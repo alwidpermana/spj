@@ -29,6 +29,9 @@
                     <label>Departemen</label>
                     <select class="select2 form-control filter" id="filDepartemen">
                       <option value="">ALL</option>
+                      <?php foreach ($departemen as $dep): ?>
+                        <option value="<?=$dep->nm_dept?>"><?=$dep->nm_dept?></option>
+                      <?php endforeach ?>
                     </select>
                   </div>
                 </div>
@@ -37,6 +40,9 @@
                     <label>Jabatan</label>
                     <select class="select2 form-control filter" id="filJabatan">
                       <option value="">ALL</option>
+                      <?php foreach ($jabatan as $jab): ?>
+                        <option value="<?=$jab->jabatan?>"><?=$jab->jabatan?></option>
+                      <?php endforeach ?>
                     </select>
                   </div>
                 </div>

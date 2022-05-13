@@ -20,7 +20,7 @@
 	function redirectLogin() {
 		var nik = '<?=$this->session->userdata("NIK")?>';
 		if (nik == '') {
-			window.location.href= '<?=base_url("Auth/Login")?>';
+			window.location.href= '<?=base_url("Auth")?>';
 		}
 	}
 </script>

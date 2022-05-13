@@ -112,6 +112,17 @@
                   </div>
                 </div>
                 <br>
+                <div class="rental">
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label class="labJudul">Rekanan</label>
+                    </div>
+                    <div class="col-md-4">
+                      <input type="text" id="inputRekanan" class="form-control" value="<?=$key->REKANAN?>">
+                    </div>
+                  </div>
+                </div>
+                <br>
                 <div class="row">
                   <div class="col-md-2">
                     <label class="text-left labJudul">Otoritas</label>
@@ -206,43 +217,40 @@
                   </div>
                 </div>
                 <br>
-                <div class="row">
-                  <div class="col-md-2"></div>
-                  <div class="col-md-3">
-                    <label class="text-kps">Perlu Approve Otoritas!</label>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-2">
-                    <label class="text-left labJudul">No Sim</label>
-                  </div>
-                  <div class="col-md-4">
-                    <input type="text" id="inputSIM" class="form-control" value="<?=$key->NO_SIM?>" <?=$key->STATUS_VERIF == 'APPROVED'?'':'disabled'?>>
-                  </div>
-                </div>
-                <br>
-                <div class="row">
-                  <div class="col-md-2">
-                    <label class="text-left labJudul">Berlaku</label>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="row">
-                      <div class="col-md-2">
-                        <label class="text-left labJudul">Terbit:</label>
-                      </div>
-                      <div class="col-md-10">
-                        <input type="date" id="inputTerbit" class="form-control" value="<?=$key->BERLAKU_TERBIT?>" <?=$key->STATUS_VERIF == 'APPROVED'?'':'disabled'?>>
-                      </div>
+                
+                <div id="otoritasDriver">
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label class="text-left labJudul">No Sim</label>
+                    </div>
+                    <div class="col-md-4">
+                      <input type="text" id="inputSIM" class="form-control" value="<?=$key->NO_SIM?>">
                     </div>
                   </div>
-                  <div class="col-md-3">
-                    <div class="row" id="tglSD">
-                      <div class="col-md-1"></div>
-                      <div class="col-md-1">
-                        <label class="text-left labJudul">S/d</label>
+                  <br>
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label class="text-left labJudul">Berlaku</label>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="row">
+                        <div class="col-md-2">
+                          <label class="text-left labJudul">Terbit:</label>
+                        </div>
+                        <div class="col-md-10">
+                          <input type="date" id="inputTerbit" class="form-control" value="<?=$key->BERLAKU_TERBIT?>">
+                        </div>
                       </div>
-                      <div class="col-md-10">
-                        <input type="date" id="inputSd" class="form-control" value="<?=$key->BERLAKU_AKHIR?>" <?=$key->STATUS_VERIF == 'APPROVED'?'':'disabled'?>>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="row" id="tglSD">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-1">
+                          <label class="text-left labJudul">S/d</label>
+                        </div>
+                        <div class="col-md-10">
+                          <input type="date" id="inputSd" class="form-control" value="<?=$key->BERLAKU_AKHIR?>">
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -309,6 +317,17 @@
                   </div>
                 </div>
 
+              </div>
+            </div>
+            <input type="hidden" id="textFotoWajah" value="<?=$key->FOTO_WAJAH?>">
+            <input type="hidden" id="textFotoKTP" value="<?=$key->FOTO_KTP?>">
+            <input type="hidden" id="textFotoSIM" value="<?=$key->FOTO_SIM?>">
+            <div class="row">
+              <div class="col-md-2"></div>
+              <div class="col-md-8">
+                <button type="button" class="btn btn-danger btn-kps btn-sm btn-block" id="btnSave">
+                  <i class="fas fa-save"></i>&nbsp;&nbsp;Save Data
+                </button>
               </div>
             </div>
           <?php endforeach ?>
@@ -392,16 +411,22 @@
     // $('.test').fadeIn('slow').removeClass('d-none');
     
     // make_skeleton().fadeOut();
-    setBerlaku();
+    // setBerlaku();
     getImageWajah();
     getImageKTP();
     getImageSIM();
-    $('#inputTerbit').on('change', function(data){
-      setBerlaku();
-    });
+    setSIM();
+    rental()
+    
     $('#inputSubjek').on('change', function(data){
       var isi = $(this).val();
       var field = 'SUBJEK';
+      saveData(isi, field);
+      rental();
+    })
+    $('#inputRekanan').on('change', function(data){
+      var isi = $(this).val();
+      var field = 'REKANAN';
       saveData(isi, field);
     })
     $('#inputSIM').on('change', function(data){
@@ -412,10 +437,13 @@
     $('#inputOtoritasDriver').on('change', function(){
       var inputOtoritasDriver = document.getElementById('inputOtoritasDriver');
       if (inputOtoritasDriver.checked == true) {
-        var isi = 'Y'
+        var isi = 'Y';
+       
       }else{
         var isi = 'N'
+       
       }
+      setSIM();
       var field = $(this).attr('field');
       saveData(isi, field)
     });
@@ -464,14 +492,75 @@
       var field='BERLAKU_TERBIT';
       saveData(isi, field)
     })
-    $('#inputSD').on('change', function(){
+    $('#inputSd').on('change', function(){
       var isi = $(this).val();
       var field='BERLAKU_AKHIR';
       saveData(isi, field)
     })
+    $('#btnSave').on('click', function(){
+      var inputOtoritasDriver = document.getElementById('inputOtoritasDriver');
+      var inputOtoritasPendamping = document.getElementById('inputOtoritasPendamping');
+      var inputUangMakan = document.getElementById('inputUangMakan');
+      var inputUangSaku = document.getElementById('inputUangSaku');
+      var inputAdj = document.getElementById('inputAdj');
+      var inputSIM = $('#inputSIM').val();
+      var inputTerbit = $('#inputTerbit').val();
+      var inputSd = $('#inputSd').val();
+      var textFotoWajah = $('#textFotoWajah').val();
+      var textFotoKTP = $('#textFotoKTP').val();
+      var textFotoSIM = $('#textFotoSIM').val();
+      var isiDriver = inputOtoritasDriver.checked == true ? 'Y' : 'N';
+      var isiPendamping = inputOtoritasPendamping.checked == true ? 'Y' : 'N';
+      var isiUangMakan = inputUangMakan.checked == true ? 'Y' : 'N';
+      var isiUangSaku = inputUangSaku.checked == true ? 'Y' : 'N';
+      var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
+      var isi = '';
+      if (isiDriver == 'Y' || isiPendamping == 'Y' || isiUangMakan == 'Y' || isiUangSaku == '' || isiAdj == '') {
+        if (isiDriver == 'Y') {
+          if (inputSIM == '') {
+            pemberitahuan(isi = 'Anda Belum Mengisi No SIM!')
+          }else if(inputTerbit == '' || inputSd==''){
+            pemberitahuan(isi = 'Anda Belum Mengisi Tanggal Berlaku SIM!')
+          }else if(textFotoWajah == ''){
+            pemberitahuan(isi = 'Anda Belum Upload Wajah!')
+          }else if(textFotoKTP == ''){
+            pemberitahuan(isi='Anda Belum Upload KTP!')
+          }else if(textFotoSIM == ''){
+            pemberitahuan(isi='Anda Belum Upload SIM!')
+          }else{
+            saveDataOtoritas();
+          }
+        }else{
+          if(textFotoWajah == ''){
+            pemberitahuan(isi = 'Anda Belum Upload Wajah!')
+          }else if(textFotoKTP == ''){
+            pemberitahuan(isi='Anda Belum Upload KTP!')
+          }else{
+            saveDataOtoritas();
+          }
+        }
+      }else{
+        var isi = 'Anda Belum Memilih Otoritas!'
+        pemberitahuan(isi);
+      }
+
+      // alert(isiDriver);
+    });
 
   })
-  
+
+  function pemberitahuan(isi) {
+    Swal.fire("Mohon Untuk Melengkapi Datanya Terlebih Dahulu",isi,'warning');
+  }
+  function rental() {
+    var inputSubjek = $('#inputSubjek').val();
+    if (inputSubjek == 'Rental') {
+      $('.rental').removeClass("d-none")
+    } else {
+      $('.rental').addClass("d-none")
+
+    }
+  }
   function berhasil() {
       Swal.fire({
         position: 'top-end',
@@ -493,28 +582,57 @@
         timer: 1500
       })
     }
-    function setBerlaku() {
-      var inputTerbit = $('#inputTerbit').val();
-      if (inputTerbit == '') {
-        $('#tglSD').addClass("d-none");
-      } else {
-        $('#tglSD').removeClass("d-none");
+    function setSIM() {
+      var inputOtoritasDriver = document.getElementById('inputOtoritasDriver');
+      if (inputOtoritasDriver.checked == true) {
+        var isi = 'Y';
+        $('#otoritasDriver').removeClass("d-none");
+      }else{
+        var isi = 'N'
+        $('#otoritasDriver').addClass("d-none");
       }
     }
     function saveData(isi, field) {
       var nik = $('#inputNIK').val();
+      var jenis = '<?=$this->uri->segment("4")?>';
       $.ajax({
         type: 'post',
         dataType: 'json',
-        data:{isi, field, nik},
+        data:{isi, field, nik, jenis},
         url: url+'/Data_Master/saveDataOtoritasKaryawan',
         cache: false,
         async: true,
         success: function(data){
-          berhasil();
+          // berhasil();
         },
         error: function(data){
-          gagal();
+          Swal.fire("Terjadi Error Pada Program","Mohon Untuk Refresh Halaman Ini Terlebih Dahulu", 'error');
+        }
+      })
+    }
+    function saveDataOtoritas(isiDriver) {
+      var nik = $('#inputNIK').val();
+      var jenis = '<?=$this->uri->segment("4")?>';
+      var isiDriver = inputOtoritasDriver.checked == true ? 'Y' : 'N';
+      var isiPendamping = inputOtoritasPendamping.checked == true ? 'Y' : 'N';
+      var isiUangMakan = inputUangMakan.checked == true ? 'Y' : 'N';
+      var isiUangSaku = inputUangSaku.checked == true ? 'Y' : 'N';
+      var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
+
+      var inputSubjek = $('#inputSubjek').val();
+      $.ajax({
+        type: 'post',
+        dataType: 'json',
+        data:{nik, jenis, inputSubjek, isiDriver, isiPendamping, isiUangMakan, isiUangSaku, isiAdj},
+        url: url+'/Data_Master/saveDataOtoritasKaryawan2',
+        cache: false,
+        async: true,
+        success: function(data){
+          berhasil();
+          location.reload();
+        },
+        error: function(data){
+          gagal()
         }
       })
     }
@@ -729,6 +847,7 @@ $(document).ready(function(){
     
   })
   function uploadGambar(response, inputNIK, field, folder) {
+    var jenis = '<?=$this->uri->segment("4")?>';
     $.ajax({
         url: url+"/Data_Master/uploadWajah",
         type: 'POST',
@@ -737,7 +856,8 @@ $(document).ready(function(){
             "image": response,
             inputNIK,
             field,
-            folder
+            folder,
+            jenis
         },
         success: function(data) {
             $('#uploadImageFotoWajah').modal('hide');
@@ -745,15 +865,19 @@ $(document).ready(function(){
             berhasil();
             if (field == 'FOTO_WAJAH') {
               getImageWajah();
+              $('#textFotoWajah').val("isi");
             }else if(field == 'FOTO_KTP'){
               getImageKTP();
+              $('#textFotoKTP').val("isi");
             }else if(field == 'FOTO_SIM'){
               getImageSIM();
+              $('#textFotoSIM').val("isi");
             }else{
               getImageWajah();
               getImageKTP();
               getImageSIM();
             }
+
         },
         error: function(data){
             gagal();

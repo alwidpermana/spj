@@ -88,3 +88,20 @@ $db['default']['dbcollat'] = 'utf8_general_ci';
 $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
+
+
+$db['dbserlok']['hostname'] = '192.168.0.210';
+$db['dbserlok']['username'] = 'root';
+$db['dbserlok']['password'] = 'root';
+$db['dbserlok']['database'] = 'db_kps_mirror_06_03_2017_revq';
+$db['dbserlok']['dbdriver'] = 'mysqli';
+$db['dbserlok']['dbprefix'] = '';
+$db['dbserlok']['pconnect'] = FALSE;
+$db['dbserlok']['db_debug'] = TRUE;
+$db['dbserlok']['cache_on'] = FALSE;
+$db['dbserlok']['cachedir'] = '';
+$db['dbserlok']['char_set'] = 'utf8';
+$db['dbserlok']['dbcollat'] = 'utf8_general_ci';
+$db['dbserlok']['swap_pre'] = '';
+$db['dbserlok']['autoinit'] = TRUE;
+$db['dbserlok']['stricton'] = FALSE;

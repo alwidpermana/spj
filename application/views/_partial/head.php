@@ -25,6 +25,10 @@
     background-color: rgb(237, 169, 22);
     color:  black;
 }
+.bg-kps-success{
+    background-color: rgb(88, 129, 87);
+    color: white;
+}
 .sidebar-kps{
   background-color: rgb(178, 58, 72);
   border-color: rgb(230, 57, 70);
@@ -32,6 +36,11 @@
 .btn-kps{
   background-color: rgb(178, 58, 72);
   border-color: rgb(230, 57, 70);
+  font-size: 12px;
+}
+.btn-kps-success{
+  background-color: rgb(88, 129, 87);
+  border-color: rgb(163, 177, 138);
   font-size: 12px;
 }
 .btn-secondary{
@@ -105,8 +114,13 @@ body{
     background-color: rgb(178, 58, 72);
     color: white;
 }
+.form-control:focus {
+    border-color: rgba(178, 58, 72, 0.7);
+    box-shadow: 0 0 0 0.2rem rgba(132, 44, 54, 0.2);
+}
 .form-group .form-control-search {
     padding-left: 2.375rem;
+
 }
 
 .form-group .form-control-icon {
@@ -120,11 +134,11 @@ body{
   pointer-events: none;
   color: #aaa;
 }
-.select2-container--default .select2-results__option--highlighted[aria-selected] {
+.select2-container--default .select2-danger .select2-results__option--highlighted[aria-selected] {
     background-color: rgb(178, 58, 72);
     color: #fff;
 }
-.select2-results .select2-highlighted {
+.select2-results .select2-danger .select2-highlighted {
   background-color: rgb(178, 58, 72);
   color: #fff;
 }
@@ -164,6 +178,16 @@ body{
 }
 .preloader2{
     background-color: #fff;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    z-index: 9999;
+    transition: 0.8s ease opacity;
+}
+.preloader-no-bg{
+    /*background-color: #fff;*/
     position: fixed;
     height: 100%;
     width: 100%;

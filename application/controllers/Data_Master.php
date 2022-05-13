@@ -31,7 +31,7 @@ class Data_Master extends CI_Controller {
 	{
 		$data['side'] = 'data_master-login';
 		$data['page'] = 'Master Data User Login';
-		$data['departement'] = $this->M_Data_Master->getDepartement()->result();
+		$data['departement'] = $this->M_Data_Master->getDepartement($kode='')->result();
 		$data['jabatan'] = $this->M_Data_Master->getJabatan()->result();
 		$this->load->view('Data_Master/user_login/index', $data);
 	}
@@ -76,7 +76,8 @@ class Data_Master extends CI_Controller {
 	{
 		$data['page'] = 'Master Data - Karyawan';
 		$data['side'] = 'data_master-karyawan_internal';
-
+		$data['departemen'] = $this->M_Data_Master->getDepartement($kode='')->result();
+		$data['jabatan'] = $this->M_Data_Master->getJabatan()->result();
 		$this->load->view("Data_Master/Karyawan/index", $data);
 	}
 	public function getTabelKaryawan()
@@ -115,6 +116,7 @@ class Data_Master extends CI_Controller {
 		$data = $this->input->post("image");
 		$field = $this->input->post("field");
  		$folder = $this->input->post("folder");
+ 		$jenis = $this->input->post("jenis");
          $image_array_1 = explode(";", $data);
  
          $image_array_2 = explode(",", $image_array_1[1]);
@@ -124,7 +126,7 @@ class Data_Master extends CI_Controller {
          $imageName = time() .'-'.$nik. '.png';
  
          file_put_contents('assets/image/'.$folder.'/'.$imageName, $data);
-         $save = $this->M_Data_Master->saveFoto($imageName, $nik, $field, $folder);
+         $save = $this->M_Data_Master->saveFoto($imageName, $nik, $field, $folder, $jenis);
      	echo json_encode($save);
 	}
 	public function saveDataOtoritasKaryawan()
@@ -132,7 +134,21 @@ class Data_Master extends CI_Controller {
 		$isi = $this->input->post("isi");
 		$field = $this->input->post("field");
 		$nik = $this->input->post("nik");
-		$data = $this->M_Data_Master->saveDataOtoritasKaryawan($isi, $field, $nik);
+		$jenis = $this->input->post("jenis");
+		$data = $this->M_Data_Master->saveDataOtoritasKaryawan($isi, $field, $nik, $jenis);
+		echo json_encode($data);
+	}
+	public function saveDataOtoritasKaryawan2()
+	{
+		$nik = $this->input->post("nik");
+		$jenis = $this->input->post("jenis");
+		$isiDriver = $this->input->post("isiDriver");
+		$inputSubjek = $this->input->post("inputSubjek");
+		$isiPendamping = $this->input->post("isiPendamping"); 
+		$isiUangMakan = $this->input->post("isiUangMakan"); 
+		$isiUangSaku = $this->input->post("isiUangSaku"); 
+		$isiAdj = $this->input->post("isiAdj");
+		$data = $this->M_Data_Master->saveDataOtoritasKaryawan2($nik, $jenis, $isiDriver, $inputSubjek, $isiPendamping, $isiUangMakan, $isiUangSaku, $isiAdj);
 		echo json_encode($data);
 	}
 	public function getDataFotoKaryawan()
@@ -251,12 +267,12 @@ class Data_Master extends CI_Controller {
 	{
 		$cari = $this->input->get("filSearch");
 		$data['data'] = $this->M_Data_Master->getKotaNonGroup($cari)->result();
-		$data['group'] = $this->M_Data_Master->getOnlyGroup()->result();
+		$data['group'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
 		$this->load->view("Data_Master/group_jalur/kota", $data);
 	}
 	public function getGroupJalur()
 	{
-		$data['data'] = $this->M_Data_Master->getOnlyGroup()->result();
+		$data['data'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
 		$data['isi'] = $this->M_Data_Master->getGroupJalur($id=0)->result();
 		$this->load->view("Data_Master/group_jalur/group", $data);	
 	}
@@ -291,6 +307,11 @@ class Data_Master extends CI_Controller {
 		}
 		echo json_encode($data);
 	}
+	public function apiJabatan()
+	{
+		$data = $this->M_Data_Master->getJabatan()->result();
+		echo json_encode($data);
+	}
 	public function Konfigurasi()
 	{
 		$data['side'] = 'data_master-konfigurasi';
@@ -298,8 +319,9 @@ class Data_Master extends CI_Controller {
 		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
 		$data['jabatan'] = $this->M_Data_Master->getJabatan()->result();
 		$data['kendaraan'] = $this->M_Data_Master->getJenisKendaraan()->result();
-		$data['group'] = $this->M_Data_Master->getOnlyGroup()->result();
+		$data['group'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
 		$data['provinsi'] = $this->M_Data_Master->getProvinsi()->result();
+		$data['tambahan'] = $this->M_Data_Master->viewTambahanUangSaku($where='')->result();
 		$this->load->view("Data_Master/Konfigurasi/index", $data);
 	}
 	public function getJenisSPJ()
@@ -336,20 +358,33 @@ class Data_Master extends CI_Controller {
 	}
 	public function getUangSaku()
 	{
-		$data['group'] = $this->M_Data_Master->getOnlyGroup()->result();
+		$data['group'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
 		$data['data'] = $this->M_Data_Master->getBiayaUangSaku()->result();
+		$data['new'] = $this->M_Data_Master->uangSakuDelivery()->result();
+		$data['non'] = $this->M_Data_Master->uangSakuNonDelivery()->result();
 		$this->load->view("Data_Master/Konfigurasi/uang_saku", $data);
 	}
 	public function saveUangSaku()
 	{
 		$inputJenisSPJ = $this->input->post("inputJenisSPJ"); 
 		$inputPIC = $this->input->post("inputPIC"); 
-		$inputJKendaraan = $this->input->post("inputJKendaraan"); 
+		$inputJKendaraan = $inputJenisSPJ == '1'?$this->input->post("inputJKendaraan"):''; 
 		$inputGroupTujuan = $this->input->post("inputGroupTujuan"); 
 		$inputBiayaRental = $this->input->post("inputBiayaRental"); 
 		$inputBiayaInternal = $this->input->post("inputBiayaInternal");
 		$value = [$inputJenisSPJ, $inputPIC, $inputJKendaraan, $inputGroupTujuan, $inputBiayaRental, $inputBiayaInternal];
 		$data = $this->M_Data_Master->saveUangSaku($value);
+		echo json_encode($data);
+	}
+	public function saveUangSakuNew()
+	{
+		$biaya= $this->input->post("biaya"); 
+		$field= $this->input->post("field"); 
+		$jenisSPJ= $this->input->post("jenisSPJ"); 
+		$pic= $this->input->post("pic"); 
+		$jenisKendaraan= $this->input->post("jenisKendaraan"); 
+		$idGroup= $this->input->post("idGroup");
+		$data = $this->M_Data_Master->saveUangSakuNew($biaya, $field, $jenisSPJ, $pic, $jenisKendaraan, $idGroup);
 		echo json_encode($data);
 	}
 	public function hapusUangSaku()
@@ -391,4 +426,86 @@ class Data_Master extends CI_Controller {
 		$data = $this->M_Data_Master->saveUangMakan($isi, $jenis, $grup, $ke);
 		echo json_encode($data);
 	}
+	public function Verifikasi_Karyawan()
+	{
+		$data['side'] = 'data_master-karyawan_approve';
+		$data['page'] = 'Verifikasi Otoritas Karyawan';
+		$data['departemen'] = $this->M_Data_Master->getDepartement($kode='')->result();
+		$data['jabatan'] = $this->M_Data_Master->getJabatan()->result();
+		$this->load->view("Data_Master/Karyawan/Approve/index", $data);
+	}
+	public function getTabelApproveKaryawan()
+	{
+		$filDepartemen = $this->input->get("filDepartemen");
+		$filJabatan = $this->input->get("filJabatan");
+		$filSearch = $this->input->get("filSearch");
+		$data['data'] = $this->M_Data_Master->getKaryawanOtoritasALL($filDepartemen, $filJabatan, $filSearch)->result();
+		$this->load->view("Data_Master/Karyawan/Approve/tabel", $data);
+	}
+	public function verifKaryawan()
+	{
+		$nik = $this->input->post("nik");
+		$data = $this->input->post("data");
+		$save = $this->M_Data_Master->verifKaryawan($nik, $data);
+		echo json_encode($save);
+	}
+	public function getTabelGroup()
+	{
+		$group = $this->input->get("group");
+		$data['data'] = $this->M_Data_Master->getGroupJalur($group)->result();
+		$this->load->view("Data_Master/Konfigurasi/tabelGroup", $data);
+	}
+	public function voucher_bbm()
+	{
+		$data['side'] = 'data_master-voucher';
+		$data['page'] = 'Master Data Voucher BBM';
+		$this->load->view("Data_Master/voucher/index", $data);
+	}
+	public function getTabelVoucherBBM()
+	{
+		$filStatus = $this->input->get("filStatus");
+		$filSearch = $this->input->get("filSearch");
+		$data['data'] = $this->M_Data_Master->getDataVoucher($filStatus, $filSearch, $id='')->result();
+		$this->load->view("Data_Master/voucher/tabel", $data);
+	}
+	public function getNoVoucher()
+	{
+		$data = $this->M_Data_Master->getNoVoucher();
+		echo json_encode($data);
+	}
+	public function saveVoucherBBM()
+	{
+		$inputVoucher = $this->input->post("inputVoucher");
+		$inputRp = $this->input->post("inputRp");
+		$inputId = $this->input->post("inputId");
+		$data = $this->M_Data_Master->saveVoucherBBM($inputVoucher, $inputRp, $inputId);
+		echo json_encode($data);
+	}
+	public function hapusVoucherBBM()
+	{
+		$no = $this->input->post("noVoucher");
+		$voucher_id = $this->input->post("voucher_id");
+		$data = $this->M_Data_Master->hapusVoucherBBM($no, $voucher_id);
+		echo json_encode($data);
+	}
+	public function saveTambahanUangSaku()
+	{
+		$id = $this->input->post("id");
+		$qty = $this->input->post("qty");
+		$sql = $this->db->query("UPDATE SPJ_US_TAMBAHAN SET QTY = $qty WHERE ID = $id");
+		echo json_encode($sql);
+	}
+	public function getJamTambahan()
+	{
+		$data['data'] = $this->M_Data_Master->getJamTambahan()->result();
+		$this->load->view("Data_Master/Konfigurasi/jam_tambahan", $data);
+	}
+	public function saveJamTambahan()
+	{
+		$jam = $this->input->post("jam");
+		$field = $this->input->post("field");
+		$data = $this->M_Data_Master->saveJamTambahan($jam, $field);
+		echo json_encode($data);
+	}
+
 }

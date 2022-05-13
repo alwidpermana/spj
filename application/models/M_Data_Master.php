@@ -4,9 +4,12 @@
 			parent::__construct();
 			$this->load->database();
 		}
-		public function getDepartement()
+		public function getDepartement($nama)
 		{
-			$sql = "SELECT nm_dept FROM dbhrm.dbo.tbdepartement";
+			$sql = "SELECT kd_dept, nm_dept, KodeRekaman FROM dbhrm.dbo.tbdepartement";
+			if ($nama != '') {
+				$sql .=" WHERE nm_dept = '$nama'";
+			}
 			return $this->db->query($sql);
 		}
 		public function getJabatan()
@@ -92,6 +95,68 @@
 			$sql = "UPDATE SPJ_USER SET LEVEL = '$level' WHERE NIK = '$nik'";
 			$this->db->query($sql);
 		}
+		public function getKaryawanOtoritasALL($departemen, $jabatan, $search)
+		{
+			$sql = "SELECT
+						*
+					FROM
+					(
+						SELECT
+							a.*,
+							b.namapeg,
+							b.jabatan,
+							b.departemen,
+							CASE 
+								WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
+								ELSE Subdepartemen1+' ,'+Subdepartemen2
+							END AS Subdepartemen
+						FROM
+							SPJ_PEGAWAI_OTORITAS a
+						LEFT JOIN dbhrm.dbo.tbPegawai b ON
+						a.nik = b.nik
+						WHERE
+							JENIS_DATA = 'internal' AND
+							STATUS_DATA = 'SAVED'
+						UNION
+						SELECT
+							a.*,
+							NamaSopir AS namapeg,
+							Status AS jabatan,
+							'-' AS departemen,
+							'-' AS Subdepartemen
+						FROM
+							SPJ_PEGAWAI_OTORITAS a
+						LEFT JOIN TrTs_SopirLogistik b ON
+						a.nik = b.KdSopir
+						WHERE
+							JENIS_DATA = 'logistik' AND
+							STATUS_DATA = 'SAVED'
+						UNION
+						SELECT
+							a.*,
+							NamaSopir AS namapeg,
+							Status AS jabatan,
+							'-' AS departemen,
+							'-' AS Subdepartemen
+						FROM
+							SPJ_PEGAWAI_OTORITAS a
+						LEFT JOIN TrTS_SopirRental b ON
+						a.nik = b.KdSopir
+						WHERE
+							JENIS_DATA = 'rental' AND
+							STATUS_DATA = 'SAVED'
+					)Q1
+					WHERE
+						departemen LIKE '%$departemen%' AND
+						jabatan LIKE '%$jabatan%' AND
+						namapeg LIKE '%$search%' OR
+						NIK LIKE '%$search%' AND
+						departemen LIKE '%$departemen%' AND
+						jabatan LIKE '%$jabatan%'
+					ORDER BY 
+						namapeg ASC";
+			return $this->db->query($sql);
+		}
 		public function getKaryawan($filDepartemen, $filJabatan, $filSearch, $nik, $top)
 		{
 			$sql = "SELECT TOP $top
@@ -105,7 +170,9 @@
 							Subdepartemen1,
 							Subdepartemen2,
 							jabatan,
-							no_ktp
+							no_ktp,
+							divisi,
+							seksi
 						FROM
 							dbhrm.dbo.tbPegawai
 						WHERE
@@ -120,6 +187,8 @@
 							*
 						FROM
 							SPJ_PEGAWAI_OTORITAS
+						WHERE
+							STATUS_DATA = 'SAVED'
 					)Q2 ON Q1.nik = Q2.NIK
 					WHERE
 						Q1.nik LIKE '%$filSearch%' OR
@@ -130,7 +199,7 @@
 		}
 		public function getSupirLogistik($status, $search, $nik, $top, $table)
 		{
-			$sql = "SELECT TOP $top
+			$sql = "SELECT TOp $top
 						*
 					FROM
 						(
@@ -156,13 +225,15 @@
 								*
 							FROM
 								SPJ_PEGAWAI_OTORITAS
+							WHERE
+							STATUS_DATA = 'SAVED'
 						)Q2 ON Q1.nik = Q2.NIK
 						WHERE
 							Q1.nik LIKE '%$search%' OR
 							namapeg LIKE '%$search%'";
 			return $this->db->query($sql);
 		}
-		public function saveFoto($file, $nik, $field, $folder)
+		public function saveFoto($file, $nik, $field, $folder, $jenis)
 		{
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
@@ -182,23 +253,38 @@
 				}
 				$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET $field = '$file', TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE NIK = '$nik'";
 			}else{
-				$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT)VALUES('$nik','$file','$tanggal','$user')";	
+				$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT, JENIS_DATA)VALUES('$nik','$file','$tanggal','$user','$jenis')";	
 			}
 			
 			return $this->db->query($sql);
 		}
-		public function saveDataOtoritasKaryawan($isi, $field, $nik)
+		public function saveDataOtoritasKaryawan($isi, $field, $nik, $jenis)
 		{
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
             $getNIK = $this->db->query("SELECT NIK FROM SPJ_PEGAWAI_OTORITAS WHERE NIK = '$nik'");
             if ($getNIK->num_rows()>0) {
-            	$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET $field = '$isi', TGL_INPUT = '$tanggal', PIC_INPUT = '$user'  WHERE NIK = '$nik'";
+            	$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET $field = '$isi', TGL_INPUT = '$tanggal', PIC_INPUT = '$user', STATUS_DATA = 'NOT SAVED'  WHERE NIK = '$nik'";
             } else {
-            	$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT)VALUES('$nik','$isi','$tanggal','$user')";
+            	$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT, JENIS_DATA)VALUES('$nik','$isi','$tanggal','$user','$jenis')";
             }
             return $this->db->query($sql);
+		}
+		public function saveDataOtoritasKaryawan2($nik, $jenis, $isiDriver, $inputSubjek, $isiPendamping, $isiUangMakan, $isiUangSaku, $isiAdj)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+            $sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET STATUS_DATA = 'SAVED', TGL_INPUT = '$tanggal', PIC_INPUT = '$user', OTORITAS_DRIVER = '$isiDriver', OTORITAS_PENDAMPING = '$isiPendamping', OTORITAS_ADJUSMENT = '$isiAdj', OTORITAS_UANG_MAKAN = '$isiUangMakan', OTORITAS_UANG_SAKU = '$isiUangSaku'  WHERE NIK = '$nik'";
+            if ($isiDriver == 'N') {
+            	$this->db->query("UPDATE SPJ_PEGAWAI_OTORITAS SET NO_SIM = null, BERLAKU_TERBIT = null, BERLAKU_AKHIR = null WHERE NIK = '$nik'");
+            }
+            if ($inputSubjek == 'Internal') {
+            	$this->db->query("UPDATE SPJ_PEGAWAI_OTORITAS SET REKANAN = null WHERE NIK = '$nik'");
+            }
+            return $this->db->query($sql);
+
 		}
 		public function getKendaraan($merk, $kendaraan, $bahanBakar, $search)
 		{
@@ -291,6 +377,28 @@
 					ORDER BY NAMA_KOTA ASC";
 			return $this->db->query($sql);
 		}
+		public function getKotaKabDis()
+		{
+			$sql = "SELECT DISTINCT
+						NAMA_KOTA
+					FROM
+					(
+						SELECT
+							ID_KOTA,
+							NAMA_KOTA
+						FROM
+							SPJ_KOTA
+					)Q1
+					INNER JOIN
+					(
+						SELECT
+							ID_KOTA
+						FROM
+							SPJ_GT_DETAIL
+					)Q2 ON Q1.ID_KOTA = Q2.ID_KOTA
+					ORDER BY NAMA_KOTA ASC";
+			return $this->db->query($sql);
+		}
 		public function getProvinsi()
 		{
 			$sql = "SELECT NAMA_PROVINSI FROM SPJ_PROVINSI ORDER BY NAMA_PROVINSI ASC";
@@ -373,14 +481,17 @@
 					ORDER BY KOTA ASC";
 			return $this->db->query($sql);
 		}
-		public function getOnlyGroup()
+		public function getOnlyGroup($group)
 		{
 			$sql ="SELECT
 						ID_GROUP,
 						NAMA_GROUP
 					FROM
-						SPJ_GROUP_TUJUAN
-					ORDER BY
+						SPJ_GROUP_TUJUAN";
+			if ($group != '') {
+				$sql .=" WHERE ID_GROUP = $group";
+			}
+			$sql .=" ORDER BY
 						ID_GROUP ASC";
 			return $this->db->query($sql);
 		}
@@ -470,6 +581,19 @@
 				$sql ="UPDATE SPJ_UANG_SAKU SET TGL_INPUT = '$tanggal', PIC_INPUT = '$user', BIAYA_INTERNAL = '$value[5]', BIAYA_RENTAL ='$value[4]' WHERE ID_JENIS_SPJ = '$value[0]' AND JENIS_PIC = '$value[1]' AND JENIS_KENDARAAN = '$value[2]' AND ID_GROUP = '$value[3]'";
 			}
 			return $this->db->query($sql);
+		}
+		public function saveUangSakuNew($biaya, $field, $idJenis, $pic, $jenisKendaraan, $idGroup)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+            $getData = $this->db->query("SELECT ID_US FROM SPJ_UANG_SAKU WHERE ID_JENIS_SPJ = '$idJenis' AND JENIS_PIC = '$pic' AND JENIS_KENDARAAN = '$jenisKendaraan' AND ID_GROUP = '$idGroup'");
+            if ($getData->num_rows()==0) {
+            	$sql = "INSERT INTO SPJ_UANG_SAKU($field, ID_JENIS_SPJ, JENIS_PIC, JENIS_KENDARAAN, TGL_INPUT, PIC_INPUT, ID_GROUP)VALUES('$biaya','$idJenis','$pic','$jenisKendaraan','$tanggal','$user','$idGroup')";
+            }else{
+            	$sql = "UPDATE SPJ_UANG_SAKU SET $field = '$biaya', TGL_INPUT='$tanggal', PIC_INPUT = '$user' WHERE ID_JENIS_SPJ = '$idJenis' AND JENIS_PIC = '$pic' AND JENIS_KENDARAAN = '$jenisKendaraan' AND ID_GROUP = '$idGroup'";
+            }
+            return $this->db->query($sql);
 		}
 		public function hapusUangSaku($id)
 		{
@@ -578,6 +702,276 @@
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
 			$sql = "INSERT INTO SPJ_KOTA VALUES('$inputTipeDaerah','$inputNamaDaerah','$inputProvinsi','$tanggal','$user')";
+			return $this->db->query($sql);
+		}
+		public function verifKaryawan($nik, $val)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+            $sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET STATUS_VERIF = '$val', PIC_VERIF='$user', TGL_VERIF = '$tanggal' WHERE NIK = '$nik'";
+            return $this->db->query($sql);
+		}
+		public function uangSakuDelivery()
+		{
+			
+
+			$sql = "SELECT
+						*
+					FROM
+					(
+						SELECT
+						Status,
+						JENIS_KENDARAAN AS KENDARAAN_MASTER
+					FROM
+					(
+						SELECT
+							DISTINCT Status,
+							'LINK' AS LINK
+						FROM
+							TrTs_SopirLogistik
+					)Q
+					LEFT JOIN
+					(
+						SELECT
+							JENIS_KENDARAAN,
+							'LINK' AS LINK
+						FROM
+							SPJ_JENIS_KENDARAAN
+					)P ON Q.LINK = P.LINK
+					)MASTER";
+			$getGroup = $this->db->query("SELECT ID_GROUP,NAMA_GROUP FROM SPJ_GROUP_TUJUAN ORDER BY ID_GROUP ASC");
+			foreach ($getGroup->result() as $key) {
+				$id = $key->ID_GROUP;
+				$sql .=" LEFT JOIN
+					(
+						SELECT
+							JENIS_PIC,
+							JENIS_KENDARAAN,
+							a.ID_GROUP AS ID_GROUP$id,
+							NAMA_GROUP AS NAMA_GROUP$id,
+							BIAYA_INTERNAL AS INTERNAL$id,
+							BIAYA_RENTAL AS RENTAL$id
+						FROM
+							SPJ_UANG_SAKU a
+						LEFT JOIN SPJ_GROUP_TUJUAN b ON
+						a.ID_GROUP = b.ID_GROUP
+						WHERE
+							a.ID_GROUP = $id AND
+							a.ID_JENIS_SPJ = 1
+					)Q$id ON MASTER.Status = Q$id.JENIS_PIC AND MASTER.KENDARAAN_MASTER = Q$id.JENIS_KENDARAAN";
+			}
+			return $this->db->query($sql);
+		
+		}
+		public function uangSakuNonDelivery()
+		{
+
+			$sql = "SELECT
+						* 
+					FROM
+					(
+						SELECT
+							jabatan,
+							'Internal' AS TIPE_MASTER
+						FROM
+							dbhrm.dbo.tbjabatan 
+						WHERE
+							jabatan IN ( 'Manager', 'Kepala Bagian', 'Kepala Bagian', 'Kepala Seksi', 'Kepala Regu', 'Staff', 'Administrasi', 'Operator', 'Driver' ) 
+						UNION ALL
+						SELECT
+							jabatan,
+							'Rental' AS TIPE_MASTER
+						FROM
+							dbhrm.dbo.tbjabatan 
+						WHERE
+							jabatan = 'Driver'
+					)Q";
+			$getGroup = $this->db->query("SELECT ID_GROUP,NAMA_GROUP FROM SPJ_GROUP_TUJUAN ORDER BY ID_GROUP ASC");
+			foreach ($getGroup->result() as $key) {
+				$id = $key->ID_GROUP;
+				$sql .=" LEFT JOIN
+						(
+							SELECT
+								JENIS_PIC,
+								JENIS_KENDARAAN,
+								a.ID_GROUP AS ID_GROUP$id,
+								NAMA_GROUP AS NAMA_GROUP$id,
+								BIAYA_INTERNAL AS BIAYA$id,
+								'Internal' AS TIPE
+							FROM
+								SPJ_UANG_SAKU a
+							LEFT JOIN SPJ_GROUP_TUJUAN b ON
+							a.ID_GROUP = b.ID_GROUP
+							WHERE
+								a.ID_GROUP = $id AND
+								a.ID_JENIS_SPJ = 2
+							UNION
+							SELECT
+								JENIS_PIC,
+								JENIS_KENDARAAN,
+								a.ID_GROUP AS ID_GROUP$id,
+								NAMA_GROUP AS NAMA_GROUP$id,
+								BIAYA_RENTAL AS BIAYA$id,
+								'Rental' AS TIPE
+							FROM
+								SPJ_UANG_SAKU a
+							LEFT JOIN SPJ_GROUP_TUJUAN b ON
+							a.ID_GROUP = b.ID_GROUP
+							WHERE
+								a.ID_GROUP = $id AND
+								a.ID_JENIS_SPJ = 2	
+						)Q$id ON Q.jabatan = Q$id.JENIS_PIC AND Q.TIPE_MASTER = Q$id.TIPE";	
+			}
+		return $this->db->query($sql);
+		}
+		public function getKategoriKendaraan()
+		{
+			$sql = "SELECT
+						DISTINCT Jenis
+					FROM
+						GA.[dbo].[GA_TKendaraan]
+					WHERE
+						JENIS  NOT IN ('Alat Angkut dan Alat Angkat')";
+			return $this->db->query($sql);
+		}
+		public function getNoVoucher()
+		{
+			$gabung = 'MSM';
+			$cekNoDoc=$this->db->query("SELECT MAX
+											( RIGHT ( NO_VOUCHER, 6 ) ) AS SETVOUCHER 
+										FROM
+											SPJ_VOUCHER_BBM 
+										WHERE
+											NO_VOUCHER LIKE 'MSM%' AND STATUS!= 'DELETED' OR STATUS IS NULL AND NO_VOUCHER LIKE 'MSM%' ");
+			foreach ($cekNoDoc->result() as $data) {
+	            if ($data->SETVOUCHER =="") {
+	                $URUTZERO = $gabung."000001";
+
+	                $hasil= array('voucher' => $URUTZERO,);
+	            }else{
+	                $zero='';
+	                $length= 6;
+	                $index=$data->SETVOUCHER;
+
+	                for ($i=0; $i <$length-strlen($index+1) ; $i++) { 
+	                    $zero = $zero.'0';
+	                }
+	                $URUTDOCNO = $gabung.$zero.($index+1);
+	                
+	                $hasil=array(
+	                'voucher' => $URUTDOCNO,);    
+	            }
+	            
+	        }
+	        return $hasil;
+		}
+		public function getDataVoucher($status, $search, $id)
+		{
+			$sql = "SELECT
+						*
+					FROM
+					(
+						SELECT
+							ID,
+							NO_VOUCHER,
+							RP,
+							STATUS
+						FROM
+							SPJ_VOUCHER_BBM
+						WHERE
+							NO_VOUCHER LIKE '$search%' AND
+							STATUS != 'DELETED' AND
+							ID LIKE '$id%'
+					)Q1";
+			if ($status != '') {
+				$sql .=" WHERE";
+				if ($status == '1') {
+					$sql.=" STATUS = 'USED'";
+				} else {
+					$sql.=" STATUS = 'NOT'";
+				}
+			}
+			$sql.=" ORDER BY NO_VOUCHER DESC";
+			return $this->db->query($sql);
+		}
+		public function saveVoucherBBM($no, $rp, $id)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			$getVoucher = $this->db->query("SELECT NO_VOUCHER FROM SPJ_VOUCHER_BBM WHERE NO_VOUCHER = '$no' AND STATUS != 'DELETED'");
+			if ($getVoucher->num_rows()==0) {
+				$sql = "INSERT INTO SPJ_VOUCHER_BBM VALUES('$no','$rp','NOT','$tanggal','$user')";
+			} else {
+				$sql ="UPDATE SPJ_VOUCHER_BBM SET RP = '$rp', TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE ID = '$id'";
+			}
+			return $this->db->query($sql);
+			
+		}
+		public function hapusVoucherBBM($no, $id)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+            $sql = "UPDATE SPJ_VOUCHER_BBM SET STATUS = 'DELETED', TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE ID = '$id'";
+            return $this->db->query($sql);
+		}
+		public function viewTambahanUangSaku($where)
+		{
+			$sql = "SELECT
+						Q1.*,
+						NAMA_JENIS
+					FROM
+					(
+						SELECT
+							Q1.JENIS_ID,
+							Q1.ID AS ID1,
+							Q1.QTY AS QTY1,
+							Q2.ID AS ID2,
+							Q2.QTY AS QTY2
+						FROM
+						(
+							SELECT
+								ID,
+								QTY,
+								JENIS_ID
+							FROM
+								SPJ_US_TAMBAHAN
+							WHERE
+								TIPE = 1
+						)Q1
+						INNER JOIN
+						(
+							SELECT
+								ID,
+								QTY,
+								JENIS_ID
+							FROM
+								SPJ_US_TAMBAHAN
+							WHERE
+								TIPE = 2
+						)Q2 ON Q1.JENIS_ID = Q2.JENIS_ID
+					)Q1
+					LEFT JOIN
+					(
+						SELECT
+							ID_JENIS,
+							NAMA_JENIS
+						FROM
+							SPJ_JENIS
+					)Q2 ON Q1.JENIS_ID = Q2.ID_JENIS
+					$where";
+			return $this->db->query($sql);
+		}
+		public function getJamTambahan()
+		{
+			$sql = "SELECT JAM1,JAM2 FROM SPJ_JAM_TAMBAHAN";
+			return $this->db->query($sql);
+		}
+		public function saveJamTambahan($jam, $field)
+		{
+			$sql = "UPDATE SPJ_JAM_TAMBAHAN SET $field = $jam";
 			return $this->db->query($sql);
 		}
 	}

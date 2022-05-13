@@ -43,6 +43,7 @@
                   <a class="cek nav-link uangJalan" id="vert-tabs-uangJalan-tab" data-toggle="pill" href="#vert-tabs-uangJalan" role="tab" aria-controls="vert-tabs-uangJalan" aria-selected="false">Uang Jalan</a>
                   <a class="cek nav-link uangSaku" id="vert-tabs-uangSaku-tab" data-toggle="pill" href="#vert-tabs-uangSaku" role="tab" aria-controls="vert-tabs-uangSaku" aria-selected="false">Uang Saku</a>
                   <a class="cek nav-link uangMakan" id="vert-tabs-uangMakan-tab" data-toggle="pill" href="#vert-tabs-uangMakan" role="tab" aria-controls="vert-tabs-uangMakan" aria-selected="false">Uang Makan</a>
+                  <a class="cek nav-link uangTambahan" id="vert-tabs-uangTambahan-tab" data-toggle="pill" href="#vert-tabs-uangTambahan" role="tab" aria-controls="vert-tabs-uangTambahan" aria-selected="false">Uang Tambahan</a>
                   <a class="cek nav-link kota" id="vert-tabs-kota-tab" data-toggle="pill" href="#vert-tabs-kota" role="tab" aria-controls="vert-tabs-kota" aria-selected="false">Kota</a>
                 </div>
               </div>
@@ -95,6 +96,37 @@
                   </div>
                   <div class="tab-pane fade" id="vert-tabs-uangMakan" role="tabpanel" aria-labelledby="vert-tabs-uangMakan-tab">
                     <div id="getUangMakan"></div>
+                  </div>
+                  <div class="tab-pane fade" id="vert-tabs-uangTambahan" role="tabpanel" aria-labelledby="vert-tabs-uangTambahan-tab">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div id="getViewJamTambahan"></div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <table class="table table-hover table-valign-middle table-striped text-center">
+                          <thead>
+                            <th>Jenis</th>
+                            <th>Jam Ke 1 - 3</th>
+                            <th>Jam Ke  &ge; 4</th>
+                          </thead>
+                          <tbody>
+                            <?php foreach ($tambahan as $tm): ?>
+                              <tr>
+                                <td><?=$tm->NAMA_JENIS?></td>
+                                <td>
+                                  <input type="number" id="inputTambahanUangSaku1" class="form-control saveTambahanUangSaku" value="<?=$tm->QTY1?>" data="<?=$tm->ID1?>">
+                                </td>
+                                <td>
+                                  <input type="number" id="inputTambahanUangSaku2" class="form-control saveTambahanUangSaku" value="<?=$tm->QTY2?>" data="<?=$tm->ID2?>">
+                                </td>
+                              </tr>
+                            <?php endforeach ?>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                   <div class="tab-pane fade" id="vert-tabs-kota" role="tabpanel" aria-labelledby="vert-tabs-kota-tab">
                     <div class="row">
@@ -302,85 +334,95 @@
           </div>
           <div class="modal-body">
             <div class="row">
-              <div class="col-md-2">
-                <label class="labJudul">Jenis SPJ</label>
-              </div>
-              <div class="col-md-3">
-                <select class="select2 form-control" id="inputJenisSPJ">
-                  <?php foreach ($spj as $key): ?>
-                    <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
-                  <?php endforeach ?>
-                </select>
-              </div>
-            </div>
-            <br>
-            <div class="row">
-              <div class="col-md-2">
-                <label class="labJudul">PIC</label>
-              </div>
-              <div class="col-md-3">
-                <select class="select2 form-control" id="inputPIC">
-                  <option value="">Pilih PIC</option>
-                  <?php foreach ($jabatan as $jab): ?>
-                    <option value="<?=$jab->jabatan?>"><?=$jab->jabatan?></option>
-                  <?php endforeach ?>
-                </select>
-              </div>
-            </div>
-            <br>
-            <div class="row">
-              <div class="col-md-2">
-                <label class="labJudul">Jenis Kendaraan</label>
-              </div>
-              <div class="col-md-3">
-                <select class="select2 form-control" id="inputJKendaraan">
-                  <?php foreach ($kendaraan as $ken): ?>
-                    <option value="<?=$ken->JENIS_KENDARAAN?>"><?=$ken->JENIS_KENDARAAN?></option>  
-                  <?php endforeach ?>
-                </select>
-              </div>
-            </div>
-            <br>
-            <div class="row">
-              <div class="col-md-2">
-                <label class="labJudul">Group Tujuan</label>
-              </div>
-              <div class="col-md-4">
-                <select class="select2" id="inputGroupTujuan">
-                  <?php foreach ($group as $group): ?>
-                    <option value="<?=$group->ID_GROUP?>"><?=$group->NAMA_GROUP?></option>
-                  <?php endforeach ?>
-                </select>
-              </div>
-            </div>
-            <br>
-            <div class="row">
-              <div class="col-md-2">
-                <label class="labJudul">Biaya Internal</label>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <span class="form-control-icon">Rp.</span>
-                  <input type="number" class="form-control form-control-search" id="inputBiayaInternal">
+              <div class="col-md-8">
+                <div class="row">
+                  <div class="col-md-3">
+                    <label class="labJudul">Jenis SPJ</label>
+                  </div>
+                  <div class="col-md-5">
+                    <select class="select2 form-control" id="inputJenisSPJ">
+                      <?php foreach ($spj as $key): ?>
+                        <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-md-3">
+                    <label class="labJudul">PIC</label>
+                  </div>
+                  <div class="col-md-5">
+                    <select class="select2 form-control" id="inputPIC">
+                      <option value="">Pilih Jabatan</option>
+                    </select>
+                  </div>
+                </div>
+                <br>
+                <div class="showJenisKendaraan">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <label class="labJudul">Jenis Kendaraan</label>
+                    </div>
+                    <div class="col-md-5">
+                      <select class="select2 form-control" id="inputJKendaraan">
+                        <?php foreach ($kendaraan as $ken): ?>
+                          <option value="<?=$ken->JENIS_KENDARAAN?>"><?=$ken->JENIS_KENDARAAN?></option>  
+                        <?php endforeach ?>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-md-3">
+                    <label class="labJudul">Group Tujuan</label>
+                  </div>
+                  <div class="col-md-5">
+                    <select class="select2" id="inputGroupTujuan">
+                      <?php foreach ($group as $group): ?>
+                        <option value="<?=$group->ID_GROUP?>"><?=$group->NAMA_GROUP?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                  <div class="col-md-1">
+                    <a href="javascript:;" class="btn text-danger text-kps lihatGroup"><i class="far fa-eye"></i></a>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-md-3">
+                    <label class="labJudul">Biaya Internal</label>
+                  </div>
+                  <div class="col-md-5">
+                    <div class="form-group">
+                      <span class="form-control-icon">Rp.</span>
+                      <input type="number" class="form-control form-control-search" id="inputBiayaInternal">
+                    </div>
+                  </div>
+                </div>
+                <div class="confUangSakuRental">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <label class="labJudul">Biaya Rental</label>
+                    </div>
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <span class="form-control-icon">Rp.</span>
+                        <input type="number" class="form-control form-control-search" id="inputBiayaRental">
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-2">
-                <label class="labJudul">Biaya Rental</label>
-              </div>
               <div class="col-md-4">
-                <div class="form-group">
-                  <span class="form-control-icon">Rp.</span>
-                  <input type="number" class="form-control form-control-search" id="inputBiayaRental">
-                </div>
+                <div id="getGroupTabel"></div>  
               </div>
             </div>
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger btn-kps ladda-button saveUangSaku" data-style="zoom-in" id="saveUangSaku">Save</button>
+              <button type="submit" class="btn btn-danger btn-kps ladda-button saveTarget" data-style="expand-right" id="saveTarget">Save</button>
           </div>
         </div>
       </div>
@@ -405,6 +447,80 @@
       </div>
     </div>
 
+    <div class="modal fade" id="modal-editNilaiUangSaku" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <form id="saveValueUangSaku">
+          <div class="modal-body">
+            <div class="d-flex justify-content-end">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="row text-left">
+              <div class="col-md-5">
+                <label>Jenis Kendaraan</label>
+              </div>
+              <div class="col-md-7">
+                : <span id="textJenisKendaraan"></span>
+              </div>
+            </div>
+            <div class="row text-left">
+              <div class="col-md-5">
+                <label>PIC</label>
+              </div>
+              <div class="col-md-7">
+                : <span id="textPIC"></span>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-md-5">
+                <label class="labJudul">Uang Saku</label>
+              </div>
+              <div class="col-md-7">
+                <input type="hidden" id="inputValueJenisSPJ">
+                <input type="hidden" id="inputValuePIC">
+                <input type="hidden" id="inputValueField">
+                <input type="hidden" id="inputValueJenisKendaraan">
+                <input type="hidden" id="inputvalueGroup">
+                <input type="number" id="inputValueUangSaku" class="form-control form-control-sm">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+              <button type="submit" class="btn btn-danger btn-kps saveUS" id="saveUS">Save</button>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal-getJamTambahan" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="d-flex justify-content-end">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <input type="hidden" id="inputFieldJamTambahan">
+                <div class="form-group">
+                  <label>Jam Kerja <span id="tambahanJamKerja"></span></label>
+                  <input type="number" id="inputJamTambahan" class="form-control form-control-sm">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-danger btn-kps ladda-button saveJamTambahan" id="saveJamTambahan" data-style="expand-right">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <?php $this->load->view('_partial/footer');?>
 </div>
@@ -424,6 +540,9 @@
     $('.preloader2').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     getJumlahPendamping();
+    confJenisSPJUangSaku(jenis=1);
+    confUangSakuRental();
+    getJamTambahan();
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     
@@ -568,6 +687,46 @@
         }
       })
     })
+    $('#inputPIC').on('change', function(){
+      confUangSakuRental();
+    });
+    $('#inputJenisSPJ').on('change', function(){
+      var jenis = $(this).val();
+      confJenisSPJUangSaku(jenis);
+      confUangSakuRental()
+      
+    });
+    $('#getUangSaku').on('click','.biayaUangSaku', function(){
+       var biaya = $(this).attr("biaya");
+        var field = $(this).attr("FIELD");
+        var jenisSPJ = $(this).attr("ID_JENIS_SPJ");
+        var pic = $(this).attr("PIC");
+        var jenisKendaraan = $(this).attr("JENIS_KENDARAAN");
+        var idGroup = $(this).attr("ID_GROUP");
+        var isiBiaya = biaya == 0?'':biaya;
+        document.getElementById("inputValueUangSaku").focus();
+        $('#modal-editNilaiUangSaku').modal("show")
+        $('#textJenisKendaraan').html(jenisKendaraan);
+        $('#textPIC').html(pic);
+        $('#inputValueUangSaku').val(isiBiaya);
+        $('#inputValueJenisSPJ').val(jenisSPJ);
+        $('#inputValuePIC').val(pic);
+        $('#inputValueField').val(field);
+        $('#inputValueJenisKendaraan').val(jenisKendaraan);
+        $('#inputvalueGroup').val(idGroup);
+
+    });
+    $('#saveValueUangSaku').submit(function(e){
+      e.preventDefault();
+      var biaya = $('#inputValueUangSaku').val() == ''?0:parseInt($('#inputValueUangSaku').val());
+      if (biaya>0) {
+        saveNilaiUangSaku();
+      } else {
+        Swal.fire("Isi Uang Saku Lebih dari 1 !","","warning")
+      }
+      
+
+    })
 
     var saveUangSaku = $('.saveUangSaku').ladda();
       saveUangSaku.click(function () {
@@ -582,8 +741,10 @@
         var inputGroupTujuan = $("#inputGroupTujuan").val();
         var inputBiayaInternal = $("#inputBiayaInternal").val();
         var inputBiayaRental = $("#inputBiayaRental").val();
-        
-        if (inputBiayaInternal == '' && inputBiayaRental == '') {
+        if (inputPIC == '') {
+          Swal.fire("Pilih PIC Terlebih Dahulu!","","warning")
+        }
+        else if (inputBiayaInternal == '' && inputBiayaRental == '') {
           Swal.fire("Isi Salah Satu Biaya!","","warning")
         }else{
           $.ajax({
@@ -725,8 +886,133 @@
         },
       });
     });
+    $('.lihatGroup').on('click', function(){
+      
+      var group = $('#inputGroupTujuan').val();
+      $.ajax({
+        type: 'get',
+        data:{group},
+        url: 'getTabelGroup',
+        cache: false,
+        async: true,
+        success: function(data){
+          $('#getGroupTabel').html(data);
+        },
+        error: function(data){
+          $('#getGroupTabel').html("Gagal Meload Data....");
+        }
+      });
+    })
+    $('.saveTambahanUangSaku').on('change', function(){
+      var id = $(this).attr("data");
+      var qty = $(this).val();
+      if (parseInt(qty) == 0 || qty == '') {
+        Swal.fire("Biaya Tidak Boleh Kosong!","","warning")
+      } else {
+        $.ajax({
+          type:'post',
+          dataType: 'json',
+          data:{id, qty},
+          url:'saveTambahanUangSaku',
+          cache: false,
+          async: true,
+          success: function(data){
+            berhasil()
+          },
+          error: function(data){
+            gagal();
+          }
+        }); 
+      }
+      
+    })
+    $('#getViewJamTambahan').on('click','.setJamTambahan', function(){
+      var jam = $(this).attr("data");
+      var field = $(this).attr("field");
+      $('#inputJamTambahan').val(jam)
+      $('#inputFieldJamTambahan').val(field);
+      if (field=='JAM2') {
+        $('#tambahanJamKerja').html("(Lewat Pukul 24:00)");
+      } else {
+        $('#tambahanJamKerja').html("");
+
+      }
+      $('#modal-getJamTambahan').modal("show");
+    });
+    var saveJamTambahan = $('.saveJamTambahan').ladda();
+      saveJamTambahan.click(function () {
+      // Start loading
+      saveJamTambahan.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var jam = $('#inputJamTambahan').val();
+        var field = $('#inputFieldJamTambahan').val();
+        $.ajax({
+          type:'post',
+          dataType:'json',
+          data:{jam, field},
+          url:'saveJamTambahan',
+          cache: false,
+          async: true,
+          success: function(data){
+            berhasil();
+            $('#modal-getJamTambahan').modal("hide");
+            getJamTambahan();
+          },
+          error: function(data){
+            gagal();
+          }
+        })
+        
+        saveJamTambahan.ladda('stop');
+        return false;
+          
+      }, 1000)
+    });
 
   })
+  function confUangSakuRental() {
+    var jenisSPJ = $('#inputJenisSPJ').val();
+    var inputPIC = $('#inputPIC').val();
+    if (jenisSPJ == '2' && inputPIC != 'Driver') {
+      $('.confUangSakuRental').addClass("d-none");
+      $('#inputBiayaRental').val("");
+    }else{
+      $('.confUangSakuRental').removeClass("d-none");
+    }
+  }
+  function confJenisSPJUangSaku(jenis) {
+    console.log(jenis)
+    if (jenis == '1') {
+      var html = '';
+      html +='<option value="Sopir">Sopir</option>';
+      html +='<option value="Pendamping">Pendamping</option>';
+      $('#inputPIC').html(html);
+      $('.showJenisKendaraan').removeClass("d-none");
+    }else{
+      $.ajax({
+        type: 'get',
+        dataType: 'json',
+        url:'apiJabatan',
+        cache: false,
+        async: true,
+        success: function(data){
+          var html='';
+          html +='<option value="">Pilih Jabatan</option>';
+          for (var i = 0; i < data.length; i++) {
+            html+= '<option value="'+data[i].jabatan+'">'+data[i].jabatan+'</option>';
+            
+          }
+          $('#inputPIC').html(html);
+        },
+        error: function(data){
+          Swal.fire("Terjadi Error Pada Program","Mohon Refresh Halaman Ini atau Hubungi Staff IT!","error");
+        }
+      }); 
+      $('.showJenisKendaraan').addClass("d-none");
+    }
+  }
   function getJumlahPendamping() {
     var gagal = '<div class="alert alert-danger bg-kps alert-dismissible">';
         gagal +='<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
@@ -825,6 +1111,47 @@
       },
       error: function(data){
         $('#getKota').html(gagal)
+      }
+    })
+  }
+
+  function saveNilaiUangSaku() {
+    var biaya = $('#inputValueUangSaku').val();
+    var field = $('#inputValueField').val();
+    var jenisSPJ = $('#inputValueJenisSPJ').val();
+    var pic = $('#inputValuePIC').val();
+    var jenisKendaraan = $('#inputValueJenisKendaraan').val();
+    var idGroup = $('#inputvalueGroup').val();
+    console.log(idGroup)
+    $.ajax({
+      type:'post',
+      dataType:'json',
+      data:{biaya, field, jenisSPJ, pic, jenisKendaraan, idGroup},
+      url:'saveUangSakuNew',
+      cache: false,
+      async: true,
+      success: function(data){
+        berhasil();
+        $('#modal-editNilaiUangSaku').modal("hide");
+        getUangSaku();
+
+      },
+      error: function(data){
+        gagal();
+      }
+    });
+  }
+  function getJamTambahan() {
+    $.ajax({
+      type:'get',
+      url:'getJamTambahan',
+      cache: false,
+      async: true,
+      success: function(data){
+        $('#getViewJamTambahan').html(data);
+      },
+      error:function(data){
+        
       }
     })
   }

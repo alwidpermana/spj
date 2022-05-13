@@ -53,7 +53,14 @@
 				<td><?=$key->BERLAKU_TERBIT?></td>
 				<td><?=$key->BERLAKU_AKHIR?></td>
 				<td><?=$key->STATUS_VERIF?></td>
-				<td><?=$key->FOTO_WAJAH?></td>
+				<td>
+					<?php if ($key->FOTO_WAJAH != null || $key->FOTO_WAJAH != ''): ?>
+						<a href="javascript:;" data="<?=$key->FOTO_WAJAH?>" class="getGambar">
+							<img src="<?=base_url()?>assets/image/foto-wajah/<?=$key->FOTO_WAJAH?>" class="img-thumbnail rounded mx-auto d-block">
+						</a>
+					<?php endif ?>
+				</td>
+				
 			</tr>
 		<?php endforeach ?>
 	</tbody>

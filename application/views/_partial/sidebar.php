@@ -37,7 +37,7 @@
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item">
-            <a href="<?=base_url()?>Dashboard" class="nav-link <?= $side == 'dashboard'?'active':''?>">
+            <a href="<?=base_url()?>dashboard" class="nav-link <?= $side == 'dashboard'?'active':''?>">
               <!-- <i class="nav-icon fas fa-tachometer-alt"></i> -->
               <i class="nav-icon fa-solid fa-gauge"></i>
               <p>
@@ -46,84 +46,172 @@
             </a>
           </li>
           <?php if ($this->session->userdata("LEVEL") <= 2): ?>
-            <li class="nav-item <?=$this->uri->segment("1")=='Data_Master'?'menu-open':''?>">
-              <a href="javascript:void(0);" class="nav-link <?=substr($side, 0, 11) == 'data_master'?'active':''?>">
-                <i class="nav-icon fas fa-folder-open"></i>
-                <p>
-                  Data Master
-                  <i class="fas fa-angle-left right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview menu-open-kps">
-                <li class="nav-item">
-                  <a href="<?=base_url()?>Data_Master/User_Login" class="nav-link ">
-                    <i class="fas fa-id-badge nav-icon <?=substr($side, 12) == 'login'?'text-dark':''?>"></i>
-                    <p>User Login</p>
-                  </a>
-                </li>
-                <li class="nav-item <?=substr($side, 12, 8) == 'karyawan'?'menu-open':''?>">
-                  <a href="javascript:void(0);" class="nav-link">
-                    <i class="nav-icon  fas fa-users <?=substr($side, 12, 8) == 'karyawan'?'text-dark':''?>"></i>
-                    <p>
-                      Karyawan
-                      <i class="fas fa-angle-left right"></i>
-                    </p>
-                  </a>
-                  <ul class="nav nav-treeview menu_sub">
-                    <li class="nav-item">
-                      <a href="<?=base_url()?>Data_Master/Karyawan_Internal" class="nav-link ">
-                        <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_internal'?'text-dark':''?>"></i>
-                        <p>Internal</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="<?=base_url()?>Data_Master/Supir_Logistik" class="nav-link ">
-                        <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_logistik'?'text-dark':''?>"></i>
-                        <p>Supir Logistik</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="<?=base_url()?>Data_Master/Supir_Rental" class="nav-link ">
-                        <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_rental'?'text-dark':''?>"></i>
-                        <p>Supir Rental</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <li class="nav-item">
-                  <a href="<?=base_url()?>Data_Master/Kendaraan" class="nav-link ">
-                    <i class="fas fa-car nav-icon <?=substr($side, 12) == 'kendaraan'?'text-dark':''?>"></i>
-                    <p>Kendaraan</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="<?=base_url()?>Data_Master/group_jalur" class="nav-link ">
-                    <i class="fas fa-signs-post nav-icon <?=substr($side, 12) == 'jalur'?'text-dark':''?>"></i>
-                    <p>Group Jalur</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="<?=base_url()?>Data_Master/Konfigurasi" class="nav-link ">
-                    <i class="fas fa-gears nav-icon <?=substr($side, 12) == 'konfigurasi'?'text-dark':''?>"></i>
-                    <p>Konfigurasi</p>
-                  </a>
-                </li>
-                
-              </ul>
-            </li>
+          <li class="nav-item <?=$this->uri->segment("1")=='data_master'?'menu-open':''?>">
+            <a href="javascript:void(0);" class="nav-link <?=substr($side, 0, 11) == 'data_master'?'active':''?>">
+              <i class="nav-icon fas fa-folder-open"></i>
+              <p>
+                Data Master
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview menu-open-kps">
+              <li class="nav-item">
+                <a href="<?=base_url()?>data_master/user_login" class="nav-link ">
+                  <i class="fas fa-id-badge nav-icon <?=substr($side, 12) == 'login'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>User Login</p>
+                </a>
+              </li>
+              <li class="nav-item <?=substr($side, 12, 8) == 'karyawan'?'menu-open':''?>">
+                <a href="javascript:void(0);" class="nav-link">
+                  <i class="nav-icon  fas fa-users <?=substr($side, 12, 8) == 'karyawan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>
+                    Karyawan
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview menu_sub">
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>data_master/karyawan_internal" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_internal'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Internal</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>data_master/supir_logistik" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_logistik'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Supir Logistik</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>data_master/supir_rental" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_rental'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Supir Rental</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>data_master/verifikasi_karyawan" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_approve'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Verifikasi Karyawan</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>data_master/kendaraan" class="nav-link ">
+                  <i class="fas fa-car nav-icon <?=substr($side, 12) == 'kendaraan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Kendaraan</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>data_master/group_jalur" class="nav-link ">
+                  <i class="fas fa-signs-post nav-icon <?=substr($side, 12) == 'jalur'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Group Jalur</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>data_master/konfigurasi" class="nav-link ">
+                  <i class="fas fa-gears nav-icon <?=substr($side, 12) == 'konfigurasi'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Konfigurasi</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>data_master/voucher_bbm" class="nav-link ">
+                  <i class="fas fa-note-sticky nav-icon <?=substr($side, 12) == 'voucher'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Voucher BBM</p>
+                </a>
+              </li>
+              
+            </ul>
+          </li>
           <?php endif ?>
-            <li class="nav-item <?=$this->uri->segment("1")=='SPJ'?'menu-open':''?>">
-              <a href="javascript:void(0);" class="nav-link <?=substr($side, 0, 3) == 'spj'?'active':''?>">
-                <i class="nav-icon fas fa-envelope-open-text"></i>
-                <p>
-                  Surat Perjalanan Dinas
-                  <i class="fas fa-angle-left right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview menu-open-kps">
-
-              </ul>
-            </li>
+          <li class="nav-item">
+            <a href="<?=base_url()?>Pengajuan/form" class="nav-link <?=$side == 'spj-pengajuan'?'active':''?>">
+              <i class="fas fa-envelope-open-text nav-icon "></i>
+              <p>Pengajuan SPJ</p>
+            </a>
+          </li>
+          <li class="nav-item <?=$this->uri->segment("1")=='monitoring'?'menu-open':''?>">
+            <a href="javascript:void(0);" class="nav-link <?=substr($side, 0, 10) == 'monitoring'?'active':''?>">
+              <i class="nav-icon fas fa-desktop"></i>
+              <p>
+                Monitoring
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview menu-open-kps">
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/spj" class="nav-link ">
+                  <i class="fas fa-file-lines nav-icon <?=substr($side, 11) == 'spj'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>SPJ</p>
+                </a>
+              </li>
+              <li class="nav-item <?=substr($side, 11, 6) == 'kasbon'?'menu-open':''?>">
+                <a href="javascript:void(0);" class="nav-link">
+                  <i class="nav-icon  fas fa-file-invoice-dollar <?=substr($side, 11, 6) == 'kasbon'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>
+                    Kasbon
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview menu_sub">
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>monitoring/kasbon_spj" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 18) == 'SPJ'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>SPJ</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>monitoring/kasbon_bbm" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 18) == 'BBM'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>BBM</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>monitoring/kasbon_tol" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 18) == 'TOL'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>TOL</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/voucher_bbm" class="nav-link ">
+                  <i class="fas fa-note-sticky nav-icon <?=substr($side, 11) == 'voucher'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Voucher BBM</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="<?=base_url()?>implementasi/security" class="nav-link <?=$side == 'implementasi-security'?'active':''?>">
+              <i class="fas fa-user-shield nav-icon"></i>
+              <p>Security Check</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?=base_url()?>implementasi/step_1" class="nav-link <?=$side == 'implementasi-step'?'active':''?>">
+              <i class="fas fa-clipboard-list nav-icon"></i>
+              <p>Implementasi</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?=base_url()?>implementasi/adjustment" class="nav-link <?=$side == 'implementasi-adjustment'?'active':''?>">
+              <i class="fas fa-clipboard-check nav-icon"></i>
+              <p>Pengajuan Adjustment</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?=base_url()?>implementasi/outstanding" class="nav-link <?=$side == 'implementasi-os'?'active':''?>">
+              <i class="fas fa-hourglass-half nav-icon"></i>
+              <p>Outstanding Otoritas</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?=base_url()?>implementasi/generate" class="nav-link <?=$side == 'implementasi-generate'?'active':''?>">
+              <i class="fas fa-hand-holding-usd nav-icon"></i>
+              <p>Generate SPJ</p>
+            </a>
+          </li>
         </ul>
       </nav>  
     <?php endif ?>

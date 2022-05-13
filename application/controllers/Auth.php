@@ -24,12 +24,14 @@ class Auth extends CI_Controller {
 	 */
 	public function index()
 	{
-		if($this->session->userdata('status') != "login"){
-	 		$this->load->view('Auth/login');
+		$this->load->view('Auth/login');
+		// $this->load->view('maintenance');
+		// if($this->session->userdata('status') != "login"){
+	 		
 
-	 	}else{
-	 		redirect(base_url("Dashboard/index"));
-	 	}
+	 // 	}else{
+	 // 		redirect(base_url("Dashboard/index"));
+	 // 	}
 		
 	}
 	public function proses_login()
@@ -55,6 +57,8 @@ class Auth extends CI_Controller {
 					'JENIS_KELAMIN' => $value->JENIS_KELAMIN,
 					'LEVEL' => $value->LEVEL,
 					'AVATAR'=>$value->AVATAR,
+					'KODE_DEPT' => $value->KODE_DEPT,
+					'SUB_DEPARTEMEN' => $value->SUB_DEPARTEMEN,
 					'status' => "login"
 					);
 	 

@@ -13,7 +13,9 @@
 						DEPARTEMEN,
 						DIVISI,
 						SEKSI,
-						JENIS_KELAMIN
+						JENIS_KELAMIN,
+						KODE_DEPT,
+						SUB_DEPARTEMEN
 					FROM
 					(
 						SELECT
@@ -37,10 +39,24 @@
 							departemen AS DEPARTEMEN,
 							divisi AS DIVISI,
 							seksi AS SEKSI,
-							jKelamin AS JENIS_KELAMIN
+							jKelamin AS JENIS_KELAMIN,
+							CASE 
+								WHEN Subdepartemen2 IS NULL THEN Subdepartemen1
+								WHEN Subdepartemen2 ='' THEN Subdepartemen1
+								WHEN Subdepartemen2 ='-' THEN Subdepartemen1
+								ELSE Subdepartemen1+', '+Subdepartemen2
+							END AS SUB_DEPARTEMEN
 						FROM
 						dbhrm.dbo.tbPegawai
-					)Q2 ON Q1.NIK = Q2.nik";
+					)Q2 ON Q1.NIK = Q2.nik
+					LEFT JOIN
+					(
+						SELECT
+							kd_dept AS KODE_DEPT,
+							nm_dept
+						FROM
+							dbhrm.dbo.tbdepartement
+					)Q3 ON Q2.DEPARTEMEN = Q3.nm_dept";
 			return $this->db->query($sql);
 		}
 		public function getDataAvatar()

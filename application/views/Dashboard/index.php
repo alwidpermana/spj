@@ -23,7 +23,6 @@
       <div class="content">
         <div class="container-fluid">
           
-        </div>
       </div>
     </div>
     
@@ -43,15 +42,13 @@
     });
     $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
-    
+
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     
     // make_skeleton().fadeOut();
-   
-
   })
-  
+
   
 
 </script>

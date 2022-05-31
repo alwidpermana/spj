@@ -1,4 +1,4 @@
-<table class="table table-hover table-bordered table-striped" id="datatable" width="100%">
+<table class="table table-hover table-bordered table-striped " id="datatable" width="100%">
     <thead class="text-center bg-gray">
         <tr>
             <th rowspan="2">No</th>
@@ -52,7 +52,7 @@
                 </td>
                 <td><?=$key->STATUS_SPJ?></td>
                 <td>
-                    <button type="button" class="btn btn-danger dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
+                    <button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
                       <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu" role="menu">
@@ -66,15 +66,30 @@
 </table>
 <script type="text/javascript">
 	$(document).ready(function(){
-		var table = $('#datatable').DataTable( {
-            scrollY:        "350px",
-            scrollX:        true,
-            scrollCollapse: true,
-            paging:         false,
-            'searching': false,
-            'ordering': true,
-            order: [[0, 'asc']],
-            
-          } ); 
+        var jmlData = '<?=count($data)?>';
+        if (jmlData>0 && jmlData<=2) {
+            $('#datatable').DataTable({
+              "paging": true,
+              "lengthChange": false,
+              "searching": false,
+              "ordering": true,
+              "info": true,
+              "autoWidth": true,
+              "responsive": false,
+            });
+        } else {
+            var table = $('#datatable').DataTable( {
+                scrollY:        "350px",
+                scrollX:        true,
+                scrollCollapse: true,
+                paging:         false,
+                'searching': false,
+                'ordering': true,
+                "autoWidth": true,
+                order: [[0, 'asc']],
+                
+              } );   
+        }
+		 
 	});
 </script>

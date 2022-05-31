@@ -42,7 +42,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Tahun</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filTahun">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filTahun">
                           <?php foreach ($tahun as $value): ?>
                             <option value="<?=$value?>"><?=$value?></option>
                           <?php endforeach ?>
@@ -52,7 +52,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Bulan</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filBulan">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filBulan">
                           <?php foreach ($bulan as $angka => $bulan): ?>
                             <option value="<?=$bulan?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
                           <?php endforeach ?>
@@ -62,7 +62,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Periode</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filPeriode">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filPeriode">
                           
                         </select>
                       </div>
@@ -70,7 +70,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Jenis SPJ</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filJenis">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                             <option value="">ALL</option>
                           <?php foreach ($jenis as $key): ?>
                             <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
@@ -81,7 +81,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Status</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filStatus">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
                           <option value="">ALL</option>
                           <option value="OPEN">OPEN</option>
                           <option value="CLOSE">CLOSE</option>
@@ -91,7 +91,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Group Tujuan</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filGroup">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filGroup">
                           <option value="">ALL</option>
                           <?php foreach ($group as $key): ?>
                             <option value="<?=$key->ID_GROUP?>"><?=$key->NAMA_GROUP?></option>
@@ -163,7 +163,7 @@
                       <td><textarea class="form-control pengaju inputUangMakan" id="inputUangMakanAlasan" rows="3"></textarea></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UMOK" 
@@ -176,7 +176,7 @@
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UMNG" 
@@ -199,7 +199,7 @@
                       <td><textarea class="form-control pengaju inputUangJalan" id="inputUangJalanAlasan" rows="3"></textarea></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UJOK" 
@@ -212,7 +212,7 @@
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UJNG" 
@@ -235,7 +235,7 @@
                       <td><textarea class="form-control pengaju inputBBM" id="inputBBMAlasan" rows="3"></textarea></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="BBMOK" 
@@ -248,7 +248,7 @@
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="BBMNG" 
@@ -271,7 +271,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-danger btn-kps saveAdjustment ladda-button" data-style="expand-right">Save</button>
+            <button type="button" class="btn bg-orange btn-kps saveAdjustment ladda-button" data-style="expand-right">Save</button>
           </div>
         </div>
       </div>
@@ -379,15 +379,22 @@
         $('#inputBBMKeterangan').val(data.uangBBMKeterangan);
         if (data.uangBBMKeputusan == 'OK') {
           $('[name="BBM"]#BBMOK').attr("checked","checked");
-        }else if(data.uangMakanKeputusan == 'NG'){
+        }else if(data.uangBBMKeputusan == 'NG'){
           $('[name="BBM"]#BBMNG').attr("checked","checked");
         }
+
         if (data.uangBBMStatus == 'CLOSE' && nik == user) {
           $('.inputBBM').attr("readonly","readonly");
         }else if(data.uangBBMStatus == 'OPEN' && nik == user){
           $('.inputBBM').removeAttr("readonly","readonly")
         }
 
+        $('#inputBBMNormal').val(parseInt(data.uangBBM));
+        if (data.uangMakanStatus == 'CLOSE' && data.uangJalanStatus == 'CLOSE' && data.uangBBMStatus == 'CLOSE') {
+          $('.saveAdjustment').attr("disabled","disabled")
+        }else{
+          $('.saveAdjustment').removeAttr("disabled","disabled")
+        }
       },
       error: function(data){
         Swal.fire("Terjadi Error Pada Program","Mohon Hubungi Staff IT!","error");

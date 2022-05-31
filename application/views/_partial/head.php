@@ -18,7 +18,7 @@
   background-color: rgb(241, 250, 238);
 }*/
 .bg-kps{
-  background-color: rgb(178, 58, 72);
+  background-color: rgb(204, 88, 3);
   color: white;
 }
 .bg-kps2{
@@ -30,12 +30,18 @@
     color: white;
 }
 .sidebar-kps{
-  background-color: rgb(178, 58, 72);
+  background-color: rgb(204, 88, 3);
   border-color: rgb(230, 57, 70);
+  /*background-color: rgb(188, 108, 37);*/
+}
+.bg-orange:hover{
+    color:  white !important;
+    box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.7) !important;
 }
 .btn-kps{
-  background-color: rgb(178, 58, 72);
-  border-color: rgb(230, 57, 70);
+  background-color: rgb(204, 88, 3);
+  border-color: rgb(252, 191, 73) !important;
+  color:  white !important;
   font-size: 12px;
 }
 .btn-kps-success{
@@ -54,12 +60,12 @@
 .btn-kps-profile{
   border-radius: 30px; 
   background-color: rgb(241, 250, 238); 
-  color: black;
-  border-color: rgb(230, 57, 70);
+  color: white !important;
+  border-color: rgb(252, 191, 73);
   font-size: 15px;
 }
 .text-kps{
-  color: rgb(178, 58, 72) !important;
+  color: rgb(204, 88, 3) !important;
   font-size: 12px;
 }
 .text-kps2{
@@ -87,7 +93,7 @@
 
 }
 .link-kps:focus{
-    background-color: rgb(178, 58, 72);
+    background-color: rgb(204, 88, 3);
     color: white;
 }
 
@@ -102,21 +108,22 @@ body{
     font-size: 11px;
 }*/
 .page-item.active .page-link {
-  background-color: rgb(178, 58, 72) !important;
+  background-color: rgb(204, 88, 3) !important;
   border: 1px solid white;
   color: white;
 }
 .page-item .page-link {
-  color: rgb(178, 58, 72);
+  color: rgb(204, 88, 3);
   
 }
 .tableKPS{
-    background-color: rgb(178, 58, 72);
+    background-color: rgb(204, 88, 3);
     color: white;
 }
 .form-control:focus {
-    border-color: rgba(178, 58, 72, 0.7);
-    box-shadow: 0 0 0 0.2rem rgba(132, 44, 54, 0.2);
+    border-color: rgba(204, 88, 3, 0.5);
+    /*box-shadow: 0 0 0 0.2rem rgba(132, 44, 54, 0.2);*/
+    box-shadow: 0 0 0 0.1rem rgba(204, 88, 3, 0.5) !important;
 }
 .form-group .form-control-search {
     padding-left: 2.375rem;
@@ -135,31 +142,31 @@ body{
   color: #aaa;
 }
 .select2-container--default .select2-danger .select2-results__option--highlighted[aria-selected] {
-    background-color: rgb(178, 58, 72);
+    background-color: rgb(204, 88, 3);
     color: #fff;
 }
 .select2-results .select2-danger .select2-highlighted {
-  background-color: rgb(178, 58, 72);
+  background-color: rgb(204, 88, 3);
   color: #fff;
 }
 .dropButton:active{
-    background-color: rgb(178, 58, 72);
+    background-color: rgb(204, 88, 3);
     color: #fff;
 }
 .dropButton:focus{
-    background-color: rgb(178, 58, 72);
+    background-color: rgb(204, 88, 3);
     color: #fff;
 }
 
   /*.text-drop{
-    color: rgb(178, 58, 72);
+    color: rgb(204, 88, 3);
   }*/
 .text-drop:active{
-    background-color: rgb(178, 58, 72);
+    background-color: rgb(204, 88, 3);
     color: #fff;
 }
 .text-drop:focus{
-    background-color: rgb(178, 58, 72);
+    background-color: rgb(204, 88, 3);
     color: #fff;
 }
 .icheck-kps > input:first-child:checked + input[type="hidden"] + label::before {
@@ -212,7 +219,7 @@ body{
     width: 75px;
     height: 75px;
     margin: 0;
-    border-top: 10px solid rgb(178, 58, 72);
+    border-top: 10px solid rgb(204, 88, 3);
     box-shadow: 4px 4px 5px #d2d2d2 inset;
     border-right: 10px solid transparent;
     border-radius: 50%;

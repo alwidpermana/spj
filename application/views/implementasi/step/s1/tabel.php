@@ -50,7 +50,7 @@
 				</td>
 				<td><?=$key->STATUS_SPJ?></td>
 				<td>
-					<a href="<?=base_url()?>implementasi/step_2/<?=$key->ID_SPJ?>" class="btn btn-danger btn-kps btn-sm" style="font-size: 9px;">
+					<a href="<?=base_url()?>implementasi/step_2/<?=$key->ID_SPJ?>" class="btn bg-orange btn-kps btn-sm" style="font-size: 9px;">
 						<i class="fas fa-caret-right"></i><br>
 						Next
 					</a>

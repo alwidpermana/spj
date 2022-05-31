@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/ladda-buttons/css/ladda-themeless.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/bs-stepper/css/bs-stepper.min.css">
+  <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <?php $this->load->view("_partial/head")?>
   <style type="text/css">
     .labJudul{
@@ -132,15 +133,15 @@
                   <div class="row">
                     <div class="col-md-4">
                       <div class="row">
-                        <div class="col-md-11">
+                        <div class="col-md-12">
                           <label class="labJudul">Tanggal Input</label>    
-                        </div>
-                        <div class="col-md-1">
-                          :
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-1">
+                      :
+                    </div>
+                    <div class="col-md-7">
                       <div class="row">
                         <div class="col-md-12">
                           <input type="text" id="inputTglInput" class="form-control form-control-sm" value="<?=date("d F Y")?>" readonly>
@@ -155,23 +156,35 @@
                         <div class="col-md-11">
                           <label class="labJudul">Jenis SPJ</label>    
                         </div>
-                        <div class="col-md-1">
-                          :
-                        </div>
                       </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-1">
+                      :
+                    </div>
+                    <div class="col-md-7">
                       <div class="row">
                         <div class="col-md-12" id="beforeNext">
-                          <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputJenisSPJ">
+                          <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisSPJ">
                             <option value="">Pilih SPJ</option>
                             <?php foreach ($spj as $spj): ?>
                               <option value="<?=$spj->ID_JENIS?>"><?=$spj->NAMA_JENIS?></option>
                             <?php endforeach ?>
                           </select>
                         </div>
-                        <div class="col-md-11" id="afterNext">
+                        <div class="col-md-12" id="afterNext">
                           <input type="text" id="inputJenisSPJ" class="form-control" readonly="">
+                        </div>
+                      </div>
+                      <br>
+                      <div class="row">
+                        <div class="col-md-12 text-right">
+                          <div class="form-group clearfix">
+                            <div class="icheck-orange d-inline">
+                              <input type="checkbox" id="inputAbnormal" name="inputAbnormal" disabled>
+                              <label for="inputAbnormal"> Abnormal?
+                              </label>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -180,15 +193,15 @@
                   <div class="row">
                     <div class="col-md-4">
                       <div class="row">
-                        <div class="col-md-11">
+                        <div class="col-md-12">
                           <label class="labJudul">No SPJ</label>    
-                        </div>
-                        <div class="col-md-1">
-                          :
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-1">
+                      :
+                    </div>
+                    <div class="col-md-7">
                       <div class="row">
                         <div class="col-md-12">
                           <input type="text" id="inputNoSPJ" class="form-control form-control-sm" value="" readonly>
@@ -200,15 +213,15 @@
                   <div class="row">
                     <div class="col-md-4">
                       <div class="row">
-                        <div class="col-md-11">
+                        <div class="col-md-12">
                           <label class="labJudul">Tanggal SPJ</label>    
-                        </div>
-                        <div class="col-md-1">
-                          :
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-1">
+                      :
+                    </div>
+                    <div class="col-md-7">
                       <div class="row">
                         <div class="col-md-12">
                           <input type="date" id="inputTglSPJ" class="form-control form-control-sm">
@@ -223,7 +236,7 @@
                       <div class="row" id="getNext">
                         <div class="col-md-6"></div>
                         <div class="col-md-6">
-                          <button type="button" class="btn btn-danger btn-kps btn-sm btn-block ladda-button btnNext" id="btnNext" data-style="zoom-in">NEXT &nbsp;<i class="fas fa-arrow-up-right-from-square"></i></button> 
+                          <button type="button" class="btn bg-orange btn-kps btn-sm btn-block ladda-button btnNext" id="btnNext" data-style="zoom-in">NEXT &nbsp;<i class="fas fa-arrow-up-right-from-square"></i></button> 
                         </div>
                       </div>
                       
@@ -394,7 +407,7 @@
                             <div class="col-md-2">
                               <div class="row">
                                 <div class="col-md-12">
-                                  <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputKendaraan">
+                                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputKendaraan">
                                     <?php foreach ($kendaraan as $ken): ?>
                                       <option value="<?=$ken->Jenis?>"><?=$ken->Jenis?></option>
                                     <?php endforeach ?>
@@ -419,7 +432,7 @@
                             <div class="col-md-2">
                               <div class="row">
                                 <div class="col-md-12">
-                                  <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputJenisKendaraan">
+                                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisKendaraan">
                                       <option value="">-</option>
                                     <?php foreach ($jenis as $jen): ?>
                                       <option value="<?=$jen->JENIS_KENDARAAN?>"><?=$jen->JENIS_KENDARAAN?></option>
@@ -433,7 +446,7 @@
                           <div class="row">
                             <div class="col-md-4">
                               <center>
-                                <button type="button" id="pilihKendaraan" class="btn btn-danger btn-kps btn-sm">
+                                <button type="button" id="pilihKendaraan" class="btn bg-orange btn-kps btn-sm">
                                   <i class="fas fa-car-side"></i>&nbsp;
                                   Pilih Kendaraan
                                 </button>
@@ -545,8 +558,8 @@
                             <div class="col-md-4">
                               <div class="row">
                                 <div class="col-md-12">
-                                  <div class="select2-danger">
-                                    <select class="select2" id="inputKota" multiple="multiple" data-placeholder="Pilih Kota/Kabupaten" data-dropdown-css-class="select2-danger" style="width: 100%;">
+                                  <div class="select2-orange">
+                                    <select class="select2" id="inputKota" multiple="multiple" data-placeholder="Pilih Kota/Kabupaten" data-dropdown-css-class="select2-orange" style="width: 100%;color: white !important;">
                                       <?php foreach ($kota as $kot): ?>
                                         <option><?=$kot->NAMA_KOTA?></option>
                                       <?php endforeach ?>
@@ -576,7 +589,7 @@
                               </div>
                               <div class="row">
                                 <div class="col-md-12">
-                                  <button type="button" class="btn btn-xs btn-kps btn-danger" data-toggle="modal" data-target="#modal-lokasi">
+                                  <button type="button" class="btn btn-xs btn-kps bg-orange" data-toggle="modal" data-target="#modal-lokasi">
                                     <i class="fas fa-plus"></i>
                                   </button>
                                 </div>
@@ -594,7 +607,7 @@
                         <div id="stepPIC" class="content" role="tabpanel" aria-labelledby="stepPIC-trigger">
                           <div class="row">
                             <div class="col-md-2">
-                              <button type="button" class="btn btn-danger btn-kps btn-sm" id="btnTambahPIC">
+                              <button type="button" class="btn bg-orange btn-kps btn-sm" id="btnTambahPIC">
                                 <i class="fas fa-plus"></i>&nbsp;&nbsp;Tambah PIC
                               </button>
                               <input type="hidden" id="setJumlahPIC">
@@ -628,7 +641,7 @@
                           <div class="row" style="padding-top: 50px">
                             <div class="col-md-4">
                               <button class="btn btn-secondary btnStepPrevios">Previous</button>
-                              <button class="btn btn-secondary btnStepNext" onclick="stepper.next()">Next</button> 
+                              <button class="btn btn-secondary btnStepNext" id="btnNextPIC">Next</button> 
                             </div>
                           </div>
                         </div>
@@ -651,21 +664,36 @@
                                     <td>Uang Saku</td>
                                     <td><span id="tampilTotalUangSaku"></span></td>
                                     <td>
-                                      <input type="text" id="inputMediaUangSaku" class="form-control form-control-sm" value="Kasbon">
+                                      <!-- <input type="text" id="inputMediaUangSaku" class="form-control form-control-sm" value="Kasbon"> -->
+                                      <select class="select2 form-control select2-orange" id="inputMediaUangSaku" data-dropdown-css-class="select2-orange">
+                                        <option value="Kasbon" selected>Kasbon</option>
+                                        <option value="Voucher" disbaled>Voucher</option>
+                                        <option value="Reimburse">Reimburse</option>
+                                      </select>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>Uang Makan</td>
                                     <td><span id="tampilTotalUangMakan"></span></td>
                                     <td>
-                                      <input type="text" id="inputMediaUangMakan" class="form-control form-control-sm" value="Kasbon">
+                                      <!-- <input type="text" id="inputMediaUangMakan" class="form-control form-control-sm" value="Kasbon"> -->
+                                      <select class="select2 form-control select2-orange" id="inputMediaUangMakan" data-dropdown-css-class="select2-orange">
+                                        <option value="Kasbon" selected>Kasbon</option>
+                                        <option value="Voucher" disbaled>Voucher</option>
+                                        <option value="Reimburse">Reimburse</option>
+                                      </select>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>Uang Jalan</td>
                                     <td><span id="tampilTotalUangJalan"></span></td>
                                     <td>
-                                      <input type="text" id="inputMediaUangJalan" class="form-control form-control-sm" value="Kasbon">
+                                      <!-- <input type="text" id="inputMediaUangJalan" class="form-control form-control-sm" value="Kasbon"> -->
+                                      <select class="select2 form-control select2-orange" id="inputMediaUangJalan" data-dropdown-css-class="select2-orange">
+                                        <option value="Kasbon" selected>Kasbon</option>
+                                        <option value="Voucher" disbaled>Voucher</option>
+                                        <option value="Reimburse">Reimburse</option>
+                                      </select>
                                     </td>
                                   </tr>
                                   <tr>
@@ -675,8 +703,8 @@
                                       <span class="text-right text-kps" style="font-size: 9px">*Boleh Tidak Diisi</span>
                                     </td>
                                     <td>
-                                      <div id="voucherBBM">
-                                        <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputBBMVoucher" style="width: 100%">
+                                      <!-- <div id="voucherBBM">
+                                        <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputBBMVoucher" style="width: 100%">
                                           <option value="">Pilih Voucher</option>
                                         </select>
                                         <input type="hidden" id="inputIdVoucher">
@@ -693,10 +721,25 @@
                                       <div class="custom-control custom-checkbox text-right">
                                         <input class="custom-control-input custom-control-input-danger" type="checkbox" id="cekVoucher">
                                         <label for="cekVoucher" class="custom-control-label">Tanpa Voucher?</label>
+                                      </div> -->
+                                      <div id="voucherBBM">
+                                        <input type="text" id="inputNoVoucher" class="form-control form-control-sm" readonly>
+                                      </div>
+                                      <div id="manualBBM">
+                                        <div class="form-group">
+                                          <label>&nbsp;</label>
+                                          <span class="form-control-icon">Rp</span>
+                                          <input type="number" class="form-control form-control-search" id="inputBBMManual">
+                                        </div>
                                       </div>
                                     </td>
                                     <td>
-                                      <input type="text" id="inputMediaBBM" class="form-control form-control-sm" value="Reimburse">
+                                      <!-- <input type="text" id="inputMediaBBM" class="form-control form-control-sm" value="Reimburse"> -->
+                                      <select class="select2 form-control select2-orange" id="inputMediaBBM" data-dropdown-css-class="select2-orange">
+                                        <option value="Kasbon">Kasbon</option>
+                                        <option value="Voucher" selected>Voucher</option>
+                                        <option value="Reimburse">Reimburse</option>
+                                      </select>
                                     </td>
                                   </tr>
                                   <tr>
@@ -713,7 +756,12 @@
                                       </div>
                                     </td>
                                     <td>
-                                      <input type="text" id="inputMediaTol" class="form-control form-control-sm" value="Reimburse">
+                                      <!-- <input type="text" id="inputMediaTol" class="form-control form-control-sm" value="Reimburse"> -->
+                                      <select class="select2 form-control select2-orange" id="inputMediaTol" data-dropdown-css-class="select2-orange">
+                                        <option value="Kasbon" selected>Kasbon</option>
+                                        <option value="Voucher" disabled>Voucher</option>
+                                        <option value="Reimburse" selected>Reimburse</option>
+                                      </select>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -769,7 +817,7 @@
                           <center>
                             <div class="row">
                               <div class="col-md-12">
-                                <h2 class="text-danger">Perhatikan!</h2>
+                                <h2 class="text-orange">Perhatikan!</h2>
                               </div>
                             </div>
                             <br>
@@ -784,7 +832,7 @@
                           <div class="row">
                             <div class="col-md-12">
                               <div class="d-flex justify-content-center">
-                                <button type="button" id="btnSaveSPJ" class="btn btn-danger btn-kps">Save Data</button>
+                                <button type="button" id="btnSaveSPJ" class="btn bg-orange btn-kps">Save Data</button>
                               </div>
                             </div>
                           </div>
@@ -823,7 +871,7 @@
               <div class="col-md-12">
                 <div class="form-group">
                   <label>Objek</label>
-                  <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputObjek">
+                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputObjek">
                     <option value="">Pilih Objek</option>
                     <option value="Customer">Customer</option>
                     <option value="Supplier">Supplier</option>
@@ -846,7 +894,7 @@
               <div class="col-md-12">
                 <div class="form-group">
                   <label>Perusahaan</label>
-                  <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputPerusahaan">
+                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan">
                     
                   </select>
                 </div>
@@ -856,7 +904,7 @@
               <div class="col-md-12">
                 <div class="form-group">
                   <label>Group Tujuan</label>
-                  <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputGroupPerusahaan">
+                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputGroupPerusahaan">
                     <option value="">Pilih Group</option>
                     <?php foreach ($group as $gr): ?>
                       <option value="<?=$gr->ID_GROUP?>"><?=$gr->NAMA_GROUP?></option>
@@ -868,7 +916,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-danger btn-kps saveLokasi ladda-button" data-style="expand-right">Save</button>
+            <button type="button" class="btn bg-orange btn-kps saveLokasi ladda-button" data-style="expand-right">Save</button>
           </div>
         </div>
       </div>
@@ -887,7 +935,7 @@
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>Jenis PIC</label>
-                          <select class="select2 form-control select2-danger pilihPIC" data-dropdown-css-class="select2-danger" id="inputJenisPIC">
+                          <select class="select2 form-control select2-orange pilihPIC" data-dropdown-css-class="select2-orange" id="inputJenisPIC">
                             <option value="">Pilih Sebagai</option>
                             <option value="Sopir">Driver</option>
                             <option value="Pendamping">Pendamping</option>
@@ -903,7 +951,7 @@
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>Subjek</label>
-                          <select class="select2 form-control select2-danger pilihPIC" data-dropdown-css-class="select2-danger" id="inputSubjek">
+                          <select class="select2 form-control select2-orange pilihPIC" data-dropdown-css-class="select2-orange" id="inputSubjek">
                             <option value="">Pilih Subjek</option>
                             <option value="Internal">Internal</option>
                             <option value="Rental">Rental</option>
@@ -920,7 +968,7 @@
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>PIC</label>
-                          <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputPIC">
+                          <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPIC">
                             <option value="">Pilih Jenis PIC dan Subjek Terlebih Dahulu!</option>
                           </select>
                         </div>
@@ -930,7 +978,7 @@
                       <div class="col-md-12 text-right">
                         <div class="form-group">
                           <div class="custom-control custom-checkbox">
-                            <input class="custom-control-input custom-control-input-danger" type="checkbox" id="inputSortir">
+                            <input class="custom-control-input custom-control-input-orange" type="checkbox" id="inputSortir">
                             <label for="inputSortir" class="custom-control-label">Sortir?</label>
                           </div>
                         </div>
@@ -972,7 +1020,8 @@
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>Uang Saku</label>
-                          <input type="text" id="inputUangSaku" class="form-control" readonly>
+                          <input type="hidden" id="inputUangSaku" class="form-control" readonly>
+                          <input type="text" id="showUangSaku" class="form-control" readonly>
                         </div>
                       </div>
                     </div>
@@ -980,7 +1029,8 @@
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>Uang Makan</label>
-                          <input type="text" id="inputUangMakan" class="form-control" readonly>
+                          <input type="hidden" id="inputUangMakan" class="form-control" readonly>
+                          <input type="text" id="showUangMakan" class="form-control" readonly>
                         </div>
                       </div>
                     </div>    
@@ -991,7 +1041,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-danger btn-kps savePIC ladda-button" data-style="expand-right">Save</button>
+            <button type="button" class="btn bg-orange btn-kps savePIC ladda-button" data-style="expand-right">Save</button>
           </div>
         </div>
       </div>

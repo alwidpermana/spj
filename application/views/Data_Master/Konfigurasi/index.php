@@ -8,9 +8,9 @@
   <?php $this->load->view("_partial/head")?>
   <style type="text/css">
     .cek{
-      color:  rgb(178, 58, 72);
+      color:  rgb(204, 88, 3);
     }
-    .cek: hover{
+    .cek:hover{
       color:  rgb(237, 169, 22);
     }
     .labJudul{
@@ -56,7 +56,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <div class="d-flex justify-content-end">
-                          <button type="button" class="btn btn-danger btn-kps btn-sm" data-toggle="modal" data-target="#modal-pendamping">
+                          <button type="button" class="btn bg-orange btn-kps btn-sm" data-toggle="modal" data-target="#modal-pendamping">
                             <i class="fas fa-plus"></i>
                             Tambah
                           </button> 
@@ -70,7 +70,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <div class="d-flex justify-content-end">
-                          <button type="button" class="btn btn-danger btn-kps btn-sm" data-toggle="modal" data-target="#modal-uangJalan">
+                          <button type="button" class="btn bg-orange btn-kps btn-sm" data-toggle="modal" data-target="#modal-uangJalan">
                             <i class="fas fa-plus"></i>
                             Tambah
                           </button> 
@@ -84,7 +84,7 @@
                      <div class="row">
                       <div class="col-md-12">
                         <div class="d-flex justify-content-end">
-                          <button type="button" class="btn btn-danger btn-kps btn-sm" data-toggle="modal" data-target="#modal-uangSaku">
+                          <button type="button" class="btn bg-orange btn-kps btn-sm" data-toggle="modal" data-target="#modal-uangSaku">
                             <i class="fas fa-plus"></i>
                             Tambah
                           </button> 
@@ -138,7 +138,7 @@
                           </div>
                         </div>
                         <div class="d-flex justify-content-end">
-                          <button type="button" class="btn btn-danger btn-kps btn-sm" data-toggle="modal" data-target="#modal-kota">
+                          <button type="button" class="btn bg-orange btn-kps btn-sm" data-toggle="modal" data-target="#modal-kota">
                             <i class="fas fa-plus"></i>
                             Tambah
                           </button> 
@@ -176,7 +176,7 @@
                   <div class="col-md-12">
                     <div class="form-group">
                       <label>Objek</label>
-                      <select class="select2 form-control" id="inputObjek">
+                      <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputObjek">
                         <?php foreach ($spj as $key): ?>
                           <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
                         <?php endforeach ?>
@@ -188,7 +188,7 @@
                   <div class="col-md-12">
                     <div class="form-group">
                       <label>Jenis Kendaraan</label>
-                      <select class="select2 form-control" id="inputJenisKendaraan">
+                      <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisKendaraan">
                         <?php foreach ($kendaraan as $key2): ?>
                           <option value="<?=$key2->JENIS_KENDARAAN?>"><?=$key2->JENIS_KENDARAAN?></option>
                         <?php endforeach ?>
@@ -213,7 +213,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger btn-kps ladda-button saveJumlahPendamping" data-style="zoom-in" id="saveJumlahPendamping">Save</button>
+              <button type="submit" class="btn bg-orange btn-kps ladda-button saveJumlahPendamping" data-style="zoom-in" id="saveJumlahPendamping">Save</button>
           </div>
         </div>
       </div>
@@ -236,7 +236,7 @@
                   <div class="col-md-12">
                     <div class="form-group">
                       <label>Kategori</label>
-                      <select class="select2 form-control" id="inputKategoriJalan">
+                      <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputKategoriJalan">
                         <?php foreach ($spj as $key): ?>
                           <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
                         <?php endforeach ?>
@@ -248,7 +248,7 @@
                   <div class="col-md-12">
                     <div class="form-group">
                       <label>Kota</label>
-                      <select class="select2 form-control" id="inputKotaJalan" style="width:100%;">
+                      <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputKotaJalan" style="width:100%;">
                         <option value="">Pilih Kota</option>
                       </select>
                     </div>
@@ -265,7 +265,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger btn-kps ladda-button saveUangJalan" data-style="zoom-in" id="saveUangJalan">Save</button>
+              <button type="submit" class="btn bg-orange btn-kps ladda-button saveUangJalan" data-style="zoom-in" id="saveUangJalan">Save</button>
           </div>
         </div>
       </div>
@@ -286,7 +286,7 @@
                 <label class="labJudul">Tipe</label>
               </div>
               <div class="col-md-3">
-                <select class="select2 form-control" id="inputTipeDaerah">
+                <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputTipeDaerah">
                   <option value="Kota">Kota</option>
                   <option value="Kabupaten">Kabupaten</option>
                 </select>
@@ -307,7 +307,7 @@
                 <label class="labJudul">Provinsi</label>
               </div>
               <div class="col-md-3">
-                <select class="select2 form-control" id="inputProvinsi">
+                <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputProvinsi">
                   <?php foreach ($provinsi as $prov): ?>
                     <option value="<?=$prov->NAMA_PROVINSI?>"><?=$prov->NAMA_PROVINSI?></option>
                   <?php endforeach ?>
@@ -317,7 +317,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger btn-kps ladda-button saveKota" data-style="zoom-in" id="saveKota">Save</button>
+              <button type="submit" class="btn bg-orange btn-kps ladda-button saveKota" data-style="zoom-in" id="saveKota">Save</button>
           </div>
         </div>
       </div>
@@ -340,7 +340,7 @@
                     <label class="labJudul">Jenis SPJ</label>
                   </div>
                   <div class="col-md-5">
-                    <select class="select2 form-control" id="inputJenisSPJ">
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisSPJ">
                       <?php foreach ($spj as $key): ?>
                         <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
                       <?php endforeach ?>
@@ -353,7 +353,7 @@
                     <label class="labJudul">PIC</label>
                   </div>
                   <div class="col-md-5">
-                    <select class="select2 form-control" id="inputPIC">
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPIC">
                       <option value="">Pilih Jabatan</option>
                     </select>
                   </div>
@@ -365,7 +365,7 @@
                       <label class="labJudul">Jenis Kendaraan</label>
                     </div>
                     <div class="col-md-5">
-                      <select class="select2 form-control" id="inputJKendaraan">
+                      <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJKendaraan">
                         <?php foreach ($kendaraan as $ken): ?>
                           <option value="<?=$ken->JENIS_KENDARAAN?>"><?=$ken->JENIS_KENDARAAN?></option>  
                         <?php endforeach ?>
@@ -379,14 +379,14 @@
                     <label class="labJudul">Group Tujuan</label>
                   </div>
                   <div class="col-md-5">
-                    <select class="select2" id="inputGroupTujuan">
+                    <select class="select2 select2-orange" data-dropdown-css-class="select2-orange" id="inputGroupTujuan">
                       <?php foreach ($group as $group): ?>
                         <option value="<?=$group->ID_GROUP?>"><?=$group->NAMA_GROUP?></option>
                       <?php endforeach ?>
                     </select>
                   </div>
                   <div class="col-md-1">
-                    <a href="javascript:;" class="btn text-danger text-kps lihatGroup"><i class="far fa-eye"></i></a>
+                    <a href="javascript:;" class="btn text-warning text-kps lihatGroup"><i class="far fa-eye"></i></a>
                   </div>
                 </div>
                 <br>
@@ -422,7 +422,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger btn-kps ladda-button saveTarget" data-style="expand-right" id="saveTarget">Save</button>
+              <button type="submit" class="btn bg-orange btn-kps ladda-button saveTarget" data-style="expand-right" id="saveTarget">Save</button>
           </div>
         </div>
       </div>
@@ -489,7 +489,7 @@
             </div>
           </div>
           <div class="modal-footer">
-              <button type="submit" class="btn btn-danger btn-kps saveUS" id="saveUS">Save</button>
+              <button type="submit" class="btn bg-orange btn-kps saveUS" id="saveUS">Save</button>
           </div>
           </form>
         </div>
@@ -515,7 +515,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="btn btn-danger btn-kps ladda-button saveJamTambahan" id="saveJamTambahan" data-style="expand-right">Save</button>
+            <button type="submit" class="btn bg-orange btn-kps ladda-button saveJamTambahan" id="saveJamTambahan" data-style="expand-right">Save</button>
           </div>
         </div>
       </div>

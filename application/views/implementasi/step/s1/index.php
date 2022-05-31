@@ -37,11 +37,22 @@
             <div class="col-md-12">
               <div class="card">
                 <div class="card-body">
+                  <?php if ($this->session->flashdata('success')): ?>
+                  <div class="row" id="flashNotif">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                      <div class="alert alert-success alert-dismissible">
+                        <h5><i class="icon fas fa-check"></i> Success!</h5>
+                        Data Berhasil Disimpan!
+                      </div>
+                    </div>
+                  </div>  
+                  <?php endif ?>
                   <div class="row">
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Tahun</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filTahun">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filTahun">
                           <?php foreach ($tahun as $value): ?>
                             <option value="<?=$value?>"><?=$value?></option>
                           <?php endforeach ?>
@@ -51,7 +62,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Bulan</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filBulan">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filBulan">
                           <?php foreach ($bulan as $angka => $bulan): ?>
                             <option value="<?=$bulan?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
                           <?php endforeach ?>
@@ -61,7 +72,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Periode</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filPeriode">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filPeriode">
                           
                         </select>
                       </div>
@@ -69,7 +80,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Jenis SPJ</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filJenis">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                             <option value="">ALL</option>
                           <?php foreach ($jenis as $key): ?>
                             <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
@@ -80,7 +91,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Status</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filStatus">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
                           <option value="">ALL</option>
                           <option value="OPEN">OPEN</option>
                           <option value="CLOSE">CLOSE</option>
@@ -90,7 +101,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Group Tujuan</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filGroup">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filGroup">
                           <option value="">ALL</option>
                           <?php foreach ($group as $key): ?>
                             <option value="<?=$key->ID_GROUP?>"><?=$key->NAMA_GROUP?></option>
@@ -142,6 +153,11 @@
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.jquery.min.js"></script>
 <script type="text/javascript">
   $(document).ready(function(){
+    window.setTimeout(function() {  
+       $("#flashNotif").fadeTo(1000, 0).slideUp(500, function() {  
+         $(this).remove();  
+       });  
+     }, 1000);
     $('.select2').select2({
         'width': '100%',
     });

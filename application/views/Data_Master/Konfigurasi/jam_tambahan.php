@@ -8,5 +8,5 @@
 
 ?>
 <p>
-  <b>Apabila perjalanan dinas luar kota dimana jam kerja melebihi <a href="javascript:;" class="text-danger text-kps setJamTambahan" field="JAM1" data="<?=$jam1?>"><?=$jam1?></a> jam (dari keberangkatan) atau perjalanan melebihi <a href="javascript:;" class="text-danger text-kps setJamTambahan" field="JAM2" data="<?=$jam2?>"><?=$jam2?></a> jam dengan lewat pukul 24.00, maka mendapat uang saku tambahan sebagai berikut:</b>
+  <b>Apabila perjalanan dinas luar kota dimana jam kerja melebihi <a href="javascript:;" class="text-warning text-kps setJamTambahan" field="JAM1" data="<?=$jam1?>"><?=$jam1?></a> jam (dari keberangkatan) atau perjalanan melebihi <a href="javascript:;" class="text-warning text-kps setJamTambahan" field="JAM2" data="<?=$jam2?>"><?=$jam2?></a> jam dengan lewat pukul 24.00, maka mendapat uang saku tambahan sebagai berikut:</b>
 </p>

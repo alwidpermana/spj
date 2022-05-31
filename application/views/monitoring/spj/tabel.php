@@ -156,7 +156,7 @@
 				<td></td>
 				<td></td>
 				<td>
-					<button type="button" class="btn btn-danger dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
+					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
                       <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu" role="menu">

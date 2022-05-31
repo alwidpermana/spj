@@ -28,7 +28,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Status</label>
-                    <select class="select2 form-control select2-danger filter" data-dropdown-css-class="select2-danger" id="filStatus">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
                       <option value="">ALL</option>
                       <option value="1">Telah Digunakan</option>
                       <option value="2">Belum Digunakan</option>
@@ -52,7 +52,7 @@
             <div class="card-body">
               <div class="row">
                 <div class="col-md-2">
-                  <button type="button" class="btn btn-danger btn-kps btn-sm btn-block" id="btnTambah">
+                  <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="btnTambah">
                     <i class="fas fa-plus"></i>&nbsp; Voucher BBM
                   </button>
                 </div>
@@ -102,7 +102,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger btn-kps ladda-button saveVoucher" data-style="expand-right" id="saveVoucher">Save</button>
+              <button type="submit" class="btn bg-orange btn-kps ladda-button saveVoucher" data-style="expand-right" id="saveVoucher">Save</button>
           </div>
         </div>
       </div>

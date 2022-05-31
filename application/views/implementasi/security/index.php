@@ -7,7 +7,14 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/ladda-buttons/css/ladda-themeless.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <?php $this->load->view("_partial/head")?>
-  
+  <style type="text/css">
+    .fotoWajah{
+      max-width: 50px;
+      width: auto;
+      height: auto;
+
+    }
+  </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse layout-navbar-fixed layout-footer-fixed">
 <div class="preloader">

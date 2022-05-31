@@ -27,7 +27,7 @@
                 <td><?=$key->Jenis?></td>
                 <td><?=$key->Pemakai?></td>
                 <td>
-                    <select class="select2 form-control inputJenisKendaraan" style="font-size: 12px;" data = '<?=$key->NoTNKB?>'>
+                    <select class="select2 form-control inputJenisKendaraan select2-orange" data-dropdown-css-class="select2-orange" style="font-size: 12px;" data = '<?=$key->NoTNKB?>'>
                             <option value="">No Data</option>
                         <?php foreach ($jenis as $key2): ?>
                             <option value="<?=$key2->JENIS_KENDARAAN?>" <?=$key->Kategori == $key2->JENIS_KENDARAAN?'selected':''?>><?=$key2->JENIS_KENDARAAN?></option>
@@ -50,7 +50,7 @@
                 <td class="text-center">
                     <a 
                       href="<?=base_url()?>Data_Master/Gambar_Kendaraan/<?=str_replace(' ','_',$key->NoTNKB)?>"
-                      class="btn btn-danger btn-kps btn-sm">
+                      class="btn bg-orange btn-kps btn-sm">
                         <i class="fas fa-image"></i>
                     </a>
                 </td>
@@ -60,6 +60,7 @@
 </table>
 <script type="text/javascript">
 	$(document).ready(function(){
+        
 		var table = $('#datatable').DataTable( {
             scrollY:        "400px",
             scrollX:        true,

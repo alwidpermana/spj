@@ -51,7 +51,7 @@ class Implementasi extends CI_Controller {
 			$noTNKB = $key->NO_TNKB;
 			$group = $key->GROUP_ID;
 		}
-		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id, $adjustment='')->result();
+		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id, $adjustment='','')->result();
 		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
 		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
 		$data['pic2'] = $this->M_Pengajuan->getPengajuanPIC($group, $noSPJ)->result();
@@ -144,8 +144,9 @@ class Implementasi extends CI_Controller {
         $selisihHari = $selisihH->d;
         if ($selisihJam >= $jam1 && $selisihHari==0) {
           $jm = $selisihJam - $jam1;
-          
-          if ($jm>0 && $jm<=3) {
+           
+          if ($jm>0) {
+          	// && $jm<=3
             $uangSaku1 = $tambahanUangSaku1;
           }else{
             $uangSaku1 = 0;
@@ -200,6 +201,10 @@ class Implementasi extends CI_Controller {
 	}
 	public function step_1()
 	{
+		$notif = $this->input->get("notif");
+		if ($notif == '1') {
+			$this->session->set_flashdata('success', 'Data Berhasil Di Simpan'); 
+		}
 		$data['side'] = 'implementasi-step';
 		$data['page'] = 'Implementasi Step 1';
 		$data['jenis'] = $this->M_Data_Master->getJenisSPJ()->result();
@@ -215,7 +220,7 @@ class Implementasi extends CI_Controller {
 		$filGroup = $this->input->get("filGroup");
 		$filPeriode = $this->input->get("filPeriode");
 
-		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='')->result();
+		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='','Y')->result();
 		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
 		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
@@ -231,7 +236,7 @@ class Implementasi extends CI_Controller {
 			$no_spj = $key->NO_SPJ;
 			$jenisId = $key->JENIS_ID;
 		}
-		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id = $id, $adjustment='')->result();
+		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id = $id, $adjustment='', '')->result();
 		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
 		$data['pic'] = $this->M_Monitoring->getPICPengajuanVersi2($no_spj)->result();
@@ -240,6 +245,8 @@ class Implementasi extends CI_Controller {
 		$where = "WHERE ID_JENIS = $jenisId";
 		$data['tambahan'] = $this->M_Data_Master->viewTambahanUangSaku($where)->result();
 		$data['uang_makan'] = $this->M_Data_Master->getUangMakan()->result();
+		$data['adjustment'] = $this->M_Implementasi->getDataAdjustment($no_spj)->result();
+		$data['realisasi'] = $this->M_Implementasi->realisasiBiayaSPJ($no_spj)->result();
 		$this->load->view("implementasi/step/s2/index", $data);
 	}
 	public function adjustment()
@@ -260,7 +267,7 @@ class Implementasi extends CI_Controller {
 		$filPeriode = $this->input->get("filPeriode");
 
 		// $data['data'] = $this->M_Implementasi->getTabelAdjustment($filTahun, $filBulan, $filJenis, $filSearch, $filGroup, $filPeriode)->result();
-		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='Y')->result();
+		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='Y','')->result();
 		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
 		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
@@ -271,7 +278,7 @@ class Implementasi extends CI_Controller {
 		$noSPJ = $this->input->get("noSPJ");
 		$getUangMakan = $this->M_Implementasi->getUangMakanNormalAdjustment($noSPJ);
 		$getUangJalan = $this->M_Pengajuan->getUangJalanSPJ($noSPJ);
-		
+		$getBBM = $this->M_Implementasi->getBBMPengajuan($noSPJ);
 		if ($getUangMakan->num_rows()>0) {
 			foreach ($getUangMakan->result() as $key) {
 				$uangMakan1 = $key->UANG_MAKAN_1;
@@ -295,8 +302,48 @@ class Implementasi extends CI_Controller {
 		} else {
 			$uangJalan = 0;
 		}
+		$uangBBM = 0;
+		foreach ($getBBM->result() as $bbm) {
+			$bbmUang = $bbm->TOTAL_UANG_BBM == null || $bbm->TOTAL_UANG_BBM == '' ? 0 : $bbm->TOTAL_UANG_BBM; 
+			$uangBBM += $bbmUang;
+		}
 
 		$getAdjustment = $this->M_Implementasi->getDataAdjustment($noSPJ);
+		$jmlOpen = 0;
+		$uangMakanDiajukan =0;
+		$uangMakanAlasan = '';
+		$uangMakanKeputusan='';
+		$uangMakanKeterangan = '';
+		$uangMakanStatus ='';
+		$uangJalanDiajukan =0;
+		$uangJalanAlasan = '';
+		$uangJalanKeputusan='';
+		$uangJalanKeterangan = '';
+		$uangJalanStatus = '';
+		$uangBBMDiajukan =0;
+		$uangBBMAlasan = '';
+		$uangBBMKeputusan='';
+		$uangBBMKeterangan = '';
+		$uangBBMStatus = '';
+
+		$uangUS1Diajukan =0;
+		$uangUS1Alasan = '';
+		$uangUS1Keputusan='';
+		$uangUS1Keterangan = '';
+		$uangUS1Status = '';
+
+		$uangUS2Diajukan =0;
+		$uangUS2Alasan = '';
+		$uangUS2Keputusan='';
+		$uangUS2Keterangan = '';
+		$uangUS2Status = '';
+
+
+		$uangUMDiajukan =0;
+		$uangUMAlasan = '';
+		$uangUMKeputusan='';
+		$uangUMKeterangan = '';
+		$uangUMStatus = '';
 		if ($getAdjustment->num_rows()>0) {
 			foreach ($getAdjustment->result() as $ad) {
 				if ($ad->OBJEK == 'UANG MAKAN') {
@@ -305,36 +352,56 @@ class Implementasi extends CI_Controller {
 					$uangMakanKeputusan = $ad->KEPUTUSAN;
 					$uangMakanKeterangan = $ad->KETERANGAN;
 					$uangMakanStatus = $ad->STATUS;
+					if ($ad->STATUS == 'OPEN') {
+						$jmlOpen +=1;
+					}
 				}elseif($ad->OBJEK == 'UANG JALAN'){
 					$uangJalanDiajukan = $ad->DIAJUKAN;
 					$uangJalanAlasan = $ad->ALASAN;
 					$uangJalanKeputusan = $ad->KEPUTUSAN;
 					$uangJalanKeterangan = $ad->KETERANGAN;
 					$uangJalanStatus = $ad->STATUS;
-				}else{
+					if ($ad->STATUS == 'OPEN') {
+						$jmlOpen +=1;
+					}
+				}elseif($ad->OBJEK == 'BBM'){
 					$uangBBMDiajukan = $ad->DIAJUKAN;
 					$uangBBMAlasan = $ad->ALASAN;
 					$uangBBMKeputusan = $ad->KEPUTUSAN;
 					$uangBBMKeterangan = $ad->KETERANGAN;
 					$uangBBMStatus = $ad->STATUS;
+					if ($ad->STATUS == 'OPEN') {
+						$jmlOpen +=1;
+					}
+				}elseif($ad->OBJEK == 'US1'){
+					$uangUS1Diajukan = $ad->DIAJUKAN;
+					$uangUS1Alasan = $ad->ALASAN;
+					$uangUS1Keputusan = $ad->KEPUTUSAN;
+					$uangUS1Keterangan = $ad->KETERANGAN;
+					$uangUS1Status = $ad->STATUS;
+					if ($ad->STATUS == 'OPEN') {
+						$jmlOpen +=1;
+					}
+				}elseif($ad->OBJEK == 'US2'){
+					$uangUS2Diajukan = $ad->DIAJUKAN;
+					$uangUS2Alasan = $ad->ALASAN;
+					$uangUS2Keputusan = $ad->KEPUTUSAN;
+					$uangUS2Keterangan = $ad->KETERANGAN;
+					$uangUS2Status = $ad->STATUS;
+					if ($ad->STATUS == 'OPEN') {
+						$jmlOpen +=1;
+					}
+				}elseif($ad->OBJEK == 'UM'){
+					$uangUMDiajukan = $ad->DIAJUKAN;
+					$uangUMAlasan = $ad->ALASAN;
+					$uangUMKeputusan = $ad->KEPUTUSAN;
+					$uangUMKeterangan = $ad->KETERANGAN;
+					$uangUMStatus = $ad->STATUS;
+					if ($ad->STATUS == 'OPEN') {
+						$jmlOpen +=1;
+					}
 				}
 			}
-		} else {
-			$uangMakanDiajukan =0;
-			$uangMakanAlasan = '';
-			$uangMakanKeputusan='';
-			$uangMakanKeterangan = '';
-			$uangJalanDiajukan =0;
-			$uangJalanAlasan = '';
-			$uangJalanKeputusan='';
-			$uangJalanKeterangan = '';
-			$uangBBMDiajukan =0;
-			$uangBBMAlasan = '';
-			$uangBBMKeputusan='';
-			$uangBBMKeterangan = '';
-			$uangMakanStatus ='';
-			$uangJalanStatus = '';
-			$uangBBMStatus = '';
 		}
 					
 		$hasil = array(
@@ -359,6 +426,23 @@ class Implementasi extends CI_Controller {
 						'uangBBMStatus'=>$uangBBMStatus,
 						'uangSaku1' =>$uangSaku1,
 						'uangSaku2' =>$uangSaku2,
+						'jmlOpen' =>$jmlOpen,
+						'uangBBM' =>$uangBBM,
+						'uangUS1Diajukan'=>round($uangUS1Diajukan),
+						'uangUS1Alasan'=>$uangUS1Alasan,
+						'uangUS1Keputusan'=>$uangUS1Keputusan,
+						'uangUS1Keterangan'=>$uangUS1Keterangan,
+						'uangUS1Status'=>$uangUS1Status,
+						'uangUS2Diajukan'=>round($uangUS2Diajukan),
+						'uangUS2Alasan'=>$uangUS2Alasan,
+						'uangUS2Keputusan'=>$uangUS2Keputusan,
+						'uangUS2Keterangan'=>$uangUS2Keterangan,
+						'uangUS2Status'=>$uangUS2Status,
+						'uangUMDiajukan'=>round($uangUMDiajukan),
+						'uangUMAlasan'=>$uangUMAlasan,
+						'uangUMKeputusan'=>$uangUMKeputusan,
+						'uangUMKeterangan'=>$uangUMKeterangan,
+						'uangUMStatus'=>$uangUMStatus,
 					  );
 
 		echo json_encode($hasil);
@@ -410,6 +494,87 @@ class Implementasi extends CI_Controller {
 		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
 		$this->load->view("implementasi/outstanding/tabel", $data);
+	}
+	public function saveKeputusanAdjustment()
+	{
+		$inputUangMakanDiajukan = $this->input->post("inputUangMakanDiajukan");
+  	$inputUangJalanDiajukan = $this->input->post("inputUangJalanDiajukan");
+  	$inputBBMDiajukan = $this->input->post("inputBBMDiajukan");
+  	$inputUS1Diajukan = $this->input->post("inputUS1Diajukan");
+  	$inputUS2Diajukan = $this->input->post("inputUS2Diajukan");
+  	$inputUMDiajukan = $this->input->post("inputUMDiajukan");
+  	$inputKeputusanBBM = $this->input->post("inputKeputusanBBM");
+  	$inputKeputusanUangMakan = $this->input->post("inputKeputusanUangMakan");
+  	$inputKeputusanUangJalan = $this->input->post("inputKeputusanUangJalan");
+  	$inputKeputusanUS1 = $this->input->post('inputKeputusanUS1');
+  	$inputKeputusanUS2 = $this->input->post('inputKeputusanUS2');
+  	$inputKeputusanUM = $this->input->post('inputKeputusanUM');
+  	$inputUangJalanKeterangan = $this->input->post("inputUangJalanKeterangan");
+  	$inputUangMakanKeterangan = $this->input->post("inputUangMakanKeterangan");
+  	$inputBBMKeterangan = $this->input->post("inputBBMKeterangan");
+  	$inputUS1Keterangan = $this->input->post("inputUS1Keterangan");
+  	$inputUS2Keterangan = $this->input->post("inputUS2Keterangan");
+  	$inputUMKeterangan = $this->input->post("inputUMKeterangan");
+  	$inputNoSPJ = $this->input->post("inputNoSPJ");
+  	$value = [$inputUangMakanDiajukan, $inputKeputusanUangMakan, $inputUangMakanKeterangan, $inputUangJalanDiajukan, $inputKeputusanUangJalan, $inputUangJalanKeterangan, $inputBBMDiajukan, $inputKeputusanBBM, $inputBBMKeterangan];
+  	$value2 = [$inputUS1Diajukan, $inputKeputusanUS1, $inputUS1Keterangan, $inputUS2Diajukan, $inputKeputusanUS2, $inputUS2Keterangan, $inputUMDiajukan, $inputKeputusanUM, $inputUMKeterangan];
+  	$data = $this->M_Implementasi->saveKeputusanAdjustment($value, $inputNoSPJ);
+  	$data = $this->M_Implementasi->saveKeputusanAdjustment2($value2, $inputNoSPJ);
+  	// $data = $this->M_Implementasi->updateKasbonOtomatis($inputNoSPJ, $inputUangMakanDiajukan, $inputUangJalanDiajukan, $inputBBMDiajukan);
+  	echo json_encode($data);
+	}
+	public function closeSPJ()
+	{
+		$inputNoSPJ = $this->input->post("inputNoSPJ"); 
+		$saku = $this->input->post("inputRealisasiUangSaku"); 
+		$makan = $this->input->post("inputRealisasiUangMakan"); 
+		$jalan = $this->input->post("inputRealisasiUangJalan"); 
+		$bbm = $this->input->post("inputRealisasiUangBBM"); 
+		$tol = $this->input->post("inputRealisasiUangTol");
+		$data = $this->M_Implementasi->saveCloseSPJ($inputNoSPJ, $saku, $makan, $jalan, $bbm, $tol);
+		echo json_encode($data);
+		
+	}
+	public function generate()
+	{
+		$data['side']= 'implementasi-generate';
+		$data['page']= 'Generate SPJ';
+		$data['jenis'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$this->load->view("implementasi/generate/index", $data);
+	}
+	public function getInfo()
+	{
+		$inputJenisSPJ = $this->input->get("filJenis");
+		$total = $this->M_Implementasi->getTotalSPJ()->result();
+		$noGenerate = $this->M_Implementasi->getNoGenerate($inputJenisSPJ);
+		$jumlahSPJ =0;
+		$totalRP = 0;
+		foreach ($total as $key) {
+			$jumlahSPJ = $key->JUMLAH_SPJ;
+			$totalRP = $key->TOTAL_RP;
+		}
+		$hasil = array('noGenerate' =>$noGenerate ,'jumlahSPJ'=>round($jumlahSPJ), 'totalRP'=> round($totalRP));
+		echo json_encode($hasil);
+	}
+	public function getTabelGenerate()
+	{
+		$inputJenisSPJ = $this->input->get("filJenis");
+		$data['data'] = $this->M_Implementasi->getSPJForGenerate($inputJenisSPJ)->result();
+		$this->load->view("implementasi/generate/tabel", $data);
+	}
+	public function saveGenerateSPJ()
+	{
+		$noSPJ = $this->input->post("noSPJ");
+		$inputNoGenerate = $this->input->post("inputNoGenerate");
+		$inputJumlahSPJ = $this->input->post("inputJumlahSPJ");
+		$inputTotalRP = $this->input->post("inputTotalRP");
+		$filJenis = $this->input->post("filJenis");
+		$jmlNoSPJ = count($noSPJ);
+		for ($i=0; $i <$jmlNoSPJ ; $i++) { 
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_SPJ = '$noSPJ[$i]'");
+		}
+		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis);
+		echo json_encode($data);
 	}
 }
 ?>

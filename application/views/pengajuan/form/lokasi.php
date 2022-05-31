@@ -20,7 +20,7 @@
 			<td><?=$key->SERLOK_KOTA?></td>
 			<td><?=$key->NAMA_GROUP?></td>
 			<td>
-				<a href="javascript:;" class="btn text-kps text-danger hapusLokasi" data="<?=$key->ID_LOKASI?>">
+				<a href="javascript:;" class="btn text-kps text-warning hapusLokasi" data="<?=$key->ID_LOKASI?>">
 					<i class="fas fa-trash-alt"></i>
 				</a>
 			</td>

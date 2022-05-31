@@ -1,7 +1,7 @@
 <?php foreach ($data as $key): ?>
   <div class="row">
     <div class="col-md-12">
-      <button type="button" class="btn btn-danger dropdown-toggle dropdown-icon btn-kps_gray btn-block btn-sm" data-toggle="dropdown" style="font-size: 10px">
+      <button type="button" class="btn btn-warning dropdown-toggle dropdown-icon btn-kps_gray btn-block btn-sm" data-toggle="dropdown" style="font-size: 10px;color:white !important;">
         <?=$key->KOTA?>
         <span class="sr-only"></span>
       </button>

@@ -27,7 +27,7 @@
                 <div class="col-md-3">
                   <div class="form-group">
                     <label>Departemen</label>
-                    <select class="select2 form-control filter" id="filDepartemen">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filDepartemen">
                       <option value="">ALL</option>
                       <?php foreach ($departemen as $dep): ?>
                         <option value="<?=$dep->nm_dept?>"><?=$dep->nm_dept?></option>
@@ -38,7 +38,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Jabatan</label>
-                    <select class="select2 form-control filter" id="filJabatan">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJabatan">
                       <option value="">ALL</option>
                       <?php foreach ($jabatan as $jab): ?>
                         <option value="<?=$jab->jabatan?>"><?=$jab->jabatan?></option>

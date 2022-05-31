@@ -5,10 +5,11 @@ class M_Monitoring extends CI_Model {
 		$this->load->database();
 	}
 
-	public function getSPJ($bulan, $tahun, $jenis, $search, $id, $adjustment)
+	public function getSPJ($bulan, $tahun, $jenis, $search, $id, $adjustment, $implementasi)
 	{
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
-		$byAdjust = $adjustment == ''?'':" AND ADJUSTMENT_MANAJEMEN = 'Y'";
+		$byAdjust = $adjustment == ''?'':" AND STATUS_SPJ = 'OPEN' AND ADJUSTMENT_MANAJEMEN = 'Y'";
+		$byStep1 = $implementasi == 'Y'?" AND STATUS_PERJALANAN = 'IN'":"";
 		$sql = "SELECT
 					* 
 				FROM
@@ -41,7 +42,8 @@ class M_Monitoring extends CI_Model {
 						MEDIA_UANG_JALAN,
 						MEDIA_UANG_BBM,
 						MEDIA_UANG_TOL,
-						STATUS_PERJALANAN
+						STATUS_PERJALANAN,
+						VOUCHER_BBM
 					FROM
 						SPJ_PENGAJUAN
 					WHERE
@@ -49,7 +51,7 @@ class M_Monitoring extends CI_Model {
 						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
 						JENIS_ID LIKE '$jenis%' AND
-						NO_SPJ LIKE '$search%' $byAdjust
+						NO_SPJ LIKE '$search%' $byAdjust $byStep1
 				)Q1
 				LEFT JOIN
 				(
@@ -158,6 +160,14 @@ class M_Monitoring extends CI_Model {
 					WHERE
 						STAR = 'Y'
 				)Q6 ON Q1.NO_TNKB = Q6.NO_TNBK
+				LEFT JOIN
+				(
+					SELECT
+						NIK AS NIK_OTORITAS,
+						FOTO_WAJAH
+					FROM
+						SPJ_PEGAWAI_OTORITAS
+				)Q7 ON Q5.NIK_DRIVER = Q7.NIK_OTORITAS
 				$byId
 				ORDER BY
 					TGL_SPJ DESC";
@@ -212,7 +222,8 @@ class M_Monitoring extends CI_Model {
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
 						JENIS_ID LIKE '$jenis%' AND
 						NO_SPJ LIKE '$search%' AND
-						GROUP_ID LIKE '$group%'
+						GROUP_ID LIKE '$group%' AND
+						STATUS_SPJ = 'OPEN' 
 				)Q1
 				LEFT JOIN
 				(
@@ -259,6 +270,17 @@ class M_Monitoring extends CI_Model {
 						UANG_MAKAN > 0
 					GROUP BY NO_SPJ
 				)Q5 ON Q1.NO_SPJ = Q5.NO_SPJ
+				LEFT JOIN
+				(
+					SELECT
+						COUNT(ID) AS JML_ADJUSTMENT,
+						NO_SPJ
+					FROM
+						SPJ_ADJUSTMENT
+					GROUP BY NO_SPJ
+				)Q6 ON Q1.NO_SPJ = Q6.NO_SPJ
+				WHERE
+					JML_ADJUSTMENT > 0
 				ORDER BY
 					TGL_SPJ DESC";
 		return $this->db->query($sql);
@@ -359,7 +381,8 @@ class M_Monitoring extends CI_Model {
 					UANG_SAKU,
 					UANG_MAKAN,
 					SORTIR,
-					OBJEK
+					OBJEK,
+					FOTO_WAJAH
 				FROM
 				(
 					SELECT
@@ -425,6 +448,14 @@ class M_Monitoring extends CI_Model {
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
 						JENIS_ID LIKE '$jenis%'
 				)Q3 ON Q1.NO_PENGAJUAN = Q3.NO_SPJ
+				LEFT JOIN
+				(
+					SELECT
+						NIK AS NIK_OTORITAS,
+						FOTO_WAJAH
+					FROM
+						SPJ_PEGAWAI_OTORITAS
+				)Q4 ON Q1.NIK = Q4.NIK_OTORITAS
 				$byId";
 		return $this->db->query($sql);
 	}
@@ -478,7 +509,7 @@ class M_Monitoring extends CI_Model {
 							GROUP_ID,
 							STATUS_SPJ,
 							KENDARAAN,
-							VOUCHER_ID
+							VOUCHER_BBM
 						FROM
 							SPJ_PENGAJUAN
 						WHERE
@@ -567,7 +598,7 @@ class M_Monitoring extends CI_Model {
 								status_aktif = 'AKTIF' 
 						)Q2 ON Q1.NIK = Q2.NIK
 					)Q5 ON Q1.NO_SPJ = Q5.NO_PENGAJUAN
-				)Q2 ON Q1.ID = Q2.VOUCHER_ID
+				)Q2 ON Q1.NO_VOUCHER = Q2.VOUCHER_BBM
 				ORDER BY
 					NO_VOUCHER DESC";
 		return $this->db->query($sql);
@@ -680,6 +711,459 @@ class M_Monitoring extends CI_Model {
 					FROM
 						SPJ_BIAYA_TAMBAHAN
 				)Q3 ON Q1.NO_PENGAJUAN = Q3.NO_SPJ";
+		return $this->db->query($sql);
+	}
+	public function getGenerateSPJ($bulan, $tahun, $jenisSPJ, $status, $awal, $akhir)
+	{
+		$sql = "SELECT
+					NO_GENERATE,
+					TGL_GENERATE,
+					JML_SPJ,
+					TOTAL_RP,
+					TGL_RECEIVE,
+					STATUS_RECEIVE,
+					PIC_INPUT
+				FROM
+					SPJ_GENERATE
+				WHERE
+				DATENAME(MONTH,TGL_GENERATE) LIKE '$bulan%' AND
+				YEAR(TGL_GENERATE) LIKE '$tahun%' AND
+				JENIS_SPJ LIKE '$jenisSPJ%' AND
+				TGL_GENERATE BETWEEN '$awal' AND '$akhir'
+				ORDER BY
+					NO_GENERATE DESC";
+		return $this->db->query($sql);
+	}
+	public function getMonitoringSPJHarian($bulan, $tahun, $jenis, $hari)
+	{
+		$sql = "SELECT
+					NO_SPJ,
+					STATUS_SPJ,
+					SUM(
+						TOTAL_UANG_SAKU + 
+						TOTAL_UANG_MAKAN + 
+						TOTAL_UANG_JALAN + 
+						TOTAL_UANG_BBM + 
+						TOTAL_UANG_TOL) AS RP
+				FROM
+					SPJ_PENGAJUAN
+				WHERE
+					MONTH(TGL_SPJ) = $bulan AND
+					YEAR(TGL_SPJ) = $tahun AND
+					DAY(TGL_SPJ) = $hari AND
+					JENIS_ID = $jenis AND
+					STATUS_DATA = 'SAVED'
+				GROUP BY 
+					NO_SPJ, STATUS_SPJ";
+		return $this->db->query($sql);
+	}
+	public function getSPJByGenerate($noGenerate)
+	{
+		$sql = "SELECT
+					Q1.*,
+					PIC_DRIVER,
+					NAMA_PENGAJU
+				FROM
+				(
+					SELECT
+						ID_SPJ,
+						NO_SPJ,
+						TGL_SPJ,
+						PIC_INPUT,
+						KENDARAAN,
+						NO_TNKB,
+						TOTAL_UANG_SAKU,
+						TOTAL_UANG_JALAN,
+						TOTAL_UANG_MAKAN,
+						TOTAL_UANG_BBM,
+						TOTAL_UANG_TOL
+					FROM
+						SPJ_PENGAJUAN
+					WHERE
+						NO_GENERATE = '$noGenerate'
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						NIK+' - '+NAMA AS PIC_DRIVER
+					FROM
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						JENIS_PIC = 'Sopir'
+				)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+				LEFT JOIN
+				(
+					SELECT
+						nik,
+						namapeg AS NAMA_PENGAJU
+					FROM
+						dbhrm.dbo.tbpegawai
+				)Q3 ON Q1.PIC_INPUT = Q3.nik";
+		return $this->db->query($sql);
+	}
+	public function getPendampingByNoGenerate($noGenerate)
+	{
+		$sql = "SELECT
+					NO_SPJ,
+					NIK +' - '+NAMA AS PIC_PENDAMPING
+				FROM
+					SPJ_PENGAJUAN a 
+				LEFT JOIN SPJ_PENGAJUAN_PIC b ON
+				a.NO_SPJ = b.NO_PENGAJUAN
+				WHERE
+					NO_GENERATE = '$noGenerate'";
+		return $this->db->query($sql);
+	}
+	public function getMonitoringSPJHarian2($bulan, $tahun, $jenis)
+	{
+		$sql = $this->db->query("Execute SPJ_monitoringHarian $tahun, $bulan, $jenis");
+    	return $sql;
+
+	}
+	public function getUrutanTerbesar($bulan, $tahun, $jenis)
+	{
+		$sql = "SELECT
+					MAX(NO_URUT) AS URUTAN_TERBESAR
+				FROM
+				(
+					SELECT
+						ROW_NUMBER() over (partition by HARI order by HARI asc) AS NO_URUT,
+						*
+					FROM
+					(
+						SELECT
+							DAY(TGL_SPJ) AS HARI
+						FROM
+							SPJ_PENGAJUAN
+						WHERE
+							MONTH(TGL_SPJ) = $bulan AND
+							YEAR(TGL_SPJ) = $tahun AND
+							JENIS_ID = $jenis AND
+							STATUS_DATA = 'SAVED'
+						GROUP BY 
+							NO_SPJ, TGL_SPJ
+					)Q1
+				)Q1";
+		return $this->db->query($sql);
+	}
+	public function getInOutKendaraan($bulan, $tahun)
+	{
+		$view = "";
+		$join ="";
+		for ($i=1; $i <=31 ; $i++) { 
+			$view.=" , Q".$i.".NO_SPJ_$i, Q".$i.".KEBERANGKATAN_".$i;
+			$join .=" LEFT JOIN
+					(
+						SELECT
+							NO_SPJ AS NO_SPJ_".$i.",
+							KEBERANGKATAN AS KEBERANGKATAN_".$i.",
+							KEPULANGAN AS KEPULANGAN_".$i."
+						FROM
+							SPJ_VALIDASI
+						WHERE
+							DAY(KEBERANGKATAN) = ".$i."
+					)Q".$i." ON QSPJ.NO_SPJ = Q".$i.".NO_SPJ_".$i;
+		}
+		$sql = "SELECT
+					QKendaraan.*
+					$view
+				FROM
+				(
+					SELECT DISTINCT
+						KENDARAAN,
+						JENIS_KENDARAAN,
+						NO_INVENTARIS,
+						MERK,
+						TYPE,
+						NO_TNKB
+					FROM
+						SPJ_PENGAJUAN 
+					WHERE
+						STATUS_DATA = 'SAVED'
+				)QKendaraan
+				LEFT JOIN
+				(
+					SELECT
+						NO_TNKB,
+						NO_SPJ
+					FROM
+						SPJ_PENGAJUAN
+					WHERE
+						STATUS_DATA = 'SAVED' AND
+						MONTH(TGL_SPJ) = 5 AND
+						YEAR(TGL_SPJ) = 2022
+				)QSPJ ON QKendaraan.NO_TNKB = QSPJ.NO_TNKB
+				$join";
+		return $this->db->query($sql);
+	}
+	public function getInOutKendaraan2($bulan, $tahun)
+	{
+		$sql = "SELECT DISTINCT
+					KENDARAAN,
+					JENIS_KENDARAAN,
+					NO_INVENTARIS,
+					MERK,
+					TYPE,
+					NO_TNKB
+				FROM
+					SPJ_PENGAJUAN
+				WHERE
+					STATUS_DATA = 'SAVED' AND
+					STATUS_PERJALANAN = 'IN' AND
+					MONTH(TGL_SPJ) = $bulan AND
+					YEAR(TGL_SPJ) = $tahun
+				ORDER BY
+					NO_TNKB ASC";
+		return $this->db->query($sql);
+	}
+	public function getInOutKendaraanDetail($bulan, $tahun)
+	{
+		$sql = "SELECT
+					a.NO_SPJ,
+					NO_TNKB,
+					KEBERANGKATAN,
+					KEPULANGAN,
+					DAY(KEBERANGKATAN) AS JALAN
+				FROM
+					SPJ_PENGAJUAN a
+				LEFT JOIN SPJ_VALIDASI b ON
+				a.NO_SPJ = b.NO_SPJ
+				WHERE
+					STATUS_DATA = 'SAVED' AND
+					STATUS_PERJALANAN = 'IN' AND
+					MONTH(TGL_SPJ) = $bulan AND
+					YEAR(TGL_SPJ) = $tahun
+				ORDER BY
+					NO_TNKB ASC";
+		return $this->db->query($sql);
+	}
+	public function getInOutPIC($bulan, $tahun)
+	{
+		$sql = "SELECT
+					Q1.NIK,
+					namapeg,
+					departemen,
+					Subdepartemen,
+					jabatan, 
+					SUBJEK,
+					REKANAN
+				FROM
+				(
+					SELECT DISTINCT
+						NIK
+					FROM
+						SPJ_PENGAJUAN_PIC a
+					INNER JOIN SPJ_PENGAJUAN b
+					ON a.NO_PENGAJUAN = b.NO_SPJ
+					WHERE
+						STATUS_DATA = 'SAVED' AND
+						STATUS_PERJALANAN = 'IN' AND
+						MONTH(TGL_SPJ) = $bulan AND
+						YEAR(TGL_SPJ) = $tahun
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						nik,
+						namapeg,
+						departemen,
+						CASE 
+							WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
+							ELSE Subdepartemen1+', '+Subdepartemen2
+						END AS Subdepartemen,
+						jabatan
+					FROM
+						dbhrm.dbo.tbPegawai
+					UNION
+					SELECT
+						KdSopir AS nik,
+						NamaSopir AS namapeg,
+						'',
+						'',
+						status AS jabatan
+					FROM
+						TrTs_SopirLogistik 
+					WHERE
+						StatusAktif = 'Aktif' 
+					UNION
+					SELECT
+						KdSopir AS nik,
+						NamaSopir AS namapeg,
+						'',
+						'',
+						status AS jabatan
+					FROM
+						TrTs_SopirRental 
+					WHERE
+						StatusAktif = 'Aktif'
+				)Q2 ON Q1.NIK = Q2.nik
+				LEFT JOIN
+				(
+					SELECT
+						NIK,
+						SUBJEK,
+						REKANAN
+					FROM
+						SPJ_PEGAWAI_OTORITAS
+				)Q3 ON Q1.NIK = Q3.NIK
+				ORDER BY namapeg ASC";
+		return $this->db->query($sql);
+	}
+	public function getInOutPICDetail($bulan, $tahun)
+	{
+		$sql = "SELECT DISTINCT
+					NIK,
+					NO_SPJ,
+					UANG_SAKU,
+					UANG_MAKAN,
+					DAY(TGL_SPJ) AS JALAN,
+					CASE 
+						WHEN JENIS_PIC = 'Sopir' THEN 'Driver'
+						ELSE 'Pendamping'
+					END AS SEBAGAI
+				FROM
+					SPJ_PENGAJUAN_PIC a
+				INNER JOIN SPJ_PENGAJUAN b
+				ON a.NO_PENGAJUAN = b.NO_SPJ
+				WHERE
+					STATUS_DATA = 'SAVED' AND
+					STATUS_PERJALANAN = 'IN' AND
+					MONTH(TGL_SPJ) = $bulan AND
+					YEAR(TGL_SPJ) = $tahun";
+		return $this->db->query($sql);
+	}
+	public function getMonitoringKMKendaraan($bulan, $tahun)
+	{
+		$sql = "SELECT
+					a.NO_SPJ,
+					NO_TNKB,
+					DAY(TGL_SPJ) AS JALAN,
+					KM_OUT,
+					KM_IN
+				FROM
+					SPJ_PENGAJUAN a
+				LEFT JOIN
+					SPJ_VALIDASI b
+				ON a.NO_SPJ = b.NO_SPJ
+				WHERE
+					STATUS_DATA = 'SAVED' AND
+					STATUS_PERJALANAN = 'IN' AND
+					MONTH(TGL_SPJ) = $bulan AND
+					YEAR(TGL_SPJ) = $tahun";
+		return $this->db->query($sql);
+	}
+	public function getMonitoringKendaraanKe2($bulan, $tahun, $jenis)
+	{
+		$sql = "Execute SPJ_monitoringKendaraanKe2 $bulan, $tahun, $jenis";
+		return $this->db->query($sql);
+	}
+	public function getMonitoringPICKe2($bulan, $tahun)
+	{
+		$sql = "SELECT
+					Q1.NIK,
+					namapeg,
+					departemen,
+					Subdepartemen,
+					jabatan, 
+					SUBJEK,
+					REKANAN
+				FROM
+				(
+					SELECT DISTINCT
+						NIK
+					FROM
+					(
+						SELECT
+							a.NO_SPJ
+						FROM
+							SPJ_PENGAJUAN a
+						LEFT JOIN SPJ_BIAYA_TAMBAHAN b
+						ON a.NO_SPJ = b.NO_SPJ
+						WHERE
+							MONTH(TGL_SPJ) = $bulan AND
+							YEAR(TGL_SPJ) = $tahun AND
+							STATUS_PERJALANAN = 'IN' AND
+							UANG_SAKU1>0 AND
+							UANG_SAKU2>0 AND
+							UANG_MAKAN >0
+					)Q1
+					LEFT JOIN
+					(
+						SELECT
+							NO_PENGAJUAN,
+							NIK
+						FROM
+							SPJ_PENGAJUAN_PIC
+					)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						nik,
+						namapeg,
+						departemen,
+						CASE 
+							WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
+							ELSE Subdepartemen1+', '+Subdepartemen2
+						END AS Subdepartemen,
+						jabatan
+					FROM
+						dbhrm.dbo.tbPegawai
+					UNION
+					SELECT
+						KdSopir AS nik,
+						NamaSopir AS namapeg,
+						'',
+						'',
+						status AS jabatan
+					FROM
+						TrTs_SopirLogistik 
+					WHERE
+						StatusAktif = 'Aktif' 
+					UNION
+					SELECT
+						KdSopir AS nik,
+						NamaSopir AS namapeg,
+						'',
+						'',
+						status AS jabatan
+					FROM
+						TrTs_SopirRental 
+					WHERE
+						StatusAktif = 'Aktif'
+				)Q2 ON Q1.NIK = Q2.nik
+				LEFT JOIN
+				(
+					SELECT
+						NIK,
+						SUBJEK,
+						REKANAN
+					FROM
+						SPJ_PEGAWAI_OTORITAS
+				)Q3 ON Q1.NIK = Q3.NIK
+				ORDER BY namapeg ASC";
+		return $this->db->query($sql);
+	}
+	public function getMonitoringPICKe2Detail($bulan, $tahun)
+	{
+		$sql = "SELECT
+					a.NO_SPJ,
+					NIK,
+					DAY(TGL_SPJ) AS TGL
+				FROM
+					SPJ_PENGAJUAN a
+				LEFT JOIN SPJ_PENGAJUAN_PIC b
+				ON a.NO_SPJ = b.NO_PENGAJUAN
+				LEFT JOIN SPJ_BIAYA_TAMBAHAN c
+				ON a.NO_SPJ = c.NO_SPJ
+				WHERE
+					MONTH(TGL_SPJ) = $bulan AND
+					YEAR(TGL_SPJ) = $tahun AND
+					STATUS_PERJALANAN = 'IN' AND
+					UANG_SAKU1 > 0 AND
+					UANG_SAKU2 > 0 AND
+					c.UANG_MAKAN > 0";
 		return $this->db->query($sql);
 	}
 }

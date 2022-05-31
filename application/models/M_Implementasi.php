@@ -88,7 +88,7 @@ class M_Implementasi extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-        $sql = $this->db->query("UPDATE SPJ_VALIDASI SET KENDARAAN = '$verifKendaraan', KETERANGAN_KENDARAAN = '$ketKendaraan', KEPULANGAN = '$tanggal', PIC_IN ='$user', KM_IN = '$km'");
+        $sql = $this->db->query("UPDATE SPJ_VALIDASI SET KENDARAAN = '$verifKendaraan', KETERANGAN_KENDARAAN = '$ketKendaraan', KEPULANGAN = '$tanggal', PIC_IN ='$user', KM_IN = '$km' WHERE NO_SPJ = '$noSPJ'");
         $this->db->query("UPDATE SPJ_PENGAJUAN SET STATUS_PERJALANAN = 'IN' WHERE NO_SPJ = '$noSPJ'");
 		$this->db->query("UPDATE SPJ_VALIDASI_PIC SET STATUS_DATA = 'IN' WHERE NO_SPJ = '$noSPJ'");
 		return $sql;
@@ -163,7 +163,7 @@ class M_Implementasi extends CI_Model {
 		if ($getData->num_rows()==0) {
 			$sql = "INSERT INTO SPJ_BIAYA_TAMBAHAN VALUES('$inputNoSPJ','$uangSaku1','$uangSaku2','$uangMakan','$statusUS1','$statusUS2','$statusMakan','$user','$user','$user','$tanggal','$tanggal','$tanggal')";
 		} else {
-			$sql = "UPDATE SPJ_BIAYA_TAMBAHAN SET UANG_SAKU1 = '$uangSaku1', UANG_SAKU2='$uangSaku2', UANG_MAKAN = '$uangMakan', STATUS_US1='$statusUS1', STATUS_US2='$statusUS2', STATUS_MAKAN = '$statusMakan', PIC_US1='$user', PIC_US2='$user', PIC_MAKAN='$user', TGL_US1='$tanggal', TGL_US2 = '$tanggal', TGL_MAKAN='$tanggal'";
+			$sql = "UPDATE SPJ_BIAYA_TAMBAHAN SET UANG_SAKU1 = '$uangSaku1', UANG_SAKU2='$uangSaku2', UANG_MAKAN = '$uangMakan', STATUS_US1='$statusUS1', STATUS_US2='$statusUS2', STATUS_MAKAN = '$statusMakan', PIC_US1='$user', PIC_US2='$user', PIC_MAKAN='$user', TGL_US1='$tanggal', TGL_US2 = '$tanggal', TGL_MAKAN='$tanggal' WHERE NO_SPJ = '$inputNoSPJ'";
 		}
 		return $this->db->query($sql);
 	}
@@ -283,21 +283,300 @@ class M_Implementasi extends CI_Model {
 		}
 
 		$this->db->query($tambahan);
-		if ($jenis == 'ALL' || $jenis=='KEPUTUSAN') {
-			$this->db->query("UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_MAKAN = '$inputUangMakanDiajukan', TOTAL_UANG_JALAN='$inputUangJalanDiajukan', TOTAL_UANG_BBM = '$inputBBMDiajukan' WHERE NO_SPJ = '$inputNoSPJ'");
-			$getKasbonSPJ= $this->db->query("SELECT CREDIT FROM SPJ_KASBON WHERE NO_SPJ = '$inputNoSPJ' AND JENIS_KASBON = 'SPJ'");
-			if ($getKasbonSPJ->num_rows()>0) {
-				foreach ($getKasbonSPJ->result() as $key) {
-					$creditSPJ = $key->CREDIT;
-				}
-				$totalCreditSPJ = $creditSPJ + $inputUangMakanDiajukan + $inputUangJalanDiajukan + $inputBBMDiajukan;
-				$this->db->query("UPDATE SPJ_KASBON SET CREDIT = '$totalCreditSPJ' WHERE NO_SPJ = '$inputNoSPJ' AND JENIS_KASBON = 'SPJ'");
-			}
+		// if ($jenis == 'ALL' || $jenis=='KEPUTUSAN') {
+		// 	$this->db->query("UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_MAKAN = '$inputUangMakanDiajukan', TOTAL_UANG_JALAN='$inputUangJalanDiajukan', TOTAL_UANG_BBM = '$inputBBMDiajukan' WHERE NO_SPJ = '$inputNoSPJ'");
+		// 	$getKasbonSPJ= $this->db->query("SELECT CREDIT FROM SPJ_KASBON WHERE NO_SPJ = '$inputNoSPJ' AND JENIS_KASBON = 'SPJ'");
+		// 	if ($getKasbonSPJ->num_rows()>0) {
+		// 		foreach ($getKasbonSPJ->result() as $key) {
+		// 			$creditSPJ = $key->CREDIT;
+		// 		}
+		// 		$totalCreditSPJ = $creditSPJ + $inputUangMakanDiajukan + $inputUangJalanDiajukan + $inputBBMDiajukan;
+		// 		$this->db->query("UPDATE SPJ_KASBON SET CREDIT = '$totalCreditSPJ' WHERE NO_SPJ = '$inputNoSPJ' AND JENIS_KASBON = 'SPJ'");
+		// 	}
 
-		}
+		// }
 		
 		return $sql;
 	}
+	public function saveKeputusanAdjustment($value, $inputNoSPJ)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
 
+        $sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$value[0]', KEPUTUSAN = '$value[1]', KETERANGAN = '$value[2]', TGL_KEPUTUSAN = '$tanggal', PIC_KEPUTUSAN = '$user', STATUS = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG MAKAN'");
+        $sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$value[3]', KEPUTUSAN = '$value[4]', KETERANGAN = '$value[5]', TGL_KEPUTUSAN = '$tanggal', PIC_KEPUTUSAN = '$user', STATUS = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG JALAN'");
+        $sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$value[6]', KEPUTUSAN = '$value[7]', KETERANGAN = '$value[8]', TGL_KEPUTUSAN = '$tanggal', PIC_KEPUTUSAN = '$user', STATUS = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'BBM'");
+        return $sql;
+	}
+	public function saveKeputusanAdjustment2($value, $inputNoSPJ)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+
+        $this->db->query("INSERT INTO SPJ_ADJUSTMENT VALUES('$inputNoSPJ','$tanggal','System','US1',$value[0],'Otomatis','$value[1]','$value[2]','$tanggal', '$user','CLOSE')");
+
+        $this->db->query("INSERT INTO SPJ_ADJUSTMENT VALUES('$inputNoSPJ','$tanggal','System','US2',$value[3],'Otomatis','$value[4]','$value[5]','$tanggal', '$user','CLOSE')");
+
+        $this->db->query("INSERT INTO SPJ_ADJUSTMENT VALUES('$inputNoSPJ','$tanggal','System','UM',$value[6],'Otomatis','$value[7]','$value[8]','$tanggal', '$user','CLOSE')");
+
+        $sql = $this->db->query("UPDATE SPJ_BIAYA_TAMBAHAN SET STATUS_US1 = 'CLOSE', STATUS_US2 = 'CLOSE', STATUS_MAKAN = 'CLOSE', PIC_US1 = '$user', PIC_US2 = '$user', PIC_MAKAN = '$user', TGL_US1='$tanggal',TGL_US2='$tanggal', TGL_MAKAN = '$tanggal' WHERE NO_SPJ = '$inputNoSPJ'");
+        return $sql;
+	}
+	public function updateKasbonOtomatis($inputSPJ, $uangMakan, $uangJalan, $uangBBM)
+	{
+		$getBiaya = $this->db->query("SELECT
+											TOTAL_UANG_SAKU,
+											UANG_SAKU_TAMBAHAN,
+											UANG_MAKAN_TAMBAHAN
+										FROM
+										(
+											SELECT
+												TOTAL_UANG_SAKU,
+												VOUCHER_ID,
+												NO_SPJ
+											FROM
+												SPJ_PENGAJUAN
+											WHERE
+												NO_SPJ = '$inputNoSPJ'
+										)Q1
+										LEFT JOIN
+										(
+											SELECT
+												NO_SPJ,
+												UANG_SAKU1 + UANG_SAKU2 AS UANG_SAKU_TAMBAHAN,
+												UANG_MAKAN AS UANG_MAKAN_TAMBAHAN
+											FROM
+												SPJ_BIAYA_TAMBAHAN
+										)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ");
+		foreach ($getBiaya->result() as $key) {
+			$usSPJ = $key->TOTAL_UANG_SAKU;
+			$uangSakuTambahan = $key->UANG_SAKU_TAMBAHAN;
+			$uangMakanTambahan = $key->UANG_MAKAN_TAMBAHAN;
+		}
+
+		$totalUangSaku = $usSPJ + $uangSakuTambahan;
+		$totalUangMakan = $uangMakan + $uangMakanTambahan;
+		$totalCreditSPJ = $totalUangSaku;
+
+		$this->db->query("UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_MAKAN = '$value[0]', TOTAL_UANG_JALAN='$value[3]', TOTAL_UANG_BBM = '$value[6]' WHERE NO_SPJ = '$inputNoSPJ'");
+
+	}
+	public function getBBMPengajuan($noSPJ)
+	{
+		$sql = "SELECT TOP 1 TOTAL_UANG_BBM FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ' AND STATUS_DATA = 'SAVED'";
+		return $this->db->query($sql);
+	}
+
+	public function realisasiBiayaSPJ($noSPJ)
+	{
+		$sql = "SELECT
+					Q1.*,
+					UANG_SAKU1*JML_PIC AS US1_TAMBAHAN,
+					UANG_SAKU2*JML_PIC AS US2_TAMBAHAN,
+					UANG_MAKAN*JML_PIC AS UM_TAMBAHAN,
+					UM_DIAJUKAN,
+					UM_TGL,
+					UM_PIC,
+					UM_STATUS,
+					UJ_DIAJUKAN,
+					UJ_TGL,
+					UJ_PIC,
+					UJ_STATUS,
+					BBM_DIAJUKAN,
+					BBM_TGL,
+					BBM_PIC,
+					BBM_STATUS,
+					JML_PIC,
+					TOTAL_UANG_SAKU + (UANG_SAKU1*JML_PIC) + (UANG_SAKU2*JML_PIC) AS REALISASI_UANG_SAKU,
+					CASE 
+						WHEN ADJUSTMENT_MANAJEMEN = 'Y' THEN (UANG_MAKAN*JML_PIC) + UM_DIAJUKAN
+						ELSE TOTAL_UANG_MAKAN + (UANG_MAKAN*JML_PIC)
+					END AS REALISASI_UANG_MAKAN,
+					CASE 
+						WHEN ADJUSTMENT_MANAJEMEN = 'Y' THEN UJ_DIAJUKAN
+						ELSE TOTAL_UANG_JALAN
+					END AS REALISASI_UANG_JALAN
+				FROM
+				(
+					SELECT
+						NO_SPJ,
+						TOTAL_UANG_SAKU,
+						TOTAL_UANG_MAKAN,
+						TOTAL_UANG_JALAN,
+						TOTAL_UANG_BBM,
+						TOTAL_UANG_TOL,
+						MEDIA_UANG_SAKU,
+						MEDIA_UANG_MAKAN,
+						MEDIA_UANG_JALAN,
+						MEDIA_UANG_BBM,
+						MEDIA_UANG_TOL,
+						ADJUSTMENT_MANAJEMEN,
+						VOUCHER_BBM
+					FROM
+						SPJ_PENGAJUAN
+					WHERE
+						NO_SPJ = '$noSPJ'
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						NO_SPJ,
+						UANG_SAKU1,
+						UANG_SAKU2,
+						UANG_MAKAN
+					FROM
+						SPJ_BIAYA_TAMBAHAN
+				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
+				LEFT JOIN
+				(
+					SELECT
+						'Y' AS ADJUSTMENT,
+						NO_SPJ,
+						DIAJUKAN AS UM_DIAJUKAN,
+						TGL_KEPUTUSAN AS UM_TGL,
+						PIC_KEPUTUSAN AS UM_PIC,
+						STATUS AS UM_STATUS
+					FROM
+						SPJ_ADJUSTMENT
+					WHERE
+						OBJEK = 'UANG MAKAN'
+				)Q3 ON Q1.NO_SPJ = Q3.NO_SPJ AND Q1.ADJUSTMENT_MANAJEMEN = Q3.ADJUSTMENT
+				LEFT JOIN
+				(
+					SELECT
+						'Y' AS ADJUSTMENT,
+						NO_SPJ,
+						DIAJUKAN AS UJ_DIAJUKAN,
+						TGL_KEPUTUSAN AS UJ_TGL,
+						PIC_KEPUTUSAN AS UJ_PIC,
+						STATUS AS UJ_STATUS
+					FROM
+						SPJ_ADJUSTMENT
+					WHERE
+						OBJEK = 'UANG JALAN'
+				)Q4 ON Q1.NO_SPJ = Q4.NO_SPJ AND Q1.ADJUSTMENT_MANAJEMEN = Q4.ADJUSTMENT
+				LEFT JOIN
+				(
+					SELECT
+						'Y' AS ADJUSTMENT,
+						NO_SPJ,
+						DIAJUKAN AS BBM_DIAJUKAN,
+						TGL_KEPUTUSAN AS BBM_TGL,
+						PIC_KEPUTUSAN AS BBM_PIC,
+						STATUS AS BBM_STATUS
+					FROM
+						SPJ_ADJUSTMENT
+					WHERE
+						OBJEK = 'BBM'
+				)Q5 ON Q1.NO_SPJ = Q5.NO_SPJ AND Q1.ADJUSTMENT_MANAJEMEN = Q5.ADJUSTMENT
+				LEFT JOIN
+				(
+					SELECT
+						COUNT(NO_PENGAJUAN) AS JML_PIC,
+						NO_PENGAJUAN
+					FROM
+						SPJ_PENGAJUAN_PIC
+					GROUP BY NO_PENGAJUAN
+				)Q6 ON Q1.NO_SPJ = Q6.NO_PENGAJUAN";
+		return $this->db->query($sql);
+	}
+	public function saveCloseSPJ($noSPJ, $saku, $makan, $jalan, $bbm, $tol)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$sql = "UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = 'CLOSE',PIC_CLOSE= '$user', TGL_CLOSE = '$tanggal', TOTAL_UANG_SAKU=$saku, TOTAL_UANG_MAKAN=$makan, TOTAL_UANG_JALAN = $jalan, TOTAL_UANG_BBM = $bbm, TOTAL_UANG_TOL=$tol  WHERE NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function getSPJForGenerate($jenis)
+	{
+		$sql = "SELECT
+					TGL_INPUT,
+					NO_SPJ,
+					TGL_SPJ,
+					QR_CODE,
+					SUM(TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+TOTAL_UANG_BBM + TOTAL_UANG_TOL) AS TOTAL_RP
+				FROM
+					SPJ_PENGAJUAN
+				WHERE
+					STATUS_SPJ = 'CLOSE' AND
+					NO_GENERATE IS NULL AND
+					JENIS_ID = $jenis
+				GROUP BY TGL_INPUT, NO_SPJ, TGL_SPJ, QR_CODE
+				ORDER BY TGL_INPUT ASC";
+		return $this->db->query($sql);
+	}
+	public function getTotalSPJ()
+	{
+		$sql = "SELECT
+					JUMLAH_SPJ,
+					TOTAL_RP
+				FROM
+				(
+					SELECT
+						COUNT(ID_SPJ) AS JUMLAH_SPJ,
+						'-' AS LINK
+					FROM
+						SPJ_PENGAJUAN
+					WHERE
+						STATUS_DATA = 'SAVED' AND
+						STATUS_SPJ = 'CLOSE' AND
+						NO_GENERATE IS NULL
+				)Q1
+				FULL JOIN
+				(
+					SELECT
+						SUM(TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+TOTAL_UANG_BBM + TOTAL_UANG_TOL) AS TOTAL_RP,
+						'-' AS LINK
+					FROM
+						SPJ_PENGAJUAN
+					WHERE
+						STATUS_DATA = 'SAVED' AND
+						STATUS_SPJ = 'CLOSE' AND
+						NO_GENERATE IS NULL
+				)Q2 ON Q1.LINK = Q2.LINK";
+		return $this->db->query($sql);
+	}
+	public function getNoGenerate($jenis)
+	{
+		$kodeJenis = $jenis == '1'?'DLV':'NDV';
+		$tahun = date('Y');
+        $bulan = date('m');
+		$gabung = "GNR/".$kodeJenis."/".$tahun."/".$bulan."/";
+		$cekNoGenerate=$this->db->query("SELECT MAX
+										( RIGHT ( NO_GENERATE, 4 ) ) AS SET_URUTAN
+									FROM
+										SPJ_GENERATE
+									WHERE
+										NO_GENERATE LIKE '$gabung%' ");
+		foreach ($cekNoGenerate->result() as $data) {
+            if ($data->SET_URUTAN =="") {
+                $noGenerate = $gabung."0001";
+            }else{
+                $zero='';
+                $length= 4;
+                $index=$data->SET_URUTAN;
+
+                for ($i=0; $i <$length-strlen($index+1) ; $i++) { 
+                    $zero = $zero.'0';
+                }
+                $noGenerate = $gabung.$zero.($index+1);
+                
+            }
+            
+        }
+        return $noGenerate;
+	}
+	public function saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $tanggal2 = date("Y-m-d");
+        $user = $this->session->userdata("NIK");
+		$sql = "INSERT INTO SPJ_GENERATE VALUES('$inputNoGenerate','$tanggal2',$inputJumlahSPJ, $inputTotalRP,null,null, '$user',$filJenis,'$tanggal')";
+		return $this->db->query($sql);
+	}
 }
 ?>

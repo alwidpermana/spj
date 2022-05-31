@@ -299,7 +299,7 @@ foreach ($data as $key): ?>
               <label>Verifikasi Kendaraan</label>
               <div class="row">
                 <div class="col-md-4">
-                  <div class="icheck-danger icheck-kps d-inline">
+                  <div class="icheck-orange icheck-kps d-inline">
                     <input 
                       type="radio" 
                       id="cekKendaraan1" 
@@ -312,7 +312,7 @@ foreach ($data as $key): ?>
                   </div> 
                 </div>
                 <div class="col-md-4">
-                  <div class="icheck-danger icheck-kps d-inline">
+                  <div class="icheck-orange icheck-kps d-inline">
                     <input 
                       type="radio" 
                       id="cekKendaraan2" 
@@ -434,6 +434,7 @@ foreach ($data as $key): ?>
                   <tr>
                     <th rowspan="2"></th>
                     <th rowspan="2">Subjek</th>
+                    <td rowspan="2"></td>
                     <th rowspan="2">NIK</th>
                     <th rowspan="2">Nama</th>
                     <th rowspan="2">Departemen</th>
@@ -453,6 +454,13 @@ foreach ($data as $key): ?>
                     <tr>
                       <td><?=$pc2->JENIS_PIC?></td>
                       <td><?=$pc2->OBJEK?></td>
+                      <td>
+                        <?php if ($pc2->FOTO_WAJAH != null || $pc2->FOTO_WAJAH !=''): ?>
+                          <a href="javascript:;" class="getFotoWajah" foto="<?=$pc2->FOTO_WAJAH?>">
+                            <img src="<?=base_url()?>assets/image/foto-wajah/<?=$pc2->FOTO_WAJAH?>" class="img-thumbnail fotoWajah">
+                          </a>
+                        <?php endif ?>
+                      </td>
                       <td><?=$pc2->NIK?></td>
                       <td><?=$pc2->NAMA?></td>
                       <td><?=$pc2->DEPARTEMEN?></td>
@@ -461,7 +469,7 @@ foreach ($data as $key): ?>
                       <td>
                         <?php if ($key->STATUS_PERJALANAN == null): ?>
                           <div class="form-group clearfix">
-                            <div class="icheck-danger icheck-kps d-inline">
+                            <div class="icheck-orange icheck-kps d-inline">
                               <input 
                                 type="radio" 
                                 id="OK<?=$pc2->NIK?>" 
@@ -477,7 +485,7 @@ foreach ($data as $key): ?>
                             </div>
                             <br>
                             <br>
-                            <div class="icheck-danger icheck-kps d-inline">
+                            <div class="icheck-orange icheck-kps d-inline">
                               <input 
                                 type="radio" 
                                 id="NG<?=$pc2->NIK?>" 
@@ -505,7 +513,7 @@ foreach ($data as $key): ?>
                           <?php if ($vPIC->PIC == $pc2->NIK): ?>
                             <?php if ($key->STATUS_PERJALANAN == 'OUT' && $vPIC->STATUS_DATA == 'OUT'): ?>
                               <div class="form-group clearfix">
-                                <div class="icheck-danger icheck-kps d-inline">
+                                <div class="icheck-orange icheck-kps d-inline">
                                   <input 
                                     type="radio" 
                                     id="OK<?=$pc2->NIK?>" 
@@ -521,7 +529,7 @@ foreach ($data as $key): ?>
                                 </div>
                                 <br>
                                 <br>
-                                <div class="icheck-danger icheck-kps d-inline">
+                                <div class="icheck-orange icheck-kps d-inline">
                                   <input 
                                     type="radio" 
                                     id="NG<?=$pc2->NIK?>" 
@@ -757,17 +765,35 @@ foreach ($data as $key): ?>
 <div class="row">
   <div class="col-md-8 offset-md-2">
     <?php if ($key->STATUS_PERJALANAN == null): ?>
-      <button type="button" class="btn btn-danger btn-kps btn-block saveCheckOut ladda-button" data-style="zoom-in" id="btnCheckOut">
+      <button type="button" class="btn bg-orange btn-kps btn-block saveCheckOut ladda-button" data-style="zoom-in" id="btnCheckOut">
         Check Out
       </button>
     <?php elseif($key->STATUS_PERJALANAN == 'OUT'): ?>
-      <button type="button" class="btn btn-danger btn-kps btn-block saveCheckIn ladda-button" data-style="zoom-in" id="btnCheckIn">
+      <button type="button" class="btn bg-orange btn-kps btn-block saveCheckIn ladda-button" data-style="zoom-in" id="btnCheckIn">
         Check In
       </button>
     <?php endif ?>
   </div>
 </div>
 <br>
+<div class="modal fade" id="modal-foto" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="d-flex justify-content-end">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <center><div id="getFoto"></div></center>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <?php endforeach ?>
 <script type="text/javascript">
   $(document).ready(function(){
@@ -889,6 +915,15 @@ foreach ($data as $key): ?>
           
       }, 1000)
     });
+
+    $('.getFotoWajah').on('click', function(){
+      var foto = $(this).attr("foto");
+      var ngambilFoto = url+'/assets/image/foto-wajah/'+foto;
+      $('#getFoto').html('<img src="'+ngambilFoto+'" class="rounded mx-auto d-block" width="75%">');
+      $('#modal-foto').modal("show");
+    });
+    
+
   });
   function saveValidasiPIC(isi, nik, noSPJ, field) {
     $.ajax({

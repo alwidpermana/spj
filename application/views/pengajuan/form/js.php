@@ -3,6 +3,7 @@
     $('.select2').select2({
         'width': '100%',
     });
+    kondisiBBM();
     $('.preloader').fadeOut('slow');
     $('.preloader-no-bg').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
@@ -59,9 +60,16 @@
     $('#beforeNext').removeClass("d-none");
     $('#inputJenisSPJ').on('change', function(){
       var jenis = $(this).val();
+      console.log(jenis)
       if (jenis !='') {
         getNoSPJ(jenis);
         disVoucher()
+        if (jenis == '1') {
+          $('[name="inputAbnormal"]').removeAttr("disabled","disabled");
+        }else{
+          $('[name="inputAbnormal"]').attr("disabled","disabled");
+          document.getElementById("inputAbnormal").checked = false;
+        }
       }else{
         $('#inputNoSPJ').val('');
         
@@ -81,6 +89,7 @@
       setTimeout(function () {
         var inputJenisSPJ = $('#inputJenisSPJ').val();
         var jenisSPJ = '';
+        var tglSekarang = '<?=date("Y-m-d")?>';
         var inputTglSPJ = $('#inputTglSPJ').val();
         if (inputJenisSPJ == '1') {
           jenisSPJ = 'Delivery';
@@ -93,38 +102,43 @@
         }else if(inputTglSPJ == ''){
           Swal.fire("Pilih Tanggal SPJ nya terlebih Dahulu!","","warning")
         }else{
-          $.ajax({
-            type:'post',
-            dataType: 'json',
-            data:{inputJenisSPJ, inputNoSPJ, inputTglSPJ},
-            url: 'saveTemporaryPengajuan',
-            cache: false,
-            async: true,
-            beforeSend: function(data){
-              $('.preloader-no-bg').show();
-            },
-            success: function(data){
-              berhasil();
-              getQrCode();
-              disVoucher();
-              // getPIC();
-              $('#isiPengajuan').removeClass("d-none");
-              $('#afterNext').removeClass("d-none");
-              $('#beforeNext').addClass("d-none");
-              $('#getNext').addClass("d-none");
-              $('input[id="inputJenisSPJ"]').val(jenisSPJ);
-              // $('#btnSaveSPJ').removeClass("d-none");
-              $('#inputTglSPJ').attr("readonly","readonly")
-              $('#inputTglBerangkat').val(inputTglSPJ);
+          if (tglSekarang>inputTglSPJ) {
+            Swal.fire("Tanggal SPJ Hanya Diperbolehkan Diisi Minimal Tanggal Hari Ini!","","warning")
+          } else {
+            $.ajax({
+              type:'post',
+              dataType: 'json',
+              data:{inputJenisSPJ, inputNoSPJ, inputTglSPJ},
+              url: 'saveTemporaryPengajuan',
+              cache: false,
+              async: true,
+              beforeSend: function(data){
+                $('.preloader-no-bg').show();
+              },
+              success: function(data){
+                berhasil();
+                getQrCode();
+                disVoucher();
+                // getPIC();
+                $('#isiPengajuan').removeClass("d-none");
+                $('#afterNext').removeClass("d-none");
+                $('#beforeNext').addClass("d-none");
+                $('#getNext').addClass("d-none");
+                $('input[id="inputJenisSPJ"]').val(jenisSPJ);
+                // $('#btnSaveSPJ').removeClass("d-none");
+                $('#inputTglSPJ').attr("readonly","readonly")
+                $('#inputTglBerangkat').val(inputTglSPJ);
 
-            },
-            complete: function(data){
-              $('.preloader-no-bg').fadeOut('slow');
-            },
-            error: function(data){
-              gagal();
-            }
-          });
+              },
+              complete: function(data){
+                $('.preloader-no-bg').fadeOut('slow');
+              },
+              error: function(data){
+                gagal();
+              }
+            });
+          }
+          
         }
         
         btnNext.ladda('stop');
@@ -416,7 +430,8 @@
                 })
               }else{
                 savePICPengajuan();
-                // console.log()
+                // console.log(parseInt(data.JML_PENDAMPING))
+                // console.log(parseInt(data.SET_PENDAMPING))
               }
 
               // console.log(data)
@@ -510,45 +525,52 @@
       getCustomerSerlok();
     });
 
-    $("#inputBBMVoucher").select2({
-      ajax: { 
-        url: 'getVoucherBBM',
-        type: "post",
-        dataType: 'json',
-        delay: 250,
-        data: function (params) {
-            return {
-              cari: params.term // search term
-            };
-        },
-        processResults: function (response) {
-            return {
-               results: response
-            };
-            console.log(response)
+    // $("#inputBBMVoucher").select2({
+    //   ajax: { 
+    //     url: 'getVoucherBBM',
+    //     type: "post",
+    //     dataType: 'json',
+    //     delay: 250,
+    //     data: function (params) {
+    //         return {
+    //           cari: params.term // search term
+    //         };
+    //     },
+    //     processResults: function (response) {
+    //         return {
+    //            results: response
+    //         };
+    //         console.log(response)
 
-        },
-        cache: true
-      }
-    });
-    $('#inputBBMVoucher').on('change', function(){
-      var id = $(this).val();
-      $.ajax({
-        type: 'get',
-        data:{id},
-        dataType: 'json',
-        url: 'getVoucherBBMPerId',
-        cache: false,
-        async: true,
-        success: function(data){
-          $('#inputIdVoucher').val(id);
-          $('#inputBBMOtomatis').val(data.RP);
-        },
-        error: function(data){
+    //     },
+    //     cache: true
+    //   }
+    // });
+    // $('#inputBBMVoucher').on('change', function(){
+    //   var id = $(this).val();
+    //   $.ajax({
+    //     type: 'get',
+    //     data:{id},
+    //     dataType: 'json',
+    //     url: 'getVoucherBBMPerId',
+    //     cache: false,
+    //     async: true,
+    //     success: function(data){
+    //       $('#inputIdVoucher').val(id);
+    //       $('#inputBBMOtomatis').val(data.RP);
+    //     },
+    //     error: function(data){
 
-        }
-      });
+    //     }
+    //   });
+    // })
+    $('#btnNextPIC').on('click', function(){
+      stepper.next()
+      getNoVoucher()
     })
+    $('#inputMediaBBM').on('change', function(){
+      kondisiBBM();
+    });
 
   })
   function getNoSPJ(jenis) {
@@ -842,10 +864,13 @@
     if (inputSortir.checked == true) {
       if (setDepartemenPIC.toLowerCase() == 'quality') {
         $('#inputUangSaku').val("40000");
+        $('#showUangSaku').val(formatRupiah(Number('40000').toFixed(0), 'Rp. '));
       }else if(setDepartemenPIC.toLowerCase() == 'produksi'){
         $('#inputUangSaku').val("30000");
+        $('#showUangSaku').val(formatRupiah(Number('30000').toFixed(0), 'Rp. '));
       }else{
         $('#inputUangSaku').val("0");  
+        $('#showUangSaku').val(formatRupiah(Number('0').toFixed(0), 'Rp. '));
       }
       
       
@@ -872,13 +897,16 @@
           success: function(data){
             if (data.BIAYA == null) {
               $('#inputUangSaku').val("0");
+              $('#showUangSaku').val(formatRupiah(Number('0').toFixed(0), 'Rp. '));
             }else{
               $('#inputUangSaku').val(data.BIAYA);  
+              $('#showUangSaku').val(formatRupiah(Number(data.BIAYA).toFixed(0), 'Rp. '));
             }
             
           },
           error: function(data){
             $('#inputUangSaku').val("0");
+            $('#showUangSaku').val(formatRupiah(Number('0').toFixed(0), 'Rp. '));
           }
         })
     }
@@ -898,9 +926,11 @@
       async: true,
       success: function(data){
         $('#inputUangMakan').val(data.BIAYA);
+        $('#showUangMakan').val(formatRupiah(Number(data.BIAYA).toFixed(0), 'Rp. '));
       },
       error: function(data){
         $('#inputUangMakan').val("0");
+        $('#showUangMakan').val(formatRupiah(Number("0").toFixed(0), 'Rp. '));
       }
     });
   }
@@ -1054,9 +1084,8 @@
     var inputTotalUangSaku = $('#inputTotalUangSaku').val();
     var inputTotalUangMakan = $('#inputTotalUangMakan').val();
     var inputTotalUangJalan = $('#inputTotalUangJalan').val();
-    var cekVoucher = document.getElementById('cekVoucher');
-    var inputBBM = cekVoucher.checked == true ? $('#inputBBMManual').val(): $('#inputBBMOtomatis').val();
-    var inputIdVoucher = cekVoucher.checked == true ? '0': $('#inputIdVoucher').val();
+    var inputNoVoucher = $('#inputNoVoucher').val();
+    var inputBBM = $('#inputBBMManual').val()
     var inputTOL = $('#inputTOL').val();
     var inputMediaUangSaku = $('#inputMediaUangSaku').val();
     var inputMediaUangMakan = $('#inputMediaUangMakan').val();
@@ -1109,7 +1138,7 @@
             inputJamBerangkat,
             inputTglPulang,
             inputJamPulang,
-            inputIdVoucher,
+            inputNoVoucher,
             inputJenisSPJ
           },
         dataType: 'json',
@@ -1319,7 +1348,33 @@
     })
   }
 
-
+  function kondisiBBM() {
+    var inputMediaBBM = $('#inputMediaBBM').val();
+    if (inputMediaBBM == 'Voucher') {
+      $('#voucherBBM').removeClass("d-none")
+      $('#manualBBM').addClass("d-none");
+      getNoVoucher()
+    }else{
+      $('#voucherBBM').addClass("d-none");
+      $('#manualBBM').removeClass("d-none");
+      $('#inputNoVoucher').val("");
+    }
+  }
+  function getNoVoucher() {
+    $.ajax({
+      url:url+'/Data_Master/getNoVoucher',
+      type:'get',
+      dataType: 'json',
+      async: true,
+      cache: false,
+      success: function(data){
+        $('#inputNoVoucher').val(data.voucher);
+      },
+      error: function(data){
+        
+      }
+    })
+  }
 
 
 
@@ -1336,24 +1391,24 @@
   }
 
   function disVoucher() {
-    var inputJenisSPJ = $('#inputJenisSPJ').val();
-    if (inputJenisSPJ == 2) {
-      $('#cekVoucher').removeAttr("disabled","disabled")
-    }else{
-      $('#cekVoucher').attr("disabled","disabled");
-    }
+    // var inputJenisSPJ = $('#inputJenisSPJ').val();
+    // if (inputJenisSPJ == 2) {
+    //   $('#cekVoucher').removeAttr("disabled","disabled")
+    // }else{
+    //   $('#cekVoucher').attr("disabled","disabled");
+    // }
   }
   function cekVoucher() {
-    var inputSortir = document.getElementById('cekVoucher');
-      if (inputSortir.checked == true) {
-        $('#voucherBBM').addClass("d-none");
-        $('#manualBBM').removeClass("d-none");
-        $('#inputMediaBBM').val("Reimburse");
-      }else{
-        $('#voucherBBM').removeClass("d-none");
-        $('#manualBBM').addClass("d-none");
-        $('#inputMediaBBM').val("Voucher");
-      }
+    // var inputSortir = document.getElementById('cekVoucher');
+    //   if (inputSortir.checked == true) {
+    //     $('#voucherBBM').addClass("d-none");
+    //     $('#manualBBM').removeClass("d-none");
+    //     $('#inputMediaBBM').val("Reimburse");
+    //   }else{
+    //     $('#voucherBBM').removeClass("d-none");
+    //     $('#manualBBM').addClass("d-none");
+    //     $('#inputMediaBBM').val("Voucher");
+    //   }
   }
   function formatRupiah(angka, prefix){
     var number_string = angka.replace(/[^,\d]/g, '').toString(),

@@ -33,7 +33,7 @@
       <div class="content">
         <div class="container-fluid">
           <div class="d-flex justify-content-end">
-            <button type="button" class="btn btn-danger btn-kps" id="btnUpload" data-toggle="modal" data-target="#modal-foto">
+            <button type="button" class="btn bg-orange btn-kps" id="btnUpload" data-toggle="modal" data-target="#modal-foto">
               <i class="fas fa-file-upload"></i> Upload Gambar Kendaraan
             </button>
           </div>
@@ -58,7 +58,7 @@
                 <div class="col-md-6">
                   <div class="row">
                     <div class="col-md-12">
-                      <select class="select2 form-control cekKosong" id="inputJenis">
+                      <select class="select2 form-control cekKosong select2-orange" data-dropdown-css-class="select2-orange" id="inputJenis">
                         <option value="Depan">Depan</option>
                         <option value="Belakang">Belakang</option>
                         <option value="Kiri">Kiri</option>
@@ -92,7 +92,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger btn-kps saveFoto" id="saveFoto">Tambah Foto</button>
+              <button type="submit" class="btn bg-orange btn-kps saveFoto" id="saveFoto">Tambah Foto</button>
             </div>
           </form>
         </div>

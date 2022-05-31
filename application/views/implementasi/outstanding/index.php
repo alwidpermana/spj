@@ -42,7 +42,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Tahun</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filTahun">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filTahun">
                           <?php foreach ($tahun as $value): ?>
                             <option value="<?=$value?>"><?=$value?></option>
                           <?php endforeach ?>
@@ -52,7 +52,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Bulan</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filBulan">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filBulan">
                           <?php foreach ($bulan as $angka => $bulan): ?>
                             <option value="<?=$bulan?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
                           <?php endforeach ?>
@@ -62,7 +62,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Periode</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filPeriode">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filPeriode">
                           
                         </select>
                       </div>
@@ -70,7 +70,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Jenis SPJ</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filJenis">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                             <option value="">ALL</option>
                           <?php foreach ($jenis as $key): ?>
                             <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
@@ -81,7 +81,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Status</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filStatus">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
                           <option value="">ALL</option>
                           <option value="OPEN">OPEN</option>
                           <option value="CLOSE">CLOSE</option>
@@ -91,7 +91,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Group Tujuan</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filGroup">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filGroup">
                           <option value="">ALL</option>
                           <?php foreach ($group as $key): ?>
                             <option value="<?=$key->ID_GROUP?>"><?=$key->NAMA_GROUP?></option>
@@ -166,7 +166,7 @@
                       </td>
                       <td>
                         <span id="viewUangMakanDiajukan"></span>
-                        <center><input type="number" id="inputUangMakanDiajukan" class="form-control form-control-sm hitungAwal" style="width: 100px;" jenis="uangMakan"></center>
+                        <center><input type="number" id="inputUangMakanDiajukan" class="form-control form-control-sm hitungAwal kondisiUangMakan" style="width: 100px;" jenis="uangMakan"></center>
                         <input type="hidden" id="awalUangMakan">
                         <div id="validasiUangMakan" class="validasiBiaya">
                           <br>
@@ -176,26 +176,26 @@
                       <td><span id="inputUangMakanAlasan"></span></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UMOK" 
                               name="uangMakan" 
                               value="OK" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiUangMakan2">
                             <label for="UMOK">
                               OK
                             </label>
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UMNG" 
                               name="uangMakan" 
                               value="NG" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiUangMakan2">
                             <label for="UMNG">
                               NG
                             </label>
@@ -203,14 +203,14 @@
                         </div>
                         <input type="hidden" id="inputKeputusanUangMakan">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUangMakanKeterangan" rows="2"></textarea></td>
+                      <td><textarea class="form-control otoritas kondisiUangMakan" id="inputUangMakanKeterangan" rows="2" ></textarea></td>
                     </tr>
                     <tr>
                       <td class="text-left">Uang Jalan</td>
                       <td><span id="inputUangJalanNormal"></span></td>
                       <td>
                         <span id="viewUangJalanDiajukan"></span>
-                        <center><input type="number" id="inputUangJalanDiajukan" class="form-control form-control-sm hitungAwal" jenis="uangJalan" style="width: 100px;"></center>
+                        <center><input type="number" id="inputUangJalanDiajukan" class="form-control form-control-sm hitungAwal kondisiUangJalan" jenis="uangJalan" style="width: 100px;"></center>
                         <input type="hidden" id="awalUangJalan">
                         <div id="validasiUangJalan" class="validasiBiaya">
                           <br>
@@ -220,26 +220,26 @@
                       <td><span id="inputUangJalanAlasan"></span></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UJOK" 
                               name="uangJalan" 
                               value="OK" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiUangJalan2">
                             <label for="UJOK">
                               OK
                             </label>
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UJNG" 
                               name="uangJalan" 
                               value="NG" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiUangJalan2">
                             <label for="UJNG">
                               NG
                             </label>
@@ -247,14 +247,14 @@
                         </div>
                         <input type="hidden" id="inputKeputusanUangJalan">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUangJalanKeterangan" rows="2"></textarea></td>
+                      <td><textarea class="form-control otoritas kondisiUangJalan" id="inputUangJalanKeterangan" rows="2"></textarea></td>
                     </tr>
                     <tr>
                       <td class="text-left">BBM</td>
                       <td><span id="inputBBMNormal"></span></td>
                       <td>
                         <span id="viewBBMDiajukan"></span>
-                        <center><input type="number" id="inputBBMDiajukan" class="form-control form-control-sm hitungAwal" jenis="bbm" style="width: 100px;"></center>
+                        <center><input type="number" id="inputBBMDiajukan" class="form-control form-control-sm hitungAwal kondisiBBM" jenis="bbm" style="width: 100px;"></center>
                         <input type="hidden" id="awalBBM">
                         <div id="validasiBBM" class="validasiBiaya">
                           <br>
@@ -264,26 +264,26 @@
                       <td><span id="inputBBMAlasan"></span></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="BBMOK" 
                               name="BBM" 
                               value="OK" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiBBM2">
                             <label for="BBMOK">
                               OK
                             </label>
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="BBMNG" 
                               name="BBM" 
                               value="NG" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiBBM2">
                             <label for="BBMNG">
                               NG
                             </label>
@@ -291,35 +291,41 @@
                         </div>
                         <input type="hidden" id="inputKeputusanBBM">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputBBMKeterangan" rows="2"></textarea></td>
+                      <td><textarea class="form-control otoritas kondisiBBM" id="inputBBMKeterangan" rows="2"></textarea></td>
                     </tr>
                     <tr>
                       <td class="text-left">Uang Saku Jam Ke 1 - 3</td>
-                      <td><span id="inputUS1Normal"></span></td>
-                      <td><span id="inputUS1Diajukan"></span></td>
+                      <td>
+                        <span id="viewUS1Normal"></span>
+                        <input type="hidden" id="inputUS1Normal">
+                      </td>
+                      <td>
+                        <span id="viewUS1Diajukan"></span>
+                        <input type="hidden" id="inputUS1Diajukan">
+                      </td>
                       <td><span id="inputUS1Alasan">Otomatis</span></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="US1OK" 
                               name="US1" 
                               value="OK" 
-                              class="inputKeputusan otoritas" checked disabled>
+                              class="inputKeputusan otoritas" checked>
                             <label for="US1OK">
                               OK
                             </label>
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="US1NG" 
                               name="US1" 
                               value="NG" 
-                              class="inputKeputusan otoritas" disabled>
+                              class="inputKeputusan otoritas">
                             <label for="US1NG">
                               NG
                             </label>
@@ -327,79 +333,91 @@
                         </div>
                         <input type="hidden" id="inputKeputusanUS1" value="OK">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUS1Keterangan" rows="2"></textarea></td>
+                      <td><textarea class="form-control otoritas" id="inputUS1Keterangan" rows="2">Otomatis</textarea></td>
                     </tr>
                     <tr>
                       <td class="text-left">Uang Saku Jam Ke > 4</td>
-                      <td><span id="inputUS2Nromal"></span></td>
-                      <td><span id="inputUS2Diajukan"></span></td>
+                      <td>
+                        <span id="viewUS2Normal"></span>
+                        <input type="hidden" id="inputUS2Normal">
+                      </td>
+                      <td>
+                        <span id="viewUS2Diajukan"></span>
+                        <input type="hidden" id="inputUS2Diajukan">
+                      </td>
                       <td><span id="inputUS2Alasan">Otomatis</span></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="US2OK" 
                               name="US2" 
                               value="OK" 
-                              class="inputKeputusan otoritas" checked disabled>
+                              class="inputKeputusan otoritas" checked>
                             <label for="US2OK">
                               OK
                             </label>
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="US2NG" 
                               name="US2" 
                               value="NG" 
-                              class="inputKeputusan otoritas" disabled>
+                              class="inputKeputusan otoritas">
                             <label for="US2NG">
                               NG
                             </label>
                           </div>
                         </div>
-                        <input type="hidden" id="inputKeputusanUS1" value="OK">
+                        <input type="hidden" id="inputKeputusanUS2" value="OK">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUS2Keterangan" rows="2"></textarea></td>
+                      <td><textarea class="form-control otoritas" id="inputUS2Keterangan" rows="2">Otomatis</textarea></td>
                     </tr>
                     <tr>
                       <td class="text-left">Uang Makan Ke 2</td>
-                      <td><span id="inputUMNormal"></span></td>
-                      <td><span id="inputUMDiajukan"></span></td>
+                      <td>
+                        <span id="viewUMNormal"></span>
+                        <input type="hidden" id="inputUMNormal">
+                      </td>
+                      <td>
+                        <span id="viewUMDiajukan"></span>
+                        <input type="hidden" id="inputUMDiajukan">
+                      </td>
                       <td><span id="inputUMAlasan">Otomatis</span></td>
                       <td>
                         <div class="form-group clearfix">
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UM2OK" 
                               name="UM" 
                               value="OK" 
-                              class="inputKeputusan otoritas" checked disabled>
+                              class="inputKeputusan otoritas" checked>
                             <label for="UM2OK">
                               OK
                             </label>
                           </div>
                           <br>
                           <br>
-                          <div class="icheck-danger icheck-kps d-inline">
+                          <div class="icheck-orange icheck-kps d-inline">
                             <input 
                               type="radio" 
                               id="UM2NG" 
                               name="UM" 
                               value="NG" 
-                              class="inputKeputusan otoritas" disabled>
+                              class="inputKeputusan otoritas">
                             <label for="UM2NG">
                               NG
                             </label>
                           </div>
                         </div>
-                        <input type="hidden" id="inputKeputusanUM">
+                        <input type="hidden" id="inputKeputusanUM" value="OK">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUMKeterangan" rows="2"></textarea></td>
+                      <td><textarea class="form-control otoritas" id="inputUMKeterangan" rows="2">Otomatis</textarea></td>
                     </tr>
                   </tbody>
                 </table>
@@ -408,7 +426,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-danger btn-kps saveOtoritas ladda-button" data-style="expand-right">Save</button>
+            <button type="button" class="btn bg-orange btn-kps saveOtoritas ladda-button" data-style="expand-right">Save</button>
           </div>
         </div>
       </div>
@@ -449,6 +467,7 @@
    $('#getTabel').on('click', '.btnKeputusan', function(){
     var noSPJ = $(this).attr("no_spj");
     var pic = $(this).attr("nik");
+    $('#inputNoSPJ').val(noSPJ);
     $.ajax({
       dataType:'json',
       data:{noSPJ},
@@ -461,17 +480,21 @@
         ngUangMakan();
         ngUangJalan();
         ngBBM();
+        $('#inputBBMNormal').html(formatRupiah(String(data.uangBBM),'Rp. '));
         $('#inputUangMakanNormal').html(formatRupiah(String(data.uangMakan1),'Rp. '));
-        $('#inputUMNormal').html(formatRupiah(String(data.uangMakan2),'Rp. '));
-        $('#inputUMDiajukan').html(formatRupiah(String(data.uangMakan2),'Rp. '));
+        $('#inputUMNormal').val(data.uangMakan2);
+        $('#viewUMNormal').html(formatRupiah(String(data.uangMakan2),'Rp. '));
+        $('#viewUMDiajukan').html(formatRupiah(String(data.uangMakan2),'Rp. '));
         $('#inputUangJalanNormal').html(formatRupiah(String(data.uangJalan),'Rp. '));
         $('#viewUangMakanDiajukan').html(formatRupiah(String(data.uangMakanDiajukan),'Rp. '));
         $('#viewUangJalanDiajukan').html(formatRupiah(String(data.uangJalanDiajukan),'Rp. '));
         $('#viewBBMDiajukan').html(formatRupiah(String(data.uangBBMDiajukan),'Rp. '));
-        $('#inputUS1Normal').html(formatRupiah(String(data.uangSaku1), 'Rp. '));
-        $('#inputUS2Nromal').html(formatRupiah(String(data.uangSaku2), 'Rp. '));
-        $('#inputUS1Diajukan').html(formatRupiah(String(data.uangSaku1), 'Rp. '));
-        $('#inputUS2Diajukan').html(formatRupiah(String(data.uangSaku2), 'Rp. '));
+        $('#inputUS1Normal').val(data.uangSaku1);
+        $('#viewUS1Normal').html(formatRupiah(String(data.uangSaku1), 'Rp. '));
+        $('#viewUS2Normal').html(formatRupiah(String(data.uangSaku2), 'Rp. '));
+        $('#inputUS2Normal').val(data.uangSaku2)
+        $('#viewUS1Diajukan').html(formatRupiah(String(data.uangSaku1), 'Rp. '));
+        $('#viewUS2Diajukan').html(formatRupiah(String(data.uangSaku2), 'Rp. '));
         $('#inputUangMakanDiajukan').val(data.uangMakanDiajukan);
         $('#awalUangMakan').val(data.uangMakanDiajukan);
         $('#inputUangJalanDiajukan').val(data.uangJalanDiajukan);
@@ -481,7 +504,104 @@
         $('#inputUangMakanAlasan').html(data.uangMakanAlasan);
         $('#inputUangJalanAlasan').html(data.uangJalanAlasan);
         $('#inputBBMAlasan').html(data.uangBBMAlasan);
-        
+        $('#inputKeputusanBBM').val(data.uangBBMKeputusan);
+        $('#inputUS1Diajukan').val(data.uangSaku1);
+        $('#inputUS2Diajukan').val(data.uangSaku2);
+        $('#inputUMDiajukan').val(data.uangMakan2);
+        $('#inputUMKeterangan').val(data.uangUMKeterangan);
+        $('#inputUS1Keterangan').val(data.uangUS1Keterangan);
+        $('#inputUS2Keterangan').val(data.uangUS2Keterangan)
+        $('#inputKeputusanUS1').val(data.uangUS1Keputusan)
+        $('#inputKeputusanUS2').val(data.uangUS2Keputusan)
+        $('#inputKeputusanUM').val(data.uangUMKeputusan)
+        if (data.uangUS1Keputusan == 'OK') {
+          $('[name="US1"]#USOK').attr("checked","checked");
+        }else if(data.uangUS1Keputusan == 'NG'){
+          $('[name="US1"]#USNG').attr("checked","checked")
+        }else{
+          $('[name="US1"]#USOK').removeAttr("checked","checked")
+          $('[name="US1"]#USNG').removeAttr("checked","checked")
+        }
+
+        if (data.uangUS2Keputusan == 'OK') {
+          $('[name="US2"]#US2OK').attr("checked","checked");
+        }else if(data.uangUS2Keputusan == 'NG'){
+          $('[name="US2"]#US2NG').attr("checked","checked")
+        }else{
+          $('[name="US2"]#US2OK').removeAttr("checked","checked")
+          $('[name="US2"]#US2NG').removeAttr("checked","checked")
+        }
+
+        if (data.uangUMKeputusan == 'OK') {
+          $('[name="UM"]#UM2OK').attr("checked","checked");
+        }else if(data.uangUMKeputusan == 'NG'){
+          $('[name="UM"]#UM2NG').attr("checked","checked")
+        }else{
+          $('[name="UM"]#UM2OK').removeAttr("checked","checked")
+          $('[name="UM"]#UM2NG').removeAttr("checked","checked")
+        }
+
+        if (data.uangBBMKeputusan == 'OK') {
+          $('[name="BBM"]#BBMOK').attr("checked","checked");
+        }else if(data.uangBBMKeputusan == 'NG'){
+          $('[name="BBM"]#BBMNG').attr("checked","checked")
+        }else{
+          $('[name="BBM"]#BBMOK').removeAttr("checked","checked")
+          $('[name="BBM"]#BBMNG').removeAttr("checked","checked")
+        }
+        $('#inputBBMKeterangan').val(data.uangBBMKeterangan);
+
+        $('#inputKeputusanUangMakan').val(data.uangMakanKeputusan);
+        if (data.uangMakanKeputusan == 'OK') {
+          $('[name="uangMakan"]#UMOK').attr("checked","checked");
+        }else if(data.uangMakanKeputusan == 'NG'){
+          $('[name="uangMakan"]#UMNG').attr("checked","checked")
+        }else{
+          $('[name="uangMakan"]#UMOK').removeAttr("checked","checked")
+          $('[name="uangMakan"]#UMNG').removeAttr("checked","checked")
+        }
+        $('#inputUangMakanKeterangan').val(data.uangMakanKeterangan);
+
+        $('#inputKeputusanUangJalan').val(data.uangJalanKeputusan);
+        if (data.uangJalanKeputusan == 'OK') {
+          $('[name="uangJalan"]#UJOK').attr("checked","checked");
+        }else if(data.uangJalanKeputusan == 'NG'){
+          $('[name="uangJalan"]#UJNG').attr("checked","checked")
+        }else{
+          $('[name="uangJalan"]#UJOK').removeAttr("checked","checked")
+          $('[name="uangJalan"]#UJNG').removeAttr("checked","checked")
+        }
+        $('#inputUangJalanKeterangan').val(data.uangJalanKeterangan);
+        if (data.uangMakanStatus == 'CLOSE') {
+          $('.kondisiUangMakan').attr("readonly","readonly");
+          $('.kondisiUangMakan2').attr("disabled","disabled");
+        }else{
+          $('.kondisiUangMakan').removeAttr("readonly","readonly");
+          $('.kondisiUangMakan2').removeAttr("disabled","disabled");
+        }
+
+        if (data.uangJalanStatus == 'CLOSE') {
+          $('.kondisiUangJalan').attr("readonly","readonly");
+          $('.kondisiUangJalan2').attr("disabled","disabled");
+        }else{
+          $('.kondisiUangJalan').removeAttr("readonly","readonly");
+          $('.kondisiUangJalan2').removeAttr("disabled","disabled");
+        }
+
+        if (data.uangBBMStatus == 'CLOSE') {
+          $('.kondisiBBM').attr("readonly","readonly");
+          $('.kondisiBBM2').attr("disabled","disabled");
+        }else{
+          $('.kondisiBBM').removeAttr("readonly","readonly");
+          $('.kondisiBBM2').removeAttr("disabled","disabled");
+        }
+
+        if (data.jmlOpen>0) {
+          $('.saveOtoritas').removeAttr("disabled","disabled")
+        }else{
+          $('.saveOtoritas').attr("disabled","disabled")
+        }
+
       },
       error: function(data){
         Swal.fire("Terjadi Error Pada Program","Mohon Hubungi Staff IT!","error")
@@ -504,10 +624,63 @@
     $('#inputKeputusanBBM').val(isi);
     ngBBM(isi);
    })
+   $('[name="US1"]').on('click', function(){
+    var isi = $(this).val();
+    $('#inputKeputusanUS1').val(isi);
+   });
+   $('[name="US2"]').on('click', function(){
+    var isi = $(this).val();
+    $('#inputKeputusanUS2').val(isi);
+   });
+   $('[name="UM"]').on('click', function(){
+    var isi = $(this).val();
+    $('#inputKeputusanUM').val(isi);
+   })
+
    $('.hitungAwal').on('keyup', function(){
     var isi = $(this).val();
     var jenis = $(this).attr("jenis");
+    hitungAwal(isi, jenis)
+    
+   })
+   $('.hitungAwal').on('change', function(){
+    var isi = $(this).val();
+    var jenis = $(this).attr("jenis");
+    hitungAwal(isi, jenis)
+    
+   })
+   var saveOtoritas = $('.saveOtoritas').ladda();
+      saveOtoritas.click(function () {
+      // Start loading
+      saveOtoritas.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var inputUangMakanDiajukan = $('#inputUangMakanDiajukan').val();
+        var awalUangMakan = $('#awalUangMakan').val();
+        var inputUangJalanDiajukan = $('#inputUangJalanDiajukan').val();
+        var awalUangJalan = $('#awalUangJalan').val();
+        var inputBBMDiajukan = $('#inputBBMDiajukan').val();
+        var awalBBM = $('#awalBBM').val();
+        
 
+        if (inputUangMakanDiajukan > awalUangMakan) {
+          Swal.fire("Jumlah Uang Makan Melebihi Pengajuan!","Uang Makan Yang Di Revisi Tidak Boleh Lebih Dari Pengajuan","warning");
+        }else if(inputUangJalanDiajukan > awalUangJalan){
+          Swal.fire("Jumlah Uang Jalan Melebihi Pengajuan!","Uang Jalan Yang Di Revisi Tidak Boleh Lebih Dari Pengajuan","warning");
+        }else if(inputBBMDiajukan > awalBBM){
+          Swal.fire("Jumlah Uang BBM Melebihi Pengajuan!","Uang BBM Yang Di Revisi Tidak Boleh Lebih Dari Pengajuan","warning");
+        }else{
+          saveKeputusan()
+        }
+        saveOtoritas.ladda('stop');
+        return false;
+          
+      }, 1000)
+    });
+
+  })
+  function hitungAwal(isi, jenis) {
     if (jenis == 'uangMakan') {
       var awal = $('#awalUangMakan').val();
       if (isi>awal) {
@@ -532,9 +705,7 @@
     }
 
     validasiBTNSave();
-   })
-
-  })
+  }
   function getTabel() {
     var filBulan = $('#filBulan').val();
     var filTahun = $('#filTahun').val();
@@ -627,6 +798,91 @@
     }else{
       $('.saveOtoritas').removeAttr("disabled","disabled")
     }
+  }
+
+  function saveKeputusan() {
+    var inputUangMakanDiajukan = $('#inputUangMakanDiajukan').val();
+    var inputUangJalanDiajukan = $('#inputUangJalanDiajukan').val();
+    var inputBBMDiajukan = $('#inputBBMDiajukan').val();
+    var inputUS1Diajukan = $('#inputUS1Diajukan').val();
+    var inputUS2Diajukan = $('#inputUS2Diajukan').val();
+    var inputUMDiajukan = $('#inputUMDiajukan').val();
+    var inputKeputusanBBM = $('#inputKeputusanBBM').val();
+    var inputKeputusanUS1 = $('#inputKeputusanUS1').val();
+    var inputKeputusanUS2 = $('#inputKeputusanUS2').val();
+    var inputKeputusanUM = $('#inputKeputusanUM').val();
+    var inputKeputusanUangMakan = $('#inputKeputusanUangMakan').val();
+    var inputKeputusanUangJalan = $('#inputKeputusanUangJalan').val();
+    var inputUangJalanKeterangan = $('#inputUangJalanKeterangan').val();
+    var inputUangMakanKeterangan = $('#inputUangMakanKeterangan').val();
+    var inputUS1Keterangan = $('#inputUS1Keterangan').val();
+    var inputUS2Keterangan = $('#inputUS2Keterangan').val();
+    var inputUMKeterangan = $('#inputUMKeterangan').val();
+    var inputBBMKeterangan = $('#inputBBMKeterangan').val();
+    var inputNoSPJ = $('#inputNoSPJ').val();
+    if (inputKeputusanBBM == '' || inputKeputusanUangJalan == ''|| inputKeputusanUangMakan == '' || inputUangJalanKeterangan == '' || inputUangJalanKeterangan == '' || inputBBMKeterangan == '' || inputKeputusanUS1 == '' || inputKeputusanUS2 == '' || inputKeputusanUM == '' || inputUS1Keterangan == '' || inputUS2Keterangan == '' || inputUMKeterangan == '') {
+      Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu","","warning")
+    }else{
+      $.ajax({
+        type:'post',
+        data:{
+          inputUangMakanDiajukan,
+          inputUangJalanDiajukan,
+          inputBBMDiajukan,
+          inputUS1Diajukan,
+          inputUS2Diajukan,
+          inputUMDiajukan,
+          inputKeputusanBBM,
+          inputKeputusanUangMakan,
+          inputKeputusanUangJalan,
+          inputKeputusanUS1,
+          inputKeputusanUS2,
+          inputKeputusanUM,
+          inputUangJalanKeterangan,
+          inputUangMakanKeterangan,
+          inputBBMKeterangan,
+          inputUS1Keterangan,
+          inputUS2Keterangan,
+          inputUMKeterangan,
+          inputNoSPJ
+        },
+        dataType:'json',
+        url:'saveKeputusanAdjustment',
+        cache: false,
+        async: true,
+        success: function(data){
+          berhasil()
+          getTabel();
+          $('#modal-otoritas').modal('hide');
+        },
+        error: function(data){
+          gagal();
+        }
+      })
+    }
+    
+  }
+
+  function berhasil() {
+      Swal.fire({
+        position: 'top-end',
+        toast : true,
+        icon: 'success',
+        title: 'Berhasil Menyimpan Data!',
+        showConfirmButton: false,
+        timer: 3000
+      })
+    }
+
+  function gagal() {
+    Swal.fire({
+      position: 'top-end',
+      toast : true,
+      icon: 'error',
+      title: 'Gagal Menyimpan Data! Hubungi Staff IT',
+      showConfirmButton: false,
+      timer: 3000
+    })
   }
 
 </script>

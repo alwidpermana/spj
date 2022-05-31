@@ -32,7 +32,7 @@
 		foreach ($data as $key): ?>
 			<tr>
 				<td>
-					<a href="<?=base_url()?>Data_Master/Edit_Karyawan/<?=$key->nik?>/<?=$jenis?>" class="btn btn-danger btn-kps btn-sm btn-block">
+					<a href="<?=base_url()?>Data_Master/Edit_Karyawan/<?=$key->nik?>/<?=$jenis?>" class="btn bg-orange btn-kps btn-sm btn-block">
 						<i class="fas fa-user-pen"></i>
 					</a>
 				</td>

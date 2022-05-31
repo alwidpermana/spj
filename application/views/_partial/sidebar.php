@@ -39,7 +39,7 @@
           <li class="nav-item">
             <a href="<?=base_url()?>dashboard" class="nav-link <?= $side == 'dashboard'?'active':''?>">
               <!-- <i class="nav-icon fas fa-tachometer-alt"></i> -->
-              <i class="nav-icon fa-solid fa-gauge"></i>
+              <i class="nav-icon fas fa-home"></i>
               <p>
                 Dashboard
               </p>
@@ -180,6 +180,48 @@
                   <p>Voucher BBM</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/generate_spj" class="nav-link ">
+                  <i class="fas fa-book nav-icon <?=substr($side, 11) == 'generate'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Generate SPJ</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/harian" class="nav-link ">
+                  <i class="fas fa-calendar-day nav-icon <?=substr($side, 11) == 'harian'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Harian SPJ</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/in_out_kendaraan" class="nav-link ">
+                  <i class="fas fa-truck nav-icon <?=substr($side, 11) == 'kendaraan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>In Out Kendaraan</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/in_out_pic" class="nav-link ">
+                  <i class="fas fa-user-alt nav-icon <?=substr($side, 11) == 'pic'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>In Out PIC</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/km_kendaraan" class="nav-link ">
+                  <i class="fas fa-gauge nav-icon <?=substr($side, 11) == 'km'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>KM Kendaraan</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/kendaraan_jam_ke_2" class="nav-link ">
+                  <i class="fas fa-truck-moving nav-icon <?=substr($side, 11) == 'kendaraan_2'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Kendaraan Jam Ke-2</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?=base_url()?>monitoring/pic_jam_ke_2" class="nav-link ">
+                  <i class="fas fa-user-plus nav-icon <?=substr($side, 11) == 'pic_2'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>PIC Jam Ke-2</p>
+                </a>
+              </li>
             </ul>
           </li>
           <li class="nav-item">
@@ -189,14 +231,14 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="<?=base_url()?>implementasi/step_1" class="nav-link <?=$side == 'implementasi-step'?'active':''?>">
-              <i class="fas fa-clipboard-list nav-icon"></i>
+            <a href="<?=base_url()?>implementasi/step_1?notif=" class="nav-link <?=$side == 'implementasi-step'?'active':''?>">
+              <i class="fas fa-clipboard-check nav-icon"></i>
               <p>Implementasi</p>
             </a>
           </li>
           <li class="nav-item">
             <a href="<?=base_url()?>implementasi/adjustment" class="nav-link <?=$side == 'implementasi-adjustment'?'active':''?>">
-              <i class="fas fa-clipboard-check nav-icon"></i>
+              <i class="fas fa-clipboard-list nav-icon"></i>
               <p>Pengajuan Adjustment</p>
             </a>
           </li>

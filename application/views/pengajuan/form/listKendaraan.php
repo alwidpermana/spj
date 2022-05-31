@@ -8,7 +8,7 @@
 	  margin-right: 0.5rem;
 	}
 	[type=radio]:checked + img{
-	  outline: 2px solid rgb(178, 58, 72);
+	  outline: 2px solid rgb(204, 88, 3);
 	  border-radius: 5px;
 	}
 	a {

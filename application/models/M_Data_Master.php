@@ -265,7 +265,7 @@
             $user = $this->session->userdata("NIK");
             $getNIK = $this->db->query("SELECT NIK FROM SPJ_PEGAWAI_OTORITAS WHERE NIK = '$nik'");
             if ($getNIK->num_rows()>0) {
-            	$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET $field = '$isi', TGL_INPUT = '$tanggal', PIC_INPUT = '$user', STATUS_DATA = 'NOT SAVED'  WHERE NIK = '$nik'";
+            	$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET $field = '$isi', TGL_INPUT = '$tanggal', PIC_INPUT = '$user'  WHERE NIK = '$nik'";
             } else {
             	$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT, JENIS_DATA)VALUES('$nik','$isi','$tanggal','$user','$jenis')";
             }

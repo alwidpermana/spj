@@ -176,7 +176,7 @@ class M_Pengajuan extends CI_Model {
 					ID_LOKASI ASC";
 		return $this->db->query($sql);
 	}
-	public function getPIC($inputSubjek, $jabatan, $where, $noPengajuan, $where2)
+	public function getPIC($inputSubjek, $jabatan, $where, $noPengajuan, $where2, $whereJenis)
 	{
 		$sql = "SELECT
 				   Q1.*
@@ -193,7 +193,9 @@ class M_Pengajuan extends CI_Model {
 							SPJ_PEGAWAI_OTORITAS
 						WHERE
 							STATUS_DATA = 'SAVED' AND
-							SUBJEK = '$inputSubjek' $where
+							SUBJEK = '$inputSubjek'
+							$whereJenis
+							$where
 					)Q1
 					LEFT JOIN
 					(
@@ -243,8 +245,7 @@ class M_Pengajuan extends CI_Model {
 						SPJ_TEMP_PIC
 				)Q3 ON Q1.NIK = Q3.PIC
 				WHERE
-					Q2.NIK IS NULL AND
-					Q3.PIC IS NULL";
+					Q2.NIK IS NULL";
 		return $this->db->query($sql);
 	}
 	public function saveOtomatisUangSPJ($id, $group, $biaya)
@@ -304,35 +305,57 @@ class M_Pengajuan extends CI_Model {
 	public function getPengajuanPIC($group, $noPengajuan)
 	{
 		$sql = "SELECT
-					ID_PIC,
-					NO_PENGAJUAN,
-					OBJEK,
-					NIK,
-					NAMA,
-					JABATAN,
-					DEPARTEMEN,
-					SUB_DEPARTEMEN,
-					UANG_SAKU,
-					UANG_MAKAN,
-					SORTIR,
-					CASE 
-						WHEN JENIS_PIC = 'Sopir' THEN 'Driver'
-						ELSE JENIS_PIC
-					END AS JENIS_PIC,
-				 GROUP_TUJUAN_ID
+					*
 				FROM
-					SPJ_PENGAJUAN_PIC
-				WHERE
-					NO_PENGAJUAN = '$noPengajuan' AND
-					GROUP_TUJUAN_ID = '$group'";
+				(
+					SELECT
+						ID_PIC,
+						NO_PENGAJUAN,
+						OBJEK,
+						NIK,
+						NAMA,
+						JABATAN,
+						DEPARTEMEN,
+						SUB_DEPARTEMEN,
+						UANG_SAKU,
+						UANG_MAKAN,
+						SORTIR,
+						CASE 
+							WHEN JENIS_PIC = 'Sopir' THEN 'Driver'
+							ELSE JENIS_PIC
+						END AS JENIS_PIC,
+					 GROUP_TUJUAN_ID
+					FROM
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						NO_PENGAJUAN = '$noPengajuan' AND
+						GROUP_TUJUAN_ID = '$group'
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						NIK AS NIK_WAJAH,
+						FOTO_WAJAH
+					FROM
+						SPJ_PEGAWAI_OTORITAS
+				)Q2 ON Q1.NIK = Q2.NIK_WAJAH";
 		return $this->db->query($sql);
 	}
 	public function cekJumlahSupir($noPengajuan, $group, $pic, $jenisK)
 	{
 		$sql = "SELECT
-				JML_DRIVER,
-				JML_PIC,
-				JML_PENDAMPING,
+				CASE 
+					WHEN JML_DRIVER IS NULL THEN 0
+					ELSE JML_DRIVER
+				END AS JML_DRIVER,
+				CASE 
+					WHEN JML_PIC IS NULL THEN 0
+					ELSE JML_PIC
+				END AS JML_PIC,
+				CASE 
+					WHEN JML_PENDAMPING IS NULL THEN 0
+					ELSE JML_PENDAMPING
+				END AS JML_PENDAMPING,
 				CASE 
 					WHEN GROUP_ID = 4 THEN QTY_LOKAL
 					WHEN GROUP_ID != 4 THEN QTY_LUAR_KOTA
@@ -577,7 +600,7 @@ class M_Pengajuan extends CI_Model {
         $inputTotalUangMakan = $this->input->post("inputTotalUangMakan");
         $inputTotalUangJalan = $this->input->post("inputTotalUangJalan");
         $inputBBM = $this->input->post("inputBBM");
-        $inputIdVoucher = $this->input->post("inputIdVoucher");
+        $inputNoVoucher = $this->input->post("inputNoVoucher");
         $inputTOL = $this->input->post("inputTOL");
         $inputMediaUangSaku = $this->input->post("inputMediaUangSaku");
         $inputMediaUangMakan = $this->input->post("inputMediaUangMakan");
@@ -616,7 +639,7 @@ class M_Pengajuan extends CI_Model {
         					MEDIA_UANG_JALAN = '$inputMediaUangJalan',
         					MEDIA_UANG_BBM = '$inputMediaBBM',
         					MEDIA_UANG_TOL = '$inputMediaTOL',
-        					VOUCHER_ID = '$inputIdVoucher',
+        					VOUCHER_BBM = '$inputNoVoucher',
         					STATUS_SPJ = 'OPEN'
         		WHERE
         			NO_SPJ = '$inputNoSPJ'";

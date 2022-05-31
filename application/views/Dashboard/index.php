@@ -23,9 +23,9 @@
       <div class="content">
         <div class="container-fluid">
           
+        </div>
       </div>
     </div>
-    
     <?php $this->load->view('_partial/footer');?>
 </div>
 <?php $this->load->view("_partial/js");?>

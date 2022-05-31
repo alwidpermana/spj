@@ -27,7 +27,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Jabatan</label>
-                    <select class="select2 filter form-control" id="filStatus">
+                    <select class="select2 filter form-control select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
                       <option value="">ALL</option>
                       <option value="Sopir">Sopir</option>
                       <option value="Pendamping">Pendamping</option>

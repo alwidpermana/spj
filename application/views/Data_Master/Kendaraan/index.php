@@ -28,7 +28,7 @@
                 <div class="col-md-1">
                   <div class="form-group">
                     <label>Merk</label>
-                    <select class="select2 filter form-control" id="filMerk">
+                    <select class="select2 filter form-control select2-orange" data-dropdown-css-class="select2-orange" id="filMerk">
                       <option value="">ALL</option>
                     </select>
                   </div>
@@ -36,7 +36,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Kendaraan</label>
-                    <select class="select2 filter form-control" id="filKendaraan">
+                    <select class="select2 filter form-control select2-orange" data-dropdown-css-class="select2-orange" id="filKendaraan">
                       <option value="">ALL</option>
                     </select>
                   </div>
@@ -44,7 +44,7 @@
                 <div class="col-md-1">
                   <div class="form-group">
                     <label>Bahan Bakar</label>
-                    <select class="select2 filter form-control" id="filBahan">
+                    <select class="select2 filter form-control select2-orange" data-dropdown-css-class="select2-orange" id="filBahan">
                       <option value="">ALL</option>
                     </select>
                   </div>
@@ -52,7 +52,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Jenis Kendaraan</label>
-                    <select class="select2 filter form-control" id="filJenis">
+                    <select class="select2 filter form-control select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                       <option value="">ALL</option>
                       <option value="Engkel & Double">Engkel & Double</option>
                       <option value="Wing Box">Wing Box</option>

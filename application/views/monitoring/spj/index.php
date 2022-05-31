@@ -39,7 +39,7 @@
                 <div class="col-md-1">
                   <div class="form-group">
                     <label>Tahun</label>
-                    <select class="select2 form-control filter" id="filTahun">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filTahun">
                       <?php foreach ($tahun as $value): ?>
                         <option value="<?=$value?>"><?=$value?></option>
                       <?php endforeach ?>
@@ -49,7 +49,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Bulan</label>
-                    <select class="select2 form-control filter" id="filBulan">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filBulan">
                       <?php foreach ($bulan as $angka => $bulan): ?>
                         <option value="<?=$bulan?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
                       <?php endforeach ?>
@@ -59,7 +59,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Periode</label>
-                    <select class="select2 form-control filter" id="filPeriode">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filPeriode">
                      
                     </select>
                   </div>
@@ -67,7 +67,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Jenis SPJ</label>
-                    <select class="select2 form-control filter" id="filJenis">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                      
                     </select>
                   </div>

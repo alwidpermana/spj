@@ -21,7 +21,7 @@
 							<?php if ($key->ID_GROUP == $key2->ID_GROUP): ?>
 								<div class="row">
 									<div class="col-md-12">
-										<button type="button" class="btn btn-danger dropdown-toggle dropdown-icon btn-kps btn-block btn-sm" data-toggle="dropdown" style="font-size: 10px">
+										<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-block btn-sm" data-toggle="dropdown" style="font-size: 10px">
 									        <?=$key2->TIPE_KOTA.' '.$key2->NAMA_KOTA?>
 									        <span class="sr-only"></span>
 									    </button>

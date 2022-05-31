@@ -6,7 +6,7 @@
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="<?=base_url()?>Dashboard" class="text-danger">Home</a></li>
+          <li class="breadcrumb-item"><a href="<?=base_url()?>Dashboard" class="text-orange">Home</a></li>
           <li class="breadcrumb-item active">
               <?php 
               $a= strtoupper($this->uri->segment('1'));

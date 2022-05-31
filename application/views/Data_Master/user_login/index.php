@@ -30,7 +30,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>&nbsp;</label>
-                        <button type="button" class="btn btn-danger btn-kps btn-block btn-sm" id="btnTambahAkun" data-toggle="modal" data-target="#modal-tambahAkun">
+                        <button type="button" class="btn bg-orange btn-kps btn-block btn-sm" id="btnTambahAkun" data-toggle="modal" data-target="#modal-tambahAkun">
                           <i class="fas fa-user-plus"></i>
                           &nbsp;&nbsp;Tambah Akun
                         </button>
@@ -76,7 +76,7 @@
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Karyawan</label>
-                  <select class="select2 form-control" id="inputNIK" style="width: 100%">
+                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputNIK" style="width: 100%">
                     <option value="">Cari Karyawan</option>
                   </select>
                 </div>
@@ -85,7 +85,7 @@
           </div>
           <div class="modal-footer getDataKaryawan">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-danger btn-kps ladda-button saveAkun" data-style="expand-right" id="btnSaveAkun">Tambah Akun</button>
+            <button type="button" class="btn bg-orange btn-kps ladda-button saveAkun" data-style="expand-right" id="btnSaveAkun">Tambah Akun</button>
           </div>
         </div>
       </div>

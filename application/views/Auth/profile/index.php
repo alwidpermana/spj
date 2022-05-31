@@ -55,7 +55,7 @@
                   <br>
                   <div class="row">
                     <div class="col-md-12 text-center">
-                      <button type="button" class="btn btn-danger btn-kps btn-sm" id="btnEditFoto">
+                      <button type="button" class="btn bg-orange btn-kps btn-sm" id="btnEditFoto">
                         Edit Avatar
                       </button>
                     </div>
@@ -157,7 +157,7 @@
                   <div class="row">
                     <div class="col-md-2"></div>
                     <div class="col-md-8">
-                      <button type="button" class="btn btn-danger btn-kps btn-block ladda-button" id="btnSavePassword" data-style="zoom-in">Save</button>
+                      <button type="button" class="btn bg-orange btn-kps btn-block ladda-button" id="btnSavePassword" data-style="zoom-in">Save</button>
                     </div>
                   </div>
                   
@@ -213,7 +213,7 @@
           </div>
           <div class="modal-footer getDataKaryawan">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-danger btn-kps ladda-button btnSaveAvatar" data-style="expand-right" id="btnSaveAvatar">Save</button>
+            <button type="button" class="btn bg-orange btn-kps ladda-button btnSaveAvatar" data-style="expand-right" id="btnSaveAvatar">Save</button>
           </div>
         </div>
       </div>

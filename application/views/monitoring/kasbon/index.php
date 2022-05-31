@@ -41,7 +41,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Tahun</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filTahun">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filTahun">
                           <?php foreach ($tahun as $value): ?>
                             <option value="<?=$value?>"><?=$value?></option>
                           <?php endforeach ?>
@@ -51,7 +51,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Bulan</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filBulan">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filBulan">
                           <?php foreach ($bulan as $angka => $bulan): ?>
                             <option value="<?=$bulan?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
                           <?php endforeach ?>
@@ -61,7 +61,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Periode</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filPeriode">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filPeriode">
                           
                         </select>
                       </div>
@@ -70,14 +70,14 @@
                       <div class="form-group">
                         <?php if ($kasbon == 'SPJ'): ?>
                           <label>Jenis SPJ</label>
-                          <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filJenis">
+                          <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                             <?php foreach ($spj as $key): ?>
                               <option value="<?=$key->NAMA_JENIS?>"><?=$key->NAMA_JENIS?></option>
                             <?php endforeach ?>
                           </select>
                         <?php elseif($kasbon == 'TOL'):?>
                           <label>Jenis SPJ</label>
-                          <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filJenis">
+                          <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                             <option value="PPIC">PPIC</option>
                             <option value="Finance">Finance</option>
                           </select>
@@ -90,7 +90,7 @@
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>Status</label>
-                        <select class="select2 form-control filter select2-danger" data-dropdown-css-class="select2-danger" id="filStatus">
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
                           <option value="">ALL</option>
                           <option value="OPEN">OPEN</option>
                           <option value="CLOSE">CLOSE</option>
@@ -114,7 +114,7 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-2">
-                      <button type="button" class="btn btn-danger btn-kps btn-sm btn-block" id="btnTambahDebit">
+                      <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="btnTambahDebit">
                         <i class="fas fa-plus"></i>&nbsp; Debit
                       </button>
                     </div>
@@ -150,13 +150,13 @@
                       
                       <?php if ($kasbon == 'SPJ'): ?>
                         <label>Jenis</label>
-                        <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputJenis">
+                        <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenis">
                           <option value="Delivery">Delivery</option>
                           <option value="Non Delivery">Non Delivery</option>
                         </select>
                       <?php elseif($kasbon == 'TOL'):?>
                         <label>Jenis</label>
-                        <select class="select2 form-control select2-danger" data-dropdown-css-class="select2-danger" id="inputJenis">
+                        <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenis">
                           <option value="PPIC">PPIC</option>
                           <option value="Finance">Finance</option>
                         </select>
@@ -180,7 +180,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger btn-kps ladda-button saveDebit" data-style="expand-right" id="saveDebit">Save</button>
+              <button type="submit" class="btn btn-orange btn-kps ladda-button saveDebit" data-style="expand-right" id="saveDebit">Save</button>
           </div>
         </div>
       </div>

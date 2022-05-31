@@ -6,6 +6,14 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/ladda-buttons/css/ladda-themeless.min.css">
   <?php $this->load->view("_partial/head")?>
+  <style type="text/css">
+    .fotoWajah{
+      max-width: 75px;
+      width: auto;
+      height: auto;
+
+    }
+  </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse layout-navbar-fixed">
 <div class="preloader">
@@ -31,18 +39,15 @@
                         <div class="row">
                           <div class="col-md-4">
                             <div class="row">
-                              <div class="col-md-11">
+                              <div class="col-md-12">
                                 <label class="labJudul">Tanggal Input</label>    
                               </div>
-                              <div class="col-md-1">
-                                :
-                              </div>
                             </div>
                           </div>
-                          <div class="col-md-4">
+                          <div class="col-md-6">
                             <div class="row">
                               <div class="col-md-12">
-                                <label><?=date("d F Y", strtotime($key->TGL_INPUT))?></label>
+                                : <label><?=date("d F Y", strtotime($key->TGL_INPUT))?></label>
                               </div>
                             </div>
                           </div>
@@ -51,18 +56,15 @@
                         <div class="row">
                           <div class="col-md-4">
                             <div class="row">
-                              <div class="col-md-11">
+                              <div class="col-md-12">
                                 <label class="labJudul">Jenis SPJ</label>    
                               </div>
-                              <div class="col-md-1">
-                                :
-                              </div>
                             </div>
                           </div>
-                          <div class="col-md-4">
+                          <div class="col-md-6">
                             <div class="row">
                               <div class="col-md-12" id="afterNext">
-                                <label><?=$key->NAMA_JENIS?></label>
+                                : <label><?=$key->NAMA_JENIS?></label>
                               </div>
                             </div>
                           </div>
@@ -71,18 +73,15 @@
                         <div class="row">
                           <div class="col-md-4">
                             <div class="row">
-                              <div class="col-md-11">
+                              <div class="col-md-12">
                                 <label class="labJudul">No SPJ</label>    
                               </div>
-                              <div class="col-md-1">
-                                :
-                              </div>
                             </div>
                           </div>
-                          <div class="col-md-4">
+                          <div class="col-md-6">
                             <div class="row">
                               <div class="col-md-12">
-                                <label><?=$key->NO_SPJ?></label>
+                                : <label><?=$key->NO_SPJ?></label>
                               </div>
                             </div>
                           </div>
@@ -91,18 +90,15 @@
                         <div class="row">
                           <div class="col-md-4">
                             <div class="row">
-                              <div class="col-md-11">
+                              <div class="col-md-12">
                                 <label class="labJudul">Tanggal SPJ</label>    
-                              </div>
-                              <div class="col-md-1">
-                                :
                               </div>
                             </div>
                           </div>
-                          <div class="col-md-4">
+                          <div class="col-md-6">
                             <div class="row">
                               <div class="col-md-12">
-                                <label><?=date("d F Y", strtotime($key->TGL_SPJ))?></label>
+                                : <label><?=date("d F Y", strtotime($key->TGL_SPJ))?></label>
                               </div>
                             </div>
                           </div>
@@ -129,29 +125,22 @@
                           <div class="col-md-11"> 
                             <label>NIK</label>  
                           </div>
-                          <div class="col-md-1">
-                            <label>:</label>
-                          </div>
                         </div>
-                        
                       </div>
-                      <div class="col-md-2">
-                        <label><?=$key->PIC_INPUT?></label>
+                      <div class="col-md-4">
+                        : <label><?=$key->PIC_INPUT?></label>
                       </div>
                     </div>
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>Nama</label>  
-                          </div>
-                          <div class="col-md-1">
-                            <label>:</label>
                           </div>
                         </div>
                       </div>
-                      <div class="col-md-2">
-                        <label><?=$key->namapeg?></label>
+                      <div class="col-md-4">
+                        : <label><?=$key->namapeg?></label>
                       </div>
                     </div>
                     <div class="row">
@@ -160,13 +149,10 @@
                           <div class="col-md-11"> 
                             <label>Jabatan</label>  
                           </div>
-                          <div class="col-md-1">
-                            <label>:</label>
-                          </div>
                         </div>
                       </div>
-                      <div class="col-md-2">
-                        <label><?=$key->jabatan?></label>
+                      <div class="col-md-4">
+                        : <label><?=$key->jabatan?></label>
                       </div>
                     </div>
                     <div class="row">
@@ -175,28 +161,22 @@
                           <div class="col-md-11"> 
                             <label>Departemen</label>  
                           </div>
-                          <div class="col-md-1">
-                            <label>:</label>
-                          </div>
                         </div>
                       </div>
-                      <div class="col-md-2">
-                        <label><?=$key->departemen?></label>
+                      <div class="col-md-4">
+                        : <label><?=$key->departemen?></label>
                       </div>
                     </div>
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>Sub Departemen</label>  
-                          </div>
-                          <div class="col-md-1">
-                            <label>:</label>
                           </div>
                         </div>
                       </div>
-                      <div class="col-md-2">
-                        <label><?=$key->Subdepartemen?></label>
+                      <div class="col-md-4">
+                        : <label><?=$key->Subdepartemen?></label>
                       </div>
                     </div>
                   </div>
@@ -213,18 +193,15 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>Kendaraan</label>  
                           </div>
-                          <div class="col-md-1">
-                            <label>:</label>
-                          </div>
                         </div>
                       </div>
-                      <div class="col-md-2">
+                      <div class="col-md-4">
                         <div class="row">
                           <div class="col-md-12">
-                            <label><?=$key->KENDARAAN?></label>
+                            : <label><?=$key->KENDARAAN?></label>
                           </div>
                         </div>
                       </div>
@@ -232,18 +209,15 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>Jenis Kendaraan</label>  
                           </div>
-                          <div class="col-md-1">
-                            <label>:</label>
-                          </div>
                         </div>
                       </div>
                       <div class="col-md-4">
                         <div class="row">
                           <div class="col-md-12">
-                            <label><?=$key->JENIS_KENDARAAN?></label>
+                            : <label><?=$key->JENIS_KENDARAAN?></label>
                           </div>
                         </div>
                       </div>
@@ -251,18 +225,15 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>No Inventaris</label>  
                           </div>
-                          <div class="col-md-1">
-                            <label>:</label>
-                          </div>
                         </div>
                       </div>
                       <div class="col-md-4">
                         <div class="row">
                           <div class="col-md-12">
-                            <label><?=$key->NO_INVENTARIS?></label>
+                            : <label><?=$key->NO_INVENTARIS?></label>
                           </div>
                         </div>
                       </div>
@@ -270,18 +241,15 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>Merk</label>  
                           </div>
-                          <div class="col-md-1">
-                            <label>:</label>
-                          </div>
                         </div>
                       </div>
                       <div class="col-md-4">
                         <div class="row">
                           <div class="col-md-12">
-                            <label><?=$key->MERK?></label>
+                            : <label><?=$key->MERK?></label>
                           </div>
                         </div>
                       </div>
@@ -289,18 +257,15 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>Type</label>  
                           </div>
-                          <div class="col-md-1">
-                            <label>:</label>
-                          </div>
                         </div>
                       </div>
                       <div class="col-md-4">
                         <div class="row">
                           <div class="col-md-12">
-                            <label><?=$key->TYPE?></label>
+                            : <label><?=$key->TYPE?></label>
                           </div>
                         </div>
                       </div>
@@ -308,18 +273,15 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>No TNKB</label>  
-                          </div>
-                          <div class="col-md-1">
-                            <label>:</label>
                           </div>
                         </div>
                       </div>
                       <div class="col-md-4">
                         <div class="row">
                           <div class="col-md-12">
-                            <label><?=$key->NO_TNKB?></label>
+                            : <label><?=$key->NO_TNKB?></label>
                           </div>
                         </div>
                       </div>
@@ -339,18 +301,15 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>Tujuan</label>  
-                          </div>
-                          <div class="col-md-1">
-                            <label>:</label>
                           </div>
                         </div>
                       </div>
-                      <div class="col-md-2">
+                      <div class="col-md-10">
                         <div class="row">
                           <div class="col-md-12">
-                            <label>
+                            : <label>
                               <?php 
                                 $noLokasi = 1;
                                 $totalLokasi = count($tujuan);
@@ -370,11 +329,8 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="row">
-                          <div class="col-md-11"> 
+                          <div class="col-md-12"> 
                             <label>Lokasi</label>  
-                          </div>
-                          <div class="col-md-1">
-                            <label>:</label>
                           </div>
                         </div>
                       </div>
@@ -426,6 +382,7 @@
                               <tr>
                                 <th></th>
                                 <th>Subjek</th>
+                                <th></th>
                                 <th>NIK</th>
                                 <th>Nama</th>
                                 <th>Departemen</th>
@@ -440,6 +397,13 @@
                               <tr>
                                 <td>Driver</td>
                                 <td><?=$key->OBJEK?></td>
+                                <td>
+                                  <?php if ($key->FOTO_WAJAH != null || $key->FOTO_WAJAH !=''): ?>
+                                    <a href="javascript:;" class="getFotoWajah" foto="<?=$key->FOTO_WAJAH?>">
+                                      <img src="<?=base_url()?>assets/image/foto-wajah/<?=$key->FOTO_WAJAH?>" class="img-thumbnail fotoWajah">
+                                    </a>
+                                  <?php endif ?>
+                                </td>
                                 <td><?=$key->NIK_DRIVER?></td>
                                 <td><?=$key->NAMA_DRIVER?></td>
                                 <td><?=$key->DEPARTEMEN_DRIVER?></td>
@@ -453,6 +417,13 @@
                                 <tr>
                                   <td>Pendamping</td>
                                   <td><?=$pc->OBJEK?></td>
+                                  <td>
+                                    <?php if ($pc->FOTO_WAJAH != null || $pc->FOTO_WAJAH !=''): ?>
+                                    <a href="javascript:;" class="getFotoWajah" foto="<?=$pc->FOTO_WAJAH?>">
+                                      <img src="<?=base_url()?>assets/image/foto-wajah/<?=$pc->FOTO_WAJAH?>" class="img-thumbnail fotoWajah">
+                                    </a>
+                                  <?php endif ?>
+                                  </td>
                                   <td><?=$pc->NIK_DRIVER?></td>
                                   <td><?=$pc->NAMA_DRIVER?></td>
                                   <td><?=$pc->DEPARTEMEN_DRIVER?></td>
@@ -466,7 +437,7 @@
                             </tbody>
                             <tfoot>
                               <tr>
-                                <th colspan="8" class="text-right">Total</th>
+                                <th colspan="9" class="text-right">Total</th>
                                 <th>Rp.<?=str_replace(',', '.', number_format($key->TOTAL_UANG_SAKU, 0))?></th>
                                 <th>Rp.<?=str_replace(',', '.', number_format($key->TOTAL_UANG_MAKAN, 0))?></th>
                               </tr>
@@ -580,7 +551,24 @@
         </div>
       </div>
     </div>
-    
+    <div class="modal fade" id="modal-foto" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="d-flex justify-content-end">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <center><div id="getFoto"></div></center>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <?php $this->load->view('_partial/footer');?>
 </div>
 <?php $this->load->view("_partial/js");?>
@@ -603,6 +591,12 @@
     
     // make_skeleton().fadeOut();
     getQrCode();
+    $('.getFotoWajah').on('click', function(){
+      var foto = $(this).attr("foto");
+      var ngambilFoto = url+'/assets/image/foto-wajah/'+foto;
+      $('#getFoto').html('<img src="'+ngambilFoto+'" class="rounded mx-auto d-block" width="75%">');
+      $('#modal-foto').modal("show");
+    });
   })
 
   function getQrCode() {

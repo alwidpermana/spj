@@ -101,10 +101,51 @@
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-2">
+                    <label class="text-left labJudul">SPJ</label>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group clearfix">
+                          <div class="icheck-orange icheck-kps d-inline">
+                            <input 
+                              type="checkbox" 
+                              id="inputSpjDlv" 
+                              class="saveSPJ" 
+                              field="SPJ_DLV" 
+                              <?=$key->SPJ_DLV == 'Y'?'checked':''?>>
+                            <label for="inputSpjDlv">
+                              Delivery
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group clearfix">
+                          <div class="icheck-orange icheck-kps d-inline">
+                            <input 
+                              type="checkbox" 
+                              id="inputSpjNdv" 
+                              class="saveSPJ" 
+                              field="SPJ_NDV" 
+                              <?=$key->SPJ_NDV == 'Y'?'checked':''?>>
+                            <label for="inputSpjNdv">
+                              Non Delivery
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-2">
                     <label class="text-left labJudul">Subjek</label>
                   </div>
                   <div class="col-md-4">
-                    <select class="select2 form-control" id="inputSubjek">
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputSubjek">
                       <option value="">Pilih Subjek</option>
                       <option value="Internal" <?=$key->SUBJEK == 'Internal'?'selected':''?>>Internal</option>
                       <option value="Rental" <?=$key->SUBJEK == 'Rental'?'selected':''?>>Rental</option>
@@ -131,7 +172,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group clearfix">
-                        <div class="icheck-danger icheck-kps d-inline">
+                        <div class="icheck-orange icheck-kps d-inline">
                           <input 
                             type="checkbox" 
                             id="inputOtoritasDriver" 
@@ -148,7 +189,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group clearfix">
-                        <div class="icheck-danger icheck-kps d-inline">
+                        <div class="icheck-orange icheck-kps d-inline">
                           <input 
                             type="checkbox" 
                             id="inputOtoritasPendamping" 
@@ -165,7 +206,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group clearfix">
-                        <div class="icheck-danger icheck-kps d-inline">
+                        <div class="icheck-orange icheck-kps d-inline">
                           <input 
                             type="checkbox" 
                             id="inputUangMakan" 
@@ -173,7 +214,7 @@
                             field="OTORITAS_UANG_MAKAN"
                             <?=$key->OTORITAS_UANG_MAKAN == 'Y'?'checked':''?>>
                           <label for="inputUangMakan">
-                            Uang Makan
+                            Uang Makan <?=$key->OTORITAS_UANG_MAKAN?>
                           </label>
                         </div>
                       </div>
@@ -182,7 +223,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group clearfix">
-                        <div class="icheck-danger icheck-kps d-inline">
+                        <div class="icheck-orange icheck-kps d-inline">
                           <input 
                             type="checkbox" 
                             id="inputUangSaku" 
@@ -199,7 +240,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group clearfix">
-                        <div class="icheck-danger icheck-kps d-inline">
+                        <div class="icheck-orange icheck-kps d-inline">
                           <input 
                             type="checkbox" 
                             id="inputAdj" 
@@ -325,7 +366,7 @@
             <div class="row">
               <div class="col-md-2"></div>
               <div class="col-md-8">
-                <button type="button" class="btn btn-danger btn-kps btn-sm btn-block" id="btnSave">
+                <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="btnSave">
                   <i class="fas fa-save"></i>&nbsp;&nbsp;Save Data
                 </button>
               </div>
@@ -434,6 +475,28 @@
       var field = 'NO_SIM';
       saveData(isi, field);
     })
+    $('#inputSpjDlv').on('change', function(){
+      var inputSpjDlv = document.getElementById('inputSpjDlv');
+      if (inputSpjDlv.checked == true) {
+        var isi = 'Y';
+      }else{
+        var isi = 'N';
+      }
+
+      var field = $(this).attr("field");
+      saveData(isi, field);
+    })
+    $('#inputSpjNdv').on('change', function(){
+      var inputSpjNdv = document.getElementById('inputSpjNdv');
+      if (inputSpjNdv.checked == true) {
+        var isi = 'Y';
+      }else{
+        var isi = 'N';
+      }
+
+      var field = $(this).attr("field");
+      saveData(isi, field);
+    })
     $('#inputOtoritasDriver').on('change', function(){
       var inputOtoritasDriver = document.getElementById('inputOtoritasDriver');
       if (inputOtoritasDriver.checked == true) {
@@ -503,6 +566,8 @@
       var inputUangMakan = document.getElementById('inputUangMakan');
       var inputUangSaku = document.getElementById('inputUangSaku');
       var inputAdj = document.getElementById('inputAdj');
+      var inputSpjDlv = document.getElementById('inputSpjDlv');
+      var inputSpjNdv = document.getElementById('inputSpjNdv');
       var inputSIM = $('#inputSIM').val();
       var inputTerbit = $('#inputTerbit').val();
       var inputSd = $('#inputSd').val();
@@ -513,8 +578,11 @@
       var isiPendamping = inputOtoritasPendamping.checked == true ? 'Y' : 'N';
       var isiUangMakan = inputUangMakan.checked == true ? 'Y' : 'N';
       var isiUangSaku = inputUangSaku.checked == true ? 'Y' : 'N';
+      var isiSpjDlv = inputSpjDlv.checked == true ? 'Y' : 'N';
+      var isiSpjNdv = inputSpjNdv.checked == true ? 'Y' : 'N';
       var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
       var isi = '';
+      console.log(isiSpjDlv)
       if (isiDriver == 'Y' || isiPendamping == 'Y' || isiUangMakan == 'Y' || isiUangSaku == '' || isiAdj == '') {
         if (isiDriver == 'Y') {
           if (inputSIM == '') {

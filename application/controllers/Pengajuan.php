@@ -211,7 +211,8 @@ class Pengajuan extends CI_Controller {
 			}else{
 				$where = " AND NIK = '-'";
 				$where2 = '';
-			}		
+			}
+			$whereJenis = " AND SPJ_DLV = 'Y'";		
 		}else{
 			if ($jabatan == "Sopir") {
 				$where = " AND OTORITAS_DRIVER = 'Y' AND JENIS_DATA = 'Internal'";
@@ -226,9 +227,10 @@ class Pengajuan extends CI_Controller {
 				$where = " AND NIK = '-'";
 				$where2 = '';
 			}
+			$whereJenis = " AND SPJ_NDV = 'Y'";
 		}
 
-		$data = $this->M_Pengajuan->getPIC($inputSubjek, $jabatan, $where, $inputNoSPJ, $where2)->result();
+		$data = $this->M_Pengajuan->getPIC($inputSubjek, $jabatan, $where, $inputNoSPJ, $where2, $whereJenis)->result();
 		echo json_encode($data);
 	}
 	public function hitungUangSaku()
@@ -255,24 +257,26 @@ class Pengajuan extends CI_Controller {
         $cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $nik);
         
         if ($cekPIC->num_rows()>0) {
-        	foreach ($cekPIC->result() as $pic) {
-        		$jam2 += $pic->DIFF_HOUR;	
-        	}
+        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
 
-        	$totalJam = $jam+$jam2;
-        	if ($totalJam<=14) {
-        		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
-        	}else{
-        		$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
+    //     	foreach ($cekPIC->result() as $pic) {
+    //     		$jam2 += $pic->DIFF_HOUR;	
+    //     	}
+
+    //     	$totalJam = $jam+$jam2;
+    //     	if ($totalJam<=14) {
+    //     		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+    //     	}else{
+    //     		$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
 			
-				if ($data->num_rows()>0) {
-					foreach ($data->result() as $key) {
-						$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
-					}
-				} else {
-					$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-				}
-        	}
+				// if ($data->num_rows()>0) {
+				// 	foreach ($data->result() as $key) {
+				// 		$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
+				// 	}
+				// } else {
+				// 	$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
+				// }
+    //     	}
 
         } else {
         	$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
@@ -312,24 +316,25 @@ class Pengajuan extends CI_Controller {
 		$cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $inputPIC);
         
         if ($cekPIC->num_rows()>0) {
-        	foreach ($cekPIC->result() as $pic) {
-        		$jam2 += $pic->DIFF_HOUR;	
-        	}
+        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+    //     	foreach ($cekPIC->result() as $pic) {
+    //     		$jam2 += $pic->DIFF_HOUR;	
+    //     	}
 
-        	$totalJam = $jam+$jam2;
-        	if ($totalJam<=14) {
-        		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
-        	}else{
-        		$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
+    //     	$totalJam = $jam+$jam2;
+    //     	if ($totalJam<=14) {
+    //     		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+    //     	}else{
+    //     		$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
 			
-				if ($data->num_rows()>0) {
-					foreach ($data->result() as $key) {
-						$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
-					}
-				} else {
-					$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-				}
-        	}
+				// if ($data->num_rows()>0) {
+				// 	foreach ($data->result() as $key) {
+				// 		$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
+				// 	}
+				// } else {
+				// 	$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
+				// }
+    //     	}
 
         } else {
         	$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);

@@ -55,6 +55,8 @@
     kondisiKendaraan()
     pengaturanSortir();
     cekVoucher()
+    kondisiTombolLokasi();
+
     // make_skeleton().fadeOut();
     $('#afterNext').addClass("d-none");
     $('#beforeNext').removeClass("d-none");
@@ -64,11 +66,14 @@
       if (jenis !='') {
         getNoSPJ(jenis);
         disVoucher()
+        kondisiTombolLokasi();
         if (jenis == '1') {
           $('[name="inputAbnormal"]').removeAttr("disabled","disabled");
+          
         }else{
           $('[name="inputAbnormal"]').attr("disabled","disabled");
           document.getElementById("inputAbnormal").checked = false;
+          
         }
       }else{
         $('#inputNoSPJ').val('');
@@ -101,6 +106,8 @@
           Swal.fire("Pilih Terlebih Dahulu Jenis SPJ!","","warning");
         }else if(inputTglSPJ == ''){
           Swal.fire("Pilih Tanggal SPJ nya terlebih Dahulu!","","warning")
+        }else if(inputNoSPJ == ''){
+          Swal.fire("No SPJ Gagal Di Buat!","Mohon Untuk Reload Terlebih Dahulu Pada Halaman Ini","warning");
         }else{
           if (tglSekarang>inputTglSPJ) {
             Swal.fire("Tanggal SPJ Hanya Diperbolehkan Diisi Minimal Tanggal Hari Ini!","","warning")
@@ -109,7 +116,7 @@
               type:'post',
               dataType: 'json',
               data:{inputJenisSPJ, inputNoSPJ, inputTglSPJ},
-              url: 'saveTemporaryPengajuan',
+              url: url+'/pengajuan/saveTemporaryPengajuan',
               cache: false,
               async: true,
               beforeSend: function(data){
@@ -148,6 +155,15 @@
     });
     $('#inputKendaraan').on('change', function(){
       kondisiKendaraan()
+      var kendaraan = $(this).val();
+      if (kendaraan == 'Rental' || kendaraan == 'Pribadi') {
+        $('#inputNoInventaris').val("-")
+        $('#inputMerk').val("");
+        $('#inputType').val("");
+        $('#inputNoTNKB').val("");
+      }else{
+        $('#inputNoInventaris').val("")
+      }
     });
     $('#pilihKendaraan').on('click', function(){
       var inputKendaraan = $('#inputKendaraan').val();
@@ -155,7 +171,7 @@
       $.ajax({
         type:'get',
         data:{inputKendaraan, inputJenisKendaraan},
-        url:'pilihKendaraan',
+        url:url+'/Pengajuan/pilihKendaraan',
         cache: false,
         async: true,
         success: function(data){
@@ -184,7 +200,7 @@
         type: 'post',
         data: {inv, inputJenisKendaraan, noSPJ, tnkb, merk, tipe, kendaraan},
         dataType: 'json',
-        url: 'saveKendaraanSPJ',
+        url: url+'/pengajuan/saveKendaraanSPJ',
         cache: false,
         async: true,
         success: function(data){
@@ -195,7 +211,7 @@
         }
       })
     });
-
+    getLokasi();
     $('#inputGroupTujuan').on('change', function(){
       var id = $(this).val();
       if (id == '') {
@@ -206,7 +222,7 @@
           type: 'get',
           data: {id},
           dataType: 'json',
-          url: 'getViewJalur',
+          url: url+'/pengajuan/getViewJalur',
           async: true,
           cache: false,
           beforeSend: function(data){
@@ -264,7 +280,7 @@
         dataType:'json',
         async: true,
         cache: false,
-        url: 'findGroupTujuan',
+        url:url+'/pengajuan/findGroupTujuan',
         success: function(data){
           if (parseInt(data)>0) {
             $("select#inputGroupPerusahaan option[value='"+data+"']").prop("selected","selected");
@@ -307,7 +323,7 @@
             type:'post',
             dataType:'json',
             data:{inputPerusahaan, inputGroupTujuan, inputObjek, inputNoSPJ},
-            url: 'saveLokasiTujuan',
+            url:url+'/pengajuan/saveLokasiTujuan',
             cache: false,
             async: true,
             success: function(data){
@@ -356,7 +372,7 @@
         type: 'get',
         data:{nik},
         dataType: 'json',
-        url: 'getDataInputPIC',
+        url:url+'/pengajuan/getDataInputPIC',
         async: true,
         cache: false,
         success: function(data){
@@ -402,7 +418,7 @@
             type: 'get',
             dataType: 'json',
             data:{inputNoSPJ, inputGroupTujuan, inputPIC, inputJenisKendaraan},
-            url:'cekJumlahSupir',
+            url:url+'/pengajuan/cekJumlahSupir',
             async: true,
             cache: false,
             success: function(data){
@@ -460,7 +476,7 @@
         type: 'get',
         data:{inputNoSPJ},
         dataType: 'json',
-        url:'cekKelengkapanDataSPJ',
+        url:url+'/pengajuan/cekKelengkapanDataSPJ',
         async: true,
         cache: false,
         success: function(data){
@@ -491,7 +507,7 @@
         type:'post',
         data:{id},
         dataType: 'json',
-        url: 'hapusLokasi',
+        url:url+'/pengajuan/hapusLokasi',
         success: function(data){
           berhasil();
           getLokasi();
@@ -508,7 +524,7 @@
         type:'post',
         data:{id},
         dataType: 'json',
-        url: 'hapusPIC',
+        url:url+'/pengajuan/hapusPIC',
         cache: false,
         async: true,
         success: function(data){
@@ -571,6 +587,101 @@
     $('#inputMediaBBM').on('change', function(){
       kondisiBBM();
     });
+    $('#inputMediaTol').on('change', function(){
+      var isi = $(this).val();
+      if (isi == 'Kasbon') {
+        $('#inputTOL').removeAttr("readonly","readonly");
+      } else {
+        $('#inputTOL').val("");
+        $('#inputTOL').attr("readonly","readonly");
+      }
+    });
+    settingManualJalan();
+    $('#inputAbnormal').on('click', function(){
+      settingManualJalan();
+    });
+
+    $('#inputManualUangJalan').on('keyup', function(){
+      var isi = $(this).val();
+      $('#inputTotalUangJalan').val(isi)
+    });
+    $('.nextBiaya').on('click', function(){
+      var inputAbnormal = document.getElementById("inputAbnormal");
+      var inputManualUangJalan = $('#inputManualUangJalan').val();
+      if (inputAbnormal.checked == true && inputManualUangJalan == '') {
+        Swal.fire("Lengkapi Datanya Terlebih Dahulu!","","warning")
+      }else{
+        console.log("kontol")
+        console.log(inputAbnormal)
+        stepper.next()
+      }
+    })
+
+    var saveCustomerSerlok = $('.saveCustomerSerlok').ladda();
+      saveCustomerSerlok.click(function () {
+      // Start loading
+      saveCustomerSerlok.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var inputNoSPJ = $('#inputNoSPJ').val();
+        var customer = [];
+        $.each($('.inputSerlokCustomer:checked'), function(){
+          customer.push($(this).val());
+        })
+
+        $.ajax({
+          type:'post',
+          dataType:'json',
+          data:{inputNoSPJ, customer},
+          url:url+'/pengajuan/saveCustomerSerlok',
+          cache: false,
+          async: true,
+          success: function(data){
+            berhasil();
+            $('#modal-serlok').modal("hide");
+            getLokasi();
+            updateGroupTujuan()
+          },
+          error:function(data){
+            gagal()
+          }
+        });
+
+        saveCustomerSerlok.ladda('stop');
+        return false;
+          
+      }, 1000)
+    });
+
+      $('#btnCekProgramSerlok').on('click', function(){
+        cekOutGoingSerlok()
+      })
+
+      $( "#inputNoTNKB" ).autocomplete({
+      source: function( request, response ) {
+        // Fetch data
+        $.ajax({
+          url: url+"/pengajuan/getDataAutoCompleteKendaraanRental",
+          type: 'post',
+          dataType: "json",
+          data: {
+            search: request.term
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      select: function (event, ui) {
+        // Set selection
+        $('#inputNoTNKB').val(ui.item.label); // display the selected text
+        $('#inputMerk').val(ui.item.merk);
+        $('#inputType').val(ui.item.type); // save selected id to input
+        return false;
+      }
+    });
+
 
   })
   function getNoSPJ(jenis) {
@@ -579,7 +690,7 @@
       type:'get',
       dataType: 'json',
       data:{jenis},
-      url:'getNoSPJ',
+      url:url+'/pengajuan/getNoSPJ',
       cache: false,
       async: true,
       success: function(data){
@@ -596,7 +707,7 @@
     $.ajax({
       type: 'post',
       data:{no},
-      url: 'viewQrCode',
+      url: url+'/pengajuan/viewQrCode',
       cache: false,
       async: true,
       success: function(data){
@@ -613,14 +724,10 @@
       if (kendaraan == 'Rental' || kendaraan == 'Pribadi') {
         $('#pilihKendaraan').attr("disabled","disabled");
         $('.inputan').removeAttr("readonly","readonly");
-        $('#inputNoInventaris').val("-")
-        $('#inputMerk').val("");
-        $('#inputType').val("");
-        $('#inputNoTNKB').val("");
+        
       }else{
         $('#pilihKendaraan').removeAttr("disabled","disabled");
         $('.inputan').attr("readonly","readonly");
-        $('#inputNoInventaris').val("")
       }
   }
 
@@ -640,7 +747,7 @@
     $.ajax({
       type:'post',
       data:{query},
-      url:'getCustomerSerlok',
+      url:url+'/pengajuan/getCustomerSerlok',
       cache: false,
       async: true,
       dataType: 'json',
@@ -664,7 +771,7 @@
       $.ajax({
         type:'get',
         data:{inputNoSPJ, inputGroupTujuan},
-        url: 'getLokasi',
+        url: url+'/pengajuan/getLokasi',
         cache: false,
         async: true,
         success: function(data){
@@ -682,7 +789,7 @@
       type: 'post',
       data:{inputNoSPJ, inputGroupTujuan},
       dataType: 'json',
-      url: 'getPengajuanPIC',
+      url: url+'/pengajuan/getPengajuanPIC',
       cache: false,
       async: true,
       success: function(data){
@@ -729,7 +836,7 @@
         type:'get',
         dataType:'json',
         data:{inputSubjek, jabatan, inputJenisSPJ, inputNoSPJ},
-        url:'getNIKPic',
+        url:url+'/pengajuan/getNIKPic',
         cache: false,
         async: true,
         success: function(data){
@@ -755,7 +862,7 @@
       type:'get',
       dataType:'json',
       data:{inputSubjek, jabatan},
-      url:'getNIKPic',
+      url:url+'/pengajuan/getNIKPic',
       cache: false,
       async: true,
       success: function(data){
@@ -779,7 +886,7 @@
       type:'get',
       dataType:'json',
       data:{inputSubjek, jabatan},
-      url:'getNIKPic',
+      url:url+'/pengajuan/getNIKPic',
       cache: false,
       async: true,
       success: function(data){
@@ -878,7 +985,7 @@
         $.ajax({
           type: 'get',
           dataType: 'json',
-          url: 'hitungUangSaku',
+          url:url+'/pengajuan/hitungUangSaku',
           data:{
             inputJenisSPJ, 
             inputSubjek, 
@@ -921,7 +1028,7 @@
       type: 'get',
       dataType:'json',
       data:{inputJenisSPJ, inputGroupTujuan, inputPIC, inputTglSPJ},
-      url: 'hitungUangMakan',
+      url: url+'/pengajuan/hitungUangMakan',
       cache: false,
       async: true,
       success: function(data){
@@ -987,7 +1094,7 @@
             inputJabatan,
             inputNamaPIC
           },
-      url: 'savePIC',
+      url: url+'/pengajuan/savePIC',
       cache: false,
       async: true,
       success: function(data){
@@ -1015,7 +1122,7 @@
       type: 'get',
       dataType: 'json',
       data:{inputNoSPJ, inputGroupTujuan},
-      url:'getTotalUangSakuMakan',
+      url:url+'/pengajuan/getTotalUangSakuMakan',
       cache: false,
       asyncCallback: true,
       success: function(data){
@@ -1038,7 +1145,7 @@
       type: 'post',
       dataType: 'json',
       data:{inputNoSPJ, inputGroupTujuan},
-      url: 'saveGroupTujuanSPJ',
+      url: url+'/pengajuan/saveGroupTujuanSPJ',
       async: true,
       cache: false,
       success: function(data){
@@ -1055,7 +1162,7 @@
       type: 'get',
       data: {inputNoSPJ},
       dataType: 'json',
-      url: 'getUangJalanSPJ',
+      url:url+'/pengajuan/getUangJalanSPJ',
       cache: false,
       async: true,
       success: function(data){
@@ -1142,7 +1249,7 @@
             inputJenisSPJ
           },
         dataType: 'json',
-        url: 'saveSPJ',
+        url:url+'/pengajuan/saveSPJ',
         async: true,
         cache: false,
         success: function(data){
@@ -1163,7 +1270,7 @@
       type:'get',
       dataType:'json',
       data:{inputNoSPJ},
-      url: 'cekAdaDriver',
+      url: url+'/pengajuan/cekAdaDriver',
       async: true,
       cache: false,
       success: function(data){
@@ -1184,7 +1291,7 @@
       type:'get',
       dataType: 'json',
       data:{inputNoSPJ},
-      url:'cekManajemen',
+      url:url+'/pengajuan/cekManajemen',
       cache: false,
       async: true,
       success: function(data){
@@ -1206,7 +1313,7 @@
       type:'post',
       dataType:'json',
       data:{inputNoSPJ, inputTglBerangkat, inputJamBerangkat, inputTglPulang, inputJamPulang},
-      url: 'saveRencanaBerangkat',
+      url:url+'/pengajuan/saveRencanaBerangkat',
       cache: false,
       async: true,
       success: function(){
@@ -1226,16 +1333,21 @@
     var tipe = $('#inputType').val();
     var tnkb= $('#inputNoTNKB').val();
     var kendaraan = $('#inputKendaraan').val();
+    var inputJenisSPJ = $('#inputJenisSPJ').val();
     $.ajax({
       type: 'post',
       data: {inv, inputJenisKendaraan, noSPJ, tnkb, merk, tipe, kendaraan},
       dataType: 'json',
-      url: 'saveKendaraanSPJ',
+      url: url+'/pengajuan/saveKendaraanSPJ',
       cache: false,
       async: true,
       success: function(data){
         console.log(data);
         stepper.next()
+        if (inputJenisSPJ == 1) {
+          cekOutGoingSerlok();  
+        }
+        
       },
       error: function(data){
         console.log("error");
@@ -1249,7 +1361,7 @@
       type:'post',
       dataType:'json',
       data:{noSPJ},
-      url: 'hapusPICDriverCzMarketing',
+      url:url+'/pengajuan/hapusPICDriverCzMarketing',
       cache: false,
       async: true,
       success: function(data){
@@ -1267,7 +1379,7 @@
       type:'post',
       dataType: 'json',
       data:{inputNoSPJ},
-      url:'updateGroupTujuan',
+      url:url+'/pengajuan/updateGroupTujuan',
       cache: false,
       async: true,
       success: function(data){
@@ -1286,7 +1398,7 @@
       type:'get',
       data:{noSPJ},
       dataType: 'json',
-      url: 'getGroupSPJ',
+      url: url+'/pengajuan/getGroupSPJ',
       cache: false,
       async: true,
       success: function(data){
@@ -1305,7 +1417,7 @@
       type:'get',
       dataType:'json',
       data:{inputNoSPJ},
-      url:'cekPengajuanPIC',
+      url:url+'/pengajuan/cekPengajuanPIC',
       cache: false,
       async: true,
       success: function(data){
@@ -1334,7 +1446,7 @@
       type:'post',
       data:{inputNoSPJ, inputGroupTujuan, inputJenisSPJ, inputJenisKendaraan},
       dataType:'json',
-      url: 'updateOtomatisUangSPJ',
+      url:url+'/pengajuan/updateOtomatisUangSPJ',
       success: function(data){
         berhasil();
         stepper.next()
@@ -1354,10 +1466,17 @@
       $('#voucherBBM').removeClass("d-none")
       $('#manualBBM').addClass("d-none");
       getNoVoucher()
+      $('#inputBBMManual').val("");
     }else{
       $('#voucherBBM').addClass("d-none");
       $('#manualBBM').removeClass("d-none");
       $('#inputNoVoucher').val("");
+      if (inputMediaBBM == 'Kasbon') {
+        $('#inputBBMManual').removeAttr("readonly","readonly");
+      }else{
+        $('#inputBBMManual').attr("readonly","readonly");
+        $('#inputBBMManual').val("");
+      }
     }
   }
   function getNoVoucher() {
@@ -1376,8 +1495,70 @@
     })
   }
 
+  function cekOutGoingSerlok() {
+    var inputNoTNKB = $('#inputNoTNKB').val();
+    var inputTglSPJ = $('#inputTglSPJ').val();
+    $.ajax({
+      type:'get',
+      data:{inputNoTNKB, inputTglSPJ},
+      dataType:'json',
+      url:url+'/pengajuan/cekOutGoingSerlok',
+      cache: false,
+      async: true,
+      success: function(data){
+        var jmlData = data.length;
+        var html='';
+        if (jmlData>0) {
+          for (var i = 0; i < data.length; i++) {
+            html+='<tr>';
+            html+='<td>'+data[i].COMPANY_NAME+'</td>';
+            html+='<td>'+data[i].PLANT1_CITY+'</td>';
+            html+='<td>';
+            html+='<div class="form-group clearfix">';
+            html+='<div class="icheck-orange d-inline">';
+            html+='<input type="checkbox" class="inputSerlokCustomer" id="idSerlok'+data[i].ID+'" name="idSerlok'+data[i].ID+'" value="'+data[i].ID+'" checked>';
+            html+='<label for="idSerlok'+data[i].ID+'"></label>';
+            html+='</div>';
+            html+='</div>';
+            html+='</td>';
+            html+='</tr>';
+          }
+          $('#getSerlok').html(html);
+          $('#modal-serlok').modal('show')
+          $('#titleTNKB').html(inputNoTNKB);
+        }else{
+          Swal.fire(
+            "Data Outgoing di Program Serlok Untuk Kendaraan Dengan No TNKB "+inputNoTNKB+" Pada Tanggal "+inputTglSPJ+" Tidak Ditemukan",
+            "Hubungi PIC Terkait atau Masukan Data Secara Manual",
+            "info")
+        }
+        
 
+      },
+      error: function(data){
 
+      }
+    })
+  }
+
+  function kondisiTombolLokasi() {
+    var inputJenisSPJ = $('#inputJenisSPJ').val();
+    console.log(inputJenisSPJ)
+    if (inputJenisSPJ == '1') {
+      $('#inputKota').attr("disabled","disabled");
+      // $('#btnCekProgramSerlok').attr("disabled","disabled");
+      $('#btnCekProgramSerlok').removeAttr("disabled","disabled");
+      $('#tambahLokasi').attr("disabled","disabled");
+    } else {
+      $('#inputKota').removeAttr("disabled","disabled");
+      $('#btnCekProgramSerlok').attr("disabled","disabled");
+      // $('#btnCekProgramSerlok').removeAttr("disabled","disabled");
+      $('#tambahLokasi').removeAttr("disabled","disabled"); 
+    }
+    
+
+    
+  }
 
 
 
@@ -1425,6 +1606,17 @@
 
     rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
     return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
+  }
+
+  function settingManualJalan() {
+    var inputAbnormal = document.getElementById("inputAbnormal");
+    if (inputAbnormal.checked == true) {
+      $('#tampilTotalUangJalan').addClass("d-none");
+      $('#manualUangJalan').removeClass("d-none");
+    }else{
+      $('#tampilTotalUangJalan').removeClass("d-none");
+      $('#manualUangJalan').addClass("d-none");
+    }
   }
 
   function berhasil() {

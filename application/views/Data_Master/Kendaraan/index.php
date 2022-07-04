@@ -99,7 +99,6 @@
     $('.select2').select2({
         'width': '100%',
     });
-    $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     getTabel();
     $('.filter').on('change', function(){

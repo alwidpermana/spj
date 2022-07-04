@@ -4,7 +4,7 @@
   <title>SPJ | PT. KPS</title>
 
   <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet" href="<?=base_url()?>assets/dist/css/font.css">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="<?=base_url()?>assets/plugins/fontawesome-free/css/all.min.css">
   <!-- overlayScrollbars -->
@@ -17,6 +17,7 @@
       /*.navbar-kps{
   background-color: rgb(241, 250, 238);
 }*/
+
 .bg-kps{
   background-color: rgb(204, 88, 3);
   color: white;
@@ -35,6 +36,14 @@
   /*background-color: rgb(188, 108, 37);*/
 }
 .bg-orange:hover{
+    color:  white !important;
+    box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.7) !important;
+}
+.bg-orange:active{
+    color:  white !important;
+    box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.7) !important;
+}
+.bg-orange:focus{
     color:  white !important;
     box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.7) !important;
 }
@@ -78,18 +87,23 @@
   /*text-decoration-color: black;*/
   border-left-style: solid;
   border-left-color: rgb(239, 246, 238);
+ 
 
+}
+.list-menu-open{
+     margin-left: 10px !important; 
+     
 }
 .menu_sub{
   border-left-style: solid;
   border-left-color: rgb(239, 246, 238);
-  margin-left: 20px !important; 
+  margin-left: 10px !important; 
 
 }
 .menu_sub2{
   border-left-style: solid;
   border-left-color: rgb(239, 246, 238);
-  margin-left: 20px !important; 
+  margin-left: 10px !important; 
 
 }
 .link-kps:focus{

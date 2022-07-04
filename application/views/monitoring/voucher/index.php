@@ -34,7 +34,43 @@
         </div>
       </div>
     </div>
-    
+    <div class="modal fade" id="modal-credit" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>No SPJ</label>
+                  <input type="text" id="inputNoSPJ" class="form-control form-control-sm" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>No Voucher</label>
+                  <input type="text" id="inputNoVoucher" class="form-control form-control-sm" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Biaya</label>
+                  <input type="number" id="inputBiaya" class="form-control form-control-sm">
+                </div>
+              </div>
+            </div>
+            
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-orange btn-kps ladda-button saveDebit" data-style="expand-right" id="saveDebit">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <?php $this->load->view('_partial/footer');?>
 </div>
 <?php $this->load->view("_partial/js");?>
@@ -49,8 +85,58 @@
     $('.select2').select2({
         'width': '100%',
     });
+
     // $('.preloader').fadeOut('slow');
     getTabel();
+    $('#getTabel').on('click', '.getVoucher', function(){
+      var noVoucher = $(this).attr("noVoucher");
+      var noSPJ = $(this).attr("noSPJ");
+      var idSPJ = $(this).attr("idSPJ");
+      var credit = $(this).attr("credit");
+      $('#inputNoSPJ').val(noSPJ);
+      $('#inputNoVoucher').val(noVoucher);
+      $('#inputBiaya').val(credit)
+      document.getElementById("inputBiaya").focus()
+      $('#modal-credit').modal("show")
+      
+    });
+    var saveDebit = $('.saveDebit').ladda();
+      saveDebit.click(function () {
+      // Start loading
+      saveDebit.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var inputNoSPJ= $('#inputNoSPJ').val();
+        var inputBiaya = $('#inputBiaya').val();
+        var inputNoVoucher =$('#inputNoVoucher').val();
+        if (parseInt(inputBiaya)>0) {
+          $.ajax({
+            type:'post',
+            data:{inputNoSPJ, inputBiaya, inputNoVoucher},
+            cache: false,
+            async: true,
+            dataType:'json',
+            url:'saveNominalVoucherBBM',
+            success: function(data){
+              berhasil()
+              getTabel();
+              $('#modal-credit').modal("hide")
+            },
+            error: function(data){
+              gagal();
+            }
+          });
+        }else{
+          Swal.fire('Masukan Jumlah Biaya Voucher BBM Lebih dari Rp. 0!','','warning');
+        }
+        saveDebit.ladda('stop');
+        return false;
+          
+      }, 1000)
+    });
+
+
   })
     function getTabel() {
       $.ajax({
@@ -73,7 +159,27 @@
       })
     }
   
+    function berhasil() {
+      Swal.fire({
+        position: 'top-end',
+        toast : true,
+        icon: 'success',
+        title: 'Berhasil Menyimpan Data!',
+        showConfirmButton: false,
+        timer: 3000
+      })
+    }
 
+  function gagal() {
+    Swal.fire({
+      position: 'top-end',
+      toast : true,
+      icon: 'error',
+      title: 'Gagal Menyimpan Data! Hubungi Staff IT',
+      showConfirmButton: false,
+      timer: 3000
+    })
+  }
 </script>
 <!-- FootJS -->
 </body>

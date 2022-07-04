@@ -185,9 +185,10 @@
     var filJenis = $('#filJenis').val();
     var filStatus = $('#filStatus').val();
     var filGroup = $('#filGroup').val();
+    var filSearch = $('#filSearch').val();
     $.ajax({
       type:'get',
-      data:{filBulan, filTahun, filPeriode, filJenis, filStatus, filGroup},
+      data:{filBulan, filTahun, filPeriode, filJenis, filStatus, filGroup, filSearch},
       url:'getTabelStep1',
       cache: false,
       async: true,

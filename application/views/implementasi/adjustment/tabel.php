@@ -1,4 +1,4 @@
-<table class="table table-hover table-bordered table-striped " id="datatable" width="100%">
+<table class="table table-hover table-bordered table-striped <?=count($data)==1?'table-responsive':''?>" id="datatable" width="100%">
     <thead class="text-center bg-gray">
         <tr>
             <th rowspan="2">No</th>

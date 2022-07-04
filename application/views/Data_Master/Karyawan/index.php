@@ -83,7 +83,6 @@
     $('.select2').select2({
         'width': '100%',
     });
-    $('.preloader').fadeOut('slow');
     getTabel();
     $('.filter').on('change', function(){
       getTabel();

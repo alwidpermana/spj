@@ -53,7 +53,7 @@
                         <label>Bulan</label>
                         <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filBulan">
                           <?php foreach ($bulan as $angka => $bulan): ?>
-                            <option value="<?=$bulan?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
+                            <option value="<?=$angka?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
                           <?php endforeach ?>
                         </select>
                       </div>
@@ -185,6 +185,7 @@
         </div>
       </div>
     </div>
+    
     <?php $this->load->view('_partial/footer');?>
 </div>
 <?php $this->load->view("_partial/js");?>
@@ -248,7 +249,10 @@
           
       }, 1000)
     });
+
+    
   })
+  
   function getData() {
     var filTahun = $('#filTahun').val();
     var filBulan = $('#filBulan').val();

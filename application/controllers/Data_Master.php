@@ -340,7 +340,8 @@ class Data_Master extends CI_Controller {
 		$inputJenisKendaraan = $this->input->post("inputJenisKendaraan");
 		$inputQtyLokal = $this->input->post("inputQtyLokal") == ''?0:$this->input->post("inputQtyLokal");
 		$inputQtyLuarKota = $this->input->post("inputQtyLuarKota")==''?0:$this->input->post("inputQtyLuarKota");
-		$data = $this->M_Data_Master->saveJumlahPendamping($inputObjek, $inputJenisKendaraan, $inputQtyLokal, $inputQtyLuarKota);
+		// $data = $this->M_Data_Master->saveJumlahPendamping($inputObjek, $inputJenisKendaraan, $inputQtyLokal, $inputQtyLuarKota);
+		$data = $this->M_Data_Master->savePengajuanKonfigurasiJumlahPendamping($inputObjek, $inputJenisKendaraan, $inputQtyLokal, $inputQtyLuarKota);
 		echo json_encode($data);
 	}
 	public function getUangJalan()
@@ -353,7 +354,8 @@ class Data_Master extends CI_Controller {
 		$inputKategoriJalan = $this->input->post("inputKategoriJalan");
 		$inputKotaJalan = $this->input->post("inputKotaJalan");
 		$inputBiayaJalan = $this->input->post("inputBiayaJalan");
-		$data = $this->M_Data_Master->saveUangJalan($inputKategoriJalan, $inputKotaJalan, $inputBiayaJalan);
+		// $data = $this->M_Data_Master->saveUangJalan($inputKategoriJalan, $inputKotaJalan, $inputBiayaJalan);
+		$data = $this->M_Data_Master->savePengajuanKonfigurasiUangJalan($inputKategoriJalan, $inputKotaJalan, $inputBiayaJalan);
 		echo json_encode($data);
 	}
 	public function getUangSaku()
@@ -373,7 +375,8 @@ class Data_Master extends CI_Controller {
 		$inputBiayaRental = $this->input->post("inputBiayaRental"); 
 		$inputBiayaInternal = $this->input->post("inputBiayaInternal");
 		$value = [$inputJenisSPJ, $inputPIC, $inputJKendaraan, $inputGroupTujuan, $inputBiayaRental, $inputBiayaInternal];
-		$data = $this->M_Data_Master->saveUangSaku($value);
+		// $data = $this->M_Data_Master->saveUangSaku($value);
+		$data = $this->M_Data_Master->savePengajuanKonfigurasiUangSaku($value);
 		echo json_encode($data);
 	}
 	public function saveUangSakuNew()
@@ -384,7 +387,8 @@ class Data_Master extends CI_Controller {
 		$pic= $this->input->post("pic"); 
 		$jenisKendaraan= $this->input->post("jenisKendaraan"); 
 		$idGroup= $this->input->post("idGroup");
-		$data = $this->M_Data_Master->saveUangSakuNew($biaya, $field, $jenisSPJ, $pic, $jenisKendaraan, $idGroup);
+		// $data = $this->M_Data_Master->saveUangSakuNew($biaya, $field, $jenisSPJ, $pic, $jenisKendaraan, $idGroup);
+		$data = $this->M_Data_Master->savePengajuanKonfigurasiUangSaku($biaya, $field, $jenisSPJ, $pic, $jenisKendaraan, $idGroup);
 		echo json_encode($data);
 	}
 	public function hapusUangSaku()
@@ -423,7 +427,8 @@ class Data_Master extends CI_Controller {
 		$jenis = $this->input->post("jenis");
 		$grup = $this->input->post("grup");
 		$ke = $this->input->post("ke");
-		$data = $this->M_Data_Master->saveUangMakan($isi, $jenis, $grup, $ke);
+		// $data = $this->M_Data_Master->saveUangMakan($isi, $jenis, $grup, $ke);
+		$data = $this->M_Data_Master->savePengajuanKonfigurasiUangMakan($isi, $jenis, $grup, $ke);
 		echo json_encode($data);
 	}
 	public function Verifikasi_Karyawan()
@@ -492,7 +497,15 @@ class Data_Master extends CI_Controller {
 	{
 		$id = $this->input->post("id");
 		$qty = $this->input->post("qty");
-		$sql = $this->db->query("UPDATE SPJ_US_TAMBAHAN SET QTY = $qty WHERE ID = $id");
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $getID = $this->db->query("SELECT TIPE, JENIS_ID FROM SPJ_US_TAMBAHAN WHERE ID = $id");
+        foreach ($getID->result() as $key) {
+        	$sql = $this->db->query("INSERT INTO SPJ_VERIFIKASI_KONFIGURASI(TABEL_KONFIGURASI, TGL_INPUT, PIC_INPUT,JENIS_ID, QTY_1, FIELD_ID)VALUES('SPJ_US_TAMBAHAN','$tanggal','$user','$key->JENIS_ID','$qty','$key->TIPE')");
+        }
+        
+		// $sql = $this->db->query("UPDATE SPJ_US_TAMBAHAN SET QTY = $qty WHERE ID = $id");
 		echo json_encode($sql);
 	}
 	public function getJamTambahan()
@@ -504,7 +517,50 @@ class Data_Master extends CI_Controller {
 	{
 		$jam = $this->input->post("jam");
 		$field = $this->input->post("field");
-		$data = $this->M_Data_Master->saveJamTambahan($jam, $field);
+		// $data = $this->M_Data_Master->saveJamTambahan($jam, $field);
+		$data = $this->M_Data_Master->savePengajuanKonfigurasiJamTambahan($jam, $field);
+		echo json_encode($data);
+	}
+	public function verifikasi_konfigurasi()
+	{
+		$data['side'] = 'data_master-verif_konfig';
+		$data['page'] = 'Verifikasi Konfigurasi';
+		$this->load->view("Data_Master/Konfigurasi/Verifikasi/index", $data);
+	}
+	public function getDataVerifikasiKonfigurasi()
+	{
+		$filStatus = $this->input->get("filStatus");
+		$filJenis = $this->input->get("filJenis");
+		$data['data']=$this->M_Data_Master->getVerifikasiKonfigurasi($filJenis, $filStatus)->result();
+		$this->load->view("Data_Master/Konfigurasi/Verifikasi/data", $data);
+	}
+	public function approvedVerifikasiKonfigurasi()
+	{
+		$id = $this->input->post("id");
+		$status = $this->input->post("status");
+		if ($status == 'APPROVED') {
+			$getData = $this->db->query("SELECT * FROM SPJ_VERIFIKASI_KONFIGURASI WHERE ID = $id")->result();
+			foreach ($getData as $key) {
+				if ($key->TABEL_KONFIGURASI == 'SPJ_JUMLAH_PENDAMPING') {
+					$data = $this->M_Data_Master->saveJumlahPendamping($key->JENIS_ID, $key->JENIS, $key->QTY_1, $key->QTY_2);
+				}elseif($key->TABEL_KONFIGURASI == 'SPJ_UANG_JALAN'){
+					$data = $this->M_Data_Master->saveUangJalan($key->JENIS_ID, $key->FIELD_ID, $key->QTY_1);
+				}elseif ($key->TABEL_KONFIGURASI == 'SPJ_UANG_MAKAN') {
+					$data = $this->M_Data_Master->saveUangMakan($key->QTY_1, $key->JENIS_ID, $key->JENIS, $key->FIELD_ID);
+				}elseif($key->TABEL_KONFIGURASI == 'SPJ_UANG_SAKU'){
+					$biaya = $key->QTY_1 == null ? $key->QTY_2 : $key->QTY_1;
+					$field = $key->QTY_1 == null ? 'BIAYA_RENTAL' : 'BIAYA_INTERNAL';
+					$data = $this->M_Data_Master->saveUangSakuNew($biaya, $field, $key->JENIS_ID, $key->JENIS, $key->JENIS_2, $key->FIELD_ID);
+				}elseif ($key->TABEL_KONFIGURASI == 'SPJ_US_TAMBAHAN') {
+					$data = $this->db->query("UPDATE SPJ_US_TAMBAHAN SET QTY = $key->QTY_1 WHERE TIPE = $key->FIELD_ID AND JENIS_ID = $key->JENIS_ID");
+				}elseif ($key->TABEL_KONFIGURASI == 'SPJ_JAM_TAMBAHAN') {
+					$field = $key->QTY_1 == null?'JAM2':'JAM1';
+					$jam = $key->QTY_1 == null?$key->QTY_2:$key->QTY_1;
+					$data = $this->M_Data_Master->saveJamTambahan($jam, $field);
+				}
+			}
+		}
+		$data = $this->M_Data_Master->verifikasiKonfigurasi($id, $status);
 		echo json_encode($data);
 	}
 

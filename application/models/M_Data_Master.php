@@ -427,7 +427,6 @@
 			} else {
 				$save = "UPDATE SPJ_JUMLAH_PENDAMPING SET QTY_LOKAL = $inputQtyLokal, QTY_LUAR_KOTA = $inputQtyLuarKota,TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE ID_JENIS_SPJ = $inputObjek AND JENIS_KENDARAAN = '$inputJenisKendaraan'";
 			}
-			
 			return $this->db->query($save);
 		}
 		public function getUangJalan()
@@ -839,11 +838,11 @@
 		{
 			$gabung = 'MSM';
 			$cekNoDoc=$this->db->query("SELECT MAX
-											( RIGHT ( NO_VOUCHER, 6 ) ) AS SETVOUCHER 
+											( RIGHT ( VOUCHER_BBM, 6 ) ) AS SETVOUCHER 
 										FROM
-											SPJ_VOUCHER_BBM 
+											SPJ_PENGAJUAN 
 										WHERE
-											NO_VOUCHER LIKE 'MSM%' AND STATUS!= 'DELETED' OR STATUS IS NULL AND NO_VOUCHER LIKE 'MSM%' ");
+											VOUCHER_BBM LIKE 'MSM%' AND STATUS_DATA = 'SAVED'");
 			foreach ($cekNoDoc->result() as $data) {
 	            if ($data->SETVOUCHER =="") {
 	                $URUTZERO = $gabung."000001";
@@ -895,16 +894,16 @@
 			$sql.=" ORDER BY NO_VOUCHER DESC";
 			return $this->db->query($sql);
 		}
-		public function saveVoucherBBM($no, $rp, $id)
+		public function saveVoucherBBM($no, $rp)
 		{
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
-			$getVoucher = $this->db->query("SELECT NO_VOUCHER FROM SPJ_VOUCHER_BBM WHERE NO_VOUCHER = '$no' AND STATUS != 'DELETED'");
+			$getVoucher = $this->db->query("SELECT ID FROM SPJ_VOUCHER_BBM WHERE NO_VOUCHER = '$no' AND STATUS != 'DELETED'");
 			if ($getVoucher->num_rows()==0) {
-				$sql = "INSERT INTO SPJ_VOUCHER_BBM VALUES('$no','$rp','NOT','$tanggal','$user')";
+				$sql = "INSERT INTO SPJ_VOUCHER_BBM VALUES('$no','$rp','USED','$tanggal','$user')";
 			} else {
-				$sql ="UPDATE SPJ_VOUCHER_BBM SET RP = '$rp', TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE ID = '$id'";
+				$sql ="UPDATE SPJ_VOUCHER_BBM SET RP = '$rp', TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE NO_VOUCHER = '$no'";
 			}
 			return $this->db->query($sql);
 			
@@ -972,6 +971,89 @@
 		public function saveJamTambahan($jam, $field)
 		{
 			$sql = "UPDATE SPJ_JAM_TAMBAHAN SET $field = $jam";
+			return $this->db->query($sql);
+		}
+		public function savePengajuanKonfigurasiJumlahPendamping($inputObjek, $inputJenisKendaraan, $inputQtyLokal, $inputQtyLuarKota)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			$sql = "INSERT INTO SPJ_VERIFIKASI_KONFIGURASI(TABEL_KONFIGURASI, TGL_INPUT, PIC_INPUT, JENIS_ID, QTY_1, QTY_2, JENIS) VALUES('SPJ_JUMLAH_PENDAMPING','$tanggal','$user','$inputObjek','$inputQtyLokal','$inputQtyLuarKota','$inputJenisKendaraan')";
+			return $this->db->query($sql);
+		}
+		public function savePengajuanKonfigurasiUangJalan($inputKategoriJalan, $inputKotaJalan, $inputBiayaJalan)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			$sql = "INSERT INTO SPJ_VERIFIKASI_KONFIGURASI(TABEL_KONFIGURASI, TGL_INPUT, PIC_INPUT, JENIS_ID, QTY_1, FIELD_ID)VALUES('SPJ_UANG_JALAN','$tanggal','$user','$inputKategoriJalan','$inputBiayaJalan','$inputKotaJalan')";
+			return $this->db->query($sql);
+		}
+		public function savePengajuanKonfigurasiUangSaku($biaya, $field, $jenisSPJ, $pic, $jenisKendaraan, $idGroup)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+            $fi = $field == 'BIAYA_INTERNAL' ? 'QTY_1':'QTY_2';
+			$sql = "INSERT INTO SPJ_VERIFIKASI_KONFIGURASI(TABEL_KONFIGURASI, TGL_INPUT, PIC_INPUT, JENIS_ID, $fi, JENIS, JENIS_2, FIELD_ID) VALUES('SPJ_UANG_SAKU','$tanggal','$user', '$jenisSPJ', $biaya, '$pic','$jenisKendaraan', '$idGroup')";
+			return $this->db->query($sql);
+		}
+		public function savePengajuanKonfigurasiUangMakan($isi, $jenis, $grup, $ke)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			$sql = "INSERT INTO SPJ_VERIFIKASI_KONFIGURASI(TABEL_KONFIGURASI, TGL_INPUT, PIC_INPUT, JENIS_ID,QTY_1, JENIS, FIELD_ID)VALUES('SPJ_UANG_MAKAN','$tanggal','$user', '$jenis',$isi,'$grup',$ke )";
+			return $this->db->query($sql);
+		}
+		public function savePengajuanKonfigurasiJamTambahan($jam, $field)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			$fi = $field == 'JAM1'?'QTY_1':'QTY_2';
+			$sql = "INSERT INTO SPJ_VERIFIKASI_KONFIGURASI(TABEL_KONFIGURASI,TGL_INPUT, PIC_INPUT, $fi)VALUES('SPJ_JAM_TAMBAHAN','$tanggal','$user',$jam)";
+			return $this->db->query($sql);
+		}
+		public function getVerifikasiKonfigurasi($jenis, $status)
+		{
+			$sql = "SELECT TOP 100
+						SUBSTRING(TABEL_KONFIGURASI, 5, 100) AS KONFIGURASI,
+						a.*,
+						b.namapeg AS NAMA_PENGAJU,
+						c.NAMA_JENIS,
+						d.NAMA_KOTA,
+						e.NAMA_GROUP,
+						f.namapeg AS NAMA_APPROVE
+					FROM
+						SPJ_VERIFIKASI_KONFIGURASI a
+					LEFT JOIN
+						dbhrm.dbo.tbPegawai b
+					ON a.PIC_INPUT = b.nik
+					LEFT JOIN
+						SPJ_JENIS c 
+					ON c.ID_JENIS = a.JENIS_ID
+					LEFT JOIN
+						SPJ_KOTA d
+					ON a.FIELD_ID = d.ID_KOTA
+					LEFT JOIN
+						SPJ_GROUP_TUJUAN e
+					ON a.FIELD_ID = e.ID_GROUP
+					LEFT JOIN
+						dbhrm.dbo.tbPegawai f
+					ON a.PIC_APPROVE = f.nik
+					WHERE
+						TABEL_KONFIGURASI LIKE '$jenis%' $status
+					ORDER BY
+						a.TGL_INPUT DESC";
+			return $this->db->query($sql);
+		}
+		public function verifikasiKonfigurasi($id, $status)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			$sql = "UPDATE SPJ_VERIFIKASI_KONFIGURASI SET STATUS_APPROVE = '$status', TGL_APPROVE='$tanggal', PIC_APPROVE='$user' WHERE ID=$id";
 			return $this->db->query($sql);
 		}
 	}

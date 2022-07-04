@@ -10,6 +10,7 @@ class Monitoring extends CI_Controller {
 		$this->load->model('M_Pengajuan');
 		$this->load->model('M_Serlok');
 		$this->load->model('M_Monitoring');
+		$this->load->model('M_Implementasi');
 		$this->load->library('pdfgenerator');
 	}
 	/**
@@ -33,6 +34,7 @@ class Monitoring extends CI_Controller {
 		$data['page'] = 'Monitoring SPJ';
 		$data['side'] = 'monitoring-spj';
 		$data['status'] = $status;
+		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
 		$this->load->view('monitoring/spj/index', $data);
 	}
 	public function getTabelSPJ()
@@ -52,9 +54,21 @@ class Monitoring extends CI_Controller {
 	{
 		$data['page'] = 'View SPJ';
 		$data['side'] = 'monitoring-spj';
+		$getData = $this->db->query("SELECT NO_SPJ, JENIS_ID FROM SPJ_PENGAJUAN WHERE ID_SPJ = $id");
+		foreach ($getData->result() as $key) {
+			$no_spj = $key->NO_SPJ;
+			$jenisId = $key->JENIS_ID;
+		}
 		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id = $id, $adjustment='','')->result();
 		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
-		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['pic'] = $this->M_Monitoring->getPICPengajuanVersi2($no_spj)->result();
+		$data['validasi'] = $this->M_Implementasi->getValidasiSPJ($no_spj)->result();
+		$data['jam_tambahan'] = $this->M_Data_Master->getJamTambahan()->result();
+		$where = "WHERE ID_JENIS = $jenisId";
+		$data['tambahan'] = $this->M_Data_Master->viewTambahanUangSaku($where)->result();
+		$data['uang_makan'] = $this->M_Data_Master->getUangMakan()->result();
+		$data['adjustment'] = $this->M_Implementasi->getDataAdjustment($no_spj)->result();
+		$data['realisasi'] = $this->M_Implementasi->realisasiBiayaSPJ($no_spj)->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
 		if ($id=='') {
 			redirect("Monitoring/spj");
@@ -154,6 +168,15 @@ class Monitoring extends CI_Controller {
 		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $jenisID='', $filSearch='', $id='')->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $jenisID='', $filSearch='', $id='')->result();
 		$this->load->view("monitoring/voucher/tabel", $data);
+	}
+	public function saveNominalVoucherBBM()
+	{
+		$inputNoSPJ = $this->input->post("inputNoSPJ");
+		$inputNoVoucher = $this->input->post("inputNoVoucher");
+		$inputBiaya = $this->input->post("inputBiaya");
+		$data = $this->M_Monitoring->saveNominalVoucherBBM($inputNoSPJ, $inputBiaya);
+		$this->M_Monitoring->saveVoucherBBM($inputNoVoucher, $inputBiaya);
+		echo json_encode($data);
 	}
 	public function generate_spj()
 	{
@@ -280,5 +303,12 @@ class Monitoring extends CI_Controller {
 		$data['data'] = $this->M_Monitoring->getMonitoringPICKe2($filBulan, $filTahun)->result();
 		$data['pic'] = $this->M_Monitoring->getMonitoringPICKe2Detail($filBulan, $filTahun)->result();
 		$this->load->view("monitoring/pic_2/tabel", $data);
+	}
+	public function cancelSPJ()
+	{
+		$id = $this->input->post("id");
+		$status = $this->input->post("status");
+		$data = $this->db->query("UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = '$status' WHERE ID_SPJ = $id");
+		echo json_encode($data);
 	}
 }

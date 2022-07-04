@@ -312,7 +312,7 @@
                               id="US1OK" 
                               name="US1" 
                               value="OK" 
-                              class="inputKeputusan otoritas" checked>
+                              class="inputKeputusan otoritas kondisiUS1" checked>
                             <label for="US1OK">
                               OK
                             </label>
@@ -325,7 +325,7 @@
                               id="US1NG" 
                               name="US1" 
                               value="NG" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiUS1">
                             <label for="US1NG">
                               NG
                             </label>
@@ -333,7 +333,7 @@
                         </div>
                         <input type="hidden" id="inputKeputusanUS1" value="OK">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUS1Keterangan" rows="2">Otomatis</textarea></td>
+                      <td><textarea class="form-control otoritas kondisiUS1" id="inputUS1Keterangan" rows="2">Otomatis</textarea></td>
                     </tr>
                     <tr>
                       <td class="text-left">Uang Saku Jam Ke > 4</td>
@@ -354,7 +354,7 @@
                               id="US2OK" 
                               name="US2" 
                               value="OK" 
-                              class="inputKeputusan otoritas" checked>
+                              class="inputKeputusan otoritas kondisiUS2" checked>
                             <label for="US2OK">
                               OK
                             </label>
@@ -367,7 +367,7 @@
                               id="US2NG" 
                               name="US2" 
                               value="NG" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiUS2">
                             <label for="US2NG">
                               NG
                             </label>
@@ -375,7 +375,7 @@
                         </div>
                         <input type="hidden" id="inputKeputusanUS2" value="OK">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUS2Keterangan" rows="2">Otomatis</textarea></td>
+                      <td><textarea class="form-control otoritas kondisiUS2" id="inputUS2Keterangan" rows="2">Otomatis</textarea></td>
                     </tr>
                     <tr>
                       <td class="text-left">Uang Makan Ke 2</td>
@@ -396,7 +396,7 @@
                               id="UM2OK" 
                               name="UM" 
                               value="OK" 
-                              class="inputKeputusan otoritas" checked>
+                              class="inputKeputusan otoritas kondisiUM" checked>
                             <label for="UM2OK">
                               OK
                             </label>
@@ -409,7 +409,7 @@
                               id="UM2NG" 
                               name="UM" 
                               value="NG" 
-                              class="inputKeputusan otoritas">
+                              class="inputKeputusan otoritas kondisiUM">
                             <label for="UM2NG">
                               NG
                             </label>
@@ -417,12 +417,13 @@
                         </div>
                         <input type="hidden" id="inputKeputusanUM" value="OK">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUMKeterangan" rows="2">Otomatis</textarea></td>
+                      <td><textarea class="form-control otoritas kondisiUM" id="inputUMKeterangan" rows="2">Otomatis</textarea></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
+            <input type="hidden" id="inputManajemen">
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -471,7 +472,7 @@
     $.ajax({
       dataType:'json',
       data:{noSPJ},
-      url:'getBiayaNormal',
+      url:url+'/Implementasi/getBiayaNormal',
       type:'get',
       cache: false,
       async: true,
@@ -511,34 +512,43 @@
         $('#inputUMKeterangan').val(data.uangUMKeterangan);
         $('#inputUS1Keterangan').val(data.uangUS1Keterangan);
         $('#inputUS2Keterangan').val(data.uangUS2Keterangan)
-        $('#inputKeputusanUS1').val(data.uangUS1Keputusan)
-        $('#inputKeputusanUS2').val(data.uangUS2Keputusan)
-        $('#inputKeputusanUM').val(data.uangUMKeputusan)
+        $('#inputManajemen').val(data.manajemen);
+        
+        
         if (data.uangUS1Keputusan == 'OK') {
           $('[name="US1"]#USOK').attr("checked","checked");
+          $('#inputKeputusanUS1').val("OK")
         }else if(data.uangUS1Keputusan == 'NG'){
           $('[name="US1"]#USNG').attr("checked","checked")
+          $('#inputKeputusanUS1').val("NG")
         }else{
-          $('[name="US1"]#USOK').removeAttr("checked","checked")
+          $('[name="US1"]#USOK').attr("checked","checked")
           $('[name="US1"]#USNG').removeAttr("checked","checked")
+          $('#inputKeputusanUS1').val("OK")
         }
 
         if (data.uangUS2Keputusan == 'OK') {
           $('[name="US2"]#US2OK').attr("checked","checked");
+          $('#inputKeputusanUS2').val("OK")
         }else if(data.uangUS2Keputusan == 'NG'){
           $('[name="US2"]#US2NG').attr("checked","checked")
+          $('#inputKeputusanUS2').val("NG")
         }else{
-          $('[name="US2"]#US2OK').removeAttr("checked","checked")
+          $('[name="US2"]#US2OK').attr("checked","checked")
           $('[name="US2"]#US2NG').removeAttr("checked","checked")
+          $('#inputKeputusanUS2').val("OK")
         }
 
         if (data.uangUMKeputusan == 'OK') {
           $('[name="UM"]#UM2OK').attr("checked","checked");
+          $('#inputKeputusanUM').val("OK")
         }else if(data.uangUMKeputusan == 'NG'){
           $('[name="UM"]#UM2NG').attr("checked","checked")
+          $('#inputKeputusanUM').val("NG")
         }else{
-          $('[name="UM"]#UM2OK').removeAttr("checked","checked")
+          $('[name="UM"]#UM2OK').attr("checked","checked")
           $('[name="UM"]#UM2NG').removeAttr("checked","checked")
+          $('#inputKeputusanUM').val("OK")
         }
 
         if (data.uangBBMKeputusan == 'OK') {
@@ -572,35 +582,69 @@
           $('[name="uangJalan"]#UJNG').removeAttr("checked","checked")
         }
         $('#inputUangJalanKeterangan').val(data.uangJalanKeterangan);
-        if (data.uangMakanStatus == 'CLOSE') {
+        
+        if (data.manajemen == 'Y') {
+          if (data.uangMakanStatus == 'CLOSE') {
+            $('.kondisiUangMakan').attr("readonly","readonly");
+            $('.kondisiUangMakan2').attr("disabled","disabled");
+          }else{
+            $('.kondisiUangMakan').removeAttr("readonly","readonly");
+            $('.kondisiUangMakan2').removeAttr("disabled","disabled");
+          }
+
+          if (data.uangJalanStatus == 'CLOSE') {
+            $('.kondisiUangJalan').attr("readonly","readonly");
+            $('.kondisiUangJalan2').attr("disabled","disabled");
+          }else{
+            $('.kondisiUangJalan').removeAttr("readonly","readonly");
+            $('.kondisiUangJalan2').removeAttr("disabled","disabled");
+          }
+
+          if (data.uangBBMStatus == 'CLOSE') {
+            $('.kondisiBBM').attr("readonly","readonly");
+            $('.kondisiBBM2').attr("disabled","disabled");
+          }else{
+            $('.kondisiBBM').removeAttr("readonly","readonly");
+            $('.kondisiBBM2').removeAttr("disabled","disabled");
+          }
+        }else{
           $('.kondisiUangMakan').attr("readonly","readonly");
           $('.kondisiUangMakan2').attr("disabled","disabled");
-        }else{
-          $('.kondisiUangMakan').removeAttr("readonly","readonly");
-          $('.kondisiUangMakan2').removeAttr("disabled","disabled");
-        }
-
-        if (data.uangJalanStatus == 'CLOSE') {
           $('.kondisiUangJalan').attr("readonly","readonly");
           $('.kondisiUangJalan2').attr("disabled","disabled");
-        }else{
-          $('.kondisiUangJalan').removeAttr("readonly","readonly");
-          $('.kondisiUangJalan2').removeAttr("disabled","disabled");
-        }
-
-        if (data.uangBBMStatus == 'CLOSE') {
           $('.kondisiBBM').attr("readonly","readonly");
           $('.kondisiBBM2').attr("disabled","disabled");
+        }
+        
+
+        if (data.uangUS1Status == 'CLOSE') {
+          $('.kondisiUS1').attr("disabled","disabled");
         }else{
-          $('.kondisiBBM').removeAttr("readonly","readonly");
-          $('.kondisiBBM2').removeAttr("disabled","disabled");
+          $('.kondisiUS1').removeAttr("disabled","disabled");
         }
 
-        if (data.jmlOpen>0) {
-          $('.saveOtoritas').removeAttr("disabled","disabled")
+        if (data.uangUS2Status == 'CLOSE') {
+          $('.kondisiUS2').attr("disabled","disabled");
         }else{
-          $('.saveOtoritas').attr("disabled","disabled")
+          $('.kondisiUS2').removeAttr("disabled","disabled");
         }
+
+        if (data.uangUMStatus == 'CLOSE') {
+          $('.kondisiUM').attr("disabled","disabled");
+        }else{
+          $('.kondisiUM').removeAttr("disabled","disabled");
+        }
+
+        if (data.manajemen == 'Y') {
+          if (data.jmlOpen>0) {
+            $('.saveOtoritas').removeAttr("disabled","disabled")
+          }else{
+            $('.saveOtoritas').attr("disabled","disabled")
+          } 
+        }else{
+          $('.saveOtoritas').removeAttr("disabled","disabled")
+        }
+        
 
       },
       error: function(data){
@@ -662,7 +706,7 @@
         var awalUangJalan = $('#awalUangJalan').val();
         var inputBBMDiajukan = $('#inputBBMDiajukan').val();
         var awalBBM = $('#awalBBM').val();
-        
+        var inputManajemen = $('#inputManajemen').val();
 
         if (inputUangMakanDiajukan > awalUangMakan) {
           Swal.fire("Jumlah Uang Makan Melebihi Pengajuan!","Uang Makan Yang Di Revisi Tidak Boleh Lebih Dari Pengajuan","warning");
@@ -671,7 +715,7 @@
         }else if(inputBBMDiajukan > awalBBM){
           Swal.fire("Jumlah Uang BBM Melebihi Pengajuan!","Uang BBM Yang Di Revisi Tidak Boleh Lebih Dari Pengajuan","warning");
         }else{
-          saveKeputusan()
+          saveKeputusan(inputManajemen)
         }
         saveOtoritas.ladda('stop');
         return false;
@@ -716,7 +760,7 @@
     $.ajax({
       type:'get',
       data:{filBulan, filTahun, filPeriode, filJenis, filStatus, filGroup},
-      url:'getTabelOutstanding',
+      url:url+'/Implementasi/getTabelOutstanding',
       cache: false,
       async: true,
       beforeSend: function(data){
@@ -800,28 +844,43 @@
     }
   }
 
-  function saveKeputusan() {
+  function saveKeputusan(inputManajemen) {
     var inputUangMakanDiajukan = $('#inputUangMakanDiajukan').val();
     var inputUangJalanDiajukan = $('#inputUangJalanDiajukan').val();
     var inputBBMDiajukan = $('#inputBBMDiajukan').val();
     var inputUS1Diajukan = $('#inputUS1Diajukan').val();
     var inputUS2Diajukan = $('#inputUS2Diajukan').val();
     var inputUMDiajukan = $('#inputUMDiajukan').val();
-    var inputKeputusanBBM = $('#inputKeputusanBBM').val();
+    var inputKeputusanBBM = inputManajemen == '' ? '-': $('#inputKeputusanBBM').val();
     var inputKeputusanUS1 = $('#inputKeputusanUS1').val();
     var inputKeputusanUS2 = $('#inputKeputusanUS2').val();
     var inputKeputusanUM = $('#inputKeputusanUM').val();
-    var inputKeputusanUangMakan = $('#inputKeputusanUangMakan').val();
-    var inputKeputusanUangJalan = $('#inputKeputusanUangJalan').val();
-    var inputUangJalanKeterangan = $('#inputUangJalanKeterangan').val();
-    var inputUangMakanKeterangan = $('#inputUangMakanKeterangan').val();
+    var inputKeputusanUangMakan = inputManajemen == '' ? '-': $('#inputKeputusanUangMakan').val();
+    var inputKeputusanUangJalan = inputManajemen == '' ? '-': $('#inputKeputusanUangJalan').val();
+    var inputUangJalanKeterangan = inputManajemen == '' ? '-': $('#inputUangJalanKeterangan').val();
+    var inputUangMakanKeterangan = inputManajemen == '' ? '-': $('#inputUangMakanKeterangan').val();
     var inputUS1Keterangan = $('#inputUS1Keterangan').val();
     var inputUS2Keterangan = $('#inputUS2Keterangan').val();
     var inputUMKeterangan = $('#inputUMKeterangan').val();
-    var inputBBMKeterangan = $('#inputBBMKeterangan').val();
+    var inputBBMKeterangan = inputManajemen == '' ? '-': $('#inputBBMKeterangan').val();
     var inputNoSPJ = $('#inputNoSPJ').val();
-    if (inputKeputusanBBM == '' || inputKeputusanUangJalan == ''|| inputKeputusanUangMakan == '' || inputUangJalanKeterangan == '' || inputUangJalanKeterangan == '' || inputBBMKeterangan == '' || inputKeputusanUS1 == '' || inputKeputusanUS2 == '' || inputKeputusanUM == '' || inputUS1Keterangan == '' || inputUS2Keterangan == '' || inputUMKeterangan == '') {
+    // console.log("keputusan BBM ="+inputKeputusanBBM)
+    // console.log("keputusan Uang Jalan ="+inputKeputusanUangJalan)
+    // console.log("keputusan BBM ="+inputKeputusanUangMakan)
+    // console.log("keputusan BBM ="+inputUangJalanKeterangan)
+    // console.log("keputusan BBM ="+inputUangMakanKeterangan)
+    // console.log("keputusan BBM ="+inputBBMKeterangan)
+    // console.log("keputusan BBM ="+inputKeputusanUS1)
+    // console.log("keputusan BBM ="+inputKeputusanUS2)
+    // console.log("keputusan BBM ="+inputKeputusanUM)
+    // console.log("keputusan BBM ="+inputUS1Keterangan)
+    // console.log("keputusan BBM ="+inputUS2Keterangan)
+    // console.log("keputusan BBM ="+inputUMKeterangan)
+    if (inputKeputusanBBM == '' || inputKeputusanUangJalan == ''|| inputKeputusanUangMakan == '' || inputUangMakanKeterangan == '' || inputUangJalanKeterangan == '' || inputBBMKeterangan == '') {
       Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu","","warning")
+
+    }else if(inputKeputusanUS1 == '' || inputKeputusanUS2 == '' || inputKeputusanUM == '' || inputUS1Keterangan == '' || inputUS2Keterangan == '' || inputUMKeterangan == ''){
+      Swal.fire
     }else{
       $.ajax({
         type:'post',
@@ -844,10 +903,11 @@
           inputUS1Keterangan,
           inputUS2Keterangan,
           inputUMKeterangan,
-          inputNoSPJ
+          inputNoSPJ,
+          inputManajemen
         },
         dataType:'json',
-        url:'saveKeputusanAdjustment',
+        url:url+'/Implementasi/saveKeputusanAdjustment',
         cache: false,
         async: true,
         success: function(data){

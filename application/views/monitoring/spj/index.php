@@ -68,7 +68,10 @@
                   <div class="form-group">
                     <label>Jenis SPJ</label>
                     <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
-                     
+                      <option value="">ALL</option>
+                      <?php foreach ($spj as $key): ?>
+                      <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
+                      <?php endforeach ?>
                     </select>
                   </div>
                 </div>
@@ -112,13 +115,40 @@
     $('.select2').select2({
         'width': '100%',
     });
-    $('.preloader').fadeOut('slow');
+    
     $('.ladda-button').ladda('bind', {timeout: 1000});
     getTabel();
     var status = '<?=$status?>';
     if (status == 'berhasil') {
       berhasil();
     }
+
+    $('.filter').on('change', function(){
+      getTabel();
+    })
+    $('#search').submit(function(e){
+      e.preventDefault();
+      getTabel();
+    })
+    $('#getTabel').on('click','.btnCancel', function(){
+      var id = $(this).attr("data");
+      var status = $(this).attr("data");
+      $.ajax({
+        type:'post',
+        dataType:'json',
+        data:{id, status},
+        url:'cancelSPJ',
+        cache: false,
+        async:true,
+        success: function(data){
+          berhasil();
+          getTabel();
+        },
+        error: function(data){
+          gagal()
+        }
+      });
+    });
   })
 
   function getTabel() {
@@ -133,8 +163,14 @@
       url:'getTabelSPJ',
       cache: false,
       async: true,
+      beforeSend: function(data){
+        $('.preloader').show();
+      },
       success: function(data){
         $('#getTabel').html(data);
+      },
+      complete: function(data){
+        $('.preloader').fadeOut('slow');
       },
       error: function(data){
 

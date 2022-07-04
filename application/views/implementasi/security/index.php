@@ -14,6 +14,12 @@
       height: auto;
 
     }
+    .fokusKendaraan{
+      border-style: solid !important;
+      border-color: #f4a261 !important;
+      border-radius: 7px;
+      border-width: 2.5px;
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse layout-navbar-fixed layout-footer-fixed">
@@ -93,6 +99,7 @@
    $('#inputScan').on('keyup', function(){
     var scan = $(this).val();
     cekSPJ(scan);
+
    })
   })
   
@@ -101,7 +108,7 @@
       type:'get',
       data:{scan},
       dataType:'json',
-      url:'cekSPJ',
+      url:url+'/Implementasi/cekSPJ',
       cache: false,
       async: true,
       beforeSend: function(data){
@@ -109,14 +116,14 @@
       },
       success: function(data){
         if (data==0) {
-          Swal.fire({
-            position: 'top-end',
-            toast : true,
-            icon: 'info',
-            title: 'Tidak Ditemukan SPJ dengan QrCode Tersebut!',
-            showConfirmButton: false,
-            timer: 3000
-          })
+          // Swal.fire({
+          //   position: 'top-end',
+          //   toast : true,
+          //   icon: 'info',
+          //   title: 'Tidak Ditemukan SPJ dengan QrCode Tersebut!',
+          //   showConfirmButton: false,
+          //   timer: 3000
+          // })
         } else {
           Swal.fire({
             position: 'top-end',
@@ -126,6 +133,7 @@
             showConfirmButton: false,
             timer: 3000
           })
+          
           getSPJ(scan)
         }
       },
@@ -150,7 +158,7 @@
     $.ajax({
       type:'get',
       data:{scan},
-      url:'getSPJ',
+      url:url+'/Implementasi/getSPJ',
       cache:false,
       async: true,
       beforeSend:function(data){

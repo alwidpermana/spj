@@ -1,3 +1,4 @@
+
 <?php 
 date_default_timezone_set('Asia/Jakarta');
 foreach ($data as $key): ?>
@@ -159,7 +160,7 @@ foreach ($data as $key): ?>
 </div>
 <div class="row">
   <div class="col-md-12">
-    <div class="card">
+    <div class="card" id="kartuKendaraan">
       <div class="card-header">
         <div class="card-title">2. Kendaraan</div>
       </div>
@@ -288,15 +289,22 @@ foreach ($data as $key): ?>
             $berangkat='';
             $pulang='';
             foreach ($validasi as $vld) {
-              $kendaraan = $vld->KENDARAAN;
-              $ketKendaraan = $vld->KETERANGAN_KENDARAAN;
+              if ($key->STATUS_PERJALANAN == null) {
+                $kendaraan = $vld->KENDARAAN;
+                $ketKendaraan = $vld->KETERANGAN_KENDARAAN;
+                
+              }else{
+                $kendaraan = $vld->KENDARAAN_IN;
+                $ketKendaraan = $vld->KETERANGAN_KENDARAAN_IN;
+              }
               $berangkat = $vld->KEBERANGKATAN;
               $pulang = $vld->KEPULANGAN;
+              
             }
           ?>
-          <div class="col-md-4">
+          <div class="col-md-4 <?=$kendaraan=='OK' || $kendaraan == 'NG'?'':'fokusKendaraan'?>" id="kolomKendaraan">
             <div class="form-group clearfix">
-              <label>Verifikasi Kendaraan</label>
+              <label>Verifikasi Kendaraan </label>
               <div class="row">
                 <div class="col-md-4">
                   <div class="icheck-orange icheck-kps d-inline">
@@ -451,7 +459,7 @@ foreach ($data as $key): ?>
                 </thead>
                 <tbody>
                   <?php foreach ($pic2 as $pc2): ?>
-                    <tr>
+                    <tr class="<?=$key->STATUS_PERJALANAN == 'IN' ? '' : 'fokusKendaraan'?>" id="<?=$pc2->NIK?>">
                       <td><?=$pc2->JENIS_PIC?></td>
                       <td><?=$pc2->OBJEK?></td>
                       <td>
@@ -697,7 +705,7 @@ foreach ($data as $key): ?>
                       </center>
                     </td>
                   </tr>
-                  <tr>
+                  <tr class="<?=$key->STATUS_PERJALANAN == 'OUT' ? 'fokusKendaraan':''?>" id="rowkepulangan">
                     <td class="text-left">Kepulangan</td>
                     <td><?=date("d F Y", strtotime($key->RENCANA_PULANG))?></td>
                     <td><?=date("H:i", strtotime($key->RENCANA_PULANG))?></td>
@@ -797,6 +805,9 @@ foreach ($data as $key): ?>
 <?php endforeach ?>
 <script type="text/javascript">
   $(document).ready(function(){
+    // $('html, body').animate({
+    //     scrollTop: $("#kartuKendaraan").offset().top
+    // }, 1000);
     $('.validasiPIC').on('click', function(){
       var isi = $(this).val();
       var nik = $(this).attr("nik");
@@ -817,6 +828,7 @@ foreach ($data as $key): ?>
       }else{
         $('.validasiKeteranganPIC#keteranganIn'+nik).val(isiKeterangan);
       }
+      $('#'+nik).removeClass("fokusKendaraan")
       saveValidasiPIC(isi, nik, noSPJ, field);
       saveValidasiPIC(isiKeterangan, nik, noSPJ, fieldKeterangan);
     })
@@ -831,12 +843,13 @@ foreach ($data as $key): ?>
       var isi = $(this).val();
       $('#inputVerifKendaraan').val(isi);
       if (isi == 'OK') {
-        $('#inputKeteranganKendaraan').val("PIC Sudah Sesuai Dengan SPJ")
+        $('#inputKeteranganKendaraan').val("Kendaraan Sudah Sesuai Dengan SPJ")
       }else if(isi == 'NG'){
-        $('#inputKeteranganKendaraan').val("PIC Tidak Sesuai Dengan SPJ")
+        $('#inputKeteranganKendaraan').val("Kendaraan Tidak Sesuai Dengan SPJ")
       }else{
         $('#inputKeteranganKendaraan').val("");
       }
+      $('#kolomKendaraan').removeClass("fokusKendaraan");
     });
     var saveCheckOut = $('.saveCheckOut').ladda();
       saveCheckOut.click(function () {
@@ -853,7 +866,7 @@ foreach ($data as $key): ?>
           data:{inputNoSPJ, jenis},
           cache: false,
           async: true,
-          url:'cekValidasiPIC',
+          url:url+'/Implementasi/cekValidasiPIC',
           dataType:'json',
           success: function(data){
             if (parseInt(data) == 0) {
@@ -885,31 +898,38 @@ foreach ($data as $key): ?>
       setTimeout(function () {
         
         var inputNoSPJ = $('#inputNoSPJ').val();
-        var jenis = 'In';
-        $.ajax({
-          type:'get',
-          data:{inputNoSPJ, jenis},
-          cache: false,
-          async: true,
-          url:'cekValidasiPIC',
-          dataType:'json',
-          success: function(data){
-            if (parseInt(data) == 0) {
-              // if (jenis == 'Out') {
-              //   saveValidasiOut()
-              // } else {
-                saveValidasiIn()
-              // }
-                saveUangTambahan();
-              console.log(jenis)
-            } else {
-              Swal.fire('Verifikasi PIC Terlebih Dahulu!',"","warning")
+        var inputKMIn = parseInt($('#inputKMIn').val());
+        if (inputKMIn >0) {
+          var jenis = 'In';
+          $.ajax({
+            type:'get',
+            data:{inputNoSPJ, jenis},
+            cache: false,
+            async: true,
+            url:url+'/Implementasi/cekValidasiPIC',
+            dataType:'json',
+            success: function(data){
+              if (parseInt(data) == 0) {
+                // if (jenis == 'Out') {
+                //   saveValidasiOut()
+                // } else {
+                  saveValidasiIn()
+                // }
+                  // saveUangTambahan();
+                console.log(jenis)
+              } else {
+                Swal.fire('Verifikasi PIC Terlebih Dahulu!',"","warning")
+              }
+            },
+            error: function(data){
+              Swal.fire("Terjadi Error Pada Program!","Hubungi Segera Staff IT","error");
             }
-          },
-          error: function(data){
-            Swal.fire("Terjadi Error Pada Program!","Hubungi Segera Staff IT","error");
-          }
-        });
+          });
+        } else {
+          Swal.fire("Masukan KM In lebih dari 0!","","warning")
+        }
+        
+        
         saveCheckIn.ladda('stop');
         return false;
           
@@ -922,6 +942,9 @@ foreach ($data as $key): ?>
       $('#getFoto').html('<img src="'+ngambilFoto+'" class="rounded mx-auto d-block" width="75%">');
       $('#modal-foto').modal("show");
     });
+    $('#inputKMIn').on('keyup', function(){
+      $('#rowkepulangan').removeClass("fokusKendaraan")
+    })
     
 
   });
@@ -932,7 +955,7 @@ foreach ($data as $key): ?>
       dataType:'json',
       cache: false,
       async: true,
-      url:'saveValidasiPIC',
+      url:url+'/Implementasi/saveValidasiPIC',
       success: function(data){
         // berhasil()
       },
@@ -953,7 +976,7 @@ foreach ($data as $key): ?>
         type:'post',
         data:{inputNoSPJ, inputVerifikasiKendaraan, inputKeteranganKendaraan, inputKMOut},
         dataType: 'json',
-        url: 'saveValidasiOut',
+        url: url+'/Implementasi/saveValidasiOut',
         cache: false,
         async: true,
         success: function(data){
@@ -979,7 +1002,7 @@ foreach ($data as $key): ?>
         type:'post',
         data:{inputNoSPJ, inputVerifikasiKendaraan, inputKeteranganKendaraan, inputKMIn, inputNoTNKB},
         dataType: 'json',
-        url: 'saveValidasiIn',
+        url: url+'/Implementasi/saveValidasiIn',
         cache: false,
         async: true,
         success: function(data){
@@ -998,7 +1021,7 @@ foreach ($data as $key): ?>
       type:'post',
       data:{inputNoSPJ,inputJenisId},
       dataType:'json',
-      url:'saveUangTambahan',
+      url:url+'/Implementasi/saveUangTambahan',
       cache: false,
       async: true,
       success: function(data){

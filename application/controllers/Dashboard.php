@@ -7,7 +7,7 @@ class Dashboard extends CI_Controller {
 		// $this->load->model('M_Login');
 		
 		$this->load->library('form_validation');
-		$this->load->model('M_Data_Master');
+		$this->load->model('M_Monitoring');
 		if($this->session->userdata('status') != "login"){
 	 		redirect(base_url("Auth/index"));
 	 	}
@@ -31,13 +31,20 @@ class Dashboard extends CI_Controller {
 	{
 		$data['page'] = '';
 		$data['side'] = 'dashboard';
-		$data['kota'] = $this->M_Data_Master->getKotaKabDis()->result();
 		$this->load->view('Dashboard/index', $data);
-		// if($this->session->userdata('status') == "login"){
-	 		
-	 // 	}else{
-	 // 		redirect(base_url("Auth/index"));		
-	 // 	}
+		
 		
 	}
+	public function pageTest()
+	{
+		$data['page'] = '-';
+		$data['side'] = '-';
+		$this->load->view('Dashboard/test', $data);
+	}
+	public function getJmlSPJForDashboard()
+	{
+		$data = $this->M_Monitoring->getJmlSPJForDashboard()->result();
+		echo json_encode($data);
+	}
+	
 }

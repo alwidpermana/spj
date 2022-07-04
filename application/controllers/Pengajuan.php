@@ -36,6 +36,20 @@ class Pengajuan extends CI_Controller {
 		$data['kota'] = $this->M_Data_Master->getKotaKabDis()->result();
 		$this->load->view("pengajuan/form/index2", $data);
 	}
+	public function form_edit($id)
+	{
+		$this->load->model('M_Monitoring');
+		$data['data']= $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='',$id, $adjustment='','')->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['side'] = 'spj-pengajuan';
+		$data['page'] = 'Form Pengajuan';
+		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['kendaraan'] = $this->M_Data_Master->getKategoriKendaraan()->result();
+		$data['jenis'] = $this->M_Data_Master->getJenisKendaraan()->result();
+		$data['group'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
+		$data['kota'] = $this->M_Data_Master->getKotaKabDis()->result();
+		$this->load->view("pengajuan/form/edit", $data);
+	}
 	public function getNoSPJ()
 	{
 		$jenis = $this->input->get("jenis");
@@ -92,6 +106,26 @@ class Pengajuan extends CI_Controller {
 		$data = $this->M_Data_Master->getGroupJalur($id)->result();
 		echo json_encode($data);
 	}
+	public function saveCustomerSerlok()
+	{
+		$inputNoSPJ = $this->input->post("inputNoSPJ");
+		$customer = $this->input->post("customer");
+		$jmlCustomer = count($customer);
+		for ($i=0; $i <$jmlCustomer ; $i++) { 
+			$serlok = $this->M_Serlok->getCustomerByGroup($query="", $customer[$i])->result();
+			$serlokKota = '';
+			foreach ($serlok as $key) {
+				$serlokID = $key->id;
+				$serlokAlamat = $key->ALAMAT_LENGKAP_PLANT;
+				$serlokPerusahaan = $key->COMPANY_NAME;
+				$serlokKota = $key->nama_kabkota;
+			}
+			$kota = substr($serlokKota, 0, 5) == 'KOTA ' ? substr($serlokKota, 5):$serlokKota;
+			$group = $this->M_Pengajuan->findGroupTujuan($kota);
+			$data = $this->M_Pengajuan->saveLokasiTujuan($group, 'Customer', $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota);
+		}
+		echo json_encode($data);
+	}
 	public function getCustomerSerlok()
 	{
 		$query = $this->input->post("query");
@@ -131,6 +165,13 @@ class Pengajuan extends CI_Controller {
 		$data = $this->M_Pengajuan->saveLokasiTujuan($inputGroupTujuan, $inputObjek, $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota);
 		echo json_encode($data);
 
+	}
+	public function cekOutGoingSerlok()
+	{
+		$inputNoTNKB = $this->input->get("inputNoTNKB");
+		$inputTglSPJ = $this->input->get("inputTglSPJ");
+		$data = $this->M_Serlok->getSPJByOutGoing($inputNoTNKB, $inputTglSPJ)->result();
+		echo json_encode($data);
 	}
 	public function updateGroupTujuan()
 	{
@@ -520,5 +561,22 @@ class Pengajuan extends CI_Controller {
 		}
 		echo json_encode($data);
 	}
+	public function getDataAutoCompleteKendaraanRental(){
+	    // POST data
+	    // $cari = $this->input->get('cari');
+	    // $jenis = $this->input->get("jenis");
+	    $postData = $this->input->post();
+	    // if ($jenis == 'tnkb') {
+	    // 	$sql = " AND NO_TNKB LIKE '%$cari'%";
+	    // }elseif($jenis == 'merk'){
+	    // 	$sql = " AND MERK LIKE '%$cari%'";
+	    // }else{
+	    // 	$sql = " AND TYPE LIKE '%$cari%'";
+	    // }
+	    // Get data
+	    $data = $this->M_Pengajuan->getKendaraanWithAutoComplete($postData);
+	    echo json_encode($data);
+	}
+
 
 }

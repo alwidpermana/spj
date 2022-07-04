@@ -44,7 +44,7 @@
 				<td><?=$key->QR_CODE?></td>
 				<td><?=$key->JENIS_TRANSAKSI?></td>
 				<?php if ($jenis == 'BBM'): ?>
-					<td><?=$key->NO_VOUCHER?></td>
+					<td><?=$key->VOUCHER_BBM?></td>
 				<?php endif ?>
 				<td><?=$key->NAMA_GROUP?></td>
 				<td>
@@ -73,7 +73,10 @@
 				<td><?=$key->TYPE?></td>
 				<td><?=$key->NO_TNKB?></td>
 				<td><?=str_replace(',', '.', number_format($key->DEBIT, 0))?></td>
-				<td><?=str_replace(',', '.', number_format($key->CREDIT, 0))?></td>
+				<td>
+					<?=str_replace(',', '.', number_format($key->CREDIT, 0))?>
+						
+				</td>
 				<td><?=str_replace(',', '.', number_format($key->SALDO, 0))?></td>
 				<td><?=$key->STATUS?></td>
 			</tr>

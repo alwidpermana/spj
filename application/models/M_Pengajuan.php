@@ -138,7 +138,13 @@ class M_Pengajuan extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-		$sql = "INSERT INTO SPJ_PENGAJUAN_LOKASI VALUES($serlokID, '$serlokAlamat','$serlokPerusahaan','$serlokKota','$inputNoSPJ','$inputGroupTujuan','$inputObjek','$tanggal','$user')";
+        $getData = $this->db->query("SELECT ID_LOKASI FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$inputNoSPJ' AND SERLOK_ID = $serlokID");
+        if ($getData->num_rows()==0) {
+        	$sql = "INSERT INTO SPJ_PENGAJUAN_LOKASI VALUES($serlokID, '$serlokAlamat','$serlokPerusahaan','$serlokKota','$inputNoSPJ','$inputGroupTujuan','$inputObjek','$tanggal','$user')";	
+        }else{
+        	$sql = "UPDATE SPJ_PENGAJUAN_LOKASI SET SERLOK_ALAMAT = '$serlokAlamat', SERLOK_COMPANY = '$serlokPerusahaan', SERLOK_KOTA = '$serlokKota', GROUP_ID = '$inputGroupTujuan', OBJEK = '$inputObjek', TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE NO_SPJ = '$inputNoSPJ' AND SERLOK_ID = $serlokID";
+        }
+		
 		return $this->db->query($sql);
 	}
 	public function updateGroupTujuan($no)
@@ -245,7 +251,8 @@ class M_Pengajuan extends CI_Model {
 						SPJ_TEMP_PIC
 				)Q3 ON Q1.NIK = Q3.PIC
 				WHERE
-					Q2.NIK IS NULL";
+					Q2.NIK IS NULL AND 
+					Q3.PIC IS NULL";
 		return $this->db->query($sql);
 	}
 	public function saveOtomatisUangSPJ($id, $group, $biaya)
@@ -667,6 +674,9 @@ class M_Pengajuan extends CI_Model {
         $inputIdVoucher = $this->input->post("inputIdVoucher");
         $inputTOL = $this->input->post("inputTOL");
         $inputJenisSPJ = $this->input->post("inputJenisSPJ");
+        $inputNoVoucher = $this->input->post("inputNoVoucher");
+        $inputMediaBBM = $this->input->post("inputMediaBBM");
+        $inputMediaTOL = $this->input->post("inputMediaTOL");
         date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
@@ -676,19 +686,19 @@ class M_Pengajuan extends CI_Model {
 	        $inputTotalUangMakan = $key->TOTAL_UANG_MAKAN;
 	        $inputTotalUangJalan = $key->TOTAL_UANG_JALAN;	
         }
-		$biayaBBM = $inputIdVoucher == 0 ? $inputBBM : 0;
-        $kasbonSPJ = $inputTotalUangSaku + $inputTotalUangJalan + $inputTotalUangMakan + $biayaBBM;
+        $biayaBBM = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
+        $biayaTol = $inputMediaTOL == 'Kasbon' ? $inputTOL : 0;
+        $kasbonSPJ = $inputTotalUangSaku + $inputTotalUangJalan + $inputTotalUangMakan + $biayaBBM + $biayaTol;
         $jenisSPJ = $inputJenisSPJ == 1 ? 'Delivery' : 'Non Delivery';
         $detail = $inputJenisSPJ == 1 ? 'PPIC' : 'Finance';
        	$sql = $this->db->query("Execute SPJ_tambahBiayaKasbon 'SPJ','spj','$kasbonSPJ','$inputNoSPJ','$jenisSPJ','$user','$tanggal'");
 
-       	if ($inputIdVoucher >0) {
-       		$sql = $this->db->query("Execute SPJ_tambahBiayaKasbon 'BBM','spj','$inputBBM','$inputNoSPJ','-','$user','$tanggal'");
-       		$sql = $this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'USED' WHERE ID = '$inputIdVoucher'");
+       	if ($inputMediaBBM =='Voucher') {
+       		$sql = $this->db->query("Execute SPJ_tambahBiayaKasbon 'BBM','spj','$biayaBBM','$inputNoSPJ','-','$user','$tanggal'");
        	}
 
-       	if ($inputTOL>0 || $inputTOL != '') {
-       		$sql = $this->db->query("Execute SPJ_tambahBiayaKasbon 'TOL','spj','$inputTOL','$inputNoSPJ','$detail','$user','$tanggal'");
+       	if ($inputMediaTOL == 'Reimburse') {
+       		$sql = $this->db->query("Execute SPJ_tambahBiayaKasbon 'TOL','spj','$biayaTol','$inputNoSPJ','$detail','$user','$tanggal'");
        	}
 
         return $sql;
@@ -768,5 +778,28 @@ class M_Pengajuan extends CI_Model {
 		$sql = $this->db->query("UPDATE SPJ_PENGAJUAN_PIC SET UANG_MAKAN = 0 WHERE NO_PENGAJUAN= '$noSPJ'");
 		$sql = $this->db->query("UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_MAKAN = 0, TOTAL_UANG_JALAN = 0, ADJUSTMENT_MANAJEMEN = 'Y' WHERE NO_SPJ = '$noSPJ'");
 		return $sql;
+	}
+	public function getKendaraanWithAutoComplete($postData)
+	{
+		$cari = $postData['search'];
+		$sql = $this->db->query("SELECT TOP 10
+					ID_SPJ,
+					NO_TNKB,
+					MERK,
+					TYPE
+				FROM
+					SPJ_PENGAJUAN
+				WHERE
+					KENDARAAN = 'Rental' AND NO_TNKB LIKE '%$cari%'
+				ORDER BY ID_SPJ DESC");
+		foreach ($sql->result() as $key) {
+			$response[] = array("merk"=>$key->MERK,"label"=>$key->NO_TNKB,"type"=>$key->TYPE);			
+		}
+		// if ($sql->num_rows()>0) {
+
+		// }else{
+		// 	$response[] = array("value"=>$key->ID_SPJ,"label"=>$key->NO_TNKB);
+		// }
+		return $response;
 	}
 }

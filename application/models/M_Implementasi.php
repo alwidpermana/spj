@@ -88,7 +88,7 @@ class M_Implementasi extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-        $sql = $this->db->query("UPDATE SPJ_VALIDASI SET KENDARAAN = '$verifKendaraan', KETERANGAN_KENDARAAN = '$ketKendaraan', KEPULANGAN = '$tanggal', PIC_IN ='$user', KM_IN = '$km' WHERE NO_SPJ = '$noSPJ'");
+        $sql = $this->db->query("UPDATE SPJ_VALIDASI SET KENDARAAN_IN = '$verifKendaraan', KETERANGAN_KENDARAAN_IN = '$ketKendaraan', KEPULANGAN = '$tanggal', PIC_IN ='$user', KM_IN = '$km' WHERE NO_SPJ = '$noSPJ'");
         $this->db->query("UPDATE SPJ_PENGAJUAN SET STATUS_PERJALANAN = 'IN' WHERE NO_SPJ = '$noSPJ'");
 		$this->db->query("UPDATE SPJ_VALIDASI_PIC SET STATUS_DATA = 'IN' WHERE NO_SPJ = '$noSPJ'");
 		return $sql;
@@ -111,7 +111,9 @@ class M_Implementasi extends CI_Model {
 					REALISASI_UANG_MAKAN,
 					REALISASI_UANG_BBM,
 					REALISASI_UANG_JALAN,
-					REALISASI_UANG_TOL
+					REALISASI_UANG_TOL,
+					KENDARAAN_IN,
+					KETERANGAN_KENDARAAN_IN
 				FROM
 					[dbo].[SPJ_VALIDASI]
 				WHERE
@@ -155,17 +157,42 @@ class M_Implementasi extends CI_Model {
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
-        $user = $this->session->userdata("NIK");
         $statusUS1 = $uangSaku1 >0 ?'OUTSTANDING':'CLOSE';
         $statusUS2 = $uangSaku2 >0 ?'OUTSTANDING':'CLOSE';
         $statusMakan = $uangMakan >0 ?'OUTSTANDING':'CLOSE';
 		$getData = $this->db->query("SELECT ID FROM SPJ_BIAYA_TAMBAHAN WHERE NO_SPJ = '$inputNoSPJ'");
 		if ($getData->num_rows()==0) {
-			$sql = "INSERT INTO SPJ_BIAYA_TAMBAHAN VALUES('$inputNoSPJ','$uangSaku1','$uangSaku2','$uangMakan','$statusUS1','$statusUS2','$statusMakan','$user','$user','$user','$tanggal','$tanggal','$tanggal')";
+			$sql = "INSERT INTO SPJ_BIAYA_TAMBAHAN VALUES('$inputNoSPJ','$uangSaku1','$uangSaku2','$uangMakan','$statusUS1','$statusUS2','$statusMakan','SYSTEM','SYSTEM','SYSTEM','$tanggal','$tanggal','$tanggal', null, null, null, null, null, null)";
 		} else {
-			$sql = "UPDATE SPJ_BIAYA_TAMBAHAN SET UANG_SAKU1 = '$uangSaku1', UANG_SAKU2='$uangSaku2', UANG_MAKAN = '$uangMakan', STATUS_US1='$statusUS1', STATUS_US2='$statusUS2', STATUS_MAKAN = '$statusMakan', PIC_US1='$user', PIC_US2='$user', PIC_MAKAN='$user', TGL_US1='$tanggal', TGL_US2 = '$tanggal', TGL_MAKAN='$tanggal' WHERE NO_SPJ = '$inputNoSPJ'";
+			$sql = "UPDATE SPJ_BIAYA_TAMBAHAN SET UANG_SAKU1 = '$uangSaku1', UANG_SAKU2='$uangSaku2', UANG_MAKAN = '$uangMakan', STATUS_US1='$statusUS1', STATUS_US2='$statusUS2', STATUS_MAKAN = '$statusMakan', PIC_US1='SYSTEM', PIC_US2='SYSTEM', PIC_MAKAN='SYSTEM', TGL_US1='$tanggal', TGL_US2 = '$tanggal', TGL_MAKAN='$tanggal' WHERE NO_SPJ = '$inputNoSPJ'";
 		}
 		return $this->db->query($sql);
+	}
+	public function saveAdjustmentUangTambah($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $um = $this->db->query("SELECT ID FROM SPJ_ADJUSTMENT WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UM'");
+        if ($um->num_rows()==0) {
+        	$this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS, PIC_PENGAJU, TGL_PENGAJU)VALUES('$inputNoSPJ','UM','$uangMakan','Otomatis','OPEN','System','$tanggal')");
+        } else {
+        	$this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$uangMakan' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UM'");
+        }
+
+        $us1 = $this->db->query("SELECT ID FROM SPJ_ADJUSTMENT WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'US1'");
+        if ($us1->num_rows()==0) {
+        	$this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS, PIC_PENGAJU, TGL_PENGAJU)VALUES('$inputNoSPJ','US1','$uangMakan','Otomatis','OPEN','System','$tanggal')");
+        } else {
+        	$this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$uangMakan' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'US1'");
+        }
+
+        $us2 = $this->db->query("SELECT ID FROM SPJ_ADJUSTMENT WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'US2'");
+        if ($us2->num_rows()==0) {
+        	$this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS, PIC_PENGAJU, TGL_PENGAJU)VALUES('$inputNoSPJ','US2','$uangMakan','Otomatis','OPEN','System','$tanggal')");
+        } else {
+        	$this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$uangMakan' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'US2'");
+        }
+		
 	}
 	public function getUangMakanNormalAdjustment($noSPJ)
 	{
@@ -237,6 +264,63 @@ class M_Implementasi extends CI_Model {
 					NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);
 	}
+	public function getDataAdjustment2($noSPJ)
+	{
+		$sql = "SELECT
+					NO_SPJ,
+					'US1' AS OBJEK,
+					UANG_SAKU1 AS DIAJUKAN,
+					'Otomatis' AS ALASAN,
+					CASE 
+						WHEN KEPUTUSAN_US1 = 'NG' THEN 'NG'
+						ELSE 'OK'
+					END AS KEPUTUSAN,
+					KETERANGAN_US1 AS KETERANGAN,
+					'System' AS KETERANGAN,
+					PIC_US1 AS PIC_PENGAJU,
+					STATUS_US1 AS STATUS
+				FROM
+					SPJ_BIAYA_TAMBAHAN
+				WHERE
+					NO_SPJ = '$noSPJ'
+				UNION
+				SELECT
+					NO_SPJ,
+					'US2',
+					UANG_SAKU2,
+					'Otomatis',
+					CASE 
+						WHEN KEPUTUSAN_US2 = 'NG' THEN 'NG'
+						ELSE 'OK'
+					END AS KEPUTUSAN_US2,
+					KETERANGAN_US2,
+					'System',
+					PIC_US2,
+					STATUS_US2
+				FROM
+					SPJ_BIAYA_TAMBAHAN
+				WHERE
+					NO_SPJ = '$noSPJ'
+				UNION
+				SELECT
+					NO_SPJ,
+					'UM',
+					UANG_MAKAN,
+					'Otomatis',
+					CASE 
+						WHEN KEPUTUSAN_MAKAN = 'NG' THEN 'NG'
+						ELSE 'OK'
+					END AS KEPUTUSAN_MAKAN,
+					KETERANGAN_MAKAN,
+					'System',
+					PIC_MAKAN,
+					STATUS_MAKAN
+				FROM
+					SPJ_BIAYA_TAMBAHAN
+				WHERE
+					NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
 	public function saveAdjustment($tambahan, $jenis)
 	{
 		$inputUangMakanDiajukan = $this->input->post("inputUangMakanDiajukan") == '' ? 0 : $this->input->post("inputUangMakanDiajukan");
@@ -254,32 +338,14 @@ class M_Implementasi extends CI_Model {
         $inputNoSPJ = $this->input->post("inputNoSPJ");
         $inputNIKPengaju = $this->input->post("inputNIKPengaju");
 		$cek = $this->db->query("SELECT ID FROM SPJ_ADJUSTMENT WHERE NO_SPJ = '$inputNoSPJ'");
-		if ($jenis=='KEPUTUSAN') {
-			$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET KEPUTUSAN = '$inputKeputusanUangMakan', KETERANGAN = '$inputUangMakanKeterangan', STATUS='CLOSE' WHERE OBJEK = 'UANG MAKAN' AND NO_SPJ = '$inputNoSPJ'");
-			$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET KEPUTUSAN = '$inputKeputusanUangJalan', KETERANGAN = '$inputUangJalanKeterangan', STATUS='CLOSE' WHERE OBJEK = 'UANG JALAN' AND NO_SPJ = '$inputNoSPJ'");
-			$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET KEPUTUSAN = '$inputKeputusanBBM', KETERANGAN = '$inputBBMKeterangan', STATUS='CLOSE' WHERE OBJEK = 'BBM' AND NO_SPJ = '$inputNoSPJ'");
+		if ($cek->num_rows()==0) {
+			$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS)VALUES('$inputNoSPJ','UANG MAKAN','$inputUangMakanDiajukan','$inputUangMakanAlasan','OPEN')");
+				$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS)VALUES('$inputNoSPJ','UANG JALAN','$inputUangJalanDiajukan','$inputUangJalanAlasan','OPEN')");
+				$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS)VALUES('$inputNoSPJ','BBM','$inputBBMDiajukan','$inputBBMAlasan','OPEN')");
 		} else {
-			if ($cek->num_rows()==0) {
-				if ($jenis == 'ALL') {
-					$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, KEPUTUSAN, KETERANGAN, STATUS)VALUES('$inputNoSPJ','UANG MAKAN','$inputUangMakanDiajukan','$inputUangMakanAlasan','$inputKeputusanUangMakan','$inputUangMakanKeterangan','CLOSE')");
-					$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, KEPUTUSAN, KETERANGAN, STATUS)VALUES('$inputNoSPJ','UANG JALAN','$inputUangJalanDiajukan','$inputUangJalanAlasan','$inputKeputusanUangJalan','$inputUangJalanKeterangan','CLOSE')");
-					$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, KEPUTUSAN, KETERANGAN, STATUS)VALUES('$inputNoSPJ','BBM','$inputBBMDiajukan','$inputBBMAlasan','$inputKeputusanBBM','$inputBBMKeterangan','CLOSE')");
-				} else {
-					$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS)VALUES('$inputNoSPJ','UANG MAKAN','$inputUangMakanDiajukan','$inputUangMakanAlasan','OPEN')");
-					$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS)VALUES('$inputNoSPJ','UANG JALAN','$inputUangJalanDiajukan','$inputUangJalanAlasan','OPEN')");
-					$sql = $this->db->query("INSERT INTO SPJ_ADJUSTMENT(NO_SPJ, OBJEK, DIAJUKAN, ALASAN, STATUS)VALUES('$inputNoSPJ','BBM','$inputBBMDiajukan','$inputBBMAlasan','OPEN')");	
-				}
-			} else {
-				if ($jenis == 'ALL') {
-					$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputUangMakanDiajukan', ALASAN = '$inputUangMakanAlasan', KEPUTUSAN = '$inputKeputusanUangMakan', KETERANGAN = '$inputUangMakanKeterangan', STATUS = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG MAKAN'");
-					$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputUangJalanDiajukan', ALASAN = '$inputUangJalanAlasan', KEPUTUSAN = '$inputKeputusanUangJalan', KETERANGAN = '$inputUangJalanKeterangan', STATUS = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG JALAN'");
-					$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputBBMDiajukan', ALASAN = '$inputBBMAlasan', KEPUTUSAN = '$inputKeputusanBBM', KETERANGAN = '$inputBBMKeterangan', STATUS = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'BBM'");
-				} else {
-					$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputUangMakanDiajukan', ALASAN = '$inputUangMakanAlasan', STATUS='OPEN' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG MAKAN'");
-					$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputUangJalanDiajukan', ALASAN = '$inputUangJalanAlasan', STATUS='OPEN' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG JALAN'");
-					$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputBBMDiajukan', ALASAN = '$inputBBMAlasan', STATUS='OPEN' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'BBM'");	
-				}
-			}
+			$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputUangMakanDiajukan', ALASAN = '$inputUangMakanAlasan', STATUS='OPEN' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG MAKAN'");
+				$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputUangJalanDiajukan', ALASAN = '$inputUangJalanAlasan', STATUS='OPEN' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG JALAN'");
+				$sql = $this->db->query("UPDATE SPJ_ADJUSTMENT SET DIAJUKAN = '$inputBBMDiajukan', ALASAN = '$inputBBMAlasan', STATUS='OPEN' WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'BBM'");
 		}
 
 		$this->db->query($tambahan);
@@ -314,14 +380,26 @@ class M_Implementasi extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-
-        $this->db->query("INSERT INTO SPJ_ADJUSTMENT VALUES('$inputNoSPJ','$tanggal','System','US1',$value[0],'Otomatis','$value[1]','$value[2]','$tanggal', '$user','CLOSE')");
-
-        $this->db->query("INSERT INTO SPJ_ADJUSTMENT VALUES('$inputNoSPJ','$tanggal','System','US2',$value[3],'Otomatis','$value[4]','$value[5]','$tanggal', '$user','CLOSE')");
-
-        $this->db->query("INSERT INTO SPJ_ADJUSTMENT VALUES('$inputNoSPJ','$tanggal','System','UM',$value[6],'Otomatis','$value[7]','$value[8]','$tanggal', '$user','CLOSE')");
-
-        $sql = $this->db->query("UPDATE SPJ_BIAYA_TAMBAHAN SET STATUS_US1 = 'CLOSE', STATUS_US2 = 'CLOSE', STATUS_MAKAN = 'CLOSE', PIC_US1 = '$user', PIC_US2 = '$user', PIC_MAKAN = '$user', TGL_US1='$tanggal',TGL_US2='$tanggal', TGL_MAKAN = '$tanggal' WHERE NO_SPJ = '$inputNoSPJ'");
+        $statusUS1 = $value[0] == 'OK' ? 'CLOSE' : 'OPEN';
+        $statusUS2 = $value[2] == 'OK' ? 'CLOSE' : 'OPEN';
+        $statusUM = $value[4] == 'OK' ? 'CLOSE' : 'OPEN';
+        $sql = $this->db->query("UPDATE SPJ_BIAYA_TAMBAHAN SET 
+        							STATUS_US1 = '$statusUS1', 
+        							STATUS_US2 = '$statusUS2', 
+        							STATUS_MAKAN = '$statusUM', 
+        							PIC_US1 = '$user', 
+        							PIC_US2 = '$user', 
+        							PIC_MAKAN = '$user', 
+        							TGL_US1='$tanggal',
+        							TGL_US2='$tanggal', 
+        							TGL_MAKAN = '$tanggal',
+        							KEPUTUSAN_US1 = '$value[0]',
+        							KEPUTUSAN_US2 = '$value[2]',
+        							KEPUTUSAN_MAKAN = '$value[4]',
+        							KETERANGAN_US1 = '$value[1]',
+        							KETERANGAN_US2 = '$value[3]',
+        							KETERANGAN_MAKAN = '$value[5]'
+        						WHERE NO_SPJ = '$inputNoSPJ'");
         return $sql;
 	}
 	public function updateKasbonOtomatis($inputSPJ, $uangMakan, $uangJalan, $uangBBM)
@@ -387,7 +465,13 @@ class M_Implementasi extends CI_Model {
 					BBM_DIAJUKAN,
 					BBM_TGL,
 					BBM_PIC,
-					BBM_STATUS,
+					CASE 
+						WHEN ADJUSTMENT_MANAJEMEN = 'Y' THEN BBM_STATUS
+						WHEN MEDIA_UANG_BBM = 'Voucher' AND Q7.NO_VOUCHER IS NOT NULL THEN 'CLOSE'
+						WHEN MEDIA_UANG_BBM = 'Reimburse' AND TOTAL_UANG_BBM >0 THEN 'CLOSE'
+						WHEN MEDIA_UANG_BBM = 'Kasbon' AND TOTAL_UANG_BBM >0 THEN 'CLOSE'
+						ELSE 'OPEN'
+					END AS BBM_STATUS,
 					JML_PIC,
 					TOTAL_UANG_SAKU + (UANG_SAKU1*JML_PIC) + (UANG_SAKU2*JML_PIC) AS REALISASI_UANG_SAKU,
 					CASE 
@@ -397,7 +481,17 @@ class M_Implementasi extends CI_Model {
 					CASE 
 						WHEN ADJUSTMENT_MANAJEMEN = 'Y' THEN UJ_DIAJUKAN
 						ELSE TOTAL_UANG_JALAN
-					END AS REALISASI_UANG_JALAN
+					END AS REALISASI_UANG_JALAN,
+					CASE
+						WHEN MEDIA_UANG_BBM = 'Voucher' THEN TGL_VOUCHER
+						WHEN ADJUSTMENT_MANAJEMEN = 'Y' THEN BBM_TGL
+						ELSE TGL_CLOSE
+					END AS TGL_BBM,
+					CASE
+						WHEN MEDIA_UANG_BBM = 'Voucher' THEN PIC_VOUCHER
+						WHEN ADJUSTMENT_MANAJEMEN= 'Y' THEN BBM_PIC
+						ELSE PIC_CLOSE
+					END AS PIC_BBM
 				FROM
 				(
 					SELECT
@@ -413,7 +507,10 @@ class M_Implementasi extends CI_Model {
 						MEDIA_UANG_BBM,
 						MEDIA_UANG_TOL,
 						ADJUSTMENT_MANAJEMEN,
-						VOUCHER_BBM
+						VOUCHER_BBM,
+						PIC_CLOSE,
+						TGL_CLOSE,
+						ABNORMAL
 					FROM
 						SPJ_PENGAJUAN
 					WHERE
@@ -479,7 +576,16 @@ class M_Implementasi extends CI_Model {
 					FROM
 						SPJ_PENGAJUAN_PIC
 					GROUP BY NO_PENGAJUAN
-				)Q6 ON Q1.NO_SPJ = Q6.NO_PENGAJUAN";
+				)Q6 ON Q1.NO_SPJ = Q6.NO_PENGAJUAN
+				LEFT JOIN
+				(
+					SELECT
+						NO_VOUCHER,
+						TGL_INPUT AS TGL_VOUCHER,
+						PIC_INPUT AS PIC_VOUCHER
+					FROM
+						SPJ_VOUCHER_BBM
+				)Q7 ON Q1.VOUCHER_BBM = Q7.NO_VOUCHER";
 		return $this->db->query($sql);
 	}
 	public function saveCloseSPJ($noSPJ, $saku, $makan, $jalan, $bbm, $tol)
@@ -487,7 +593,14 @@ class M_Implementasi extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-		$sql = "UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = 'CLOSE',PIC_CLOSE= '$user', TGL_CLOSE = '$tanggal', TOTAL_UANG_SAKU=$saku, TOTAL_UANG_MAKAN=$makan, TOTAL_UANG_JALAN = $jalan, TOTAL_UANG_BBM = $bbm, TOTAL_UANG_TOL=$tol  WHERE NO_SPJ = '$noSPJ'";
+        $cekVoucher = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ' AND MEDIA_UANG_BBM = 'Voucher' AND TOTAL_UANG_BBM <=0");
+        if ($cekVoucher->num_rows()>0) {
+        	$status = 'OPEN';
+        } else {
+        	$status = 'CLOSE';
+        }
+        
+		$sql = "UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = '$status',PIC_CLOSE= '$user', TGL_CLOSE = '$tanggal', TOTAL_UANG_SAKU=$saku, TOTAL_UANG_MAKAN=$makan, TOTAL_UANG_JALAN = $jalan, TOTAL_UANG_BBM = $bbm, TOTAL_UANG_TOL=$tol  WHERE NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);
 	}
 	public function getSPJForGenerate($jenis)

@@ -36,7 +36,7 @@
 				<td><?=$key->NO_SPJ?></td>
 				<td><?=$key->TGL_SPJ?></td>
 				<td><?=$key->QR_CODE?></td>
-				<td><?=$key->NO_VOUCHER?></td>
+				<td><?=$key->VOUCHER_BBM?></td>
 				<td><?=$key->NAMA_GROUP?></td>
 				<td>
 					<ul style="padding-left: 10px">
@@ -63,7 +63,18 @@
 				<td><?=$key->MERK?></td>
 				<td><?=$key->TYPE?></td>
 				<td><?=$key->NO_TNKB?></td>
-				<td><?=str_replace(',', '.', number_format($key->RP, 0))?></td>
+				<td>
+					<a 
+						href="javascript:;"
+						noVoucher = "<?=$key->VOUCHER_BBM?>"
+						noSPJ = "<?=$key->NO_SPJ?>"
+						idSPJ = "<?=$key->ID_SPJ?>"
+						credit = "<?=round($key->TOTAL_UANG_BBM)?>"
+						style="display: block; text-decoration: none;"
+						class="text-kps text-warning text-center getVoucher">
+						<?=str_replace(',', '.', number_format($key->TOTAL_UANG_BBM, 0))?>
+					</a>		
+				</td>
 				<td><?=$key->STATUS_SPJ?></td>
 			</tr>
 		<?php endforeach ?>

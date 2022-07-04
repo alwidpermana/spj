@@ -63,8 +63,8 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md-2"></div>
-                <div class="col-md-8">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
                   <button type="button" class="btn bg-orange btn-kps btn-block ladda-button" data-style="zoom-in" id="btnGenerate">Generate SPJ</button>
                 </div>
               </div>
@@ -118,6 +118,7 @@
       $('#inputTotalRP').val(totalRP);
       $('#showJumlahSPJ').html(noSPJ.length);
       $('#showTotalRP').html(totalRP);
+      console.log(noSPJ);
     });
     $('#getTabel').on('click','[name="inputCheckSPJ"]', function(){
       var totalRP = 0;
@@ -158,7 +159,7 @@
             type:'post',
             data:{noSPJ,inputNoGenerate,inputJumlahSPJ,inputTotalRP, filJenis},
             dataType:'json',
-            url:'saveGenerateSPJ',
+            url:url+'/Implementasi/saveGenerateSPJ',
             cache: false,
             async: true,
             success: function(data){
@@ -201,7 +202,7 @@
     $.ajax({
       type:'get',
       data:{filJenis},
-      url:'getInfo',
+      url:url+'/Implementasi/getInfo',
       dataType:'json',
       cache: false,
       async: true,
@@ -224,7 +225,7 @@
     $.ajax({
       type:'get',
       data:{filJenis},
-      url:'getTabelGenerate',
+      url:url+'/Implementasi/getTabelGenerate',
       cache: false,
       async: true,
       beforeSend: function(data){

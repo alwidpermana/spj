@@ -22,7 +22,40 @@
 		</tr>
 	</thead>
 	<tbody>
-		<?php foreach ($data as $key): ?>
+		<?php
+		$ok1 = 0;
+		$ok2 = 0;
+		$ok3 = 0;
+		$ok4 = 0;
+		$ok5 = 0;
+		$ok6 = 0;
+		$ok7 = 0;
+		$ok8 = 0;
+		$ok9 = 0;
+		$ok10 = 0;
+		$ok11 = 0;
+		$ok12 = 0;
+		$ok13 = 0;
+		$ok14 = 0;
+		$ok15 = 0;
+		$ok16 = 0;
+		$ok17 = 0;
+		$ok18 = 0;
+		$ok19 = 0;
+		$ok20 = 0;
+		$ok21 = 0;
+		$ok22 = 0;
+		$ok23 = 0;
+		$ok24 = 0;
+		$ok25 = 0;
+		$ok26 = 0;
+		$ok27 = 0;
+		$ok28 = 0;
+		$ok29 = 0;
+		$ok30 = 0;
+		$ok31 = 0;
+
+		foreach ($data as $key): ?>
 			<tr>
 				<td><?=$key->NO_URUT?></td>
 				<?php

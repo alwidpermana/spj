@@ -26,7 +26,7 @@
 			<td>Akhir</td>
 		</tr>
 	</thead>
-	<tbody>
+	<tbody style="height: 350px">
 		<?php 
 		$i = 1;
 		foreach ($data as $key): ?>
@@ -69,7 +69,7 @@
 <script type="text/javascript">
 	$(document).ready(function(){
 		var table = $('#datatable').DataTable( {
-            scrollY:        "400px",
+            scrollY:        "350px",
             scrollX:        true,
             scrollCollapse: true,
             paging:         true,

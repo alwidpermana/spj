@@ -159,9 +159,9 @@ class Implementasi extends CI_Controller {
           }
           
 
-        }elseif($selisihJam >=$jam2 && $selisihHari>0){
-          $jm = $selisihJam - $jam2;
-          if ($jm>0 && $jm<=3) {
+        }elseif($selisihHari>0){
+        	$jm = $selisihHari>1?($selisihJam+($selisihHari*24)) - $jam2: $selisihJam - $jam2;
+          if ($jm>0) {
             $uangSaku1 = $tambahanUangSaku1;
           }else{
             $uangSaku1 = 0;
@@ -196,6 +196,8 @@ class Implementasi extends CI_Controller {
         }
 
         $data = $this->M_Implementasi->saveUangTambahan($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
+        // $test = array('uang saku1' =>$uangSaku1 ,'uang saku 2'=> $uangSaku2, 'uangMakan'=>$uangMakan, 'selisih jam'=>$selisihJam, 'selisih Hari'=>$selisihHari, 'jam 2'=>$jam2, 'jm'=>$jm);
+        // $this->M_Implementasi->saveAdjustmentUangTambah($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
         echo json_encode($data);
 
 	}
@@ -307,8 +309,16 @@ class Implementasi extends CI_Controller {
 			$bbmUang = $bbm->TOTAL_UANG_BBM == null || $bbm->TOTAL_UANG_BBM == '' ? 0 : $bbm->TOTAL_UANG_BBM; 
 			$uangBBM += $bbmUang;
 		}
+		$getManajemen = $this->db->query("SELECT ADJUSTMENT_MANAJEMEN FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ'");
+		$manajemen = '';
+		if ($getManajemen->num_rows()>0) {
+			foreach ($getManajemen->result() as $mnj) {
+				$manajemen = $mnj->ADJUSTMENT_MANAJEMEN;
+			}
+		}
 
 		$getAdjustment = $this->M_Implementasi->getDataAdjustment($noSPJ);
+		$getAdjustment2 = $this->M_Implementasi->getDataAdjustment2($noSPJ);
 		$jmlOpen = 0;
 		$uangMakanDiajukan =0;
 		$uangMakanAlasan = '';
@@ -373,7 +383,13 @@ class Implementasi extends CI_Controller {
 					if ($ad->STATUS == 'OPEN') {
 						$jmlOpen +=1;
 					}
-				}elseif($ad->OBJEK == 'US1'){
+				}
+			}
+		}
+
+		if ($getAdjustment2->num_rows()>0) {
+			foreach ($getAdjustment2->result() as $ad) {
+				if($ad->OBJEK == 'US1'){
 					$uangUS1Diajukan = $ad->DIAJUKAN;
 					$uangUS1Alasan = $ad->ALASAN;
 					$uangUS1Keputusan = $ad->KEPUTUSAN;
@@ -443,6 +459,7 @@ class Implementasi extends CI_Controller {
 						'uangUMKeputusan'=>$uangUMKeputusan,
 						'uangUMKeterangan'=>$uangUMKeterangan,
 						'uangUMStatus'=>$uangUMStatus,
+						'manajemen'=>$manajemen
 					  );
 
 		echo json_encode($hasil);
@@ -456,17 +473,8 @@ class Implementasi extends CI_Controller {
 		$user = $this->session->userdata("NIK");
 		$level = $this->session->userdata("LEVEL");
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
-		if ($user == $inputNIKPengaju && $level<= 1) {
-			$tambahan = "UPDATE SPJ_ADJUSTMENT SET TGL_PENGAJU = '$tanggal', PIC_PENGAJU = '$user', TGL_KEPUTUSAN = '$tanggal', PIC_KEPUTUSAN ='$user', STATUS='CLOSE' WHERE NO_SPJ = '$inputNoSPJ'";
-			$jenis = 'ALL';
-			
-		}elseif($user == $inputNIKPengaju){
-			$tambahan = "UPDATE SPJ_ADJUSTMENT SET TGL_PENGAJU = '$tanggal', PIC_PENGAJU = '$user', STATUS = 'OPEN' WHERE NO_SPJ = '$inputNoSPJ'";
-			$jenis='PENGAJU';
-		}elseif($level<=1){
-			$tambahan = "UPDATE SPJ_ADJUSTMENT SET TGL_KEPUTUSAN ='$tanggal', PIC_KEPUTUSAN = '$user', STATUS = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ'";
-			$jenis = 'KEPUTUSAN';
-		}
+		$tambahan = "UPDATE SPJ_ADJUSTMENT SET TGL_PENGAJU = '$tanggal', PIC_PENGAJU = '$user', STATUS = 'OPEN' WHERE NO_SPJ = '$inputNoSPJ'";
+		$jenis='PENGAJU';
 		
 		$data = $this->M_Implementasi->saveAdjustment($tambahan, $jenis);
 		echo json_encode($data);
@@ -516,9 +524,13 @@ class Implementasi extends CI_Controller {
   	$inputUS2Keterangan = $this->input->post("inputUS2Keterangan");
   	$inputUMKeterangan = $this->input->post("inputUMKeterangan");
   	$inputNoSPJ = $this->input->post("inputNoSPJ");
+  	$inputManajemen = $this->input->post("inputManajemen");
   	$value = [$inputUangMakanDiajukan, $inputKeputusanUangMakan, $inputUangMakanKeterangan, $inputUangJalanDiajukan, $inputKeputusanUangJalan, $inputUangJalanKeterangan, $inputBBMDiajukan, $inputKeputusanBBM, $inputBBMKeterangan];
-  	$value2 = [$inputUS1Diajukan, $inputKeputusanUS1, $inputUS1Keterangan, $inputUS2Diajukan, $inputKeputusanUS2, $inputUS2Keterangan, $inputUMDiajukan, $inputKeputusanUM, $inputUMKeterangan];
-  	$data = $this->M_Implementasi->saveKeputusanAdjustment($value, $inputNoSPJ);
+  	$value2 = [$inputKeputusanUS1, $inputUS1Keterangan, $inputKeputusanUS2, $inputUS2Keterangan, $inputKeputusanUM, $inputUMKeterangan];
+  	if ($inputManajemen == 'Y') {
+  		$data = $this->M_Implementasi->saveKeputusanAdjustment($value, $inputNoSPJ);
+  	}
+  	
   	$data = $this->M_Implementasi->saveKeputusanAdjustment2($value2, $inputNoSPJ);
   	// $data = $this->M_Implementasi->updateKasbonOtomatis($inputNoSPJ, $inputUangMakanDiajukan, $inputUangJalanDiajukan, $inputBBMDiajukan);
   	echo json_encode($data);
@@ -529,7 +541,7 @@ class Implementasi extends CI_Controller {
 		$saku = $this->input->post("inputRealisasiUangSaku"); 
 		$makan = $this->input->post("inputRealisasiUangMakan"); 
 		$jalan = $this->input->post("inputRealisasiUangJalan"); 
-		$bbm = $this->input->post("inputRealisasiUangBBM"); 
+		$bbm = $this->input->post("inputRealisasiUangBBM")== '' ? 0 : $this->input->post("inputRealisasiUangBBM"); 
 		$tol = $this->input->post("inputRealisasiUangTol");
 		$data = $this->M_Implementasi->saveCloseSPJ($inputNoSPJ, $saku, $makan, $jalan, $bbm, $tol);
 		echo json_encode($data);

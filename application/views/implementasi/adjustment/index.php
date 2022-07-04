@@ -141,14 +141,11 @@
                     <tr>
                       <th rowspan="2">Objek</th>
                       <th colspan="3">Pengajuan Adjustment</th>
-                      <th colspan="2">Otoritas</th>
                     </tr>
                     <tr>
                       <th>Normal</th>
                       <th>Diajukan</th>
                       <th>Alasan</th>
-                      <th>Keputusan</th>
-                      <th>Keterangan</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -161,7 +158,7 @@
                       </td>
                       <td><input type="number" id="inputUangMakanDiajukan" class="form-control form-control-sm pengaju inputUangMakan"></td>
                       <td><textarea class="form-control pengaju inputUangMakan" id="inputUangMakanAlasan" rows="3"></textarea></td>
-                      <td>
+                      <!-- <td>
                         <div class="form-group clearfix">
                           <div class="icheck-orange icheck-kps d-inline">
                             <input 
@@ -190,14 +187,14 @@
                         </div>
                         <input type="hidden" id="inputKeputusanUangMakan">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUangMakanKeterangan" rows="3"></textarea></td>
+                      <td><textarea class="form-control otoritas" id="inputUangMakanKeterangan" rows="3"></textarea></td> -->
                     </tr>
                     <tr>
                       <td>Uang Jalan</td>
                       <td><input type="number" id="inputUangJalanNormal" class="form-control form-control-sm" readonly></td>
                       <td><input type="number" id="inputUangJalanDiajukan" class="form-control form-control-sm pengaju inputUangJalan"></td>
                       <td><textarea class="form-control pengaju inputUangJalan" id="inputUangJalanAlasan" rows="3"></textarea></td>
-                      <td>
+                      <!-- <td>
                         <div class="form-group clearfix">
                           <div class="icheck-orange icheck-kps d-inline">
                             <input 
@@ -226,14 +223,14 @@
                         </div>
                         <input type="hidden" id="inputKeputusanUangJalan">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputUangJalanKeterangan" rows="3"></textarea></td>
+                      <td><textarea class="form-control otoritas" id="inputUangJalanKeterangan" rows="3"></textarea></td> -->
                     </tr>
                     <tr>
                       <td>BBM</td>
                       <td><input type="number" id="inputBBMNormal" class="form-control form-control-sm" readonly></td>
                       <td><input type="number" id="inputBBMDiajukan" class="form-control form-control-sm pengaju inputBBM"></td>
                       <td><textarea class="form-control pengaju inputBBM" id="inputBBMAlasan" rows="3"></textarea></td>
-                      <td>
+                      <!-- <td>
                         <div class="form-group clearfix">
                           <div class="icheck-orange icheck-kps d-inline">
                             <input 
@@ -262,7 +259,7 @@
                         </div>
                         <input type="hidden" id="inputKeputusanBBM">
                       </td>
-                      <td><textarea class="form-control otoritas" id="inputBBMKeterangan" rows="3"></textarea></td>
+                      <td><textarea class="form-control otoritas" id="inputBBMKeterangan" rows="3"></textarea></td> -->
                     </tr>
                   </tbody>
                 </table>
@@ -335,7 +332,7 @@
     $.ajax({
       dataType:'json',
       data:{noSPJ},
-      url:'getBiayaNormal',
+      url:url+'/Implementasi/getBiayaNormal',
       type:'get',
       cache: false,
       async: true,
@@ -440,44 +437,14 @@
         var inputKeputusanUangMakan = $('#inputKeputusanUangMakan').val();
         var inputKeputusanUangJalan = $('#inputKeputusanUangJalan').val();
         var inputKeputusanBBM = $('#inputKeputusanBBM').val();
-        if (inputNIKPengaju == user && level <= 1) {
-          if (inputUangMakanDiajukan == '' || inputUangMakanAlasan == '' || inputUangMakanKeterangan == '' || inputKeputusanUangMakan == '') {
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang Makan Masih Ada Yang Belum Terisi!","warning")
-          }else if(inputUangJalanDiajukan == '' || inputUangJalanAlasan == '' || inputUangJalanKeterangan == '' || inputKeputusanUangJalan == ''){
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang Jalan Masih Ada Yang Belum Terisi!","warning")
-          }else if(inputBBMDiajukan==''||inputBBMAlasan==''||inputBBMKeterangan==''||inputKeputusanBBM==''){
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang BBM Masih Ada Yang Belum Terisi!","warning")
-          }else{
-            saveAdjustments();
-          }
-        }else if(inputNIKPengaju == user){
-          if (inputUangMakanDiajukan == '' || inputUangMakanAlasan == '') {
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang Makan Masih Ada Yang Belum Terisi!","warning")
-          }else if(inputUangJalanDiajukan == '' || inputUangJalanAlasan == ''){
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang Jalan Masih Ada Yang Belum Terisi!","warning")
-          }else if(inputBBMDiajukan==''||inputBBMAlasan==''){
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang BBM Masih Ada Yang Belum Terisi!","warning")
-          }else{
-            saveAdjustments();
-          }
-        }else if(level<=1){
-          if (inputUangMakanKeterangan == '' || inputKeputusanUangMakan == '') {
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang Makan Masih Ada Yang Belum Terisi!","warning")
-          }else if(inputUangJalanKeterangan == '' || inputKeputusanUangJalan == ''){
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang Jalan Masih Ada Yang Belum Terisi!","warning")
-          }else if(inputBBMKeterangan==''||inputKeputusanBBM==''){
-            Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang BBM Masih Ada Yang Belum Terisi!","warning")
-          }else if(inputUangMakanDiajukan == ''){
-            Swal.fire("Uang Makan Belum Diajukan!","Hubungi PIC Pengaju untuk mengajukan Biaya Uang Makan!","warning")
-          }else if(inputUangJalanDiajukan == ''){
-            Swal.fire("Uang Makan Belum Diajukan!","Hubungi PIC Pengaju untuk mengajukan Biaya Uang Jalan!","warning")
-          }else if(inputBBMDiajukan == ''){
-            Swal.fire("Biaya BBM Belum Diajukan!","Hubungi PIC Pengaju untuk mengajukan Biaya BBM!","warning");
-          }else{
-            saveAdjustments();
-          }
+        if (inputUangMakanDiajukan == '' || inputUangMakanAlasan == '') {
+          Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang Makan Masih Ada Yang Belum Terisi!","warning")
+        }else if(inputUangJalanDiajukan == '' || inputUangJalanAlasan == ''){
+          Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang Jalan Masih Ada Yang Belum Terisi!","warning")
+        }else if(inputBBMDiajukan==''||inputBBMAlasan==''){
+          Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu!","Objek Uang BBM Masih Ada Yang Belum Terisi!","warning")
         }else{
-          Swal.fire("Anda Tidak Berhak Untuk Melakukan Proses Data Dihalaman Ini!","Kordinasikan dengan bagian IT!","info");
+          saveAdjustments();
         }
         saveAdjustment.ladda('stop');
         return false;
@@ -496,7 +463,7 @@
     $.ajax({
       type:'get',
       data:{filBulan, filTahun, filPeriode, filJenis, filStatus, filGroup},
-      url:'getTabelAdjustment',
+      url:url+'/Implementasi/getTabelAdjustment',
       cache: false,
       async: true,
       beforeSend: function(data){
@@ -547,7 +514,7 @@
         inputNoSPJ,
         inputNIKPengaju
       },
-      url:'saveAdjustment',
+      url:url+'/Implementasi/saveAdjustment',
       cache: false,
       async: true,
       success: function(data){

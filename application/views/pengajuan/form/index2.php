@@ -98,6 +98,16 @@
     .bs-stepper-label{
       font-size: 13px;
     }
+    .step-trigger{
+      color: white !important;
+    }
+    .bs-stepper-circle{
+      color: white !important;
+      background-color: rgb(204, 88, 3) !important;
+    }
+    .bs-stepper-label{
+      color:  black !important;
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse layout-navbar-fixed layout-footer-fixed">
@@ -224,7 +234,7 @@
                     <div class="col-md-7">
                       <div class="row">
                         <div class="col-md-12">
-                          <input type="date" id="inputTglSPJ" class="form-control form-control-sm">
+                          <input type="date" id="inputTglSPJ" class="form-control form-control-sm" value="<?=date("Y-m-d")?>">
                         </div>
                       </div>
                     </div>
@@ -313,77 +323,62 @@
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>NIK</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
                                 </div>
                               </div>
                               
                             </div>
-                            <div class="col-md-2">
-                              <label><?=$this->session->userdata("NIK")?></label>
+                            <div class="col-md-4">
+                              <label>: <?=$this->session->userdata("NIK")?></label>
                             </div>
                           </div>
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Nama</label>  
                                 </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
-                                </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
-                              <label><?=$this->session->userdata("NAMA")?></label>
+                            <div class="col-md-4">
+                              <label>: <?=$this->session->userdata("NAMA")?></label>
                             </div>
                           </div>
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Jabatan</label>  
                                 </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
-                                </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
-                              <label><?=$this->session->userdata("JABATAN")?></label>
+                            <div class="col-md-4">
+                              <label>: <?=$this->session->userdata("JABATAN")?></label>
                             </div>
                           </div>
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Departemen</label>  
                                 </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
-                                </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
-                              <label><?=$this->session->userdata("DEPARTEMEN")?></label>
+                            <div class="col-md-4">
+                              <label>: <?=$this->session->userdata("DEPARTEMEN")?></label>
                             </div>
                           </div>
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Sub Departemen</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
-                              <label><?=$this->session->userdata("SUB_DEPARTEMEN")?></label>
+                            <div class="col-md-4">
+                              <label>: <?=$this->session->userdata("SUB_DEPARTEMEN")?></label>
                             </div>
                           </div>
                           <div class="row" style="padding-top: 50px">
@@ -396,11 +391,8 @@
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Kendaraan</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
                                 </div>
                               </div>
                             </div>
@@ -421,11 +413,8 @@
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Jenis Kendaraan</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
                                 </div>
                               </div>
                             </div>
@@ -457,11 +446,8 @@
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>No Inventaris</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
                                 </div>
                               </div>
                             </div>
@@ -477,11 +463,25 @@
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
-                                  <label>Merk</label>  
+                                <div class="col-md-12"> 
+                                  <label>No TNKB</label>  
                                 </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
+                              </div>
+                            </div>
+                            <div class="col-md-2">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <input type="text" id="inputNoTNKB" class="form-control form-control-sm inputan">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <br>
+                          <div class="row">
+                            <div class="col-md-2">
+                              <div class="row">
+                                <div class="col-md-12"> 
+                                  <label>Merk</label>  
                                 </div>
                               </div>
                             </div>
@@ -497,11 +497,8 @@
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Type</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
                                 </div>
                               </div>
                             </div>
@@ -513,26 +510,7 @@
                               </div>
                             </div>
                           </div>
-                          <br>
-                          <div class="row">
-                            <div class="col-md-2">
-                              <div class="row">
-                                <div class="col-md-11"> 
-                                  <label>No TNKB</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="col-md-2">
-                              <div class="row">
-                                <div class="col-md-12">
-                                  <input type="text" id="inputNoTNKB" class="form-control form-control-sm inputan">
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          
 
                           <div class="row" style="padding-top: 50px">
                             <div class="col-md-4">
@@ -547,11 +525,8 @@
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Tujuan</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
                                 </div>
                               </div>
                             </div>
@@ -573,11 +548,8 @@
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
-                                <div class="col-md-11"> 
+                                <div class="col-md-12"> 
                                   <label>Lokasi</label>  
-                                </div>
-                                <div class="col-md-1">
-                                  <label>:</label>
                                 </div>
                               </div>
                             </div>
@@ -589,11 +561,17 @@
                               </div>
                               <div class="row">
                                 <div class="col-md-12">
-                                  <button type="button" class="btn btn-xs btn-kps bg-orange" data-toggle="modal" data-target="#modal-lokasi">
+                                  <button type="button" class="btn btn-xs btn-kps bg-orange" data-toggle="modal" data-target="#modal-lokasi" id="tambahLokasi">
                                     <i class="fas fa-plus"></i>
                                   </button>
                                 </div>
                               </div>
+                            </div>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                              <button type="button" class="btn btn-kps bg-orange btn-block" id="btnCekProgramSerlok">
+                                Cek Data Program Serlok
+                              </button>
                             </div>
                           </div>
                           <br>
@@ -667,8 +645,8 @@
                                       <!-- <input type="text" id="inputMediaUangSaku" class="form-control form-control-sm" value="Kasbon"> -->
                                       <select class="select2 form-control select2-orange" id="inputMediaUangSaku" data-dropdown-css-class="select2-orange">
                                         <option value="Kasbon" selected>Kasbon</option>
-                                        <option value="Voucher" disbaled>Voucher</option>
-                                        <option value="Reimburse">Reimburse</option>
+                                        <option value="Voucher" disabled="disabled">Voucher</option>
+                                        <option value="Reimburse" disabled="disabled">Reimburse</option>
                                       </select>
                                     </td>
                                   </tr>
@@ -679,20 +657,25 @@
                                       <!-- <input type="text" id="inputMediaUangMakan" class="form-control form-control-sm" value="Kasbon"> -->
                                       <select class="select2 form-control select2-orange" id="inputMediaUangMakan" data-dropdown-css-class="select2-orange">
                                         <option value="Kasbon" selected>Kasbon</option>
-                                        <option value="Voucher" disbaled>Voucher</option>
-                                        <option value="Reimburse">Reimburse</option>
+                                        <option value="Voucher" disabled="disabled">Voucher</option>
+                                        <option value="Reimburse" disabled="disabled">Reimburse</option>
                                       </select>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>Uang Jalan</td>
-                                    <td><span id="tampilTotalUangJalan"></span></td>
+                                    <td>
+                                      <span id="tampilTotalUangJalan"></span>
+                                      <div id="manualUangJalan">
+                                        <input type="number" id="inputManualUangJalan" class="form-control form-control-sm">
+                                      </div>
+                                    </td>
                                     <td>
                                       <!-- <input type="text" id="inputMediaUangJalan" class="form-control form-control-sm" value="Kasbon"> -->
                                       <select class="select2 form-control select2-orange" id="inputMediaUangJalan" data-dropdown-css-class="select2-orange">
                                         <option value="Kasbon" selected>Kasbon</option>
-                                        <option value="Voucher" disbaled>Voucher</option>
-                                        <option value="Reimburse">Reimburse</option>
+                                        <option value="Voucher" disabled="disabled">Voucher</option>
+                                        <option value="Reimburse" disabled="disabled">Reimburse</option>
                                       </select>
                                     </td>
                                   </tr>
@@ -752,13 +735,13 @@
                                       <div class="form-group">
                                         <label>&nbsp;</label>
                                         <span class="form-control-icon">Rp</span>
-                                        <input type="number" class="form-control form-control-search" id="inputTOL">
+                                        <input type="number" class="form-control form-control-search" id="inputTOL" readonly>
                                       </div>
                                     </td>
                                     <td>
                                       <!-- <input type="text" id="inputMediaTol" class="form-control form-control-sm" value="Reimburse"> -->
                                       <select class="select2 form-control select2-orange" id="inputMediaTol" data-dropdown-css-class="select2-orange">
-                                        <option value="Kasbon" selected>Kasbon</option>
+                                        <option value="Kasbon">Kasbon</option>
                                         <option value="Voucher" disabled>Voucher</option>
                                         <option value="Reimburse" selected>Reimburse</option>
                                       </select>
@@ -772,7 +755,7 @@
                           <div class="row" style="padding-top: 50px">
                             <div class="col-md-4">
                               <button class="btn btn-secondary btnStepPrevios">Previous</button>
-                              <button class="btn btn-secondary btnStepNext" onclick="stepper.next()">Next</button> 
+                              <button class="btn btn-secondary btnStepNext nextBiaya">Next</button> 
                             </div>
                           </div>
                         </div>
@@ -1042,6 +1025,40 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             <button type="button" class="btn bg-orange btn-kps savePIC ladda-button" data-style="expand-right">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modal-serlok" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <div class="modal-title">
+              <label>Program SPJ Menemukan Data Outgoing dari Program Serlok. Kendaraan Dengan No TNKB <span id="titleTNKB"></span> Berangkat Ke Customer Berikut:</label>
+            </div>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12 table-responsive p-0">
+                <table class="table table-hover table-valign-middle table-striped" width="100%">
+                  <thead>
+                    <tr>
+                      <th>Company Name</th>
+                      <th>Plant City</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="getSerlok">
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bg-orange btn-kps saveCustomerSerlok ladda-button" data-style="expand-right">Tambah Tujuan</button>
           </div>
         </div>
       </div>

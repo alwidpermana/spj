@@ -1179,7 +1179,7 @@
         position: 'top-end',
         toast : true,
         icon: 'success',
-        title: 'Berhasil Menyimpan Data!',
+        title: 'Berhasil Mengajukan Perubahan Konfigurasi!',
         showConfirmButton: false,
         timer: 3000
       })
@@ -1190,7 +1190,7 @@
       position: 'top-end',
       toast : true,
       icon: 'error',
-      title: 'Gagal Menyimpan Data! Hubungi Staff IT',
+      title: 'Gagal Mengajukan Konfigurasi! Hubungi Staff IT',
       showConfirmButton: false,
       timer: 3000
     })

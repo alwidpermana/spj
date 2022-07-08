@@ -458,7 +458,10 @@ foreach ($data as $key): ?>
                   </tr>
                 </thead>
                 <tbody>
+                  <input type="hidden" id="inputVerifCountPIC" value="<?=count($pic2)?>">
+                  <input type="hidden" id="inputVerifAfterChoice">
                   <?php foreach ($pic2 as $pc2): ?>
+                    <input type="hidden" id="verifPIC<?=$pc2->NIK?>">
                     <tr class="<?=$key->STATUS_PERJALANAN == 'IN' ? '' : 'fokusKendaraan'?>" id="<?=$pc2->NIK?>">
                       <td><?=$pc2->JENIS_PIC?></td>
                       <td><?=$pc2->OBJEK?></td>
@@ -861,6 +864,7 @@ foreach ($data as $key): ?>
         
         var inputNoSPJ = $('#inputNoSPJ').val();
         var jenis = 'Out';
+        var inputVerifCountPIC = $('#inputVerifCountPIC').val()
         $.ajax({
           type:'get',
           data:{inputNoSPJ, jenis},
@@ -868,23 +872,37 @@ foreach ($data as $key): ?>
           async: true,
           url:url+'/Implementasi/cekValidasiPIC',
           dataType:'json',
+          beforeSend: function(data){
+            $('.preloader-no-bg').show();
+          },
           success: function(data){
-            if (parseInt(data) == 0) {
-              // if (jenis == 'Out') {
-                saveValidasiOut()
-              // } else {
-              //   saveValidasiIn()
-              // }
-              console.log(jenis)
+            if (parseInt(inputVerifCountPIC)==parseInt(data)) {
+              saveValidasiOut()
+              
             } else {
-              Swal.fire('Verifikasi PIC Terlebih Dahulu!',"","warning")
+              Swal.fire("Verifikasi PIC Terlebih Dahulu","","warning")
             }
+            // if (parseInt(data) == 0) {
+            //   // if (jenis == 'Out') {
+
+                
+            //   // } else {
+            //   //   saveValidasiIn()
+            //   // }
+            //   console.log(jenis)
+            // } else {
+            //   Swal.fire('Verifikasi PIC Terlebih Dahulu!',"","warning")
+            // }
+          },
+          complete: function(data){
+            $('.preloader-no-bg').fadeOut("slow");
           },
           error: function(data){
             Swal.fire("Terjadi Error Pada Program!","Hubungi Segera Staff IT","error");
           }
         });
         saveCheckOut.ladda('stop');
+        
         return false;
           
       }, 1000)
@@ -899,38 +917,49 @@ foreach ($data as $key): ?>
         
         var inputNoSPJ = $('#inputNoSPJ').val();
         var inputKMIn = parseInt($('#inputKMIn').val());
-        if (inputKMIn >0) {
-          var jenis = 'In';
-          $.ajax({
-            type:'get',
-            data:{inputNoSPJ, jenis},
-            cache: false,
-            async: true,
-            url:url+'/Implementasi/cekValidasiPIC',
-            dataType:'json',
-            success: function(data){
-              if (parseInt(data) == 0) {
-                // if (jenis == 'Out') {
-                //   saveValidasiOut()
-                // } else {
-                  saveValidasiIn()
-                // }
-                  // saveUangTambahan();
-                console.log(jenis)
-              } else {
-                Swal.fire('Verifikasi PIC Terlebih Dahulu!',"","warning")
-              }
-            },
-            error: function(data){
-              Swal.fire("Terjadi Error Pada Program!","Hubungi Segera Staff IT","error");
+        var inputVerifCountPIC = $('#inputVerifCountPIC').val()
+        console.log("kontol")
+        var jenis = 'In';
+        $.ajax({
+          type:'get',
+          data:{inputNoSPJ, jenis},
+          cache: false,
+          async: true,
+          url:url+'/Implementasi/cekValidasiPIC',
+          dataType:'json',
+          beforeSend: function(data){
+            $('.preloader-no-bg').show();
+          },
+          success: function(data){
+            if (parseInt(inputVerifCountPIC)==parseInt(data)) {
+              saveValidasiIn()
+              
+            } else {
+              Swal.fire("Verifikasi PIC Terlebih Dahulu","","warning")
             }
-          });
-        } else {
-          Swal.fire("Masukan KM In lebih dari 0!","","warning")
-        }
+            // if (parseInt(data) == 0) {
+            //   // if (jenis == 'Out') {
+            //   //   saveValidasiOut()
+            //   // } else {
+            //     saveValidasiIn()
+            //   // }
+            //     // saveUangTambahan();
+            //   console.log(jenis)
+            // } else {
+            //   Swal.fire('Verifikasi PIC Terlebih Dahulu!',"","warning")
+            // }
+          },
+          complete: function(data){
+            $('.preloader-no-bg').fadeOut('slow');
+          },
+          error: function(data){
+            Swal.fire("Terjadi Error Pada Program!","Hubungi Segera Staff IT","error");
+          }
+        });
         
         
         saveCheckIn.ladda('stop');
+        // $('.saveCheckIn').attr("disabled","disabled");
         return false;
           
       }, 1000)
@@ -972,6 +1001,7 @@ foreach ($data as $key): ?>
     if (inputVerifikasiKendaraan == '') {
       Swal.fire("Verifikasi Kendaraan Terlebih Dahulu!","","warning")
     } else {
+      $('.saveCheckOut').attr("disabled","disabled");
       $.ajax({
         type:'post',
         data:{inputNoSPJ, inputVerifikasiKendaraan, inputKeteranganKendaraan, inputKMOut},
@@ -982,6 +1012,7 @@ foreach ($data as $key): ?>
         success: function(data){
           berhasil();
           location.reload();
+          
         },
         error: function(data){
           gagal();
@@ -995,9 +1026,13 @@ foreach ($data as $key): ?>
     var inputKeteranganKendaraan = $('#inputKeteranganKendaraan').val();
     var inputKMIn = $('#inputKMIn').val();
     var inputNoTNKB = $('#inputNoTNKB').val();
+    var inputKMOut = $('#inputKMOut').val();
     if (inputVerifikasiKendaraan == '') {
       Swal.fire("Verifikasi Kendaraan Terlebih Dahulu!","","warning")
-    } else {
+    }else if(parseInt(inputKMOut) > parseInt(inputKMIn)){
+      Swal.fire("KM Out Tidak Boleh Lebih Besar Dibandingkan KM In","","warning")
+    }else {
+      $('.saveCheckOut').attr("disabled","disabled");
       $.ajax({
         type:'post',
         data:{inputNoSPJ, inputVerifikasiKendaraan, inputKeteranganKendaraan, inputKMIn, inputNoTNKB},

@@ -10,14 +10,13 @@ class M_Pengajuan extends CI_Model {
 		$kodeJenis = $jenis == '1'?'DLV':'NDV';
 		$tahun = date('Y');
         $bulan = date('m');
-		$gabung = "SPJ/".$kodeJenis."/".$kode."/".$tahun."/".$bulan."/";
+		$gabung = "SPJ/".$kodeJenis."/".$tahun."/".$bulan."/";
 		$cekNoDoc=$this->db->query("SELECT MAX
 											( RIGHT ( NO_SPJ, 4 ) ) AS SETNODOC
 										FROM
 											SPJ_PENGAJUAN
 										WHERE
-											NO_SPJ LIKE '$gabung%' 
-											AND STATUS_DATA ='SAVED'");
+											NO_SPJ LIKE '$gabung%'");
 		foreach ($cekNoDoc->result() as $data) {
             if ($data->SETNODOC =="") {
                 $URUTZERO = $gabung."0001";
@@ -44,7 +43,13 @@ class M_Pengajuan extends CI_Model {
         }
         return $hasil;
 	}
-
+	public function hapusPengajuan($noSPJ)
+	{
+		$sql = "DELETE FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ'";
+		$this->db->query("DELETE FROM SPJ_PENGAJUAN_PIC WHERE NO_PENGAJUAN = '$noSPJ'");
+        $this->db->query("DELETE FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$noSPJ'");
+        return $this->db->query($sql);
+	}
 	public function saveTemporaryPengajuan($jenis, $no, $namaFile, $inputTglSPJ)
 	{
 		date_default_timezone_set('Asia/Jakarta');
@@ -149,12 +154,35 @@ class M_Pengajuan extends CI_Model {
 	}
 	public function updateGroupTujuan($no)
 	{
-		$sql = $this->db->query("SELECT
-					MAX(GROUP_ID) AS ID
-				FROM
-					[dbo].[SPJ_PENGAJUAN_LOKASI]
-				WHERE
-					NO_SPJ = '$no'");
+		$sql = $this->db->query("SELECT TOP 1
+									CASE 
+									WHEN Q1.ID IS NULL THEN Q2.ID
+									ELSE Q1.ID
+								END AS ID
+								FROM
+								(
+									SELECT
+										MAX(GROUP_ID) AS ID,
+										NO_SPJ
+									FROM
+										[dbo].[SPJ_PENGAJUAN_LOKASI]
+									WHERE
+										NO_SPJ = '$no' AND
+										GROUP_ID != 4
+									GROUP BY NO_SPJ
+								)Q1
+								FULL JOIN
+								(
+									SELECT
+										MAX(GROUP_ID) AS ID,
+										NO_SPJ
+									FROM
+										[dbo].[SPJ_PENGAJUAN_LOKASI]
+									WHERE
+										NO_SPJ = '$no' AND
+										GROUP_ID = 4
+									GROUP BY NO_SPJ
+								)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ");
 		foreach ($sql->result() as $key) {
 			$id = $key->ID;
 		}
@@ -173,7 +201,7 @@ class M_Pengajuan extends CI_Model {
 					b.NAMA_GROUP
 				FROM
 					SPJ_PENGAJUAN_LOKASI a 
-				INNER JOIN
+				LEFT JOIN
 					SPJ_GROUP_TUJUAN b
 				ON a.GROUP_ID = b.ID_GROUP
 				WHERE
@@ -624,6 +652,7 @@ class M_Pengajuan extends CI_Model {
         date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
+        $inputAbnormal = $this->input->post("inputAbnormal");
         $sql = "UPDATE SPJ_PENGAJUAN SET
         					TGL_INPUT = '$tanggal',
         					PIC_INPUT = '$user',
@@ -647,7 +676,8 @@ class M_Pengajuan extends CI_Model {
         					MEDIA_UANG_BBM = '$inputMediaBBM',
         					MEDIA_UANG_TOL = '$inputMediaTOL',
         					VOUCHER_BBM = '$inputNoVoucher',
-        					STATUS_SPJ = 'OPEN'
+        					STATUS_SPJ = 'OPEN',
+        					ABNORMAL = '$inputAbnormal'
         		WHERE
         			NO_SPJ = '$inputNoSPJ'";
         // $biayaBBM = $inputIdVoucher == 0 ? $inputBBM : 0;
@@ -801,5 +831,323 @@ class M_Pengajuan extends CI_Model {
 		// 	$response[] = array("value"=>$key->ID_SPJ,"label"=>$key->NO_TNKB);
 		// }
 		return $response;
+	}
+	public function getIDByNoSPJ($noSPJ)
+	{
+		$sql = "SELECT
+					ID_SPJ,
+					NAMA_JENIS 
+				FROM
+					SPJ_PENGAJUAN a
+				INNER JOIN SPJ_JENIS b 
+				ON a.JENIS_ID = b.ID_JENIS 
+				WHERE
+					NO_SPJ = '$noSPJ' AND
+					STATUS_DATA = 'SAVED'";
+		return $this->db->query($sql);
+	}
+	public function getDataTemporary($search)
+	{
+		$user = $this->session->userdata("LEVEL")>1 ? $this->session->userdata("NIK") : '';
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						ID_SPJ,
+						a.TGL_INPUT,
+						a.PIC_INPUT,
+						namapeg AS PIC_NAMA,
+						JENIS_ID,
+						NAMA_JENIS,
+						NO_SPJ,
+						TGL_SPJ,
+						QR_CODE
+					FROM
+						SPJ_PENGAJUAN a
+					LEFT JOIN dbhrm.dbo.tbPegawai b ON
+					a.PIC_INPUT = b.nik
+					INNER JOIN SPJ_JENIS c ON
+					a.JENIS_ID = c.ID_JENIS
+					WHERE
+						STATUS_DATA = 'TEMPORARY' AND
+						a.PIC_INPUT LIKE '$user%'
+				)Q1
+				WHERE
+					NO_SPJ LIKE '%$search%' OR
+					QR_CODE LIKE '%$search%'
+				ORDER BY TGL_INPUT DESC";
+		return $this->db->query($sql);
+	}
+	public function getSPJTemporary($id)
+	{
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						* 
+					FROM
+					(
+						SELECT
+							ID_SPJ,
+							TGL_INPUT,
+							JENIS_ID,
+							NO_SPJ,
+							TGL_SPJ,
+							QR_CODE,
+							PIC_INPUT,
+							JENIS_KENDARAAN,
+							NO_INVENTARIS,
+							NO_TNKB,
+							MERK,
+							TYPE,
+							GROUP_ID,
+							TOTAL_UANG_JALAN,
+							TOTAL_UANG_BBM,
+							TOTAL_UANG_TOL,
+							STATUS_SPJ,
+							RENCANA_BERANGKAT,
+							RENCANA_PULANG,
+							KENDARAAN,
+							MEDIA_UANG_SAKU,
+							MEDIA_UANG_MAKAN,
+							MEDIA_UANG_JALAN,
+							MEDIA_UANG_BBM,
+							MEDIA_UANG_TOL,
+							STATUS_PERJALANAN,
+							VOUCHER_BBM
+						FROM
+							SPJ_PENGAJUAN
+						WHERE
+							STATUS_DATA = 'TEMPORARY' AND
+							ID_SPJ = $id
+					)Q1
+					LEFT JOIN
+					(
+						SELECT
+							nik,
+							namapeg,
+							jabatan,
+							departemen,
+							CASE 
+								WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
+								ELSE Subdepartemen1+', '+Subdepartemen2
+							END AS Subdepartemen
+						FROM
+							dbhrm.dbo.tbPegawai
+					)Q2 ON Q1.PIC_INPUT = Q2.nik
+					LEFT JOIN
+					(
+						SELECT
+							ID_GROUP,
+							NAMA_GROUP
+						FROM
+							SPJ_GROUP_TUJUAN
+					)Q3 ON Q1.GROUP_ID = Q3.ID_GROUP
+					LEFT JOIN
+					(
+						SELECT
+							ID_JENIS,
+							NAMA_JENIS
+						FROM
+							SPJ_JENIS
+					)Q4 ON Q1.JENIS_ID = Q4.ID_JENIS
+					LEFT JOIN
+					(
+						SELECT
+							Q1.NIK + ' - ' + namapeg AS PIC_DRIVER,
+							NO_PENGAJUAN,
+							Q1.NIK AS NIK_DRIVER,
+							namapeg AS NAMA_DRIVER,
+							jabatan AS JABATAN_DRIVER,
+							departemen AS DEPARTEMEN_DRIVER,
+							Subdepartemen AS SUB_DEPARTEMEN_DRIVER,
+							UANG_SAKU,
+							UANG_MAKAN,
+							SORTIR,
+							OBJEK
+						FROM
+						(
+							SELECT
+								NO_PENGAJUAN,
+								NIK,
+								UANG_SAKU,
+								UANG_MAKAN,
+								SORTIR,
+								OBJEK
+							FROM
+								SPJ_PENGAJUAN_PIC
+							WHERE
+								JENIS_PIC ='Sopir'
+						)Q1
+						LEFT JOIN
+						(
+							SELECT
+								KdSopir AS nik,
+								NamaSopir AS namapeg,
+								'-' AS jabatan,
+								'-' AS departemen,
+								'-' AS Subdepartemen
+							FROM
+								TrTs_SopirLogistik 
+							WHERE
+								StatusAktif = 'Aktif' 
+							UNION
+							SELECT
+								KdSopir AS nik,
+								NamaSopir AS namapeg,
+								'-' AS jabatan,
+								'-' AS departemen,
+								'-' AS Subdepartemen
+							FROM
+								TrTs_SopirRental 
+							WHERE
+								StatusAktif = 'Aktif' 
+							UNION
+							SELECT
+								nik,
+								namapeg,
+								jabatan,
+								departemen,
+								CASE
+									WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
+									ELSE Subdepartemen1 + ', ' + Subdepartemen2
+								END AS Subdepartemen
+							FROM
+								dbhrm.dbo.tbPegawai 
+							WHERE
+								status_aktif = 'AKTIF' 
+						)Q2 ON Q1.NIK = Q2.NIK
+					)Q5 ON Q1.NO_SPJ = Q5.NO_PENGAJUAN
+					LEFT JOIN
+					(
+						SELECT
+							NO_TNBK,
+							NAMA_FILE
+						FROM
+							SPJ_GAMBAR_KENDARAAN
+						WHERE
+							STAR = 'Y'
+					)Q6 ON Q1.NO_TNKB = Q6.NO_TNBK
+					LEFT JOIN
+					(
+						SELECT
+							NIK AS NIK_OTORITAS,
+							FOTO_WAJAH
+						FROM
+							SPJ_PEGAWAI_OTORITAS
+					)Q7 ON Q5.NIK_DRIVER = Q7.NIK_OTORITAS
+					LEFT JOIN
+					(
+						SELECT
+							NO_BT,
+							UANG_SAKU1 * JML_PIC AS US1,
+							UANG_SAKU2 * JML_PIC AS US2,
+							UANG_MAKAN * JML_PIC AS UM
+						FROM
+						(
+							SELECT
+								NO_SPJ AS NO_BT,
+								UANG_SAKU1,
+								UANG_SAKU2,
+								UANG_MAKAN
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+						)Q1
+						INNER JOIN
+						(
+							SELECT
+								COUNT(NO_PENGAJUAN) AS JML_PIC,
+								NO_PENGAJUAN
+							FROM
+								SPJ_PENGAJUAN_PIC
+							GROUP BY
+								NO_PENGAJUAN
+						)Q2 ON Q1.NO_BT = Q2.NO_PENGAJUAN
+					)Q8 ON Q1.NO_SPJ = Q8.NO_BT
+					LEFT JOIN
+					(
+						SELECT
+							NO_SPJ AS NO_ADJUSTMENT,
+							SUM(DIAJUKAN) AS BIAYA_ADJUSTMENT
+						FROM
+							SPJ_ADJUSTMENT
+						GROUP BY NO_SPJ
+					)Q9 ON Q1.NO_SPJ = Q9.NO_ADJUSTMENT
+					LEFT JOIN
+					(
+						SELECT
+							Q1.*,
+							OK_OUT,
+							OK_IN,
+							JML_PIC,
+							CASE 
+								WHEN OK_OUT = JML_PIC THEN 'OK'
+								ELSE 'NG'
+							END AS VALIDASI_OUT,
+							CASE 
+								WHEN OK_IN = JML_PIC THEN 'OK'
+								ELSE 'NG'
+							END AS VALIDASI_IN
+						FROM
+						(
+							SELECT
+								NO_SPJ AS NO_VALIDASI,
+								KEBERANGKATAN,
+								KEPULANGAN,
+								KM_OUT,
+								KM_IN
+							FROM
+								SPJ_VALIDASI
+						)Q1
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ, 
+								COUNT(NO_SPJ) AS OK_OUT 
+							FROM
+								SPJ_VALIDASI_PIC
+							WHERE
+								SET_OUT = 'OK'
+							GROUP BY NO_SPJ
+						)Q2 ON Q1.NO_VALIDASI = Q2.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ, 
+								COUNT(NO_SPJ) AS OK_IN
+							FROM
+								SPJ_VALIDASI_PIC
+							WHERE
+								SET_IN = 'OK'
+							GROUP BY NO_SPJ
+						)Q3 ON Q1.NO_VALIDASI = Q3.NO_SPJ
+						INNER JOIN
+						(
+							SELECT
+								COUNT(NO_PENGAJUAN) AS JML_PIC,
+								NO_PENGAJUAN
+							FROM
+								SPJ_PENGAJUAN_PIC
+							GROUP BY
+								NO_PENGAJUAN
+						)Q4 ON Q1.NO_VALIDASI = Q4.NO_PENGAJUAN
+					)Q10 ON Q1.NO_SPJ = Q10.NO_VALIDASI
+					LEFT JOIN
+					(
+						SELECT
+							NO_PENGAJUAN AS NO_TOTAL,
+							SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+							SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
+						FROM
+							SPJ_PENGAJUAN_PIC
+						GROUP BY
+							NO_PENGAJUAN		
+					)Q11 ON Q1.NO_SPJ = Q11.NO_TOTAL
+				)Q1 
+				ORDER BY
+					TGL_SPJ DESC";
+		return $this->db->query($sql);
 	}
 }

@@ -29,6 +29,12 @@
       <div class="spinner-2"></div>
   </div>
 </div>
+<div class="preloader-no-bg">
+  <div class="loader">
+      <div class="spinner"></div>
+      <div class="spinner-2"></div>
+  </div>
+</div>
 <div class="wrapper">
     <?php $this->load->view('_partial/navbar');?>
     <?php $this->load->view('_partial/sidebar');?>
@@ -88,6 +94,7 @@
         'width': '100%',
     });
     $('.preloader').fadeOut('slow');
+    $('.preloader-no-bg').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     $('.preloader-no-bg').fadeOut("slow");
     // $('.ph-item').fadeOut('slow');
@@ -115,27 +122,50 @@
         $('.preloader-no-bg').show();
       },
       success: function(data){
-        if (data==0) {
-          // Swal.fire({
-          //   position: 'top-end',
-          //   toast : true,
-          //   icon: 'info',
-          //   title: 'Tidak Ditemukan SPJ dengan QrCode Tersebut!',
-          //   showConfirmButton: false,
-          //   timer: 3000
-          // })
-        } else {
-          Swal.fire({
-            position: 'top-end',
-            toast : true,
-            icon: 'success',
-            title: 'Berhasil Mengambil Data SPJ',
-            showConfirmButton: false,
-            timer: 3000
-          })
+        
+        if (data!=null ) {
+          // if (data.STATUS_PERJALANAN == null) {
+          //   hapusVerifikasiPICOut(scan)
+          // }else{
+          //   updateVerfikasiPICIn(scan)
+          // }
+          // var statusPerjalan = data.STATUS_PERJALANAN == null ? 'OUT':'IN';
+          var statusPerjalan = '';
+          if (data.STATUS_PERJALANAN == null) {
+            statusPerjalan = 'OUT';
+          }else if(data.STATUS_PERJALANAN == 'OUT'){
+            statusPerjalan = 'IN';
+          }else{
+            statusPerjalan = '-';
+          }
+          // console.log(data.STATUS_PERJALANAN);
+          // console.log(statusPerjalan)
+
+          var noSPJ = data.NO_SPJ;
+          verfikasiDataPICOutIn(scan, statusPerjalan, noSPJ)
           
-          getSPJ(scan)
         }
+        // if (data==0) {
+        //   // Swal.fire({
+        //   //   position: 'top-end',
+        //   //   toast : true,
+        //   //   icon: 'info',
+        //   //   title: 'Tidak Ditemukan SPJ dengan QrCode Tersebut!',
+        //   //   showConfirmButton: false,
+        //   //   timer: 3000
+        //   // })
+        // } else {
+        //   Swal.fire({
+        //     position: 'top-end',
+        //     toast : true,
+        //     icon: 'success',
+        //     title: 'Berhasil Mengambil Data SPJ',
+        //     showConfirmButton: false,
+        //     timer: 3000
+        //   })
+          
+        //   getSPJ(scan)
+        // }
       },
       complete: function(data){
         $('.preloader-no-bg').fadeOut("slow");
@@ -168,6 +198,8 @@
         $('#getSPJ').html(data)
         $('#inputScan').attr("disabled","disabled");
         document.getElementById('inputScan').blur()
+        $('.saveCheckOut').removeAttr("disabled","disabled");
+        $('.saveCheckIn').removeAttr("disabled","disabled");
       },
       complete: function(data){
         $('.preloader-no-bg').fadeOut("slow");
@@ -176,6 +208,28 @@
         Swal.fire("Gagal Mengambil SPJ!","Reload Halaman Ini atau Hubungi Staff IT","error")
       }
     })
+  }
+  function verfikasiDataPICOutIn(scan, status, noSPJ) {
+    if (status == '-') {
+      getSPJ(scan)
+    }else{
+      $.ajax({
+        type:'post',
+        data:{noSPJ, status},
+        dataType:'json',
+        url:url+'/Implementasi/verifikasiDataPICOutIn',
+        cache: false,
+        async: true,
+        success: function(data){
+          getSPJ(scan)
+        },
+        error: function(data){
+
+        }
+      })  
+      // console.log(status)
+    }
+    
   }
   function berhasil() {
       Swal.fire({

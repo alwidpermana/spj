@@ -9,7 +9,7 @@
 	<tbody>
 		<?php foreach ($data as $key): ?>
 			<tr>
-				<td><?=date("d F Y", strtotime($key->TGL_INPUT))?></td>
+				<td><?=date("Y-m-d", strtotime($key->TGL_INPUT))?></td>
 				<td><?=$key->TRANSAKSI?></td>
 				<td><?=$key->DEBIT==0?'':str_replace(',', '.', number_format($key->DEBIT))?></td>
 			</tr>

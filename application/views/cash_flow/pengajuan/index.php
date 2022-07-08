@@ -139,6 +139,30 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="modal-receive" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <input type="hidden" id="id">
+            <input type="hidden" id="kasbon">
+            <input type="hidden" id="jumlah">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label><p>Masukan Kode Approve Yang Telah Diberikan Oleh Bagian Keuangan</p></label><br>
+                  <label>Kode Approve</label>
+                  <input type="text" id="inputPassword" class="form-control form-control-sm">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bg-orange btn-kps saveApprove ladda-button" data-style="expand-right" step="1">Save & Receive</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <?php $this->load->view('_partial/footer');?>
 </div>
 <?php $this->load->view("_partial/js");?>
@@ -241,25 +265,72 @@
       var jumlah = $(this).attr("jumlah");
       var jenisSPJ = $(this).attr("jenisSPJ");
       var jenisKasbon = $(this).attr("jenisKasbon");
-      var kasbon = inputJenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':jenisKasbon+' '+jenisSPJ;
-      $.ajax({
-        type:'post',
-        data:{id,jumlah, kasbon},
-        dataType:'json',
-        url:'receivePengajuan',
-        cache: false,
-        async: true,
-        success: function(data){
-          berhasil();
-          getPengajuan();
-        },
-        error: function(data){
-          gagal()
-        }
-      });
+      var kasbon = jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':jenisKasbon+' '+jenisSPJ;
+      $('#id').val(id)
+      $('#status').val(status)
+      $('#kasbon').val(kasbon)
+      $('#jumlah').val(jumlah)
+      $('#modal-receive').modal('show')
+      
+    });
+    var saveApprove = $('.saveApprove').ladda();
+      saveApprove.click(function () {
+      // Start loading
+      saveApprove.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var id = $('#id').val()
+        var status = $('#status').val()
+        var kasbon = $('#kasbon').val()
+        var jumlah = $('#jumlah').val()
+        var inputPassword = $('#inputPassword').val()
+        $.ajax({
+          type:'get',
+          data:{id, inputPassword},
+          dataType:'json',
+          url:'cekPasswordReceive',
+          cache: false,
+          async: true,
+          success: function(data){
+            if (parseInt(data)==0) {
+              Swal.fire("Kode Untuk Receive Yang Anda Masukan Salah!","Perhatikan Besar dan Kecil Kodenya!","warning")
+            } else {
+              receivePengajuan(id, jumlah, kasbon)
+            }
+          },
+          error: function(data){
+            gagal()
+          }
+        })
+        saveApprove.ladda('stop');
+        return false;
+          
+      }, 1000)
     });
 
   })
+
+  function receivePengajuan(id, jumlah, kasbon) {
+    $('.saveApprove').attr("disabled","disabled");
+    $.ajax({
+      type:'post',
+      data:{id,jumlah, kasbon},
+      dataType:'json',
+      url:'receivePengajuan',
+      cache: false,
+      async: true,
+      success: function(data){
+        berhasil();
+        getPengajuan();
+        $('.saveApprove').removeAttr("disabled","disabled");
+        $('#modal-receive').modal('hide')
+      },
+      error: function(data){
+        gagal()
+      }
+    });
+  }
   
   function getPengajuan() {
     var filJenis = $('#filJenis').val();
@@ -296,11 +367,11 @@
       async: true,
       success: function(data){
         var saldo = parseInt(data.SALDO);
-        if (saldo>=inputBiaya) {
+        // if (saldo>=inputBiaya) {
           savePengajuan(inputJenisKasbon, inputJenisSPJ, inputBiaya)
-        }else{
-          Swal.fire("Saldo Kas Induk "+jenis+" Tidak Mencukupi!","Mohon Hubungi PIC Terkait","info")
-        }
+        // }else{
+        //   Swal.fire("Saldo Kas Induk "+jenis+" Tidak Mencukupi!","Mohon Hubungi PIC Terkait","info")
+        // }
       },
       error: function(data){
         gagal()

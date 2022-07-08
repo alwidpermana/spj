@@ -221,7 +221,7 @@
 	           
 	            paging:         false,
 	            'searching': false,
-	            order: [[3, 'desc']],
+	            order: [[1, 'asc']],
 	            info: false,  
 	            columnDefs: [
 		            { orderable: false, targets: 0 }
@@ -235,7 +235,7 @@
 	            scrollCollapse: true,
 	            paging:         false,
 	            'searching': false,
-	            order: [[3, 'desc']],
+	            order: [[1, 'asc']],
 	            info: false,  
 	            columnDefs: [
 		            { orderable: false, targets: 0 }

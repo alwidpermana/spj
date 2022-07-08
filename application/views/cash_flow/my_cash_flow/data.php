@@ -107,7 +107,8 @@
                 <td><?=str_replace(',', '.', number_format($key->JUMLAH))?></td>
                 <?php if ($key->STATUS_PENGAJUAN_SALDO == 'OPEN' && $key->STATUS_APPROVE == null): ?>
                   <td colspan="5" class="text-center">
-                    <button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
+                    <?php if ($key->TRANSAKSI == 'Pinbuk'): ?>
+                      <button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
                         Approve Pengajuan
                         <span class="sr-only">Toggle Dropdown</span>
                       </button>
@@ -122,6 +123,17 @@
                           jumlah="<?=$key->JUMLAH?>">Approve</a>
                         <a class="dropdown-item dropButton approvePengajuan" data="<?=$key->ID?>" status="REJECTED" href="javascript:;">Reject</a>
                       </div>
+                    <?php else: ?>
+                      <a 
+                        href="javascript:;" 
+                        class="btn bg-orange btn-kps btn-sm approveGenerate" 
+                        data="<?=$key->ID?>"
+                        jenisKasbon = "<?=$key->JENIS_KASBON?>"
+                        jenisSPJ = "<?=$key->NAMA_JENIS?>"
+                        jumlah="<?=$key->JUMLAH?>">
+                        Approve Generate
+                      </a>
+                    <?php endif ?>
                     
                   </td>
                   <td style="display: none"></td>
@@ -143,36 +155,50 @@
                       if ($gapApprove->d>0) {
                         echo '<span class="text-danger">'.$gapApprove->d.' Hari</span>';
                       } else {
-                        echo $gapApprove.' Hari';
+                        echo $gapApprove->d.' Hari';
                       }
-                      
+                        
                       
                     ?>
                   </td>
                   <td><?=$key->STATUS_APPROVE?></td>  
                 <?php endif ?>
-                
-                <td><?=$key->TGL_RECEIVE==null?'':date("d F Y", strtotime($key->TGL_RECEIVE))?></td>
-                <td>
-                  <?=$key->PIC_RECEIVE?><br>
-                  <?=$key->NAMA_RECEIVE?>
-                </td>
-                <td>
-                  <?php
-                    if ($key->STATUS_RECEIVE == 'RECEIVED') {
-                      $tglReceive = $key->TGL_RECEIVE == null?date("Y-m-d"):date("Y-m-d", strtotime($key->TGL_RECEIVE));
-                      $createReceive = date_create($tglReceive);
-                      $gapReceive = date_diff($createApprove, $createReceive);
-                      
-                      if ($gapReceive->d > 0) {
-                        echo '<span class="text-danger">'.$gapReceive->d.' Hari</span>';
-                      }else{
-                        echo $gapReceive->d.' Hari';
+                <?php if ($key->DEFAULT_TRANSAKSI == 'Generate' && $key->STATUS_APPROVE == 'APPROVED' && $key->STATUS_RECEIVE == null): ?>
+                  <td colspan="4" class="text-center">
+                    <a 
+                      href="javascript:;" 
+                      class="btn bg-orange btn-kps btn-sm receiveGenerate" 
+                      data="<?=$key->ID?>"
+                      jenisKasbon = "<?=$key->JENIS_KASBON?>"
+                      jenisSPJ = "<?=$key->NAMA_JENIS?>"
+                      jumlah="<?=$key->JUMLAH?>"
+                      >
+                      Receive Generate
+                    </a>
+                  </td>
+                <?php else: ?>
+                  <td><?=$key->TGL_RECEIVE==null?'':date("d F Y", strtotime($key->TGL_RECEIVE))?></td>
+                  <td>
+                    <?=$key->PIC_RECEIVE?><br>
+                    <?=$key->NAMA_RECEIVE?>
+                  </td>
+                  <td>
+                    <?php
+                      if ($key->STATUS_RECEIVE == 'RECEIVED') {
+                        $tglReceive = $key->TGL_RECEIVE == null?date("Y-m-d"):date("Y-m-d", strtotime($key->TGL_RECEIVE));
+                        $createReceive = date_create($tglReceive);
+                        $gapReceive = date_diff($createApprove, $createReceive);
+                        
+                        if ($gapReceive->d > 0) {
+                          echo '<span class="text-danger">'.$gapReceive->d.' Hari</span>';
+                        }else{
+                          echo $gapReceive->d.' Hari';
+                        }
                       }
-                    }
-                  ?>
-                </td>
-                <td><?=$key->STATUS_RECEIVE?></td>
+                    ?>
+                  </td>
+                  <td><?=$key->STATUS_RECEIVE?></td>
+                <?php endif ?>
                 <td class="text-center">
                   <?php if ($key->STATUS_PENGAJUAN_SALDO == 'CLOSE'): ?>
                     <span class="badge bg-success">CLOSE</span>

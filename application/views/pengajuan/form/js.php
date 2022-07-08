@@ -625,15 +625,13 @@
       // Do something in backend and then stop ladda
       setTimeout(function () {
         var inputNoSPJ = $('#inputNoSPJ').val();
-        var customer = [];
-        $.each($('.inputSerlokCustomer:checked'), function(){
-          customer.push($(this).val());
-        })
+        var inputTglSPJ = $('#inputTglSPJ').val();
+        var inputNoTNKB = $('#inputNoTNKB').val();
 
         $.ajax({
           type:'post',
           dataType:'json',
-          data:{inputNoSPJ, customer},
+          data:{inputNoSPJ, inputTglSPJ, inputNoTNKB},
           url:url+'/pengajuan/saveCustomerSerlok',
           cache: false,
           async: true,
@@ -768,9 +766,10 @@
   function getLokasi() {
       var inputNoSPJ = $('#inputNoSPJ').val();
       var inputGroupTujuan = $('#inputGroupTujuan').val();
+      var inputJenisSPJ = $('#inputJenisSPJ').val();
       $.ajax({
         type:'get',
-        data:{inputNoSPJ, inputGroupTujuan},
+        data:{inputNoSPJ, inputGroupTujuan, inputJenisSPJ},
         url: url+'/pengajuan/getLokasi',
         cache: false,
         async: true,
@@ -1205,6 +1204,8 @@
     var inputJamPulang = $('#inputJamPulang').val();
     var inputAneh = 'Aneh';
     var inputJenisSPJ = $('#inputJenisSPJ').val();
+    var abnormal = document.getElementById("inputAbnormal");
+    var inputAbnormal = abnormal.checked == true ? 'Y' : 'N';
     if (inputNoTNKB == '') {
       Swal.fire("Lengkapi Datanya Terlebih Dahulu!","No TNKB Kendaraan Masing Kosong!", "warning")
     }else if(inputGroupTujuan == ''){
@@ -1246,15 +1247,22 @@
             inputTglPulang,
             inputJamPulang,
             inputNoVoucher,
-            inputJenisSPJ
+            inputJenisSPJ,
+            inputAbnormal
           },
         dataType: 'json',
         url:url+'/pengajuan/saveSPJ',
         async: true,
         cache: false,
+        beforeSend: function(data){
+          $('.preloader-no-bg').show();
+        },
         success: function(data){
           berhasil();
-          window.location.href = '<?=base_url()?>monitoring/spj?status=berhasil';
+          window.location.href = '<?=base_url()?>monitoring/spj';
+        },
+        complete: function(data){
+          $('.preloader-no-bg').fadeOut('slow');
         },
         error: function(darta){
           gagal();
@@ -1275,9 +1283,42 @@
       cache: false,
       success: function(data){
         if (parseInt(data)>0) {
-          saveSPJ();
+          cekSaldo();
         } else {
           Swal.fire("Tidak Terdapat Driver Pada SPJ Ini!","PIC yang di daftarkan Tidak ada yang memiliki otoritas Driver!","warning")
+        }
+      },
+      error: function(data){
+
+      }
+    })
+  }
+  function cekSaldo() {
+    var inputJenisSPJ = $('#inputJenisSPJ').val();
+    var inputMediaBBM = $('#inputMediaBBM').val();
+    var inputMediaTOL = $('#inputMediaTol').val();
+    var inputTotalUangSaku = parseInt($('#inputTotalUangSaku').val());
+    var inputTotalUangMakan = parseInt($('#inputTotalUangMakan').val());
+    var inputTotalUangJalan = parseInt($('#inputTotalUangJalan').val());
+    var inputBBM = parseInt($('#inputBBMManual').val());
+    var inputTOL = parseInt($('#inputTOL').val());
+    var bbmSPJ = inputMediaBBM == 'Voucher' ? 0 : inputBBM;
+    var tolSPJ = inputMediaTOL == 'Kasbon' ? inputTOL:0;
+
+    var kasbonSPJ = inputTotalUangSaku + inputTotalUangMakan + inputTotalUangJalan + bbmSPJ + tolSPJ;
+
+    $.ajax({
+      type:'get',
+      data:{inputJenisSPJ},
+      dataType:'json',
+      cache: false,
+      async: true,
+      url:url+'/pengajuan/cekSaldoSubKas',
+      success: function(data){
+        if (kasbonSPJ >= data.saldoSPJ) {
+          Swal.fire("Kasbon SPJ Melebihi Jumlah Saldo Sub Kas!","Hubungi PIC Terkait","warning")
+        }else{
+          saveSPJ();
         }
       },
       error: function(data){
@@ -1513,14 +1554,6 @@
             html+='<tr>';
             html+='<td>'+data[i].COMPANY_NAME+'</td>';
             html+='<td>'+data[i].PLANT1_CITY+'</td>';
-            html+='<td>';
-            html+='<div class="form-group clearfix">';
-            html+='<div class="icheck-orange d-inline">';
-            html+='<input type="checkbox" class="inputSerlokCustomer" id="idSerlok'+data[i].ID+'" name="idSerlok'+data[i].ID+'" value="'+data[i].ID+'" checked>';
-            html+='<label for="idSerlok'+data[i].ID+'"></label>';
-            html+='</div>';
-            html+='</div>';
-            html+='</td>';
             html+='</tr>';
           }
           $('#getSerlok').html(html);

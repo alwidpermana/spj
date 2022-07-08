@@ -59,10 +59,11 @@
                 <div class="form-group">
                   <label>Biaya</label>
                   <input type="number" id="inputBiaya" class="form-control form-control-sm">
+                  <input type="hidden" id="inputBiayaAwal">
                 </div>
               </div>
             </div>
-            
+            <input type="hidden" id="inputId">
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -93,9 +94,12 @@
       var noSPJ = $(this).attr("noSPJ");
       var idSPJ = $(this).attr("idSPJ");
       var credit = $(this).attr("credit");
+      var uangBBM = $(this).attr("uangBBM");
+      $('#inputId').val(idSPJ);
       $('#inputNoSPJ').val(noSPJ);
       $('#inputNoVoucher').val(noVoucher);
       $('#inputBiaya').val(credit)
+      $('#inputBiayaAwal').val(uangBBM);
       document.getElementById("inputBiaya").focus()
       $('#modal-credit').modal("show")
       
@@ -110,10 +114,12 @@
         var inputNoSPJ= $('#inputNoSPJ').val();
         var inputBiaya = $('#inputBiaya').val();
         var inputNoVoucher =$('#inputNoVoucher').val();
+        var inputId = $('#inputId').val();
+        var inputBiayaAwal = $('#inputBiayaAwal').val();
         if (parseInt(inputBiaya)>0) {
           $.ajax({
             type:'post',
-            data:{inputNoSPJ, inputBiaya, inputNoVoucher},
+            data:{inputNoSPJ, inputBiaya, inputNoVoucher, inputId, inputBiayaAwal},
             cache: false,
             async: true,
             dataType:'json',

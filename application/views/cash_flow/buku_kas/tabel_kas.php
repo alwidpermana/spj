@@ -17,11 +17,12 @@
 	<tbody>
 		<?php 
 		$i = 1;
+		$tglHariIni = date("Y-m-d");
 		foreach ($data as $key): ?>
 			<tr>
 				<td class="text-center">
 					<?php if ($key->PENGAJUAN_SALDO_ID == 0): ?>
-					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown" <?=$jmlData == $i  ?'':'disabled'?>>
+					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown" <?=$jmlData == $i && $tglHariIni == date("Y-m-d", strtotime($key->TGL_KAS))  ?'':'disabled'?>>
                       <span class="sr-only">Toggle Dropdown</span>
                     </button>	
 					<?php else: ?>

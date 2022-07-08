@@ -167,14 +167,38 @@
                   <p>My Cash Flow</p>
                 </a>
               </li>
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>cash_flow/rekap_saldo" class="nav-link ">
+                  <i class="fas fa-wallet nav-icon <?=substr($side, 10) == 'rekap'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Rekap Saldo</p>
+                </a>
+              </li>
             </ul>
           </li>
-          <li class="nav-item">
-            <a href="<?=base_url()?>Pengajuan/form" class="nav-link <?=$side == 'spj-pengajuan'?'active':''?>">
-              <i class="fas fa-envelope-open-text nav-icon "></i>
-              <p>Pengajuan SPJ</p>
+          <li class="nav-item <?=$this->uri->segment("1")=='pengajuan'?'menu-open':''?>">
+            <a href="javascript:void(0);" class="nav-link <?=$this->uri->segment("1")=='pengajuan'?'active':''?>">
+              <i class="nav-icon fas fa-envelope-open-text"></i>
+              <p>
+                Pengajuan SPJ
+                <i class="fas fa-angle-left right"></i>
+              </p>
             </a>
+            <ul class="nav nav-treeview menu-open-kps">
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>pengajuan/form" class="nav-link <?=$side == 'spj-pengajuan'?'text-dark':''?>">
+                  <i class="fas fa-file-alt nav-icon <?=$side == 'spj-pengajuan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Pengajuan Baru</p>
+                </a>
+              </li>
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>pengajuan/temporary" class="nav-link <?=$side == 'spj-temporary'?'text-dark':''?>">
+                  <i class="fas fa-file-excel nav-icon <?=$side == 'spj-temporary'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Temporary Pengajuan</p>
+                </a>
+              </li>
+            </ul>
           </li>
+          
           <li class="nav-item <?=$this->uri->segment("1")=='monitoring'?'menu-open':''?>">
             <a href="javascript:void(0);" class="nav-link <?=substr($side, 0, 10) == 'monitoring'?'active':''?>">
               <i class="nav-icon fas fa-desktop"></i>

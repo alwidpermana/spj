@@ -53,7 +53,8 @@ class M_Serlok extends CI_Model {
 	{
 		$sql = "SELECT DISTINCT
 					Q1.*,
-					COMPANY_NAME
+					COMPANY_NAME,
+					nama_kabkota
 				FROM
 				(
 					SELECT
@@ -61,7 +62,8 @@ class M_Serlok extends CI_Model {
 						DELIVERY_DATE,
 						PLANT1_CITY,
 						kps_customer_delivery_setup AS ID,
-						d.KPS_CUSTOMER_ID
+						d.KPS_CUSTOMER_ID,
+						ID_CITY_SETUP AS ID_KAB_KOTA
 					FROM
 						kps_vehicle a
 					JOIN
@@ -83,7 +85,15 @@ class M_Serlok extends CI_Model {
 						KPS_CUSTOMER_ID 
 					FROM
 						kps_customer 
-				)Q2 ON Q2.KPS_CUSTOMER_ID = Q1.KPS_CUSTOMER_ID";
+				)Q2 ON Q2.KPS_CUSTOMER_ID = Q1.KPS_CUSTOMER_ID
+				LEFT JOIN
+				(
+					SELECT
+						ID_KK,
+						nama_kabkota
+					FROM
+						tref_kabkota
+				)Q3 ON Q1.ID_KAB_KOTA = Q3.ID_KK";
 		$dbserlok = $this->load->database("dbserlok", TRUE);
 		return $dbserlok->query($sql);
 	}

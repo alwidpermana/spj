@@ -24,6 +24,22 @@ class M_Cash_Flow extends CI_Model {
 		$sql = "INSERT INTO SPJ_KAS(TGL_INPUT, PIC_INPUT, TRANSAKSI, $fieldTujuan, $fieldBiaya, PENGAJUAN_SALDO_ID, STATUS_APPROVE, PIC_APPROVE, TGL_APPROVE) VALUES('$tanggal', '$user', '$inputTransaksi', '$inputTujuan', $inputBiaya, $inputIDPengajuan, 'APPROVED', 'KODE','$tanggal')";
 		return $this->db->query($sql);
 	}
+	public function getAllSaldo($jenis)
+	{
+		$sql = "SELECT
+					ID,
+					JENIS_SALDO,
+					REPLACE(JENIS_SALDO, 'Kasbon ', '') AS NAMA_SALDO,
+					JUMLAH,
+					JENIS_KAS
+				FROM
+					SPJ_SALDO
+				WHERE
+					ID != 1 AND
+					JENIS_KAS LIKE '$jenis%'
+				ORDER BY ID ASC";
+		return $this->db->query($sql);
+	}
 	public function getSaldoPerJenis($jenis, $kas)
 	{
 		$sql = "SELECT
@@ -38,15 +54,19 @@ class M_Cash_Flow extends CI_Model {
 	public function updateSaldo($jenis, $biaya, $kas)
 	{
 		$sql = "UPDATE SPJ_SALDO SET JUMLAH = $biaya WHERE JENIS_SALDO = '$jenis' AND JENIS_KAS = '$kas'";
+		if ($jenis != 'Modal Awal') {
+			$this->rekapSaldo($jenis, $biaya, $kas);
+		}
+		$this->saveLogSaldo($jenis, $biaya, $kas);
 		return $this->db->query($sql);
 	}
 	public function getAllSaldoKasInduk()
 	{
 		
 	}
-	public function getDataBukuKasInternal($filBulan, $filTahun)
+	public function getDataBukuKasInternal($filBulan, $filTahun, $bulan)
 	{
-		$sql = "Execute SPJ_monitoringBukuKasInternal $filBulan, $filTahun";
+		$sql = "Execute SPJ_monitoringBukuKasInternal $filBulan, $filTahun, '$bulan%'";
 		return $this->db->query($sql);
 	}
 	public function getDataModalAwal($bulan, $tahun)
@@ -112,8 +132,9 @@ class M_Cash_Flow extends CI_Model {
 		$sql = "SELECT
 					ID,
 					TGL_PENGAJU,
+					TRANSAKSI AS DEFAULT_TRANSAKSI,
 					CASE 
-						WHEN TRANSAKSI = 'Generate' THEN JENIS_KASBON+' No. '+DETAIL_TRANSAKSI
+						WHEN TRANSAKSI = 'Generate' THEN TRANSAKSI+' No. '+DETAIL_TRANSAKSI
 						ELSE TRANSAKSI
 					END AS TRANSAKSI,
 					JENIS_KASBON,
@@ -158,13 +179,13 @@ class M_Cash_Flow extends CI_Model {
 				ORDER BY TGL_PENGAJU DESC";
 		return $this->db->query($sql);
 	}
-	public function approvePengajuan($id, $status)
+	public function approvePengajuan($id, $status, $password)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
         $statusPengajuan = $status == 'APPROVED'?'OPEN':'REJECTED';
-		$sql = "UPDATE SPJ_PENGAJUAN_SALDO SET PIC_APPROVE = '$user', TGL_APPROVE = '$tanggal', STATUS_APPROVE='$status', STATUS_PENGAJUAN_SALDO = '$statusPengajuan' WHERE ID=$id";
+		$sql = "UPDATE SPJ_PENGAJUAN_SALDO SET PIC_APPROVE = '$user', TGL_APPROVE = '$tanggal', STATUS_APPROVE='$status', STATUS_PENGAJUAN_SALDO = '$statusPengajuan', PASSWORD_RECEIVE='$password' WHERE ID=$id";
 		return $this->db->query($sql);
 	}
 	public function receivePengajuan($id)
@@ -175,24 +196,161 @@ class M_Cash_Flow extends CI_Model {
         $sql = "UPDATE SPJ_PENGAJUAN_SALDO SET PIC_RECEIVE = '$user', TGL_RECEIVE = '$tanggal', STATUS_RECEIVE = 'RECEIVED', STATUS_PENGAJUAN_SALDO='CLOSE' WHERE ID = $id";
         return $this->db->query($sql);
 	}
-	public function saveSubKas($kasbon,$field, $jumlah, $jenis, $id)
+	public function saveSubKas($kasbon,$field, $jumlah, $jenis, $id, $detail)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
-		$sql = "INSERT INTO SPJ_KAS_SUB(JENIS_KASBON, $field, TGL_INPUT, JENIS_FK, FK_ID)VALUES('$kasbon',$jumlah,'$tanggal','$jenis',$id)";
+        $getData = $this->db->query("SELECT ID FROM SPJ_KAS_SUB WHERE JENIS_KASBON = '$kasbon' AND JENIS_FK='$jenis' AND FK_ID = $id AND DETAIL_KASBON = '$detail'");
+        if ($getData->num_rows()==0) {
+        	$sql = "INSERT INTO SPJ_KAS_SUB(JENIS_KASBON, $field, TGL_INPUT, JENIS_FK, FK_ID, DETAIL_KASBON)VALUES('$kasbon',$jumlah,'$tanggal','$jenis',$id,'$detail')";
+        } else {
+        	$sql = "UPDATE SPJ_KAS_SUB SET $field = $jumlah WHERE JENIS_KASBON = '$kasbon' AND JENIS_FK='$jenis' AND FK_ID = $id AND DETAIL_KASBON = '$detail'";
+        }
+        
+		
 		return $this->db->query($sql);
 	}
-	public function getDataRekapSaldo($field1, $field2)
+	public function getDataRekapSaldo($field1)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d');
 		$sql = "SELECT
-					SUM($field1) AS KAS_REKAP,
-					SUM($field2) AS KAS_TOTAL
+					SUM($field1) AS KAS_REKAP
 				FROM
 					SPJ_REKAP_SALDO
 				WHERE
-					TGL_REKAP = '$tgl'";
+					TGL_REKAP = '$tanggal'";
+		return $this->db->query($sql);
+	}
+	public function updateRekapSaldo($field, $saldo, $fieldDebit, $debit, $jenis, $field2, $tipe)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d');
+        $getData = $this->db->query("SELECT ID FROM SPJ_REKAP_SALDO WHERE TGL_REKAP = '$tanggal'");
+        if ($getData->num_rows()==0) {
+        	$sql = "INSERT INTO SPJ_REKAP_SALDO(TGL_REKAP, $field, $fieldDebit)VALUES('$tanggal','$saldo','$debit')";
+        } else {
+        	$sql = "UPDATE SPJ_REKAP_SALDO SET $field = $saldo, $fieldDebit = $debit WHERE TGL_REKAP = '$tanggal'";
+        }
+        $this->db->query($sql);
+        $jenis2 = $jenis =='KAS INDUK'?'SUB KAS':'KAS INDUK';
+        $getSaldo = $this->getSaldoPerJenis($tipe, $jenis2);
+    	if ($getSaldo->num_rows()==0) {
+    		$saldoBeda = 0;
+    	} else {
+    		foreach ($getSaldo->result() as $key) {
+	    		$saldoBeda =$key->SALDO; 
+	    	}
+    	}
+    	
+    	$this->db->query("UPDATE SPJ_REKAP_SALDO SET $field2 = $saldoBeda WHERE TGL_REKAP = '$tanggal'");
+        
+	}
+	public function rekapSaldo($tujuan, $saldo, $jenis)
+	{
+		if ($tujuan == 'Kasbon SPJ Delivery' && $jenis == 'KAS INDUK') {
+			$field = 'KAS_INDUK_SPJ_DLV';
+			$fieldDebit = 'DA_SPJ_DLV';
+			$field2 = 'SUB_KAS_SPJ_DLV';
+		}elseif ($tujuan == 'Kasbon SPJ Non Delivery' && $jenis == 'KAS INDUK') {
+			$field = 'KAS_INDUK_SPJ_NDV';
+			$fieldDebit = 'DA_SPJ_NDV';
+			$field2 = 'SUB_KAS_SPJ_NDV';
+		}elseif ($tujuan == 'Kasbon TOL Delivery' && $jenis == 'KAS INDUK') {
+			$field = 'KAS_INDUK_TOL_DLV';
+			$fieldDebit = 'DA_TOL_DLV';
+			$field2 = 'SUB_KAS_TOL_DLV';
+		}elseif ($tujuan == 'Kasbon TOL Non Delivery' && $jenis == 'KAS INDUK') {
+			$field = 'KAS_INDUK_TOL_NDV';
+			$fieldDebit = 'DA_TOL_NDV';
+			$field2 = 'SUB_KAS_TOL_NDV';
+		}elseif ($tujuan == 'Kasbon Voucher BBM' && $jenis == 'KAS INDUK') {
+			$field = 'KAS_INDUK_BBM';
+			$fieldDebit = 'DA_BBM';
+			$field2 = 'SUB_KAS_BBM';
+		}elseif ($tujuan == 'Kasbon SPJ Delivery' && $jenis == 'SUB KAS') {
+			$field = 'SUB_KAS_SPJ_DLV';
+			$fieldDebit = 'DA_SPJ_DLV';
+			$field2 = 'KAS_INDUK_SPJ_DLV';
+		}elseif ($tujuan == 'Kasbon SPJ Non Delivery' && $jenis == 'SUB KAS') {
+			$field = 'SUB_KAS_SPJ_NDV';
+			$fieldDebit = 'DA_SPJ_NDV';
+			$field2 = 'KAS_INDUK_SPJ_NDV';
+		}elseif ($tujuan == 'Kasbon TOL Delivery' && $jenis == 'SUB KAS') {
+			$field = 'SUB_KAS_TOL_DLV';
+			$fieldDebit = 'DA_TOL_DLV';
+			$field2 = 'KAS_INDUK_TOL_DLV';
+		}elseif ($tujuan == 'Kasbon TOL Non Delivery' && $jenis == 'SUB KAS') {
+			$field = 'SUB_KAS_TOL_NDV';
+			$fieldDebit = 'DA_TOL_NDV';
+			$field2 = 'KAS_INDUK_TOL_NDV';
+		}elseif ($tujuan == 'Kasbon Voucher BBM' && $jenis == 'SUB KAS') {
+			$field = 'SUB_KAS_BBM';
+			$fieldDebit = 'DA_BBM';
+			$field2 = 'KAS_INDUK_BBM';
+		}else{
+			$field = 'KAS_INDUK_TOTAL';
+			$fieldDebit = 'SUB_KAS_TOTAL';
+			$field2 = 'KAS_INDUK_TOTAL';
+		}
+		$debit = 0;
+		$getDebitAwal = $this->db->query("SELECT
+												SUM(CREDIT) AS DEBIT_AWAL
+											FROM
+												SPJ_KAS
+											WHERE
+												KE = '$tujuan'");
+		foreach ($getDebitAwal->result() as $key) {
+			$debit = $key->DEBIT_AWAL == null ? 0 : $key->DEBIT_AWAL;
+		}
+		$this->updateRekapSaldo($field, $saldo, $fieldDebit, $debit, $jenis, $field2, $tujuan);
+	}
+	public function getDataMonitoringRekapSaldo($bulan, $tahun)
+	{
+		$sql = "SELECT
+					ID,
+					TGL_REKAP,
+					KAS_INDUK_SPJ_DLV,
+					SUB_KAS_SPJ_DLV,
+					KAS_INDUK_SPJ_DLV + SUB_KAS_SPJ_DLV AS TOTAL_SPJ_DLV,
+					DA_SPJ_DLV - (KAS_INDUK_SPJ_DLV + SUB_KAS_SPJ_DLV) AS OS_SPJ_DLV,
+					KAS_INDUK_SPJ_NDV,
+					SUB_KAS_SPJ_NDV,
+					KAS_INDUK_SPJ_NDV + SUB_KAS_SPJ_NDV AS TOTAL_SPJ_NDV,
+					DA_SPJ_NDV - (KAS_INDUK_SPJ_NDV + SUB_KAS_SPJ_NDV) AS OS_SPJ_NDV,
+					KAS_INDUK_TOL_DLV,
+					SUB_KAS_TOL_DLV,
+					KAS_INDUK_TOL_DLV + SUB_KAS_TOL_DLV AS TOTAL_TOL_DLV,
+					DA_TOL_DLV - (KAS_INDUK_TOL_DLV + SUB_KAS_TOL_DLV) AS OS_TOL_DLV,
+					KAS_INDUK_TOL_NDV,
+					SUB_KAS_TOL_NDV,
+					KAS_INDUK_TOL_NDV + SUB_KAS_TOL_NDV AS TOTAL_TOL_NDV,
+					DA_TOL_NDV - (KAS_INDUK_TOL_NDV + SUB_KAS_TOL_NDV) AS OS_TOL_NDV,
+					KAS_INDUK_BBM,
+					SUB_KAS_BBM,
+					KAS_INDUK_BBM + SUB_KAS_BBM AS TOTAL_BBM,
+					DA_BBM - (KAS_INDUK_BBM + SUB_KAS_BBM) AS OS_BBM
+				FROM
+					SPJ_REKAP_SALDO
+				WHERE
+					DATENAME(MONTH,TGL_REKAP) LIKE '$bulan%' AND
+					YEAR(TGL_REKAP) = '$tahun'";
+		return $this->db->query($sql);
+	}
+	public function saveLogSaldo($jenis, $biaya, $kas)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$this->db->query("INSERT INTO SPJ_SALDO_LOG(TGL_INPUT, PIC_INPUT, JENIS_SALDO, JENIS_KAS, JUMLAH)VALUES('$tanggal','$user','$jenis', '$kas', $biaya)");
+	}
+	public function approveGenerate($id, $jenis, $jumlah)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$sql = "INSERT INTO SPJ_KAS_INDUK(JENIS_KASBON,DEBIT,CREDIT,TGL_INPUT,JENIS_FK,FK_ID)VALUES('$jenis',$jumlah, $jumlah, '$tanggal','PENGAJUAN SALDO',$id)";
+		$this->db->query("UPDATE SPJ_PENGAJUAN_SALDO SET PIC_APPROVE = '$user', TGL_APPROVE = '$tanggal', STATUS_APPROVE = 'APPROVED' WHERE ID=$id");
 		return $this->db->query($sql);
 	}
 }

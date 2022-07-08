@@ -9,11 +9,30 @@
   <style type="text/css">
     .scrollable{
       overflow-y: hidden;
-      max-height: 240px;
+      max-height: 165px;
     }
     .scrollable:hover{
       overflow-y: auto;
       scrollbar-width: thin;
+    }
+    ::-webkit-scrollbar {
+      width: 18px;
+    }
+    ::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #d6dee1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #d6dee1;
+      border-radius: 1px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #d6dee1;
+      border-radius: 1px;
+      border: 6px solid transparent;
+      background-clip: content-box;
     }
   </style>
 </head>
@@ -52,14 +71,8 @@
                   <div class="info-box bg-kps shadow-lg">
                     <span class="info-box-icon"><i class="fas fa-envelope-open-text"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Pengajuan SPJ</span>
-                      <span class="info-box-number">35</span>
-                      <div class="progress">
-                        <div class="progress-bar" style="width: 87%"></div>
-                      </div>
-                      <span class="progress-description">
-                        70% kendaraan Keluar Hari Ini
-                      </span>
+                      <span class="info-box-text">SPJ</span>
+                      <span class="progress-description" style="font-size:13px"><?=$jml_spj?>&nbsp;&nbsp;&nbsp; Pengajuan Hari Ini</span>
                     </div>
                   </div>
                 </div>
@@ -67,14 +80,11 @@
                   <div class="info-box bg-kps shadow-lg">
                     <span class="info-box-icon"><i class="fas fa-upload"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Generate SPJ</span>
-                      <span class="info-box-number">4</span>
-                      <div class="progress">
-                        <div class="progress-bar" style="width: 87%"></div>
-                      </div>
-                      <span class="progress-description">
-                        87% SPJ Belum di Generate
-                      </span>
+                      <span class="info-box-text">Generate</span>
+                      <span class="progress-description" style="font-size:13px"><?=$jmlGenerate?>&nbsp;&nbsp;&nbsp; SPJ</span>
+                      <!-- <span class="progress-description">
+                        SPJ Perlu Dilakukan Generate
+                      </span> -->
                     </div>
                   </div>
                 </div>
@@ -82,88 +92,52 @@
                   <div class="info-box bg-kps shadow-lg">
                     <span class="info-box-icon"><i class="fas fa-hourglass-half"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Outstanding SPJ</span>
-                      <span class="info-box-number">7</span>
-                      <div class="progress">
-                        <div class="progress-bar" style="width: 23%"></div>
-                      </div>
-                      <span class="progress-description">
-                        23% SPJ Memerlukan Approve
-                      </span>
+                      <span class="info-box-text">Outstanding</span>
+                      <span class="progress-description" style="font-size:13px"><?=$outstanding?>&nbsp;&nbsp;&nbsp; SPJ</span>
+                      <!-- <span class="progress-description">
+                        Perlu Dilakukan Approve Outstanding
+                      </span> -->
                     </div>
                   </div>
                 </div>
               </div>
+              
 
             </div>
             <div class="col-md-4">
               <div class="row">
                 <div class="col-md-12">
                   <div class="card">
-                    <div class="card-header">
-                      <div class="card-title">
-                        Kendaraan Out 
-                      </div>
+                    <div class="card-header border-0">
+                      <h3 class="card-title">Kendaraan Out</h3>
                     </div>
-                    <div class="card-body p-0">
-                      <div class="row scrollable">
-                        <div class="col-md-12">
-                          <table class="table table-valign-middle" style="border-top-color: #CC5803;">
-                            <thead class="text-center">
-                              <th>No</th>
-                              <th>No TNKB</th>
-                              <th>Group Tujuan</th>
-                            </thead>
-                            <tbody class="text-center">
+                    <div class="card-body table-responsive p-0">
+                      <table class="table table-striped table-valign-middle datatable" width="100%">
+                        <thead class="text-center">
+                          <th>No</th>
+                          <th>No TNKB</th>
+                          <th>Group Tujuan</th>
+                          <th>No SPJ</th>
+                        </thead>
+                        <tbody class="text-center">
+                          <?php 
+                            $i= 1;
+                            foreach ($tempKendaraan as $tk): ?>
                               <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
+                                <td><?=$i++?></td>
+                                <td><?=$tk->NO_TNKB?></td>
+                                <td><?=$tk->NAMA_GROUP?></td>
+                                <td>
+                                  <a href="<?=base_url()?>monitoring/view_spj/<?=$tk->ID_SPJ?>" class="btn text-kps">
+                                    <?=$tk->NO_SPJ?>    
+                                  </a>
+                                </td>
                               </tr>
-                              <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td>1</td>
-                                <td>D 9876 AS</td>
-                                <td>Group 1</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
+                            <?php endforeach ?>
+
+
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
@@ -171,60 +145,39 @@
               <div class="row">
                 <div class="col-md-12">
                   <div class="card">
-                    <div class="card-header">
-                      <div class="card-title">
-                        PIC Out 
-                      </div>
+                    <div class="card-header border-0">
+                      <h3 class="card-title">PIC Out</h3>
                     </div>
-                    <div class="card-body p-0">
-                      <div class="row scrollable">
-                        <div class="col-md-12">
-                          <table class="table table-valign-middle">
-                            <thead>
-                              <th></th>
-                              <th>PIC</th>
-                              <th>Group Tujuan</th>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td><img class="direct-chat-img" src="<?=base_url()?>assets/image/foto-wajah/1648538535-S-003.png" alt="message user image"></td>
-                                <td>04035 - Alwi Dahlan Permana</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td><img class="direct-chat-img" src="<?=base_url()?>assets/image/foto-wajah/1648538535-S-003.png" alt="message user image"></td>
-                                <td>04035 - Alwi Dahlan Permana</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td><img class="direct-chat-img" src="<?=base_url()?>assets/image/foto-wajah/1648538535-S-003.png" alt="message user image"></td>
-                                <td>04035 - Alwi Dahlan Permana</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td><img class="direct-chat-img" src="<?=base_url()?>assets/image/foto-wajah/1648538535-S-003.png" alt="message user image"></td>
-                                <td>04035 - Alwi Dahlan Permana</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td><img class="direct-chat-img" src="<?=base_url()?>assets/image/foto-wajah/1648538535-S-003.png" alt="message user image"></td>
-                                <td>04035 - Alwi Dahlan Permana</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td><img class="direct-chat-img" src="<?=base_url()?>assets/image/foto-wajah/1648538535-S-003.png" alt="message user image"></td>
-                                <td>04035 - Alwi Dahlan Permana</td>
-                                <td>Group 1</td>
-                              </tr>
-                              <tr>
-                                <td><img class="direct-chat-img" src="<?=base_url()?>assets/image/foto-wajah/1648538535-S-003.png" alt="message user image"></td>
-                                <td>04035 - Alwi Dahlan Permana</td>
-                                <td>Group 1</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
+                    <div class="card-body table-responsive p-0">
+                      <table class="table table-striped table-valign-middle datatable" width="100%">
+                        <thead class="text-center">
+                          <th></th>
+                          <th>PIC</th>
+                          <th>No SPJ</th>
+                        </thead>
+                        <tbody class="text-center">
+                          <?php foreach ($tempPIC as $tp): ?>
+                            <tr>
+                              <td>
+                                <?php if ($tp->FOTO_WAJAH == null || $tp->FOTO_WAJAH == ''): 
+                                  $fotoUn = $tp->JenisKelamin == 'P'?'female1.png':'male3.png';
+                                ?>
+                                  <img class="direct-chat-img" src="<?=base_url()?>assets/image/avatar/<?=$fotoUn?>" alt="message user image">
+                                <?php else:?>
+                                  <img class="direct-chat-img" src="<?=base_url()?>assets/image/foto-wajah/<?=$tp->FOTO_WAJAH?>" alt="message user image">  
+                                <?php endif ?>
+                                
+                              </td>
+                              <td><?=$tp->PIC.'<br>'.$tp->NAMA_PIC?></td>
+                              <td>
+                                <a href="<?=base_url()?>monitoring/view_spj/<?=$tp->ID_SPJ?>" class="btn text-kps">
+                                  <?=$tp->NO_SPJ?>    
+                                </a>
+                              </td>
+                            </tr>
+                          <?php endforeach ?>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
@@ -258,7 +211,16 @@
     
     // make_skeleton().fadeOut();
     getDiagramJmlDelivery();
-    
+    var table = $('.datatable').DataTable( {
+      scrollY:        "200px",
+      scrollX:        true,
+      scrollCollapse: true,
+      paging:         false,
+      'searching': false,
+      'ordering': false,
+      'info': false,
+      order: [[0, 'asc']],
+    } ); 
   })
   function getDiagramJmlDelivery() {
     var delivery = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];

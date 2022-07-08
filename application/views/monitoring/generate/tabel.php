@@ -28,9 +28,9 @@
 				<td><?=$key->TGL_RECEIVE?></td>
 				<td><?=$key->STATUS_RECEIVE?></td>
 				<td class="text-center">
-					<button type="button" class="btn btn-orange btn-kps btn-sm" id="btnList" noGenerate="<?=$key->NO_GENERATE?>">
+					<a href="<?=base_url()?>monitoring/detail_generate/<?=$key->ID?>" class="btn btn-orange btn-kps btn-sm">
 						<i class="fas fa-ellipsis-h"></i>
-					</button>
+					</a>
 				</td>
 			</tr>
 		<?php endforeach ?>

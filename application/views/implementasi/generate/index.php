@@ -16,6 +16,12 @@
       <div class="spinner-2"></div>
   </div>
 </div>
+<div class="preloader-no-bg">
+  <div class="loader">
+      <div class="spinner"></div>
+      <div class="spinner-2"></div>
+  </div>
+</div>
 <div class="wrapper">
     <?php $this->load->view('_partial/navbar');?>
     <?php $this->load->view('_partial/sidebar');?>
@@ -88,7 +94,7 @@
     $('.select2').select2({
         'width': '100%',
     });
-    
+    $('.preloader-no-bg').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     getInfo()
     getTabel()
@@ -162,6 +168,9 @@
             url:url+'/Implementasi/saveGenerateSPJ',
             cache: false,
             async: true,
+            beforeSend: function(data){
+              $('.preloader-no-bg').show();
+            },
             success: function(data){
               Swal.fire({
                 position: 'top-end',
@@ -173,6 +182,9 @@
               })
               getTabel();
               getInfo();
+            },
+            complete: function(data){
+              $('.preloader-no-bg').fadeOut('slow');
             },
             error: function(data){
               Swal.fire({

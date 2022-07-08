@@ -70,6 +70,7 @@
 						noSPJ = "<?=$key->NO_SPJ?>"
 						idSPJ = "<?=$key->ID_SPJ?>"
 						credit = "<?=round($key->TOTAL_UANG_BBM)?>"
+						uangBBM = "<?=$key->TOTAL_UANG_BBM?>"
 						style="display: block; text-decoration: none;"
 						class="text-kps text-warning text-center getVoucher">
 						<?=str_replace(',', '.', number_format($key->TOTAL_UANG_BBM, 0))?>

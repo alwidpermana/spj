@@ -50,6 +50,7 @@
                   <div class="form-group">
                     <label>Bulan</label>
                     <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filBulan">
+                        <option value="">ALL</option>
                       <?php foreach ($bulan as $angka => $bulan): ?>
                         <option value="<?=$angka?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
                       <?php endforeach ?>

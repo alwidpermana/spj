@@ -27,6 +27,12 @@
       <div class="spinner-2"></div>
   </div>
 </div>
+<div class="preloader-no-bg">
+  <div class="loader">
+      <div class="spinner"></div>
+      <div class="spinner-2"></div>
+  </div>
+</div>
 <div class="wrapper">
     <?php $this->load->view('_partial/navbar');?>
     <?php $this->load->view('_partial/sidebar');?>
@@ -424,6 +430,8 @@
               </div>
             </div>
             <input type="hidden" id="inputManajemen">
+            <input type="hidden" id="inputJenisSPJ">
+            <input type="hidden" id="inputIdSPJ">
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -449,6 +457,7 @@
         'width': '100%',
     });
     $('.preloader').fadeOut('slow');
+    $('.preloader-no-bg').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     
     // $('.ph-item').fadeOut('slow');
@@ -468,7 +477,11 @@
    $('#getTabel').on('click', '.btnKeputusan', function(){
     var noSPJ = $(this).attr("no_spj");
     var pic = $(this).attr("nik");
+    var jenisSPJ = $(this).attr("jenisSPJ");
+    var idSPJ = $(this).attr("idSPJ")
     $('#inputNoSPJ').val(noSPJ);
+    $('#inputJenisSPJ').val(jenisSPJ);
+    $('#inputIdSPJ').val(idSPJ);
     $.ajax({
       dataType:'json',
       data:{noSPJ},
@@ -476,6 +489,9 @@
       type:'get',
       cache: false,
       async: true,
+      beforeSend: function(data){
+        $('.preloader-no-bg').show();
+      },
       success: function(data){
         $('#modal-otoritas').modal("show")
         ngUangMakan();
@@ -635,17 +651,25 @@
           $('.kondisiUM').removeAttr("disabled","disabled");
         }
 
-        if (data.manajemen == 'Y') {
-          if (data.jmlOpen>0) {
-            $('.saveOtoritas').removeAttr("disabled","disabled")
-          }else{
-            $('.saveOtoritas').attr("disabled","disabled")
-          } 
-        }else{
+        // if (data.manajemen == 'Y') {
+        //   if (data.jmlOpen>0) {
+        //     $('.saveOtoritas').removeAttr("disabled","disabled")
+        //   }else{
+        //     $('.saveOtoritas').attr("disabled","disabled")
+        //   } 
+        // }else{
+        //   $('.saveOtoritas').removeAttr("disabled","disabled")
+        // }
+        if (data.jmlOpen>0) {
           $('.saveOtoritas').removeAttr("disabled","disabled")
+        }else{
+          $('.saveOtoritas').attr("disabled","disabled")
         }
         
 
+      },
+      complete: function(data){
+        $('.preloader-no-bg').fadeOut("slow");
       },
       error: function(data){
         Swal.fire("Terjadi Error Pada Program","Mohon Hubungi Staff IT!","error")
@@ -715,9 +739,11 @@
         }else if(inputBBMDiajukan > awalBBM){
           Swal.fire("Jumlah Uang BBM Melebihi Pengajuan!","Uang BBM Yang Di Revisi Tidak Boleh Lebih Dari Pengajuan","warning");
         }else{
-          saveKeputusan(inputManajemen)
+          cekSaldo(inputManajemen)
         }
+
         saveOtoritas.ladda('stop');
+        $('.saveOtoritas').attr("disabled","disabled")
         return false;
           
       }, 1000)
@@ -844,7 +870,38 @@
     }
   }
 
-  function saveKeputusan(inputManajemen) {
+  function cekSaldo(inputManajemen) {
+    var inputJenisSPJ = $('#inputJenisSPJ').val();
+    var kasbon = "Kasbon SPJ "+inputJenisSPJ;
+    var inputUangMakanDiajukan = inputManajemen == '' ? 0: parseInt($('#inputUangMakanDiajukan').val());
+    var inputUangJalanDiajukan = inputManajemen == '' ? 0: parseInt($('#inputUangJalanDiajukan').val());
+    var inputBBMDiajukan = inputManajemen == '' ? 0: parseInt($('#inputBBMDiajukan').val());
+    var inputUS1Diajukan = parseInt($('#inputUS1Diajukan').val());
+    var inputUS2Diajukan = parseInt($('#inputUS2Diajukan').val());
+    var inputUMDiajukan = parseInt($('#inputUMDiajukan').val());
+    var total = inputUangMakanDiajukan+inputUangJalanDiajukan+inputUS1Diajukan+inputUS2Diajukan+inputUMDiajukan+inputBBMDiajukan;
+    $.ajax({
+      type:'get',
+      data:{kasbon},
+      dataType: 'json',
+      url:url+'/Implementasi/cekSaldo',
+      cache: false,
+      async: true,
+      success: function(data){
+        if (total>data) {
+          Swal.fire("Saldo Tidak Mencukupi!","Hubungi PIC Terkait","warning")
+        }else{
+          saveKeputusan(inputManajemen, total)
+        }
+        
+      },
+      error: function(data){
+
+      }
+    });
+  }
+
+  function saveKeputusan(inputManajemen, totalBiaya) {
     var inputUangMakanDiajukan = $('#inputUangMakanDiajukan').val();
     var inputUangJalanDiajukan = $('#inputUangJalanDiajukan').val();
     var inputBBMDiajukan = $('#inputBBMDiajukan').val();
@@ -864,6 +921,8 @@
     var inputUMKeterangan = $('#inputUMKeterangan').val();
     var inputBBMKeterangan = inputManajemen == '' ? '-': $('#inputBBMKeterangan').val();
     var inputNoSPJ = $('#inputNoSPJ').val();
+    var inputJenisSPJ = $('#inputJenisSPJ').val();
+    var inputIdSPJ = $('#inputIdSPJ').val();
     // console.log("keputusan BBM ="+inputKeputusanBBM)
     // console.log("keputusan Uang Jalan ="+inputKeputusanUangJalan)
     // console.log("keputusan BBM ="+inputKeputusanUangMakan)
@@ -880,7 +939,7 @@
       Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu","","warning")
 
     }else if(inputKeputusanUS1 == '' || inputKeputusanUS2 == '' || inputKeputusanUM == '' || inputUS1Keterangan == '' || inputUS2Keterangan == '' || inputUMKeterangan == ''){
-      Swal.fire
+      Swal.fire("Mohon untuk Melengkapi Datanya Terlebih Dahulu","","warning")
     }else{
       $.ajax({
         type:'post',
@@ -904,16 +963,25 @@
           inputUS2Keterangan,
           inputUMKeterangan,
           inputNoSPJ,
-          inputManajemen
+          inputManajemen,
+          totalBiaya,
+          inputJenisSPJ,
+          inputIdSPJ
         },
         dataType:'json',
         url:url+'/Implementasi/saveKeputusanAdjustment',
         cache: false,
         async: true,
+        beforeSend: function(data){
+          $('.preloader-no-bg').show();
+        },
         success: function(data){
           berhasil()
           getTabel();
           $('#modal-otoritas').modal('hide');
+        },
+        complete: function(data){
+          $('.preloader-no-bg').fadeOut("slow");
         },
         error: function(data){
           gagal();

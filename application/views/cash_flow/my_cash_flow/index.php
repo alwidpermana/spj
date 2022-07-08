@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +11,12 @@
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse layout-navbar-fixed layout-footer-fixed">
 <div class="preloader">
+  <div class="loader">
+      <div class="spinner"></div>
+      <div class="spinner-2"></div>
+  </div>
+</div>
+<div class="preloader-no-bg">
   <div class="loader">
       <div class="spinner"></div>
       <div class="spinner-2"></div>
@@ -76,6 +83,15 @@
               </div>
             </div>
           </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="">
+                <div class="">
+                  <div id="getSaldo"></div>
+                </div>
+              </div>
+            </div>
+          </div>
           <br>
           <div class="row">
             <div class="col-md-12">
@@ -83,6 +99,32 @@
                 <div id="getTabel"></div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal-approve" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <input type="hidden" id="id">
+            <input type="hidden" id="status">
+            <input type="hidden" id="jenisKasbon">
+            <input type="hidden" id="jenisSPJ">
+            <input type="hidden" id="jumlah">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label><p>Masukan Kode Approve Bebas Untuk Diberikan Kepada PIC Receive/PIC Penerima Uang Top Up Saldo Sub Kas</p></label><br>
+                  <label>Kode Approve</label>
+                  <input type="text" id="inputPassword" class="form-control form-control-sm">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bg-orange btn-kps saveApprove ladda-button" data-style="expand-right" step="1">Save & Approve</button>
           </div>
         </div>
       </div>
@@ -104,26 +146,111 @@
     });
     
     $('.ladda-button').ladda('bind', {timeout: 1000});
-    
+    $('.preloader-no-bg').fadeOut('slow');
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     
     // make_skeleton().fadeOut();
    getTabel()
+   getDataSaldo();
    $('#getTabel').on('click','.approvePengajuan', function(){
     var id = $(this).attr("data");
     var status = $(this).attr("status");
     var jenisKasbon = $(this).attr("jenisKasbon");
     var jenisSPJ = $(this).attr("jenisSPJ");
     var jumlah = $(this).attr("jumlah");
-    if (status == 'APPROVED') {
-      cekSaldo(jenisKasbon, jenisSPJ, jumlah, id, status)  
-    }else{
-      approvePengajuan('', '', id, status, '')
-    }
-    
-    
+    $('#id').val(id)
+    $('#status').val(status)
+    $('#jenisKasbon').val(jenisKasbon)
+    $('#jenisSPJ').val(jenisSPJ)
+    $('#jumlah').val(jumlah)
+    $('#modal-approve').modal('show')
+    // if (status == 'APPROVED') {
+    //   cekSaldo(jenisKasbon, jenisSPJ, jumlah, id, status)  
+    // }else{
+    //   approvePengajuan('', '', id, status, '')
+    // }
    })
+   var saveApprove = $('.saveApprove').ladda();
+      saveApprove.click(function () {
+      // Start loading
+      saveApprove.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var id = $('#id').val()
+        var status = $('#status').val()
+        var jenisKasbon = $('#jenisKasbon').val()
+        var jenisSPJ = $('#jenisSPJ').val()
+        var jumlah = $('#jumlah').val()
+        var inputPassword = $('#inputPassword').val()
+        if (status == 'APPROVED') {
+          cekSaldo(jenisKasbon, jenisSPJ, jumlah, id, status, inputPassword)  
+        }else{
+          approvePengajuan('', '', id, status, '')
+        }
+        saveApprove.ladda('stop');
+        $('.saveApprove').attr("disabled","disabled");
+        return false;
+          
+      }, 1000)
+    });
+   $('#getTabel').on('click','.approveGenerate', function(){
+    var id = $(this).attr("data");
+    var jenisKasbon = $(this).attr("jenisKasbon");
+    var jenisSPJ = $(this).attr("jenisSPJ");
+    var jumlah = $(this).attr("jumlah");
+    $.ajax({
+      type:'post',
+      dataType:'json',
+      data:{id, jenisKasbon, jenisSPJ, jumlah},
+      url:'approveGenerate',
+      cache: false,
+      async: true,
+      beforeSend: function(data){
+        $('.preloader-no-bg').show();
+      },
+      success: function(data){
+        berhasil();
+        getTabel();
+        getDataSaldo();
+      },
+      complete: function(data){
+        $('.preloader-no-bg').fadeOut('slow');
+      },
+      error: function(data){
+        gagal();
+      }
+    });
+   })
+   $('#getTabel').on('click','.receiveGenerate', function(){
+    var id = $(this).attr("data");
+    var jenisKasbon = $(this).attr("jenisKasbon");
+    var jenisSPJ = $(this).attr("jenisSPJ");
+    var jumlah = $(this).attr("jumlah");
+    $.ajax({
+      type:'post',
+      dataType:'json',
+      data:{id, jenisKasbon, jenisSPJ, jumlah},
+      url:'receiveGenerate',
+      cache: false,
+      async: true,
+      beforeSend: function(data){
+        $('.preloader-no-bg').show();
+      },
+      success: function(data){
+        berhasil();
+        getTabel();
+        getDataSaldo();
+      },
+      complete: function(data){
+        $('.preloader-no-bg').fadeOut('slow');
+      },
+      error: function(data){
+        gagal();
+      }
+    });
+   });
 
   })
   
@@ -152,8 +279,22 @@
       }
     });
   }
+  function getDataSaldo() {
+    $.ajax({
+      type:'get',
+      url:'getAllSaldo',
+      cache:false,
+      async: true,
+      success: function(data){
+        $('#getSaldo').html(data);
+      },
+      error: function(data){
 
-  function cekSaldo(inputJenisKasbon, inputJenisSPJ, inputBiaya, id, status) {
+      }
+    });
+  }
+
+  function cekSaldo(inputJenisKasbon, inputJenisSPJ, inputBiaya, id, status, password) {
     var jenis = inputJenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':inputJenisKasbon+' '+inputJenisSPJ;
     $.ajax({
       type:'get',
@@ -165,7 +306,7 @@
       success: function(data){
         var saldo = parseInt(data.SALDO);
         if (saldo>=inputBiaya) {
-          approvePengajuan(jenis, inputBiaya, id, status, saldo)
+          approvePengajuan(jenis, inputBiaya, id, status, saldo, password)
         }else{
           Swal.fire("Saldo Kas Induk "+jenis+" Tidak Mencukupi!","Mohon Hubungi PIC Terkait","info")
         }
@@ -175,10 +316,10 @@
       }
     })
   }
-  function approvePengajuan(kasbon, jumlah, id, status, saldo) {
+  function approvePengajuan(kasbon, jumlah, id, status, saldo, password) {
     $.ajax({
       type:'post',
-      data:{id, status, kasbon, jumlah, saldo},
+      data:{id, status, kasbon, jumlah, saldo, password},
       dataType:'json',
       url:'approvePengajuan',
       cache: false,
@@ -186,6 +327,8 @@
       success: function(data){
         berhasil();
         getTabel();
+        getDataSaldo();
+        $('#modal-approve').modal('hide')
       },
       error: function(data){
         gagal()

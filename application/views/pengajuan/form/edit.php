@@ -191,7 +191,7 @@
                         <div class="col-md-12 text-right">
                           <div class="form-group clearfix">
                             <div class="icheck-orange d-inline">
-                              <input type="checkbox" id="inputAbnormal" name="inputAbnormal" disabled>
+                              <input type="checkbox" id="inputAbnormal" name="inputAbnormal">
                               <label for="inputAbnormal"> Abnormal?
                               </label>
                             </div>
@@ -707,8 +707,8 @@
                                     <td>
                                       <!-- <input type="text" id="inputMediaBBM" class="form-control form-control-sm" value="Reimburse"> -->
                                       <select class="select2 form-control select2-orange" id="inputMediaBBM" data-dropdown-css-class="select2-orange">
-                                        <option value="Kasbon" <?=$key->MEDIA_UANG_BBM == 'Kasbon'?'selected':''?>>Kasbon</option>
                                         <option value="Voucher" <?=$key->MEDIA_UANG_BBM == 'Voucher'?'selected':''?>>Voucher</option>
+                                        <option value="Kasbon" <?=$key->MEDIA_UANG_BBM == 'Kasbon'?'selected':''?>>Kasbon</option>
                                         <option value="Reimburse" <?=$key->MEDIA_UANG_BBM == 'Reimburse' ? 'selected':''?>>Reimburse</option>
                                       </select>
                                     </td>
@@ -764,8 +764,8 @@
                                 <tbody>
                                   <tr>
                                     <td class="font-weight-bold">Keberangkatan </td>
-                                    <td><input type="date" id="inputTglBerangkat" class="form-control saveRencana" value="<?=date("Y-m-d", strtotime($key->RENCANA_BERANGKAT))?>"></td>
-                                    <td><input type="time" id="inputJamBerangkat" class="form-control saveRencana" value="<?=date("H:i", strtotime($key->RENCANA_BERANGKAT))?>"></td>
+                                    <td><input type="date" id="inputTglBerangkat" class="form-control saveRencana" value="<?=$key->RENCANA_BERANGKAT==null?date("Y-m-d"):date("Y-m-d", strtotime($key->RENCANA_BERANGKAT))?>"></td>
+                                    <td><input type="time" id="inputJamBerangkat" class="form-control saveRencana" value="<?=$key->RENCANA_BERANGKAT==null?date("H:i"):date("H:i", strtotime($key->RENCANA_BERANGKAT))?>"></td>
                                   </tr>
                                   <tr>
                                     <td class="font-weight-bold">Kepulangan</td>

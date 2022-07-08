@@ -12,6 +12,7 @@ class Implementasi extends CI_Controller {
 		$this->load->model('M_Monitoring');
 		$this->load->library('pdfgenerator');
 		$this->load->model('M_Implementasi');
+		$this->load->model('M_Cash_Flow');
 	}
 	/**
 	 * Index Page for this controller.
@@ -34,10 +35,22 @@ class Implementasi extends CI_Controller {
 		$data['page'] = 'Security Chek In Out';
 		$this->load->view("implementasi/security/index", $data);
 	}
+	public function verifikasiDataPICOutIn()
+	{
+		$noSPJ = $this->input->post("noSPJ");
+		$status = $this->input->post("status");
+		if ($status == 'OUT') {
+			$data = $this->db->query("DELETE FROM SPJ_VALIDASI_PIC WHERE NO_SPJ = '$noSPJ'");
+		} else {
+			$data = $this->db->query("UPDATE SPJ_VALIDASI_PIC SET SET_IN = null, KETERANGAN_IN = null WHERE NO_SPJ = '$noSPJ'");
+		}
+		echo json_encode($data);
+		
+	}
 	public function cekSPJ()
 	{
 		$scan = $this->input->get("scan");
-		$data = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$scan'")->num_rows();
+		$data = $this->db->query("SELECT ID_SPJ, STATUS_PERJALANAN, NO_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$scan'")->row();
 		
 		echo json_encode($data);
 	}
@@ -74,7 +87,7 @@ class Implementasi extends CI_Controller {
 	{
 		$inputNoSPJ = $this->input->get("inputNoSPJ");
 		$jenis = $this->input->get("jenis");
-		$data = $this->M_Implementasi->cekValidasiPIC($inputNoSPJ, $jenis)->num_rows();
+		$data = $this->M_Implementasi->cekValidasiPICNew($inputNoSPJ, $jenis)->num_rows();
 		echo json_encode($data);
 	}
 	public function saveValidasiOut()
@@ -395,7 +408,7 @@ class Implementasi extends CI_Controller {
 					$uangUS1Keputusan = $ad->KEPUTUSAN;
 					$uangUS1Keterangan = $ad->KETERANGAN;
 					$uangUS1Status = $ad->STATUS;
-					if ($ad->STATUS == 'OPEN') {
+					if ($ad->STATUS == 'OUTSTANDING') {
 						$jmlOpen +=1;
 					}
 				}elseif($ad->OBJEK == 'US2'){
@@ -404,7 +417,7 @@ class Implementasi extends CI_Controller {
 					$uangUS2Keputusan = $ad->KEPUTUSAN;
 					$uangUS2Keterangan = $ad->KETERANGAN;
 					$uangUS2Status = $ad->STATUS;
-					if ($ad->STATUS == 'OPEN') {
+					if ($ad->STATUS == 'OUTSTANDING') {
 						$jmlOpen +=1;
 					}
 				}elseif($ad->OBJEK == 'UM'){
@@ -413,7 +426,7 @@ class Implementasi extends CI_Controller {
 					$uangUMKeputusan = $ad->KEPUTUSAN;
 					$uangUMKeterangan = $ad->KETERANGAN;
 					$uangUMStatus = $ad->STATUS;
-					if ($ad->STATUS == 'OPEN') {
+					if ($ad->STATUS == 'OUTSTANDING') {
 						$jmlOpen +=1;
 					}
 				}
@@ -525,6 +538,10 @@ class Implementasi extends CI_Controller {
   	$inputUMKeterangan = $this->input->post("inputUMKeterangan");
   	$inputNoSPJ = $this->input->post("inputNoSPJ");
   	$inputManajemen = $this->input->post("inputManajemen");
+  	$totalBiaya = $this->input->post("totalBiaya");
+  	$inputJenisSPJ = $this->input->post("inputJenisSPJ");
+  	$inputIdSPJ = $this->input->post("inputIdSPJ");
+
   	$value = [$inputUangMakanDiajukan, $inputKeputusanUangMakan, $inputUangMakanKeterangan, $inputUangJalanDiajukan, $inputKeputusanUangJalan, $inputUangJalanKeterangan, $inputBBMDiajukan, $inputKeputusanBBM, $inputBBMKeterangan];
   	$value2 = [$inputKeputusanUS1, $inputUS1Keterangan, $inputKeputusanUS2, $inputUS2Keterangan, $inputKeputusanUM, $inputUMKeterangan];
   	if ($inputManajemen == 'Y') {
@@ -532,6 +549,8 @@ class Implementasi extends CI_Controller {
   	}
   	
   	$data = $this->M_Implementasi->saveKeputusanAdjustment2($value2, $inputNoSPJ);
+  	$kasbon = 'Kasbon SPJ '.$inputJenisSPJ;
+  	$this->updateSaldo($inputIdSPJ, $kasbon, $totalBiaya,'BIAYA TAMBAHAN');
   	// $data = $this->M_Implementasi->updateKasbonOtomatis($inputNoSPJ, $inputUangMakanDiajukan, $inputUangJalanDiajukan, $inputBBMDiajukan);
   	echo json_encode($data);
 	}
@@ -543,7 +562,14 @@ class Implementasi extends CI_Controller {
 		$jalan = $this->input->post("inputRealisasiUangJalan"); 
 		$bbm = $this->input->post("inputRealisasiUangBBM")== '' ? 0 : $this->input->post("inputRealisasiUangBBM"); 
 		$tol = $this->input->post("inputRealisasiUangTol");
+		$inputId = $this->input->post("inputId");
+		$inputJenisSPJ = $this->input->post("inputJenisSPJ");
+		$inputMediaUangTOL = $this->input->post("inputMediaUangTOL");
 		$data = $this->M_Implementasi->saveCloseSPJ($inputNoSPJ, $saku, $makan, $jalan, $bbm, $tol);
+		if ($inputMediaUangTOL == 'Reimburse') {
+			$kasbon = "Kasbon TOL ".$inputJenisSPJ;
+			$this->updateSaldo($inputId, $kasbon, $tol,'REIMBURSE TOL');
+		}
 		echo json_encode($data);
 		
 	}
@@ -582,11 +608,45 @@ class Implementasi extends CI_Controller {
 		$inputTotalRP = $this->input->post("inputTotalRP");
 		$filJenis = $this->input->post("filJenis");
 		$jmlNoSPJ = count($noSPJ);
+		$kasbonSPJ = 0;
+		$kasbonBBM = 0;
+		$kasbonTOL = 0;
 		for ($i=0; $i <$jmlNoSPJ ; $i++) { 
 			$this->db->query("UPDATE SPJ_PENGAJUAN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_SPJ = '$noSPJ[$i]'");
+			$getBiaya = $this->M_Implementasi->getBiayaTotalPerNoSPJ($noSPJ[$i])->result();
+			foreach ($getBiaya as $key) {
+				$kasbonSPJ += $key->KASBON_SPJ;
+				$kasbonBBM += $key->KASBON_BBM;
+				$kasbonTOL += $key->KASBON_TOL;
+			}
 		}
 		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis);
+		// $data = array('KASBON SPJ' =>$kasbonSPJ ,'KASBON BBM' =>$kasbonBBM, 'KASBON TOL' =>$kasbonTOL,'total'=>$kasbonSPJ+$kasbonBBM+$kasbonTOL );
+		$data = $this->M_Implementasi->generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $filJenis);
 		echo json_encode($data);
+	}
+	public function cekSaldo()
+	{
+		$kasbon = $this->input->get("kasbon");
+		$data = $this->M_Cash_Flow->getSaldoPerJenis($kasbon,'SUB KAS');
+		$saldoSPJ = 0;
+		foreach ($data->result() as $key) {
+			$saldoSPJ = $key->SALDO;
+		}
+		echo json_encode(round($saldoSPJ));
+	}
+	public function updateSaldo($inputIdSPJ, $kasbon, $totalBiaya, $keterangan)
+	{
+		$id = $inputIdSPJ;
+		$jenis = $kasbon;
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($jenis, 'SUB KAS');
+		$saldo = 0;
+		foreach ($getSaldo->result() as $key) {
+			$saldo  = $key->SALDO;
+		}
+		$totalSaldo = $saldo - $totalBiaya;
+		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
+		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalBiaya, 'KASBON', $id,$keterangan);
 	}
 }
 ?>

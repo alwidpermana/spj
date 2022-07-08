@@ -250,6 +250,15 @@ body{
     top: 0;
     animation: 0.8s spin-2 linear infinite;
 }
+.bg-success{
+    background-color: #8cb369 !important;
+}
+.bg-danger{
+    background-color: #B36969 !important;
+}
+.bg-warning{
+    background-color: #f9dc5c !important;
+}
 @keyframes spin{
     from{ transform: rotate(0deg); }
     to{ transform: rotate(360deg); }

@@ -36,9 +36,11 @@ class Cash_Flow extends CI_Controller {
 	}
 	public function getTabelKas()
 	{
-		$filBulan = $this->input->get("filBulan") == '' ? date('n'):$this->input->get("filBulan");
+		$filBulan = $this->input->get("filBulan") == '' ? '1':$this->input->get("filBulan");
 		$filTahun = $this->input->get("filTahun") == '' ? date('Y'):$this->input->get("filTahun");
-		$data['data'] = $this->M_Cash_Flow->getDataBukuKasInternal($filBulan, $filTahun)->result();
+		$tglFilter = '01-'.$filBulan.'-'.$filTahun;
+		$textBulan = $this->input->get("filBulan") == ''?'':date('F', strtotime($tglFilter));
+		$data['data'] = $this->M_Cash_Flow->getDataBukuKasInternal($filBulan, $filTahun, $textBulan)->result();
 		$this->load->view("cash_flow/buku_kas/tabel_kas", $data);
 	}
 	public function getTabelModalAwal()
@@ -67,10 +69,6 @@ class Cash_Flow extends CI_Controller {
 				$totalSaldo2 = $inputBiaya + $sld->SALDO;
 			}
 			$data = $this->M_Cash_Flow->updateSaldo($inputTujuan,$totalSaldo2,'KAS INDUK');
-			if ($inputTujuan == 'Kasbon SPJ Delivery') {
-				$fieldRekap = 'KAS_INDUK_SPJ_DLV';
-			}
-			$this->saveRekapSaldo($fieldRekap, $totalSaldo2);
 			$getLastID = $this->db->query("SELECT TOP 1 ID FROM SPJ_KAS ORDER BY ID DESC");
 			$lastID = 0;
 			foreach ($getLastID->result() as $last) {
@@ -145,6 +143,7 @@ class Cash_Flow extends CI_Controller {
 				foreach ($getSaldo->result() as $sld) {
 					$totalSaldo2 = $sld->SALDO - $inputBiayaAwal;
 				}
+				
 				$data = $this->M_Cash_Flow->updateSaldo($inputTujuanAwal,$totalSaldo2,'KAS INDUK');
 				
 
@@ -166,6 +165,7 @@ class Cash_Flow extends CI_Controller {
 			}
 
 			$data = $this->M_Cash_Flow->updateSaldo($inputTujuan,$totalSaldo3, 'KAS INDUK');	
+			
 			$this->M_Cash_Flow->updateKasInduk($inputTujuan, 'DEBIT', $inputBiaya, 'KAS INTERNAL', $inputID);
 		}
 		if ($inputBiayaAwal == $inputBiaya) {
@@ -190,6 +190,7 @@ class Cash_Flow extends CI_Controller {
 			$totalSaldo= $key->SALDO - $biaya;
 		}
 		$data = $this->M_Cash_Flow->updateSaldo($tujuan,$totalSaldo, 'KAS INDUK');
+		
 		if ($tujuan != 'Modal Awal') {
 			$getSaldo2 = $this->M_Cash_Flow->getSaldoPerJenis('Modal Awal','KAS INDUK');
 			foreach ($getSaldo2->result() as $key2) {
@@ -223,6 +224,12 @@ class Cash_Flow extends CI_Controller {
 		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenisKasbon, $filStatus)->result();
 		$this->load->view("cash_flow/my_cash_flow/data", $data);
 	}
+	public function getAllSaldo()
+	{
+		$data['induk'] = $this->M_Cash_Flow->getAllSaldo('KAS INDUK')->result();
+		$data['sub'] = $this->M_Cash_Flow->getAllSaldo('SUB KAS')->result();
+		$this->load->view("cash_flow/my_cash_flow/saldo", $data);
+	}
 	public function approvePengajuan()
 	{
 		$id = $this->input->post("id");
@@ -230,7 +237,8 @@ class Cash_Flow extends CI_Controller {
 		$kasbon = $this->input->post("kasbon");
 		$jumlah = $this->input->post("jumlah");
 		$saldo = $this->input->post("saldo");
-		$data = $this->M_Cash_Flow->approvePengajuan($id, $status);
+		$password = $this->input->post("password");
+		$data = $this->M_Cash_Flow->approvePengajuan($id, $status, $password);
 		if ($status == 'APPROVED') {
 			$totalSaldo = $saldo - $jumlah;
 			$data = $this->M_Cash_Flow->updateSaldo($kasbon, $totalSaldo, 'KAS INDUK');
@@ -242,7 +250,7 @@ class Cash_Flow extends CI_Controller {
 	{
 		$id = $this->input->post("id");
 		$jumlah = $this->input->post("jumlah");
-		$kasbon = $this->input->post("kasbon");
+		$kasbon = $this->input->post("kasbon") == 'Kasbon BBM ' ? 'Kasbon Voucher BBM' : $this->input->post("kasbon");
 		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($kasbon, 'SUB KAS');
 		$saldo = 0;
 		foreach ($getSaldo->result() as $key) {
@@ -251,7 +259,60 @@ class Cash_Flow extends CI_Controller {
 		$totalSaldo = $saldo + $jumlah;
 		$data = $this->M_Cash_Flow->receivePengajuan($id);
 		$data = $this->M_Cash_Flow->updateSaldo($kasbon, $totalSaldo, 'SUB KAS');
-		$data = $this->M_Cash_Flow->saveSubKas($kasbon,'DEBIT', $jumlah, 'PENGAJUAN SALDO', $id);
+		$data = $this->M_Cash_Flow->saveSubKas($kasbon,'DEBIT', $jumlah, 'PENGAJUAN SALDO', $id,'-');
 		echo json_encode($data);
 	}
+	public function rekap_saldo()
+	{
+		$data['side'] = 'cash_flow-rekap';
+		$data['page'] = 'Rekap Saldo Per Bulan';
+		$this->load->view("cash_flow/rekap_saldo/index", $data);
+	}
+	public function getDataRekapSaldo()
+	{
+		$filBulan = $this->input->get("filBulan");
+		$filTahun = $this->input->get("filTahun");
+		$data['data'] = $this->M_Cash_Flow->getDataMonitoringRekapSaldo($filBulan, $filTahun)->result();
+		$this->load->view("cash_flow/rekap_saldo/data", $data);
+	}
+	public function approveGenerate()
+	{
+		$id = $this->input->post("id");
+		$jenisKasbon = $this->input->post("jenisKasbon");
+		$jenisSPJ = $this->input->post("jenisSPJ");
+		$jumlah = $this->input->post("jumlah");
+
+		$jenis = $jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':$jenisKasbon.' '.$jenisSPJ;
+		$data = $this->M_Cash_Flow->approveGenerate($id, $jenis, $jumlah);
+		echo json_encode($data);
+	}
+	public function receiveGenerate()
+	{
+		$id = $this->input->post("id");
+		$jenisKasbon = $this->input->post("jenisKasbon");
+		$jenisSPJ = $this->input->post("jenisSPJ");
+		$jumlah = $this->input->post("jumlah");
+
+		$kasbon = $jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':$jenisKasbon.' '.$jenisSPJ;
+
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($kasbon, 'SUB KAS');
+		$saldo = 0;
+		foreach ($getSaldo->result() as $key) {
+			$saldo  = $key->SALDO;
+		}
+		$totalSaldo = $saldo + $jumlah;
+		$data = $this->M_Cash_Flow->receivePengajuan($id);
+		$data = $this->M_Cash_Flow->updateSaldo($kasbon, $totalSaldo, 'SUB KAS');
+		$data = $this->M_Cash_Flow->saveSubKas($kasbon,'DEBIT', $jumlah, 'PENGAJUAN SALDO', $id,'GENERATE');
+		echo json_encode($data);
+	}
+	public function cekPasswordReceive()
+	{
+		$id = $this->input->get("id");
+		$inputPassword = $this->input->get("inputPassword");
+		$data = $this->db->query("SELECT ID FROM SPJ_PENGAJUAN_SALDO WHERE ID = $id AND PASSWORD_RECEIVE = '$inputPassword'");
+		$jumlah = $data->num_rows();
+		echo json_encode($jumlah);
+	}
+	
 }

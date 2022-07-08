@@ -118,21 +118,21 @@ class Monitoring extends CI_Controller {
 		$data['page'] = 'Kasbon SPJ';
 		$data['kasbon'] = 'SPJ';
 		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
-		$this->load->view("monitoring/kasbon/index", $data);
+		$this->load->view("monitoring/kasbon/indexNew", $data);
 	}
 	public function kasbon_bbm()
 	{
 		$data['side'] = "monitoring-kasbon-BBM";
 		$data['page'] = 'Kasbon BBM';
 		$data['kasbon'] = 'BBM';
-		$this->load->view("monitoring/kasbon/index", $data);
+		$this->load->view("monitoring/kasbon/indexBBM", $data);
 	}
 	public function kasbon_tol()
 	{
 		$data['side'] = "monitoring-kasbon-TOL";
 		$data['page'] = 'Kasbon TOL';
 		$data['kasbon'] = 'TOL';
-		$this->load->view("monitoring/kasbon/index", $data);
+		$this->load->view("monitoring/kasbon/indexNew", $data);
 	}
 	public function getTabelKasbonSPJ()
 	{
@@ -174,14 +174,17 @@ class Monitoring extends CI_Controller {
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$inputNoVoucher = $this->input->post("inputNoVoucher");
 		$inputBiaya = $this->input->post("inputBiaya");
+		$inputId = $this->input->post("inputId");
+		$inputBiayaAwal = $this->input->post("inputBiayaAwal");
 		$data = $this->M_Monitoring->saveNominalVoucherBBM($inputNoSPJ, $inputBiaya);
 		$this->M_Monitoring->saveVoucherBBM($inputNoVoucher, $inputBiaya);
+		$this->updateSaldo($inputId, $inputBiaya, $inputBiayaAwal);
 		echo json_encode($data);
 	}
 	public function generate_spj()
 	{
 		$data['side'] = 'monitoring-generate';
-		$data['page'] = 'Monitoring Generate SPJ';
+		$data['page'] = 'Monitoring SPJ (Per Generate)';
 		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
 		$this->load->view("monitoring/generate/index", $data);
 	}
@@ -196,8 +199,8 @@ class Monitoring extends CI_Controller {
 		if (date("m", strtotime($periodeAwal))!= date("m", strtotime($periodeAkhir))) {
 			$filBulan = '';
 		}
-		
-		$data['data'] = $this->M_Monitoring->getGenerateSPJ($filBulan, $filTahun, $filJenis, $filStatus, $periodeAwal, $periodeAkhir)->result();
+		$where = " AND TGL_GENERATE BETWEEN '$periodeAwal' AND '$periodeAkhir'";
+		$data['data'] = $this->M_Monitoring->getGenerateSPJ($filBulan, $filTahun, $filJenis, $filStatus, $where, '')->result();
 		$this->load->view("monitoring/generate/tabel", $data);
 	}
 	public function listSPJByNoGenerate()
@@ -207,6 +210,17 @@ class Monitoring extends CI_Controller {
 		$data['pic'] = $this->M_Monitoring->getPendampingByNoGenerate($noGenerate)->result();
 
 		$this->load->view("monitoring/generate/list-spj", $data);
+	}
+	public function detail_generate($id)
+	{
+		$data['side'] = 'monitoring-generate';
+		$whereID = " WHERE ID = $id";
+		$data['generate'] = $this->M_Monitoring->getGenerateSPJ('', '', '', '', '', $whereID)->result();
+		$data['page'] = 'Detail Monitoring SPJ (Per Generate)';
+		$data['data'] = $this->M_Monitoring->getSPJByIdGenerate($id)->result();
+		$data['pic'] = $this->M_Monitoring->getPICByIdGenerate($id)->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByIdGenerate($id)->result();
+		$this->load->view("monitoring/generate/detail", $data);
 	}
 	public function harian()
 	{
@@ -311,4 +325,42 @@ class Monitoring extends CI_Controller {
 		$data = $this->db->query("UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = '$status' WHERE ID_SPJ = $id");
 		echo json_encode($data);
 	}
+	public function getMonitoringKasbon()
+	{
+		$filTahun = $this->input->get("filTahun");
+		$filBulan = $this->input->get("filBulan") == '' ? '1':$this->input->get("filBulan");
+		$tglBulan = '01-'.$filBulan.'-2022';
+		$namaBulan = $this->input->get("filBulan") == '' ? '':date("F", strtotime($tglBulan));
+		$filJenis = $this->input->get("filJenis");
+		$filStatus = $this->input->get("filStatus");
+
+		$data['data'] = $this->M_Monitoring->getKasbonCashFlow($filJenis,$filTahun, $filBulan, $namaBulan, $filStatus)->result();
+		$this->load->view("monitoring/kasbon/tabelNew", $data);
+	}
+	public function getMonitoringKasbonBBM()
+	{
+		$filTahun = $this->input->get("filTahun");
+		$filBulan = $this->input->get("filBulan") == '' ? '1':$this->input->get("filBulan");
+		$tglBulan = '01-'.$filBulan.'-2022';
+		$namaBulan = $this->input->get("filBulan") == '' ? '':date("F", strtotime($tglBulan));
+		$filJenis = 'Kasbon Voucher BBM';
+		$filStatus = $this->input->get("filStatus");
+
+		$data['data'] = $this->M_Monitoring->getKasbonCashFlow($filJenis,$filTahun, $filBulan, $namaBulan, $filStatus)->result();
+		$this->load->view("monitoring/kasbon/tabelBBM", $data);
+	}
+	public function updateSaldo($inputId, $inputBiaya, $inputBiayaAwal)
+	{
+		$this->load->model('M_Cash_Flow');
+		$jenis = 'Kasbon Voucher BBM';
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($jenis, 'SUB KAS');
+		$saldo = 0;
+		foreach ($getSaldo->result() as $key) {
+			$saldo  = $key->SALDO;
+		}
+		$totalSaldo = ($saldo+$inputBiayaAwal) - $inputBiaya;
+		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
+		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $inputBiaya, 'KASBON', $inputId,'VOUCHER');
+	}
+
 }

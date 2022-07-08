@@ -26,6 +26,7 @@
       <div class="content">
         <div class="container-fluid">
           <?php foreach ($data as $key): ?>
+            <input type="hidden" id="inputId" value="<?=$this->uri->segment("3")?>">
             <div class="row">
               <div class="col-md-12">
                 <div class="card">
@@ -61,6 +62,7 @@
                             <div class="row">
                               <div class="col-md-12" id="afterNext">
                                 :&nbsp;<label><?=$key->NAMA_JENIS?></label>
+                                <input type="hidden" id="inputJenisSPJ" value="<?=$key->NAMA_JENIS?>">
                               </div>
                             </div>
                           </div>
@@ -858,79 +860,7 @@
       // Timeout example
       // Do something in backend and then stop ladda
       setTimeout(function () {
-        var inputStatusUS1 = $('#inputStatusUS1').val();
-        var inputStatusUS2 = $('#inputStatusUS2').val();
-        var inputStatusUM = $('#inputStatusUM').val();
-        var inputStatusAdjMakan = $('#inputStatusAdjMakan').val();
-        var inputRealisasiUangSaku = $('#inputRealisasiUangSaku').val();
-        var inputRealisasiUangMakan = $('#inputRealisasiUangMakan').val();
-        var inputRealisasiUangJalan = $('#inputRealisasiUangJalan').val();
-        var inputRealisasiUangBBM = $('#inputRealisasiUangBBM').val();
-        var inputRealisasiUangTol = $('#inputRealisasiUangTol').val();
-        var inputMediaUangBBM = $('#inputMediaUangBBM').val();
-        var inputMediaUangTOL = $('#inputMediaUangTOL').val();
-        var inputNoSPJ = $('#inputNoSPJ').val();    
-        if (inputStatusUS1 != 'CLOSE') {
-          Swal.fire("Status Uang Saku Ke 2 Masih Belum Close!","Hubungi PIC Terkait","warning")
-          $('html, body').animate({
-              scrollTop: $("#divPIC").offset().top
-          }, 500);
-        }else if(inputStatusUS2 != 'CLOSE'){
-          Swal.fire("Status Uang Saku Ke 2 Masih Belum Close!","Hubungi PIC Terkait","warning")
-          $('html, body').animate({
-              scrollTop: $("#divPIC").offset().top
-          }, 500);
-        }else if(inputStatusUM!= 'CLOSE'){
-          Swal.fire("Status Uang Makan Ke 2 Masih Belum Close!","Hubungi PIC Terkait","warning")
-          $('html, body').animate({
-              scrollTop: $("#divPIC").offset().top
-          }, 500);
-        }else if(inputStatusAdjMakan!= 'CLOSE'){
-          Swal.fire("Status Uang Makan Adjustment Masih Belum Close!","Hubungi PIC Terkait","warning")
-          $('html, body').animate({
-              scrollTop: $("#divPIC").offset().top
-          }, 500);
-        }else if(inputRealisasiUangBBM == '' && inputMediaUangBBM == 'Reimburse'){
-          Swal.fire({
-            position: 'top-end',
-            toast : true,
-            icon: 'warning',
-            title: 'Isi Terlebih Dahulu Biaya BBM!',
-            showConfirmButton: false,
-            timer: 2500
-          })
-          document.getElementById("inputRealisasiUangBBM").focus();
-          $('html, body').animate({
-              scrollTop: $("#divBiaya").offset().top
-          }, 500);
-        }else if(inputRealisasiUangTol == '' && inputMediaUangTOL == 'Reimburse'){
-          Swal.fire({
-            position: 'top-end',
-            toast : true,
-            icon: 'warning',
-            title: 'Isi Terlebih Dahulu Biaya TOL!',
-            showConfirmButton: false,
-            timer: 2500
-          })
-          document.getElementById("inputRealisasiUangTol").focus();
-          $('html, body').animate({
-              scrollTop: $("#divBiaya").offset().top
-          }, 500);
-        }else{
-          $.ajax({
-            type:'post',
-            data:{inputNoSPJ, inputRealisasiUangSaku, inputRealisasiUangMakan, inputRealisasiUangJalan, inputRealisasiUangBBM, inputRealisasiUangTol},
-            url:url+'/implementasi/closeSPJ',
-            cache: false,
-            async: true,
-            success: function(data){
-              window.location.href = url+'/Implementasi/step_1?notif=1';
-            },
-            error: function(data){
-              Swal.fire("Gagal Menyimpan Data!","Reload Terlebih Dahulu Halaman Ini atau Hubungi Staff IT","error")
-            }
-          });
-        }
+        cekSaldo();
         closeSPJ.ladda('stop');
         return false;
           
@@ -971,6 +901,113 @@
     console.log(inputKbTOL)
     console.log(totalRealisasi)
     console.log(totalKB)
+  }
+
+  function cekSaldo() {
+    var inputJenisSPJ = $('#inputJenisSPJ').val();
+    var inputMediaUangTOL = $('#inputMediaUangTOL').val();
+    var inputRealisasiUangTol = $('#inputRealisasiUangTol').val();
+    var kasbon = "Kasbon TOL "+inputJenisSPJ;
+    if (parseInt(inputRealisasiUangTol)>0) {
+      $.ajax({
+        type:'get',
+        data:{kasbon},
+        dataType: 'json',
+        url:url+'/Implementasi/cekSaldo',
+        cache: false,
+        async: true,
+        success: function(data){
+          if (inputRealisasiUangTol>data && inputMediaUangTOL == 'Reimburse') {
+            Swal.fire("Saldo Tidak Mencukupi!","Hubungi PIC Terkait","warning")
+          }else{
+            saveImplementasi(inputJenisSPJ)
+          }
+          
+        },
+        error: function(data){
+
+        }
+      }); 
+    }else{
+      Swal.fire("Isi Terlebih Dahulu Uang TOL","","warning")
+    }
+    
+  }
+  function saveImplementasi(inputJenisSPJ) {
+    var inputStatusUS1 = $('#inputStatusUS1').val();
+    var inputStatusUS2 = $('#inputStatusUS2').val();
+    var inputStatusUM = $('#inputStatusUM').val();
+    var inputStatusAdjMakan = $('#inputStatusAdjMakan').val();
+    var inputRealisasiUangSaku = $('#inputRealisasiUangSaku').val();
+    var inputRealisasiUangMakan = $('#inputRealisasiUangMakan').val();
+    var inputRealisasiUangJalan = $('#inputRealisasiUangJalan').val();
+    var inputRealisasiUangBBM = $('#inputRealisasiUangBBM').val();
+    var inputRealisasiUangTol = $('#inputRealisasiUangTol').val();
+    var inputMediaUangBBM = $('#inputMediaUangBBM').val();
+    var inputMediaUangTOL = $('#inputMediaUangTOL').val();
+    var inputNoSPJ = $('#inputNoSPJ').val(); 
+    var inputId = $('#inputId').val();    
+    if (inputStatusUS1 != 'CLOSE') {
+      Swal.fire("Status Uang Saku Ke 2 Masih Belum Close!","Hubungi PIC Terkait","warning")
+      $('html, body').animate({
+          scrollTop: $("#divPIC").offset().top
+      }, 500);
+    }else if(inputStatusUS2 != 'CLOSE'){
+      Swal.fire("Status Uang Saku Ke 2 Masih Belum Close!","Hubungi PIC Terkait","warning")
+      $('html, body').animate({
+          scrollTop: $("#divPIC").offset().top
+      }, 500);
+    }else if(inputStatusUM!= 'CLOSE'){
+      Swal.fire("Status Uang Makan Ke 2 Masih Belum Close!","Hubungi PIC Terkait","warning")
+      $('html, body').animate({
+          scrollTop: $("#divPIC").offset().top
+      }, 500);
+    }else if(inputStatusAdjMakan!= 'CLOSE'){
+      Swal.fire("Status Uang Makan Adjustment Masih Belum Close!","Hubungi PIC Terkait","warning")
+      $('html, body').animate({
+          scrollTop: $("#divPIC").offset().top
+      }, 500);
+    }else if(inputRealisasiUangBBM == '' && inputMediaUangBBM == 'Reimburse'){
+      Swal.fire({
+        position: 'top-end',
+        toast : true,
+        icon: 'warning',
+        title: 'Isi Terlebih Dahulu Biaya BBM!',
+        showConfirmButton: false,
+        timer: 2500
+      })
+      document.getElementById("inputRealisasiUangBBM").focus();
+      $('html, body').animate({
+          scrollTop: $("#divBiaya").offset().top
+      }, 500);
+    }else if(inputRealisasiUangTol == '' && inputMediaUangTOL == 'Reimburse'){
+      Swal.fire({
+        position: 'top-end',
+        toast : true,
+        icon: 'warning',
+        title: 'Isi Terlebih Dahulu Biaya TOL!',
+        showConfirmButton: false,
+        timer: 2500
+      })
+      document.getElementById("inputRealisasiUangTol").focus();
+      $('html, body').animate({
+          scrollTop: $("#divBiaya").offset().top
+      }, 500);
+    }else{
+      $.ajax({
+        type:'post',
+        data:{inputNoSPJ, inputRealisasiUangSaku, inputRealisasiUangMakan, inputRealisasiUangJalan, inputRealisasiUangBBM, inputRealisasiUangTol, inputJenisSPJ, inputId, inputMediaUangTOL},
+        url:url+'/implementasi/closeSPJ',
+        cache: false,
+        async: true,
+        success: function(data){
+          window.location.href = url+'/Implementasi/step_1?notif=1';
+        },
+        error: function(data){
+          Swal.fire("Gagal Menyimpan Data!","Reload Terlebih Dahulu Halaman Ini atau Hubungi Staff IT","error")
+        }
+      });
+    }
   }
   
   function formatRupiah(angka, prefix){

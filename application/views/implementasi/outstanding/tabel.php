@@ -86,7 +86,7 @@
                     </button>
                     <div class="dropdown-menu" role="menu">
                         <a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/view_spj/<?=$key->ID_SPJ?>">Lihat SPJ</a>
-                        <a class="dropdown-item dropButton btnKeputusan" href="javascript:;" no_spj = "<?=$key->NO_SPJ?>" nik = "<?=$key->PIC_INPUT?>">Keputusan Otoritas</a>
+                        <a class="dropdown-item dropButton btnKeputusan" href="javascript:;" no_spj = "<?=$key->NO_SPJ?>" nik = "<?=$key->PIC_INPUT?>" jenisSPJ = "<?=$key->NAMA_JENIS?>" idSPJ = "<?=$key->ID_SPJ?>">Keputusan Otoritas</a>
                     </div>
                 </td>
             </tr>

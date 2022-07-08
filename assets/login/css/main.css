@@ -58,7 +58,7 @@ a:focus {
 
 a:hover {
 	text-decoration: none;
-  color: ##CC5803;
+  color: #CC5803;
 }
 
 /*---------------------------------------------*/
@@ -169,10 +169,11 @@ iframe {
   align-items: center;
   padding: 15px;
   background: #9053c7;
-  background: -webkit-linear-gradient(-135deg, ##CC5803, #EDA916);
-  background: -o-linear-gradient(-135deg, ##CC5803, #EDA916);
-  background: -moz-linear-gradient(-135deg, ##CC5803, #EDA916);
-  background: linear-gradient(-135deg, ##CC5803, #EDA916);
+  background: -webkit-linear-gradient(-180deg, #CC5803, #CC7803);
+  background: -o-linear-gradient(-180deg, #CC5803, #CC7803);
+  background: -moz-linear-gradient(-180deg, #CC5803, #CC7803);
+  background: linear-gradient(-180deg, #CC5803, #CC7803);
+
 }
 
 .wrap-login100 {
@@ -256,7 +257,7 @@ iframe {
   width: 100%;
   height: 100%;
   box-shadow: 0px 0px 0px 0px;
-  color: rgba(209,33,23, 0.8);
+  color: rgba(204, 88, 3, 0.8);
 }
 
 .input100:focus + .focus-input100 {
@@ -304,7 +305,7 @@ iframe {
 }
 
 .input100:focus + .focus-input100 + .symbol-input100 {
-  color: ##CC5803;
+  color: #CC5803;
   padding-left: 28px;
 }
 
@@ -332,7 +333,7 @@ iframe {
   width: 100%;
   height: 50px;
   border-radius: 25px;
-  background: ##CC5803;
+  background: #CC5803;
   display: -webkit-box;
   display: -webkit-flex;
   display: -moz-box;

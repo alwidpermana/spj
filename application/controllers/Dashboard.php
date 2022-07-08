@@ -31,6 +31,11 @@ class Dashboard extends CI_Controller {
 	{
 		$data['page'] = '';
 		$data['side'] = 'dashboard';
+		$data['tempKendaraan'] = $this->M_Monitoring->getDashboardTemporaryKendaraan()->result();
+		$data['tempPIC'] = $this->M_Monitoring->getDashboardTemporaryPIC()->result();
+		$data['jmlGenerate'] = $this->M_Monitoring->getDashboardPersentaseJmlGenerate()->num_rows();
+		$data['outstanding'] = $this->M_Monitoring->getDashboardOutstanding()->num_rows();
+		$data['jml_spj'] = $this->M_Monitoring->getDashboardJumlahSPJ()->num_rows();
 		$this->load->view('Dashboard/index', $data);
 		
 		

@@ -9,6 +9,7 @@ class Pengajuan extends CI_Controller {
 		$this->load->model('M_Data_Master');
 		$this->load->model('M_Pengajuan');
 		$this->load->model('M_Serlok');
+		$this->load->model('M_Cash_Flow');
 	}
 	/**
 	 * Index Page for this controller.
@@ -109,17 +110,23 @@ class Pengajuan extends CI_Controller {
 	public function saveCustomerSerlok()
 	{
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
-		$customer = $this->input->post("customer");
-		$jmlCustomer = count($customer);
-		for ($i=0; $i <$jmlCustomer ; $i++) { 
-			$serlok = $this->M_Serlok->getCustomerByGroup($query="", $customer[$i])->result();
-			$serlokKota = '';
-			foreach ($serlok as $key) {
-				$serlokID = $key->id;
-				$serlokAlamat = $key->ALAMAT_LENGKAP_PLANT;
-				$serlokPerusahaan = $key->COMPANY_NAME;
-				$serlokKota = $key->nama_kabkota;
-			}
+		$inputNoTNKB = $this->input->post("inputNoTNKB");
+		$inputTglSPJ = $this->input->post("inputTglSPJ");
+		$this->db->query("DELETE FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$inputNoSPJ'");
+		$getSerlok = $this->M_Serlok->getSPJByOutGoing($inputNoTNKB, $inputTglSPJ);
+		foreach ($getSerlok->result() as $key) {
+			$serlokID = $key->ID;
+			$serlokAlamat = $key->PLANT1_CITY;
+			$serlokPerusahaan = $key->COMPANY_NAME;
+			$serlokKota = $key->nama_kabkota;
+			// $serlok = $this->M_Serlok->getCustomerByGroup($query="", $idSerlok)->result();
+			// $serlokKota = '';
+			// foreach ($serlok as $key2) {
+			// 	$serlokID = $key2->id;
+			// 	$serlokAlamat = $key2->ALAMAT_LENGKAP_PLANT;
+			// 	$serlokPerusahaan = $key2->COMPANY_NAME;
+			// 	$serlokKota = $key2->nama_kabkota;
+			// }
 			$kota = substr($serlokKota, 0, 5) == 'KOTA ' ? substr($serlokKota, 5):$serlokKota;
 			$group = $this->M_Pengajuan->findGroupTujuan($kota);
 			$data = $this->M_Pengajuan->saveLokasiTujuan($group, 'Customer', $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota);
@@ -227,7 +234,9 @@ class Pengajuan extends CI_Controller {
 	{
 		$inputGroupTujuan= $this->input->get("inputGroupTujuan");
 		$inputNoSPJ= $this->input->get("inputNoSPJ");
+		$inputJenisSPJ = $this->input->get("inputJenisSPJ");
 		$data['data'] = $this->M_Pengajuan->getLokasi($inputGroupTujuan, $inputNoSPJ)->result();
+		$data['jenis'] = $inputJenisSPJ;
 		$this->load->view('pengajuan/form/lokasi', $data);
 	}
 	public function getPIC()
@@ -507,6 +516,18 @@ class Pengajuan extends CI_Controller {
 			$this->M_Pengajuan->savePICManajemen($inputNoSPJ);	
 		}
 		$this->M_Pengajuan->saveKasbon();
+		$inputTotalUangSaku = $this->input->post("inputTotalUangSaku");
+        $inputTotalUangMakan = $this->input->post("inputTotalUangMakan");
+        $inputTotalUangJalan = $this->input->post("inputTotalUangJalan");
+        $inputBBM = $this->input->post("inputBBM");
+        $inputTOL = $this->input->post("inputTOL");
+        $inputMediaBBM = $this->input->post("inputMediaBBM");
+        $inputMediaTOL = $this->input->post("inputMediaTOL");
+        $inputNoSPJ = $this->input->post("inputNoSPJ");
+        $bbmSPJ = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
+        $tolSPJ = $inputMediaTOL == 'Kasbon' ? $inputTol : 0;
+        $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $inputTotalUangJalan + $bbmSPJ + $tolSPJ;
+		$this->updateSaldo($inputNoSPJ, $totalSPJ);
 		echo json_encode($data);
 	}
 	public function cekAdaDriver()
@@ -576,6 +597,82 @@ class Pengajuan extends CI_Controller {
 	    // Get data
 	    $data = $this->M_Pengajuan->getKendaraanWithAutoComplete($postData);
 	    echo json_encode($data);
+	}
+	public function cekSaldoSubKas()
+	{
+		$inputJenisSPJ = $this->input->get("inputJenisSPJ");
+		$data = $this->M_Cash_Flow->getAllSaldo('SUB KAS')->result();
+		$saldoSPJ = 0;
+		$saldoTOL = 0;
+		$saldoBBM = 0;
+		foreach ($data as $key) {
+			if ($inputJenisSPJ == '1' && $key->JENIS_SALDO == 'Kasbon SPJ Delivery') {
+				$saldoSPJ = $key->JUMLAH;
+			}elseif ($inputJenisSPJ == '2' && $key->JENIS_SALDO == 'Kasbon SPJ Non Delivery') {
+				$saldoSPJ = $key->JUMLAH;
+			}elseif ($inputJenisSPJ == '1' && $key->JENIS_SALDO == 'Kasbon TOL Delivery') {
+				$saldoTOL = $key->JUMLAH;
+			}elseif ($inputJenisSPJ == '2' && $key->JENIS_SALDO == 'Kasbon TOL Non Delivery') {
+				$saldoTOL = $key->JUMLAH;
+			}elseif ($key->JENIS_SALDO == 'Kasbon Voucher BBM') {
+				$saldoBBM = $key->JUMLAH;
+			}
+		}
+
+		$hasil = array('saldoSPJ' =>$saldoSPJ, 'saldoTOL'=>$saldoTOL, 'saldoBBM'=>$saldoBBM);
+		echo json_encode($hasil);
+	}
+	public function updateSaldo($inputNoSPJ, $totalSPJ)
+	{
+		$getSPJ = $this->M_Pengajuan->getIDByNoSPJ($inputNoSPJ)->result();
+		$id = 0;
+		$jenisSPJ = '';
+		foreach ($getSPJ as $key) {
+			$id = $key->ID_SPJ;
+			$jenisSPJ = $key->NAMA_JENIS;
+		}
+		$jenis = 'Kasbon SPJ '.$jenisSPJ;
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($jenis, 'SUB KAS');
+		$saldo = 0;
+		foreach ($getSaldo->result() as $key) {
+			$saldo  = $key->SALDO;
+		}
+		$totalSaldo = $saldo - $totalSPJ;
+		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
+		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalSPJ, 'KASBON', $id,'TRANSAKSI AWAL');
+	}
+
+	public function temporary()
+	{
+		$data['side'] = 'spj-temporary';
+		$data['page'] = 'Pengajuan SPJ (Temporary)';
+		$this->load->view("pengajuan/temporary/index", $data);
+	}
+	public function getTabelTemporary()
+	{
+		$filSearch = $this->input->get("filSearch");
+		$data['data']=$this->M_Pengajuan->getDataTemporary($filSearch)->result();
+		$this->load->view("pengajuan/temporary/tabel", $data);
+	}
+	public function form_temporary($id)
+	{
+		$this->load->model('M_Monitoring');
+		$data['data']= $this->M_Pengajuan->getSPJTemporary($id)->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['side'] = 'spj-temporary';
+		$data['page'] = 'Form SPJ Temporary';
+		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['kendaraan'] = $this->M_Data_Master->getKategoriKendaraan()->result();
+		$data['jenis'] = $this->M_Data_Master->getJenisKendaraan()->result();
+		$data['group'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
+		$data['kota'] = $this->M_Data_Master->getKotaKabDis()->result();
+		$this->load->view("pengajuan/form/edit", $data);
+	}
+	public function hapusPengajuan()
+	{
+		$noSPJ = $this->input->post("noSPJ");
+		$data = $this->M_Pengajuan->hapusPengajuan($noSPJ);
+		echo json_encode($data);
 	}
 
 

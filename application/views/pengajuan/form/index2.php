@@ -148,10 +148,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-1">
-                      :
-                    </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                       <div class="row">
                         <div class="col-md-12">
                           <input type="text" id="inputTglInput" class="form-control form-control-sm" value="<?=date("d F Y")?>" readonly>
@@ -168,10 +165,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-1">
-                      :
-                    </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                       <div class="row">
                         <div class="col-md-12" id="beforeNext">
                           <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisSPJ">
@@ -208,10 +202,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-1">
-                      :
-                    </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                       <div class="row">
                         <div class="col-md-12">
                           <input type="text" id="inputNoSPJ" class="form-control form-control-sm" value="" readonly>
@@ -228,10 +219,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-1">
-                      :
-                    </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                       <div class="row">
                         <div class="col-md-12">
                           <input type="date" id="inputTglSPJ" class="form-control form-control-sm" value="<?=date("Y-m-d")?>">
@@ -321,68 +309,68 @@
                         <!-- your steps content here -->
                         <div id="stepPengaju" class="content" role="tabpanel" aria-labelledby="stepPengaju-trigger">
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-sm-2">
                               <div class="row">
-                                <div class="col-md-12"> 
+                                <div class="col-sm-12"> 
                                   <label>NIK</label>  
                                 </div>
                               </div>
                               
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-sm-4">
                               <label>: <?=$this->session->userdata("NIK")?></label>
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-sm-2">
                               <div class="row">
-                                <div class="col-md-12"> 
+                                <div class="col-sm-12"> 
                                   <label>Nama</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-sm-4">
                               <label>: <?=$this->session->userdata("NAMA")?></label>
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-sm-2">
                               <div class="row">
-                                <div class="col-md-12"> 
+                                <div class="col-sm-12"> 
                                   <label>Jabatan</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-sm-4">
                               <label>: <?=$this->session->userdata("JABATAN")?></label>
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-sm-2">
                               <div class="row">
-                                <div class="col-md-12"> 
+                                <div class="col-sm-12"> 
                                   <label>Departemen</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-sm-4">
                               <label>: <?=$this->session->userdata("DEPARTEMEN")?></label>
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-sm-2">
                               <div class="row">
-                                <div class="col-md-12"> 
+                                <div class="col-sm-12"> 
                                   <label>Sub Departemen</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-sm-4">
                               <label>: <?=$this->session->userdata("SUB_DEPARTEMEN")?></label>
                             </div>
                           </div>
                           <div class="row" style="padding-top: 50px">
-                            <div class="col-md-4">
+                            <div class="col-sm-4">
                               <button class="btn btn-secondary btnStepNext" onclick="stepper.next()">Next</button>
                             </div>
                           </div>
@@ -569,6 +557,7 @@
                             </div>
                             <div class="col-md-2"></div>
                             <div class="col-md-2">
+                              <br>
                               <button type="button" class="btn btn-kps bg-orange btn-block" id="btnCekProgramSerlok">
                                 Cek Data Program Serlok
                               </button>
@@ -1046,7 +1035,6 @@
                     <tr>
                       <th>Company Name</th>
                       <th>Plant City</th>
-                      <th></th>
                     </tr>
                   </thead>
                   <tbody id="getSerlok">

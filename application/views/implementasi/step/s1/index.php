@@ -94,6 +94,7 @@
                         <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
                           <option value="">ALL</option>
                           <option value="OPEN">OPEN</option>
+                          <option value="Waiting For Generate">Waiting For Generate</option>
                           <option value="CLOSE">CLOSE</option>
                         </select>
                       </div>

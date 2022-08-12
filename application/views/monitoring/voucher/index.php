@@ -25,6 +25,39 @@
           <div class="card">
             <div class="card-body">
               <div class="row">
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label>Status Pengisian</label>
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
+                      <option value="">ALL</option>
+                      <option value="OPEN">OPEN</option>
+                      <option value="CLOSE">CLOSE</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label>Jenis SPJ</label>
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
+                      <option value="">ALL</option>
+                      <?php foreach ($spj as $key): ?>
+                      <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-3"></div>
+                <div class="col-md-5">
+                  <form id="search">
+                    <div class="form-group">
+                      <label>&nbsp;</label>
+                      <span class="fa fa-search form-control-icon"></span>
+                      <input type="search" class="form-control form-control-search" id="filSearch" placeholder="Cari Berdasarkan No SPJ atau Voucher BBM">
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="row">
                 <div class="col-md-12">
                   <div id="getTabel"></div>
                 </div>
@@ -89,6 +122,13 @@
 
     // $('.preloader').fadeOut('slow');
     getTabel();
+    $('.filter').on('change', function(){
+      getTabel();
+    });
+    $('#search').submit(function(e){
+      e.preventDefault()
+      getTabel()
+    });
     $('#getTabel').on('click', '.getVoucher', function(){
       var noVoucher = $(this).attr("noVoucher");
       var noSPJ = $(this).attr("noSPJ");
@@ -145,9 +185,13 @@
 
   })
     function getTabel() {
+      var filStatus = $('#filStatus').val();
+      var filJenis = $('#filJenis').val();
+      var filSearch = $('#filSearch').val();
       $.ajax({
         type: 'get',
         url:'getMonVoucherBBM',
+        data:{filStatus, filJenis, filSearch},
         cache: false,
         async: true,
         beforeSend: function(data){

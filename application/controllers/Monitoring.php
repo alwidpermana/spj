@@ -41,7 +41,7 @@ class Monitoring extends CI_Controller {
 	{
 		$filTahun = $this->input->get("filTahun");
 		$filBulan = $this->input->get("filBulan");
-		$filPeriode = $this->input->get("filPeriode");
+		$filStatus = $this->input->get("filStatus");
 		$filJenis = $this->input->get("filJenis");
 		$filSearch = $this->input->get("filSearch");
 		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='','')->result();
@@ -103,6 +103,18 @@ class Monitoring extends CI_Controller {
 		$this->pdfgenerator->generate($html, $filename, true, 'A4', 'portrait');
 		$this->pdfgenerator->set_option('isRemoteEnabled', true);
 	}
+	public function print_spj($id)
+	{
+		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id = $id, $adjustment='','')->result();
+		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$getNoSPJ = $this->M_Monitoring->getNoSPJByID($id); 
+		$no = $getNoSPJ;
+		$namaFile = str_replace("/","",$no);
+		$data['nama'] = $namaFile;
+		 $this->load->view('monitoring/spj/view/print', $data);
+	}
 	public function saveDebit()
 	{
 		$inputDebit = $this->input->post("inputDebit");
@@ -132,7 +144,8 @@ class Monitoring extends CI_Controller {
 		$data['side'] = "monitoring-kasbon-TOL";
 		$data['page'] = 'Kasbon TOL';
 		$data['kasbon'] = 'TOL';
-		$this->load->view("monitoring/kasbon/indexNew", $data);
+		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$this->load->view("monitoring/kasbon/indexTOL", $data);
 	}
 	public function getTabelKasbonSPJ()
 	{
@@ -160,11 +173,15 @@ class Monitoring extends CI_Controller {
 	{
 		$data['side'] = 'monitoring-voucher';
 		$data['page'] = 'Monitoring - Voucher';
+		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
 		$this->load->view("monitoring/voucher/index", $data);
 	}
 	public function getMonVoucherBBM()
 	{
-		$data['data'] = $this->M_Monitoring->monitoring_voucher()->result();
+		$filSearch = $this->input->get("filSearch");
+		$filStatus = $this->input->get("filStatus");
+		$filJenis = $this->input->get("filJenis");
+		$data['data'] = $this->M_Monitoring->monitoring_voucher($filStatus, $filSearch, $filJenis)->result();
 		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $jenisID='', $filSearch='', $id='')->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $jenisID='', $filSearch='', $id='')->result();
 		$this->load->view("monitoring/voucher/tabel", $data);
@@ -323,6 +340,12 @@ class Monitoring extends CI_Controller {
 		$id = $this->input->post("id");
 		$status = $this->input->post("status");
 		$data = $this->db->query("UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = '$status' WHERE ID_SPJ = $id");
+		$getSPJ = $this->db->query("SELECT ID_SPJ, JENIS_ID, TOTAL_UANG_SAKU, TOTAL_UANG_MAKAN, TOTAL_UANG_JALAN FROM SPJ_PENGAJUAN WHERE ID_SPJ = $id");
+		foreach ($getSPJ->result() as $key) {
+			$total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN;
+			$jenis = $key->JENIS_ID;
+			$this->updateSaldoSPJ($id, $total, $jenis, $status);
+		}
 		echo json_encode($data);
 	}
 	public function getMonitoringKasbon()
@@ -333,9 +356,17 @@ class Monitoring extends CI_Controller {
 		$namaBulan = $this->input->get("filBulan") == '' ? '':date("F", strtotime($tglBulan));
 		$filJenis = $this->input->get("filJenis");
 		$filStatus = $this->input->get("filStatus");
-
+		$data['status'] = $filStatus;
 		$data['data'] = $this->M_Monitoring->getKasbonCashFlow($filJenis,$filTahun, $filBulan, $namaBulan, $filStatus)->result();
 		$this->load->view("monitoring/kasbon/tabelNew", $data);
+	}
+	public function getLatestMonthKasbon()
+	{
+		$filJenis = $this->input->get("filJenis");
+		$filBulan = $this->input->get("filBulan");
+		$filTahun = $this->input->get("filTahun");
+		$data = $this->M_Monitoring->getLastSaldoMonth($filBulan, $filTahun, $filJenis)->row();
+		echo json_encode($data);
 	}
 	public function getMonitoringKasbonBBM()
 	{
@@ -361,6 +392,91 @@ class Monitoring extends CI_Controller {
 		$totalSaldo = ($saldo+$inputBiayaAwal) - $inputBiaya;
 		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
 		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $inputBiaya, 'KASBON', $inputId,'VOUCHER');
+	}
+
+	public function getBiayaAdmin()
+	{
+		$filJenis = $this->input->get("filJenis")=='Kasbon TOL Delivery'?'1':'2';
+		$filTahun = $this->input->get("filTahun");
+		$filBulan = $this->input->get("filBulan");
+		$filStatus = $this->input->get("filStatus");
+		$data['data'] = $this->M_Monitoring->getTabelBiayaAdmin($filJenis, $filTahun, $filStatus)->result();
+		$this->load->view("monitoring/kasbon/tabelBiayaAdmin", $data);
+	}
+	public function saveBiayaAdmin()
+	{
+		$inputTglBiaya = $this->input->post("inputTglBiaya");
+		$inputJenis = $this->input->post("inputJenis");
+		$inputBiaya = $this->input->post("inputBiaya");
+		$inputKeterangan = $this->input->post("inputKeterangan");
+		$inputId = $this->input->post("inputID");
+		if ($inputId=='') {
+			$data = $this->M_Monitoring->saveBiayaAdmin($inputTglBiaya, $inputJenis, $inputBiaya, $inputKeterangan);
+		}else{
+			$data = $this->M_Monitoring->updateBiayaAdmin($inputTglBiaya, $inputJenis, $inputBiaya, $inputKeterangan, $inputId);
+		}
+		
+		echo json_encode($data);
+	}
+	public function getKodeApprove()
+	{
+		$inputKode = $this->input->get("inputKode");
+		$data = $this->M_Monitoring->getKodeApprove($inputKode)->num_rows();
+		echo json_encode($data);
+	}
+	public function approveBiayaAdmin()
+	{
+		$inputId = $this->input->post("inputId");
+		$inputStatus = $this->input->post("inputStatus");
+		$kasbon = $this->input->post("kasbon");
+		$biaya = $this->input->post("biaya");
+		$totalBiaya = $this->input->post("totalBiaya");
+		$data = $this->M_Monitoring->approveBiayaAdmin($inputId, $inputStatus);
+		if ($inputStatus == 'APPROVED') {
+			$this->updateSaldoBiayaAdmin($inputId, $kasbon, $biaya,'-','BIAYA ADMIN');
+		}
+		
+		echo json_encode($data);
+	}
+	public function hapusBiayaAdmin()
+	{
+		$id = $this->input->post("id");
+		$data = $this->M_Monitoring->hapusBiayaAdmin($id);
+		echo json_encode($data);
+	}
+	public function updateSaldoBiayaAdmin($inputIdSPJ, $kasbon, $totalBiaya, $keterangan, $jenisFK)
+	{
+		$this->load->model('M_Cash_Flow');
+		$id = $inputIdSPJ;
+		$jenis = $kasbon;
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($jenis, 'SUB KAS');
+		$saldo = 0;
+		foreach ($getSaldo->result() as $key) {
+			$saldo  = $key->SALDO;
+		}
+		$totalSaldo = $saldo - $totalBiaya;
+		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
+		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalBiaya, $jenisFK, $id,$keterangan);
+	}
+	public function updateSaldoSPJ($id, $total, $jenis, $status)
+	{
+		$this->load->model('M_Cash_Flow');
+		$kasbon = $jenis == '1'?'Kasbon SPJ Delivery':'Kasbon SPJ Non Delivery';
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($kasbon, 'SUB KAS');
+		$saldo = 0;
+		foreach ($getSaldo->result() as $key) {
+			$saldo  = $key->SALDO;
+		}
+		if ($status == 'CANCEL') {
+			$totalSaldo = $status == 'CANCEL'?$saldo+$total:$saldo-$total;
+			$this->M_Cash_Flow->updateSaldo($kasbon, $totalSaldo, 'SUB KAS');
+			$this->db->query("DELETE FROM SPJ_KAS_SUB WHERE JENIS_FK = 'KASBON' AND DETAIL_KASBON = 'TRANSAKSI AWAL' AND FK_ID = $id");
+		} else {
+			$totalSaldo = $saldo-$total;
+			$this->M_Cash_Flow->updateSaldo($kasbon, $totalSaldo, 'SUB KAS');
+			$this->M_Cash_Flow->saveSubKas($kasbon,'CREDIT', $total, 'KASBON', $id,'TRANSAKSI AWAL');
+		}
+		
 	}
 
 }

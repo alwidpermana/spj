@@ -36,16 +36,16 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-          <!-- <?php if ($this->session->userdata("LEVEL") == 0): ?>
+          <?php if ($this->session->userdata("LEVEL") == 0): ?>
             <li class="nav-item">
-              <a href="<?=base_url()?>dashboard/pageTest" class="nav-link <?= $side == 'dashboard'?'active':''?>">
+              <a href="<?=base_url()?>dashboard/pageTest" class="nav-link <?= $side == 'test'?'active':''?>">
                 <i class="nav-icon fas fa-tachometer-alt"></i>
                 <p>
                   TEST
                 </p>
               </a>
             </li>
-          <?php endif ?> -->
+          <?php endif ?>
           <li class="nav-item ">
             <a href="<?=base_url()?>dashboard" class="nav-link <?= $side == 'dashboard'?'active':''?>">
               <!-- <i class="nav-icon fas fa-tachometer-alt"></i> -->
@@ -98,12 +98,14 @@
                       <p>Supir Rental</p>
                     </a>
                   </li>
-                  <li class="nav-item">
-                    <a href="<?=base_url()?>data_master/verifikasi_karyawan" class="nav-link ">
-                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_approve'?'text-dark':''?>" style="font-size: 11px;"></i>
-                      <p>Verifikasi Karyawan</p>
-                    </a>
-                  </li>
+                  <?php if ($this->session->userdata("LEVEL")<=1): ?>
+                    <li class="nav-item">
+                      <a href="<?=base_url()?>data_master/verifikasi_karyawan" class="nav-link ">
+                        <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_approve'?'text-dark':''?>" style="font-size: 11px;"></i>
+                        <p>Verifikasi Karyawan</p>
+                      </a>
+                    </li> 
+                  <?php endif ?>
                 </ul>
               </li>
               <li class="nav-item list-menu-open">
@@ -124,12 +126,14 @@
                   <p>Konfigurasi</p>
                 </a>
               </li>
-              <li class="nav-item list-menu-open">
-                <a href="<?=base_url()?>data_master/verifikasi_konfigurasi" class="nav-link ">
-                  <i class="fas fa-clipboard-check nav-icon <?=substr($side, 12) == 'verif_konfig'?'text-dark':''?>" style="font-size: 11px;"></i>
-                  <p>Verifikasi Konfigurasi</p>
-                </a>
-              </li>
+              <?php if ($this->session->userdata("LEVEL")<=1): ?>
+                <li class="nav-item list-menu-open">
+                  <a href="<?=base_url()?>data_master/verifikasi_konfigurasi" class="nav-link ">
+                    <i class="fas fa-clipboard-check nav-icon <?=substr($side, 12) == 'verif_konfig'?'text-dark':''?>" style="font-size: 11px;"></i>
+                    <p>Verifikasi Konfigurasi</p>
+                  </a>
+                </li>  
+              <?php endif ?>
               <li class="nav-item list-menu-open">
                 <a href="<?=base_url()?>data_master/voucher_bbm" class="nav-link ">
                   <i class="fas fa-note-sticky nav-icon <?=substr($side, 12) == 'voucher'?'text-dark':''?>" style="font-size: 11px;"></i>
@@ -140,7 +144,8 @@
             </ul>
           </li>
           <?php endif ?>
-          <li class="nav-item <?=$this->uri->segment("1")=='cash_flow'?'menu-open':''?>">
+          <?php if ($this->session->userdata("LEVEL")<2): ?>
+           <li class="nav-item <?=$this->uri->segment("1")=='cash_flow'?'menu-open':''?>">
             <a href="javascript:void(0);" class="nav-link <?=$this->uri->segment("1")=='cash_flow'?'active':''?>">
               <i class="nav-icon fas fa-money-check-alt"></i>
               <p>
@@ -174,31 +179,34 @@
                 </a>
               </li>
             </ul>
-          </li>
-          <li class="nav-item <?=$this->uri->segment("1")=='pengajuan'?'menu-open':''?>">
-            <a href="javascript:void(0);" class="nav-link <?=$this->uri->segment("1")=='pengajuan'?'active':''?>">
-              <i class="nav-icon fas fa-envelope-open-text"></i>
-              <p>
-                Pengajuan SPJ
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview menu-open-kps">
-              <li class="nav-item list-menu-open">
-                <a href="<?=base_url()?>pengajuan/form" class="nav-link <?=$side == 'spj-pengajuan'?'text-dark':''?>">
-                  <i class="fas fa-file-alt nav-icon <?=$side == 'spj-pengajuan'?'text-dark':''?>" style="font-size: 11px;"></i>
-                  <p>Pengajuan Baru</p>
-                </a>
-              </li>
-              <li class="nav-item list-menu-open">
-                <a href="<?=base_url()?>pengajuan/temporary" class="nav-link <?=$side == 'spj-temporary'?'text-dark':''?>">
-                  <i class="fas fa-file-excel nav-icon <?=$side == 'spj-temporary'?'text-dark':''?>" style="font-size: 11px;"></i>
-                  <p>Temporary Pengajuan</p>
-                </a>
-              </li>
-            </ul>
-          </li>
+          </li> 
+          <?php endif ?>
           
+          <?php if ($this->session->userdata("LEVEL")<=4): ?>
+            <li class="nav-item <?=$this->uri->segment("1")=='pengajuan'?'menu-open':''?>">
+              <a href="javascript:void(0);" class="nav-link <?=$this->uri->segment("1")=='pengajuan'?'active':''?>">
+                <i class="nav-icon fas fa-envelope-open-text"></i>
+                <p>
+                  Pengajuan SPJ
+                  <i class="fas fa-angle-left right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview menu-open-kps">
+                <li class="nav-item list-menu-open">
+                  <a href="<?=base_url()?>pengajuan/form" class="nav-link <?=$side == 'spj-pengajuan'?'text-dark':''?>">
+                    <i class="fas fa-file-alt nav-icon <?=$side == 'spj-pengajuan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                    <p>Pengajuan Baru</p>
+                  </a>
+                </li>
+                <li class="nav-item list-menu-open">
+                  <a href="<?=base_url()?>pengajuan/temporary" class="nav-link <?=$side == 'spj-temporary'?'text-dark':''?>">
+                    <i class="fas fa-file-excel nav-icon <?=$side == 'spj-temporary'?'text-dark':''?>" style="font-size: 11px;"></i>
+                    <p>Temporary Pengajuan</p>
+                  </a>
+                </li>
+              </ul>
+            </li>  
+          <?php endif ?>
           <li class="nav-item <?=$this->uri->segment("1")=='monitoring'?'menu-open':''?>">
             <a href="javascript:void(0);" class="nav-link <?=substr($side, 0, 10) == 'monitoring'?'active':''?>">
               <i class="nav-icon fas fa-desktop"></i>
@@ -299,30 +307,33 @@
               <p>Security Check</p>
             </a>
           </li>
-          <li class="nav-item">
-            <a href="<?=base_url()?>implementasi/step_1?notif=" class="nav-link <?=$side == 'implementasi-step'?'active':''?>">
-              <i class="fas fa-clipboard-check nav-icon"></i>
-              <p>Implementasi</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="<?=base_url()?>adjustment" class="nav-link <?=$side == 'implementasi-adjustment'?'active':''?>">
-              <i class="fas fa-clipboard-list nav-icon"></i>
-              <p>Pengajuan Adjustment</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="<?=base_url()?>outstanding_otoritas" class="nav-link <?=$side == 'implementasi-os'?'active':''?>">
-              <i class="fas fa-hourglass-half nav-icon"></i>
-              <p>Outstanding Otoritas</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="<?=base_url()?>generate_spj" class="nav-link <?=$side == 'implementasi-generate'?'active':''?>">
-              <i class="fas fa-upload nav-icon"></i>
-              <p>Generate SPJ</p>
-            </a>
-          </li>
+          <?php if ($this->session->userdata("LEVEL")<=2): ?>
+            <li class="nav-item">
+              <a href="<?=base_url()?>implementasi/step_1?notif=" class="nav-link <?=$side == 'implementasi-step'?'active':''?>">
+                <i class="fas fa-clipboard-check nav-icon"></i>
+                <p>Implementasi</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?=base_url()?>adjustment" class="nav-link <?=$side == 'implementasi-adjustment'?'active':''?>">
+                <i class="fas fa-clipboard-list nav-icon"></i>
+                <p>Pengajuan Adjustment</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?=base_url()?>outstanding_otoritas" class="nav-link <?=$side == 'implementasi-os'?'active':''?>">
+                <i class="fas fa-hourglass-half nav-icon"></i>
+                <p>Outstanding Otoritas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?=base_url()?>generate_spj" class="nav-link <?=$side == 'implementasi-generate'?'active':''?>">
+                <i class="fas fa-upload nav-icon"></i>
+                <p>Generate SPJ</p>
+              </a>
+            </li>  
+          <?php endif ?>
+          
         </ul>
       </nav>  
     <?php endif ?>

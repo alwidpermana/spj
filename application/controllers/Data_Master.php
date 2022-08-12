@@ -200,6 +200,8 @@ class Data_Master extends CI_Controller {
 	{
 		$data['page'] = 'Master Data - Kendaraan';
 		$data['side'] = 'data_master-kendaraan';
+		$data['jenis'] = $this->M_Data_Master->getFilterJenisKendaraan()->result();
+		$data['Merk'] = $this->M_Data_Master->getFilterMerkKendaraan()->result();
 		$this->load->view("Data_Master/Kendaraan/index", $data);
 	}
 	public function getTabelKendaraan()
@@ -210,7 +212,7 @@ class Data_Master extends CI_Controller {
 		$filJenis = $this->input->get("filJenis");
 		$filSearch = $this->input->get("filSearch");
 		$data['jenis'] = $this->M_Data_Master->getJenisKendaraan()->result();
-		$data['data'] = $this->M_Data_Master->getKendaraan($filMerk, $filKendaraan, $filBahan, $filSearch)->result();
+		$data['data'] = $this->M_Data_Master->getKendaraan($filMerk, $filKendaraan, $filBahan, $filSearch, $filJenis)->result();
 		$this->load->view("Data_Master/Kendaraan/tabel", $data);
 	}
 	public function saveKendaraan()
@@ -231,17 +233,40 @@ class Data_Master extends CI_Controller {
 	}
 	public function uploadKendaraan()
 	{	
-		$data = $this->input->post("image");
-		$image_array_1 = explode(";", $data);
+		// $data = $this->input->post("image");
+		// $image_array_1 = explode(";", $data);
  
-         $image_array_2 = explode(",", $image_array_1[1]);
+  //        $image_array_2 = explode(",", $image_array_1[1]);
  
-         $data = base64_decode($image_array_2[1]);
+  //        $data = base64_decode($image_array_2[1]);
  
-         $imageName = time() . '.png';
+  //        $imageName = time() . '.png';
  
-         file_put_contents('assets/image/foto-kendaraan/'.$imageName, $data);
-         $save = $this->M_Data_Master->saveFotoKendaraan($imageName);
+  //        file_put_contents('assets/image/foto-kendaraan/'.$imageName, $data);
+		$config['upload_path']="./assets/image/foto-kendaraan";
+        $config['allowed_types']='gif|jpg|png|jpeg|application/pdf|pdf';
+        $config['encrypt_name'] = TRUE;
+        $fileName = '';
+        $this->load->library('upload',$config);
+	    if($this->upload->do_upload("inputFile")){
+	        $data = $this->upload->data();
+
+	        //Resize and Compress Image
+            // $config['image_library']='gd2';
+            $config['source_image']='./assets/image/foto-kendaraan/'.$data['file_name'];
+            // $config['create_thumb']= FALSE;
+            $config['maintain_ratio']= FALSE;
+            // $config['quality']= '60%';
+            // $config['width']= 1024;
+            $config['max_size']     = '1500';
+        		
+            // $config['height']= 768;
+            // $config['new_image']= './assets/dokumen/kecelakaan-kerja/'.$data['file_name'];
+            $this->load->library('image_lib', $config);
+            // $this->image_lib->resize();
+            $fileName= $data['file_name'];
+	    }
+        $save = $this->M_Data_Master->saveFotoKendaraan($fileName);
      	echo json_encode($save);
 	}
 	public function getGaleriKendaraan()
@@ -250,6 +275,14 @@ class Data_Master extends CI_Controller {
 		$no = str_replace('_', ' ', $noTNKB);
 		$data['data'] = $this->M_Data_Master->getGaleriKendaraan($no)->result();
 		$this->load->view("Data_Master/Kendaraan/showGaleri", $data);
+	}
+	public function updateStarKendaraan()
+	{
+		$id = $this->input->post("id");
+		$noTNKB = $this->input->post("noTNBK");
+		$no = str_replace('_', ' ', $noTNKB);
+		$data= $this->M_Data_Master->updateStarKendaraan($id, $no);
+		echo json_encode($data);
 	}
 	public function hapusGambarKendaraan()
 	{

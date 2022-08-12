@@ -105,6 +105,7 @@
 
             </div>
             <div class="col-md-4">
+              
               <div class="row">
                 <div class="col-md-12">
                   <div class="card">
@@ -325,7 +326,17 @@
       }],
       yAxes: [{
         ticks: {
-          fontColor: '#37323e'
+          fontColor: '#37323e',
+          display: true,
+          gridLines: {
+            display: true,
+          },
+          userCallback(label, index, labels) {
+             // only show if whole number
+             if (Math.floor(label) === label) {
+                 return label;
+             }
+          }
         },
         gridLines: {
           display: true,

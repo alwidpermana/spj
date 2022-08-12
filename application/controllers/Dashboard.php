@@ -52,4 +52,9 @@ class Dashboard extends CI_Controller {
 		echo json_encode($data);
 	}
 	
+	public function testAPI()
+	{
+
+		echo json_encode($data);
+	}
 }

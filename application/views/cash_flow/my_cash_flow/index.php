@@ -190,7 +190,7 @@
           approvePengajuan('', '', id, status, '')
         }
         saveApprove.ladda('stop');
-        $('.saveApprove').attr("disabled","disabled");
+        
         return false;
           
       }, 1000)
@@ -324,11 +324,17 @@
       url:'approvePengajuan',
       cache: false,
       async:true,
+      beforeSend:function(data){
+        $('.saveApprove').attr("disabled","disabled");
+      },
       success: function(data){
         berhasil();
         getTabel();
         getDataSaldo();
         $('#modal-approve').modal('hide')
+      },
+      complete: function(data){
+        $('.saveApprove').removeAttr("disabled","disabled");
       },
       error: function(data){
         gagal()

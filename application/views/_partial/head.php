@@ -47,6 +47,9 @@
     color:  white !important;
     box-shadow: 0 0 0 0.2rem rgba(252, 191, 73, 0.7) !important;
 }
+.callout-kps{
+    border-left-color: rgb(204, 88, 3);
+}
 .btn-kps{
   background-color: rgb(204, 88, 3);
   border-color: rgb(252, 191, 73) !important;
@@ -75,6 +78,9 @@
 }
 .text-kps{
   color: rgb(204, 88, 3) !important;
+  font-size: 12px;
+}
+.text-dark{
   font-size: 12px;
 }
 .text-kps2{
@@ -228,6 +234,26 @@ body{
     top:0;
     bottom:0;
 
+}
+.loader-card{
+    position: absolute;
+    height: 75px;
+    width: 75px;
+    margin:auto;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+}
+.loader-card2{
+    position: absolute;
+    height: 75px;
+    width: 75px;
+    margin:auto;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
 }
 .spinner{
     width: 75px;

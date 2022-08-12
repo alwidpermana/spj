@@ -82,7 +82,7 @@
 				$level = $key->jabatan == 'Kepala Bagian'?3:4;
 				$avatar = $key->jkelamin == 'L'?'male1.png':'female1.png';
 			}
-			$sql = "INSERT INTO SPJ_USER VALUES('SPJ-$nik','123','$level','AKTIF','$avatar','$tanggal','$user')";
+			$sql = "INSERT INTO SPJ_USER(NIK, PASSWORD, LEVEL,STATUS, AVATAR, TGL_INPUT, PIC_INPUT) VALUES('SPJ-$nik','123','$level','AKTIF','$avatar','$tanggal','$user')";
 			return $this->db->query($sql);
 		}
 		public function ubahStatusAkun($nik, $status)
@@ -187,8 +187,6 @@
 							*
 						FROM
 							SPJ_PEGAWAI_OTORITAS
-						WHERE
-							STATUS_DATA = 'SAVED'
 					)Q2 ON Q1.nik = Q2.NIK
 					WHERE
 						Q1.nik LIKE '%$filSearch%' OR
@@ -225,8 +223,6 @@
 								*
 							FROM
 								SPJ_PEGAWAI_OTORITAS
-							WHERE
-							STATUS_DATA = 'SAVED'
 						)Q2 ON Q1.nik = Q2.NIK
 						WHERE
 							Q1.nik LIKE '%$search%' OR
@@ -276,7 +272,7 @@
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
-            $sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET STATUS_DATA = 'SAVED', TGL_INPUT = '$tanggal', PIC_INPUT = '$user', OTORITAS_DRIVER = '$isiDriver', OTORITAS_PENDAMPING = '$isiPendamping', OTORITAS_ADJUSMENT = '$isiAdj', OTORITAS_UANG_MAKAN = '$isiUangMakan', OTORITAS_UANG_SAKU = '$isiUangSaku'  WHERE NIK = '$nik'";
+            $sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET STATUS_DATA = 'SAVED', TGL_INPUT = '$tanggal', PIC_INPUT = '$user', OTORITAS_DRIVER = '$isiDriver', OTORITAS_PENDAMPING = '$isiPendamping', OTORITAS_UANG_MAKAN = 'Y', OTORITAS_UANG_SAKU = 'Y', SUBJEK='$inputSubjek'  WHERE NIK = '$nik'";
             if ($isiDriver == 'N') {
             	$this->db->query("UPDATE SPJ_PEGAWAI_OTORITAS SET NO_SIM = null, BERLAKU_TERBIT = null, BERLAKU_AKHIR = null WHERE NIK = '$nik'");
             }
@@ -286,8 +282,9 @@
             return $this->db->query($sql);
 
 		}
-		public function getKendaraan($merk, $kendaraan, $bahanBakar, $search)
+		public function getKendaraan($merk, $kendaraan, $bahanBakar, $search, $filJenis)
 		{
+			$whereJenis = $filJenis == '' ? '' : " AND Kategori LIKE '$filJenis%'";
 			$sql = "SELECT
 						*
 					FROM
@@ -304,14 +301,16 @@
 							Pemakai,
 							Kategori,
 							BBMPerLiter,
-							StatusAktif
+							StatusAktif,
+							NamaSTNK
 						FROM
 							GA.[dbo].[GA_TKendaraan]
 						WHERE
 							StatusAktif = 'Aktif' AND
-							Merk LIKE '%$merk%' AND
-							Jenis LIKE '%$kendaraan%' AND
-							BahanBakar LIKE '%$bahanBakar%'
+							Merk LIKE '$merk%' AND
+							Jenis LIKE '$kendaraan%' AND
+							BahanBakar LIKE '$bahanBakar%'
+							$whereJenis
 					)Q1
 					WHERE
 						NoInventaris LIKE '%$search%' OR
@@ -319,6 +318,24 @@
 						Pemakai LIKE '%$search%'
 					ORDER BY
 							TglInput DESC";
+			return $this->db->query($sql);
+		}
+		public function getFilterJenisKendaraan()
+		{
+			$sql = "SELECT DISTINCT
+						Jenis
+					FROM
+						GA.[dbo].[GA_TKendaraan]
+					ORDER BY Jenis ASC";
+			return $this->db->query($sql);
+		}
+		public function getFilterMerkKendaraan()
+		{
+			$sql = "SELECT DISTINCT
+						Merk
+					FROM
+						GA.[dbo].[GA_TKendaraan]
+					ORDER BY Merk ASC";
 			return $this->db->query($sql);
 		}
 		public function saveKendaraan($no, $isi, $field)
@@ -329,12 +346,12 @@
 		public function saveFotoKendaraan($fileName)
 		{
 			$inputJenis = $this->input->post("inputJenis");
-			$noTNBK = $this->input->post("noTNBK");
+			$inputNoTNKB = $this->input->post("inputNoTNKB");
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
 			$user = $this->session->userdata("NIK");
-			$no = str_replace('_', ' ', $noTNBK);
-			$sql = "INSERT INTO SPJ_GAMBAR_KENDARAAN VALUES('$no','$inputJenis','$fileName','$tanggal','$user')";
+			$no = str_replace('_', ' ', $inputNoTNKB);
+			$sql = "INSERT INTO SPJ_GAMBAR_KENDARAAN VALUES('$no','$inputJenis','$fileName','$tanggal','$user', null)";
 			return $this->db->query($sql);
 		}
 		public function getGaleriKendaraan($no)
@@ -345,7 +362,13 @@
 					FROM
 						SPJ_GAMBAR_KENDARAAN
 					WHERE
-						NO_TNBK = 'Z 1802 AM'";
+						NO_TNBK = '$no'";
+			return $this->db->query($sql);
+		}
+		public function updateStarKendaraan($id, $no)
+		{
+			$this->db->query("UPDATE SPJ_GAMBAR_KENDARAAN SET STAR = null WHERE NO_TNBK = '$no'");
+			$sql = "UPDATE SPJ_GAMBAR_KENDARAAN SET STAR = 'Y' WHERE ID_GK = $id";
 			return $this->db->query($sql);
 		}
 		public function hapusGambarKendaraan($id)

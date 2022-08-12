@@ -71,6 +71,26 @@
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="modal-foto" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="d-flex justify-content-end">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div id="fotoWajah"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     
     <?php $this->load->view('_partial/footer');?>
 </div>
@@ -90,6 +110,14 @@
     $('#search').submit(function(e){
       e.preventDefault();
       getTabel();
+    });
+    $('#getTabel').on('click', '.getGambar', function(){
+      var foto = $(this).attr("data");
+      var html="";
+      html+='<img src="<?=base_url()?>assets/image/foto-wajah/'+foto+'" class="img-thumbnail rounded mx-auto d-block">';
+      $('#fotoWajah').html(html);
+      console.log(html)
+      $('#modal-foto').modal("show");
     });
   })
   

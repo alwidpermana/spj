@@ -1,3 +1,6 @@
+<?php
+  date_default_timezone_set('Asia/Jakarta');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -769,8 +772,8 @@
                                   </tr>
                                   <tr>
                                     <td class="font-weight-bold">Kepulangan</td>
-                                    <td><input type="date" id="inputTglPulang" class="form-control saveRencana" value="<?=date("Y-m-d", strtotime($key->RENCANA_PULANG))?>"></td>
-                                    <td><input type="time" id="inputJamPulang" class="form-control saveRencana" value="<?=date("H:i", strtotime($key->RENCANA_PULANG))?>"></td>
+                                    <td><input type="date" id="inputTglPulang" class="form-control saveRencana" value="<?=$key->RENCANA_PULANG==null?date("Y-m-d"):date("Y-m-d", strtotime($key->RENCANA_PULANG))?>"></td>
+                                    <td><input type="time" id="inputJamPulang" class="form-control saveRencana" value="<?=$key->RENCANA_PULANG==null?date("H:i"):date("H:i", strtotime($key->RENCANA_PULANG))?>"></td>
                                   </tr>
                                 </tbody>
                               </table>
@@ -803,7 +806,7 @@
                           <div class="row">
                             <div class="col-md-12">
                               <div class="d-flex justify-content-center">
-                                <button type="button" id="btnSaveSPJ" class="btn bg-orange btn-kps">Save Data</button>
+                                <button type="button" id="btnSaveSPJ" class="btn bg-orange btn-kps" status="UPDATE">Save Data</button>
                               </div>
                             </div>
                           </div>
@@ -829,6 +832,20 @@
       <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content">
           <div class="modal-body">
+            <div class="row">
+              <div class="col-md-2"></div>
+              <div class="col-md-8">
+                <form id="search">
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <span class="fa fa-search form-control-icon"></span>
+                    <input type="search" class="form-control form-control-search" id="searchKendaraan" placeholder="Cari Berdasarkan No SPJ">
+                  </div>
+                </form>
+              </div>
+            </div>
+            <br>
+            <br>
             <div id="getKendaraan"></div>
           </div>
         </div>
@@ -843,8 +860,7 @@
                 <div class="form-group">
                   <label>Objek</label>
                   <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputObjek">
-                    <option value="">Pilih Objek</option>
-                    <option value="Customer">Customer</option>
+                    <option value="Customer" selected>Customer</option>
                     <option value="Supplier">Supplier</option>
                     <option value="Rekanan">Rekanan</option>
                     <option value="Lainnya">Lainnya...</option>

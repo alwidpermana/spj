@@ -1,6 +1,7 @@
 <table class="table table-hover table-bordered table-striped" id="datatable" width="100%">
 	<thead class="text-center bg-gray">
 		<tr>
+			<th rowspan="2"></th>
 			<th rowspan="2">No</th>
 			<th rowspan="2">Tanggal Input</th>
 			<th rowspan="2">No SPJ</th>
@@ -31,8 +32,22 @@
 		$i = 1;
 		foreach ($data as $key): ?>
 			<tr>
+				<td class="text-center">
+					<?php if ($key->NO_GENERATE == null): ?>
+						<a 
+							href="javascript:;" 
+							class="btn bg-orange btn-kps btn-sm getVoucher"
+							noVoucher = "<?=$key->VOUCHER_BBM?>"
+							noSPJ = "<?=$key->NO_SPJ?>"
+							idSPJ = "<?=$key->ID_SPJ?>"
+							credit = "<?=round($key->TOTAL_UANG_BBM)?>"
+							uangBBM = "<?=$key->TOTAL_UANG_BBM?>">
+							<i class="fas fa-info"></i>
+						</a>
+					<?php endif ?>
+				</td>
 				<td><?=$i++?></td>
-				<td><?=$key->TGL_INPUT?></td>
+				<td><?=date("Y-m-d", strtotime($key->TGL_INPUT))?></td>
 				<td><?=$key->NO_SPJ?></td>
 				<td><?=$key->TGL_SPJ?></td>
 				<td><?=$key->QR_CODE?></td>
@@ -76,7 +91,7 @@
 						<?=str_replace(',', '.', number_format($key->TOTAL_UANG_BBM, 0))?>
 					</a>		
 				</td>
-				<td><?=$key->STATUS_SPJ?></td>
+				<td><?=$key->STATUS_VOUCHER?></td>
 			</tr>
 		<?php endforeach ?>
 	</tbody>
@@ -89,7 +104,7 @@
             scrollCollapse: true,
             paging:         false,
             'searching': false,
-            order: [[0, 'asc']],
+            order: [[6, 'desc']],
             info: false, 
             
           } ); 

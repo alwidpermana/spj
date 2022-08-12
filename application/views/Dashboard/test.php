@@ -22,7 +22,23 @@
       <?php $this->load->view('_partial/content-header');?>
       <div class="content">
         <div class="container-fluid">
-          
+          <div class="card">
+            <input type="time" id="inputJamBerangkat" class="form-control saveRencana" value="<?=date('H:i')?>">
+            <div class="card-header">
+              <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                  <a class="nav-link active" href="#">Eclipse IDE</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">NetBeans IDE</a>
+                </li>
+             </ul>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Eclipse IDE Introduction</h5>
+              <p class="card-text">Eclipse is a widely used Java IDE.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -36,6 +52,8 @@
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/spin.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.jquery.min.js"></script>
+<script src="<?= base_url()?>assets/plugins/require.js"></script>
+
 <script type="text/javascript">
   $(document).ready(function(){
     $('.select2').select2({
@@ -43,14 +61,63 @@
     });
     $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
-    
+    test()
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     
     // make_skeleton().fadeOut();
-   
+    // const Header = require('postman-collection').Header;
+    // const url = require('url');
+    // const hmac_username ='EtQ6cQqwz5Zt28h3';
+    // const hmac_secret = 'b92gFlPSHfhBjb2hYhBJOxPFr1WTg2fb';
+    // const requestUrl = url.parse(request['url']);
+    // const requestLine = pm.request.method + ' ' + requestUrl.path + ' HTTP/1.1';
+    // const dateString = new Date().toUTCString();
+    // const digest = CryptoJS.HmacSHA256(['date: ' + dateString, requestLine].join('\n'), hmac_secret);
+    // const signature = CryptoJS.enc.Base64.stringify(digest);
+    // const hmac_header = 'hmac username="' + hmac_username + '", algorithm="hmac-sha256", headers="date request-line", signature="' + signature + '"'
+    // // pm.request.headers.add(new Header("Authorization: " + hmac_header));
+    // // pm.request.headers.add(new Header("Date: " + dateString));
+    // var settings = {
+    //   "url": "https://api.mekari.com/v2/talenta/v2/employee?limit=20&employment_status=1&show_ess=1",
+    //   "method": "GET",
+    //   "timeout": 0,
+    //   "headers": {
+    //     "Authorization": "{{hmac_signature}}",
+    //     "Date": "{{authentication_date}}"
+    // },
+    // };
 
+    // $.ajax(settings).done(function (response) {
+    //   console.log(response);
+    // });
   })
+
+  function test() {
+    // const Header = require([postman-collection]).Header;
+    // const url = require('https://api.mekari.com/v2/talenta/v2/employee?limit=20&employment_status=1&show_ess=1');
+    // const hmac_username ='EtQ6cQqwz5Zt28h3';
+    // const hmac_secret = 'b92gFlPSHfhBjb2hYhBJOxPFr1WTg2fb';
+    // const requestUrl = url.parse(request['url']);
+    // const requestLine = pm.request.method + ' ' + requestUrl.path + ' HTTP/1.1';
+    // const dateString = new Date().toUTCString();
+    // const digest = CryptoJS.HmacSHA256(['date: ' + dateString, requestLine].join('\n'), hmac_secret);
+    // const signature = CryptoJS.enc.Base64.stringify(digest);
+    // const hmac_header = 'hmac username="' + hmac_username + '", algorithm="hmac-sha256", headers="date request-line", signature="' + signature + '"'
+    $.ajax({
+      type:'get',
+      dataType:'json',
+      url:'testAPI',
+      cache: false,
+      success: function(data){
+        console.log(data)
+      },
+      error: function(data){
+
+      }
+    });
+    
+  }
   
   
 

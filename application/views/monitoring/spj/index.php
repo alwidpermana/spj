@@ -58,9 +58,12 @@
                 </div>
                 <div class="col-md-2">
                   <div class="form-group">
-                    <label>Periode</label>
-                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filPeriode">
-                     
+                    <label>Status</label>
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
+                     <option value="">ALL</option>
+                     <option value="OPEN">OPEN</option>
+                     <option value="CLOSE">CLOSE</option>
+                     <option value="Waiting For Generate">Waiting For Generate</option>
                     </select>
                   </div>
                 </div>
@@ -89,6 +92,20 @@
           </div>
 
           <div class="card">
+            <div class="card-header border-0">
+              <h5 class="card-title font-weight-bold"></h5>
+              <div class="card-tools">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-tool" data-toggle="dropdown">
+                    <i class="fas fa-ellipsis-h"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right" role="menu">
+                    <!-- <a href="#" class="dropdown-item dropButton">Export To PDF</a> -->
+                    <a href="<?=base_url()?>export_file/excel_spj" class="dropdown-item dropButton">Export To Excel</a>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-12">
@@ -132,7 +149,7 @@
     })
     $('#getTabel').on('click','.btnCancel', function(){
       var id = $(this).attr("data");
-      var status = $(this).attr("data");
+      var status = $(this).attr("status");
       $.ajax({
         type:'post',
         dataType:'json',
@@ -154,12 +171,12 @@
   function getTabel() {
     var filTahun = $('#filTahun').val();
     var filBulan = $('#filBulan').val();
-    var filPeriode = $('#filPeriode').val();
+    var filStatus = $('#filStatus').val();
     var filJenis = $('#filJenis').val();
     var filSearch = $('#filSearch').val();
     $.ajax({
       type:'get',
-      data:{filTahun, filBulan, filPeriode, filJenis, filSearch},
+      data:{filTahun, filBulan, filStatus, filJenis, filSearch},
       url:'getTabelSPJ',
       cache: false,
       async: true,

@@ -62,6 +62,7 @@
     $('#beforeNext').removeClass("d-none");
     $('#inputJenisSPJ').on('change', function(){
       var jenis = $(this).val();
+      getSaldoPerJenis(jenis);
       console.log(jenis)
       if (jenis !='') {
         getNoSPJ(jenis);
@@ -96,6 +97,7 @@
         var jenisSPJ = '';
         var tglSekarang = '<?=date("Y-m-d")?>';
         var inputTglSPJ = $('#inputTglSPJ').val();
+        var inputSaldoHidden = $('#inputSaldoHidden').val();
         if (inputJenisSPJ == '1') {
           jenisSPJ = 'Delivery';
         }else{
@@ -108,6 +110,8 @@
           Swal.fire("Pilih Tanggal SPJ nya terlebih Dahulu!","","warning")
         }else if(inputNoSPJ == ''){
           Swal.fire("No SPJ Gagal Di Buat!","Mohon Untuk Reload Terlebih Dahulu Pada Halaman Ini","warning");
+        }else if(parseInt(inputSaldoHidden)<1){
+          Swal.fire("Saldo Masih 0!","Hubungi PIC Terkait","warning")
         }else{
           if (tglSekarang>inputTglSPJ) {
             Swal.fire("Tanggal SPJ Hanya Diperbolehkan Diisi Minimal Tanggal Hari Ini!","","warning")
@@ -134,7 +138,12 @@
                 $('input[id="inputJenisSPJ"]').val(jenisSPJ);
                 // $('#btnSaveSPJ').removeClass("d-none");
                 $('#inputTglSPJ').attr("readonly","readonly")
-                $('#inputTglBerangkat').val(inputTglSPJ);
+                var jenisData = '<?=$this->uri->segment("2")?>';
+                if (jenisData != 'form_temporary') {
+                  $('#inputTglBerangkat').val(inputTglSPJ);
+                  $('#inputTglPulang').val(inputTglSPJ);  
+                }
+                
 
               },
               complete: function(data){
@@ -166,22 +175,11 @@
       }
     });
     $('#pilihKendaraan').on('click', function(){
-      var inputKendaraan = $('#inputKendaraan').val();
-      var inputJenisKendaraan = $('#inputJenisKendaraan').val();
-      $.ajax({
-        type:'get',
-        data:{inputKendaraan, inputJenisKendaraan},
-        url:url+'/Pengajuan/pilihKendaraan',
-        cache: false,
-        async: true,
-        success: function(data){
-          $('#modal-kendaraan').modal("show");
-          $('#getKendaraan').html(data);
-        },
-        error: function(data){
-          Swal.fire("Gagal Mengambil Data!","Hubungi Staff IT","error");
-        }
-      });
+      searchKendaraan();
+      $('#modal-kendaraan').modal("show");
+    })
+    $('#searchKendaraan').on('keyup', function(){
+      searchKendaraan();
     })
     $('#getKendaraan').on('click', '.pilihKendaraan', function(){
       var tnkb = $(this).attr('tnkb');
@@ -471,7 +469,7 @@
 
     $('#btnSaveSPJ').on('click', function(){
       var inputNoSPJ = $('#inputNoSPJ').val();
-
+      var status = $(this).attr("status");
       $.ajax({
         type: 'get',
         data:{inputNoSPJ},
@@ -487,7 +485,7 @@
           }else if(data.JML_PIC <= 0){
             Swal.fire("Data PIC Masih Kosong!","Mohon Untuk Menambahkan Data PIC","warning")
           }else{
-            cekAdaDriver();
+            cekAdaDriver(status);
           }
         },
         error: function(data){
@@ -737,7 +735,7 @@
       if (i == 0) {
         query += "WHERE ";
       }
-      query +=" nama_kabkota = '"+data[i]+"' ";
+      query +=" nama_kabkota LIKE '%"+data[i]+"%' ";
       if (i<end) {
         query+= " OR ";
       }
@@ -828,13 +826,14 @@
     var jabatan = $('#inputJenisPIC').val();
     var inputJenisSPJ = $('#inputJenisSPJ').val();
     var inputNoSPJ = $('#inputNoSPJ').val();
+    var inputTglSPJ = $('#inputTglSPJ').val();
     if (inputSubjek == '' && jabatan == '') {
 
     }else{
       $.ajax({
         type:'get',
         dataType:'json',
-        data:{inputSubjek, jabatan, inputJenisSPJ, inputNoSPJ},
+        data:{inputSubjek, jabatan, inputJenisSPJ, inputNoSPJ, inputTglSPJ},
         url:url+'/pengajuan/getNIKPic',
         cache: false,
         async: true,
@@ -914,13 +913,15 @@
           }
       });
 
-      document.querySelectorAll("#inputKendaraan option").forEach(opt => {
-          if (opt.value == "Motor Operasional" || opt.value == 'Non Delivery') {
-              opt.disabled = true;
-          }else{
-            opt.disabled = false;
-          }
-      });  
+      // document.querySelectorAll("#inputKendaraan option").forEach(opt => {
+      //     if (opt.value == "Motor Operasional" || opt.value == 'Non Delivery') {
+      //         opt.disabled = true;
+      //     }else{
+      //       opt.disabled = false;
+      //     }
+      // });  
+      $("select#inputKendaraan option[value='Delivery']").prop("selected","selected");
+      $("select#inputKendaraan").trigger("change") 
 
     }else{
       document.querySelectorAll("#inputJenisPIC option").forEach(opt => {
@@ -931,13 +932,13 @@
           }
       });
 
-      document.querySelectorAll("#inputKendaraan option").forEach(opt => {
-          if (opt.value == "Delivery") {
-              opt.disabled = true;
-          }else{
-            opt.disabled = false;
-          }
-      });
+      // document.querySelectorAll("#inputKendaraan option").forEach(opt => {
+      //     if (opt.value == "Delivery") {
+      //         opt.disabled = true;
+      //     }else{
+      //       opt.disabled = false;
+      //     }
+      // });
 
       $("select#inputKendaraan option[value='Non Delivery']").prop("selected","selected");
       $("select#inputKendaraan").trigger("change")  
@@ -1176,7 +1177,7 @@
     });
   }
 
-  function saveSPJ() {
+  function saveSPJ(status) {
     var inputNoSPJ = $('#inputNoSPJ').val();
     var inputTglSPJ = $('#inputTglSPJ').val();
     var inputJenisKendaraan = $('#inputJenisKendaraan').val();
@@ -1248,7 +1249,8 @@
             inputJamPulang,
             inputNoVoucher,
             inputJenisSPJ,
-            inputAbnormal
+            inputAbnormal,
+            status
           },
         dataType: 'json',
         url:url+'/pengajuan/saveSPJ',
@@ -1256,6 +1258,7 @@
         cache: false,
         beforeSend: function(data){
           $('.preloader-no-bg').show();
+          $('#btnSaveSPJ').attr("disabled","disabled");
         },
         success: function(data){
           berhasil();
@@ -1263,6 +1266,7 @@
         },
         complete: function(data){
           $('.preloader-no-bg').fadeOut('slow');
+          $('#btnSaveSPJ').removeAttr("disabled","disabled");
         },
         error: function(darta){
           gagal();
@@ -1272,7 +1276,7 @@
 
   }
 
-  function cekAdaDriver() {
+  function cekAdaDriver(status) {
     var inputNoSPJ = $('#inputNoSPJ').val();
     $.ajax({
       type:'get',
@@ -1283,7 +1287,7 @@
       cache: false,
       success: function(data){
         if (parseInt(data)>0) {
-          cekSaldo();
+          cekSaldo(status);
         } else {
           Swal.fire("Tidak Terdapat Driver Pada SPJ Ini!","PIC yang di daftarkan Tidak ada yang memiliki otoritas Driver!","warning")
         }
@@ -1293,7 +1297,7 @@
       }
     })
   }
-  function cekSaldo() {
+  function cekSaldo(status) {
     var inputJenisSPJ = $('#inputJenisSPJ').val();
     var inputMediaBBM = $('#inputMediaBBM').val();
     var inputMediaTOL = $('#inputMediaTol').val();
@@ -1318,7 +1322,7 @@
         if (kasbonSPJ >= data.saldoSPJ) {
           Swal.fire("Kasbon SPJ Melebihi Jumlah Saldo Sub Kas!","Hubungi PIC Terkait","warning")
         }else{
-          saveSPJ();
+          saveSPJ(status);
         }
       },
       error: function(data){
@@ -1578,14 +1582,14 @@
     var inputJenisSPJ = $('#inputJenisSPJ').val();
     console.log(inputJenisSPJ)
     if (inputJenisSPJ == '1') {
-      $('#inputKota').attr("disabled","disabled");
-      // $('#btnCekProgramSerlok').attr("disabled","disabled");
+      // $('#inputKota').attr("disabled","disabled");
+      // // $('#btnCekProgramSerlok').attr("disabled","disabled");
       $('#btnCekProgramSerlok').removeAttr("disabled","disabled");
-      $('#tambahLokasi').attr("disabled","disabled");
+      // $('#tambahLokasi').attr("disabled","disabled");
     } else {
       $('#inputKota').removeAttr("disabled","disabled");
-      $('#btnCekProgramSerlok').attr("disabled","disabled");
-      // $('#btnCekProgramSerlok').removeAttr("disabled","disabled");
+      // $('#btnCekProgramSerlok').attr("disabled","disabled");
+      $('#btnCekProgramSerlok').removeAttr("disabled","disabled");
       $('#tambahLokasi').removeAttr("disabled","disabled"); 
     }
     
@@ -1604,6 +1608,47 @@
     }
   }
 
+  function getSaldoPerJenis(jenis) {
+    $.ajax({
+      type:'get',
+      data:{jenis},
+      url:url+'/pengajuan/getSaldoPerJenis',
+      cache: false,
+      async: true,
+      success: function(data){
+        if (jenis =='') {
+          $('#getSaldo').html(""); 
+        }else{
+          $('#getSaldo').html(data);
+        }
+        
+        console.log($('#inputSaldoHidden').val());
+      },
+      error: function(data){
+
+      }
+    })
+  }
+  function searchKendaraan() {
+    var inputKendaraan = $('#inputKendaraan').val();
+    var inputJenisKendaraan = $('#inputJenisKendaraan').val();
+    var inputTglSPJ = $('#inputTglSPJ').val();
+    var searchKendaraan = $('#searchKendaraan').val();
+    $.ajax({
+      type:'get',
+      data:{inputKendaraan, inputJenisKendaraan, inputTglSPJ, searchKendaraan},
+      url:url+'/Pengajuan/pilihKendaraan',
+      cache: false,
+      async: true,
+      success: function(data){
+        $('#getKendaraan').html(data);
+
+      },
+      error: function(data){
+        Swal.fire("Gagal Mengambil Data!","Hubungi Staff IT","error");
+      }
+    });
+  }
   function disVoucher() {
     // var inputJenisSPJ = $('#inputJenisSPJ').val();
     // if (inputJenisSPJ == 2) {

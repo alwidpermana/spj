@@ -32,7 +32,16 @@ class Cash_Flow extends CI_Controller {
 	{
 		$data['page'] = 'Buku Kas Internal';
 		$data['side'] = 'cash_flow-buku';
-		$this->load->view("cash_flow/buku_kas/index", $data);
+		$this->load->view("cash_flow/buku_kas/index2", $data);
+	}
+	public function getSaldoBukuKasInternal()
+	{
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis('Modal Awal','KAS INDUK');
+		$saldo = 0;
+		foreach ($getSaldo->result() as $key) {
+			$saldo = $key->SALDO;
+		}
+		echo json_encode($saldo);
 	}
 	public function getTabelKas()
 	{
@@ -42,6 +51,15 @@ class Cash_Flow extends CI_Controller {
 		$textBulan = $this->input->get("filBulan") == ''?'':date('F', strtotime($tglFilter));
 		$data['data'] = $this->M_Cash_Flow->getDataBukuKasInternal($filBulan, $filTahun, $textBulan)->result();
 		$this->load->view("cash_flow/buku_kas/tabel_kas", $data);
+	}
+	public function getTabelPengajuanKasInternal()
+	{
+		$filBulan = $this->input->get("filBulan") == '' ? '1':$this->input->get("filBulan");
+		$filTahun = $this->input->get("filTahun") == '' ? date('Y'):$this->input->get("filTahun");
+		$tglFilter = '01-'.$filBulan.'-'.$filTahun;
+		$bulan = $this->input->get("filBulan") == ''?'':date('F', strtotime($tglFilter));
+		$data['data'] = $this->M_Cash_Flow->getTabelPengajuanKasInternal($bulan, $filTahun)->result();
+		$this->load->view("cash_flow/buku_kas/tabel_pengajuan_kas", $data);
 	}
 	public function getTabelModalAwal()
 	{
@@ -77,6 +95,17 @@ class Cash_Flow extends CI_Controller {
 			$this->M_Cash_Flow->saveKasInduk($inputTujuan, 'DEBIT',$inputBiaya,'KAS INTERNAL', $lastID);
 		}
 		
+		echo json_encode($data);
+	}
+	public function saveBukuKas2()
+	{
+		$inputTransaksi = $this->input->post("inputTransaksi");
+		$inputTujuan = $this->input->post("inputTujuan");
+		$inputBiaya = $this->input->post("inputBiaya");
+		$fieldTujuan = $inputTransaksi == 'Modal Awal' ? 'DARI' : 'KE';
+		$fieldBiaya = $inputTransaksi == 'Modal Awal' ? 'DEBIT' : 'CREDIT';
+		$inputIDPengajuan = $this->input->post("inputIDPengajuan") == '' ? 0 : $this->input->post("inputIDPengajuan");
+		$data = $this->M_Cash_Flow->saveBukuKas($inputTransaksi, $inputTujuan, $inputBiaya, $fieldTujuan, $fieldBiaya, $inputIDPengajuan);
 		echo json_encode($data);
 	}
 	public function cekSaldoAwal()
@@ -178,6 +207,19 @@ class Cash_Flow extends CI_Controller {
 		// $data = array('modal awal'=>'modal awal','totalSaldo' =>$totalSaldo ,'tujuan pertama'=>$inputTujuanAwal,'total Saldo Tujuan Pertama'=>$totalSaldo2, 'tujuan terakhir' => $inputTujuan, 'totalSaldoAkhir'=>$totalSaldo3 );
 		echo json_encode($data);
 	}
+	public function updateBukuKasPengajuan()
+	{
+		$inputTransaksi = $this->input->post("inputTransaksi");
+		$inputTujuan = $this->input->post("inputTujuan");
+		$inputBiaya = $this->input->post("inputBiaya");
+		$fieldTujuan = $inputTransaksi == 'Modal Awal' ? 'DARI' : 'KE';
+		$fieldBiaya = $inputTransaksi == 'Modal Awal' ? 'DEBIT' : 'CREDIT';
+		$inputTujuanAwal = $this->input->post("inputTujuanAwal");
+		$inputBiayaAwal = $this->input->post("inputBiayaAwal");
+		$inputID = $this->input->post("inputID");
+		$data = $this->M_Cash_Flow->updateBukuKas($inputTransaksi, $inputTujuan, $inputBiaya, $fieldTujuan, $fieldBiaya, $inputID);
+		echo json_encode($data);
+	}
 	public function hapusKas()
 	{
 		$id = $this->input->post("id");
@@ -200,6 +242,44 @@ class Cash_Flow extends CI_Controller {
 			$this->M_Cash_Flow->hapusKasInduk("KAS INTERNAL", $id);
 		}
 		// $data= array('biaya' =>$biaya ,'totalSaldo1'=>$totalSaldo, 'totalSaldo2'=>$totalSaldo2, 'tujuan'=>$tujuan );
+		echo json_encode($data);
+	}
+	public function hapusKasPengajuan()
+	{
+		$id = $this->input->post("id");
+		$transaksi = $this->input->post("transaksi");
+		$tujuan = $transaksi == 'Modal Awal'?'Modal Awal':$this->input->post("tujuan");
+		$biaya = $this->input->post("biaya");
+		$data = $this->M_Cash_Flow->hapusKas($id);
+		echo json_encode($data);
+	}
+	public function approvePengajuanKasInternal()
+	{
+		$id = $this->input->post("id");
+		$inputTransaksi = $this->input->post("inputTransaksi");
+		$inputTujuan = $this->input->post("inputTujuan");
+		$inputBiaya = $this->input->post("inputBiaya");
+		$fieldTujuan = $inputTransaksi == 'Modal Awal' ? 'DARI' : 'KE';
+		$fieldBiaya = $inputTransaksi == 'Modal Awal' ? 'DEBIT' : 'CREDIT';
+		$inputIDPengajuan = $this->input->post("inputIDPengajuan") == '' ? 0 : $this->input->post("inputIDPengajuan");
+		$saldo = $this->input->post("saldo");
+		$totalSaldo = $inputTransaksi == 'Modal Awal' ? $saldo + $inputBiaya : $saldo - $inputBiaya;
+		$data = $this->M_Cash_Flow->approvePengajuanKasInternal($id);
+		$data = $this->M_Cash_Flow->updateSaldo('Modal Awal',$totalSaldo,'KAS INDUK');
+		if ($inputTransaksi != 'Modal Awal') {
+			$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($inputTujuan,'KAS INDUK')->result();
+			$totalSaldo2 = 0;
+			foreach ($getSaldo as $sld) {
+				$totalSaldo2 = $inputBiaya + $sld->SALDO;
+			}
+			$data = $this->M_Cash_Flow->updateSaldo($inputTujuan,$totalSaldo2,'KAS INDUK');
+			$getLastID = $this->db->query("SELECT TOP 1 ID FROM SPJ_KAS ORDER BY ID DESC");
+			$lastID = 0;
+			foreach ($getLastID->result() as $last) {
+				$lastID = $last->ID; 
+			}
+			$this->M_Cash_Flow->saveKasInduk($inputTujuan, 'DEBIT',$inputBiaya,'KAS INTERNAL', $lastID);
+		}
 		echo json_encode($data);
 	}
 	public function cancelPengajuan()

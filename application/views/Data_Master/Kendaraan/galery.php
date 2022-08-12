@@ -53,12 +53,13 @@
             </button>
           </div>
           <form id="submitFoto">
+            <input type="hidden" name="inputNoTNKB" value="<?=$this->uri->segment("3")?>">
             <div class="modal-body">
               <div class="row">
                 <div class="col-md-6">
                   <div class="row">
                     <div class="col-md-12">
-                      <select class="select2 form-control cekKosong select2-orange" data-dropdown-css-class="select2-orange" id="inputJenis">
+                      <select class="select2 form-control cekKosong select2-orange" data-dropdown-css-class="select2-orange" id="inputJenis" name="inputJenis">
                         <option value="Depan">Depan</option>
                         <option value="Belakang">Belakang</option>
                         <option value="Kiri">Kiri</option>
@@ -71,8 +72,8 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="custom-file">
-                        <input type="file" class="custom-file-input form-control-sm cekKosong" id="fileKTP" name="fileKTP" accept=".png, .jpg, .jpeg">
-                        <label class="custom-file-label" for="fileKTP">Choose file</label>
+                        <input type="file" class="custom-file-input form-control-sm cekKosong" id="inputFile" name="inputFile" accept=".png, .jpg, .jpeg">
+                        <label class="custom-file-label" for="inputFile">Choose file</label>
                       </div>
                     </div>
                   </div>
@@ -119,39 +120,13 @@
     getGambar();
     cekKosong()
     $('.preloader').fadeOut('slow');
-    $image_crop2 = $('#image_demo2').croppie({
-      enableExif: true,
-      viewport: {
-        width:320,
-        height:200,
-        type:'square' //circle
-      },
-      boundary:{
-        width:350,
-        height:300
-      }
-    });
 
     $('.cekKosong').on('change', function(){
       cekKosong();
     })
-
-    $('#fileKTP').on('change', function(){
-      var reader = new FileReader();
-      reader.onload = function (event) {
-        $image_crop2.croppie('bind', {
-          url: event.target.result
-        }).then(function(){
-          console.log('jQuery bind complete');
-        });
-      }
-      reader.readAsDataURL(this.files[0]);
-      $('#uploadImageFotoKartu').removeClass("d-none");
-      cekKosong();
-    });
     $('#submitFoto').submit(function(e){
       e.preventDefault();
-      var file = $('#fileKTP')[0];
+      var file = $('#inputFile')[0];
       var info_file = file.files[0];
       var nama = info_file.name;
       var size = info_file.size;
@@ -163,12 +138,34 @@
         }else if(type != 'application/pdf' && type != 'image/png' && type != 'image/jpeg' && type != 'image/jpg'){
           Swal.fire("Format File Tidak Valid","Masukan file dengan format .png, .jpg, atau .jpeg",'error')
         }else{
-          $image_crop2.croppie('result', {
-              type: 'canvas',
-              size: 'viewport'
-          }).then(function(response) {
-              uploadGambar(response)
-          });
+          // $image_crop2.croppie('result', {
+          //     type: 'canvas',
+          //     size: 'viewport'
+          // }).then(function(response) {
+          //     uploadGambar(response)
+          // });
+          var noTNBK = '<?=$this->uri->segment("3")?>';
+          var inputJenis = $('#inputJenis').val();
+          $.ajax({
+              url: url+"/Data_Master/uploadKendaraan",
+              type: 'POST',
+              dataType: 'json',
+              data:new FormData(this), //this is formData
+               processData:false,
+               contentType:false,
+               cache:false,
+               async:false,
+              success: function(data) {
+                  berhasil();
+                  $('#saveFoto').attr("disabled","disabled");
+                  $('#uploadImageFotoKartu').addClass("d-none");
+                  $('#modal-foto').modal("hide");
+                  getGambar();
+              },
+              error: function(data){
+                  gagal();
+              }
+          })
            
         }
     });
@@ -207,6 +204,26 @@
         }
       })
     });
+
+    $('#getGambar').on('click', '.btnAktif', function(){
+      var noTNBK = '<?=$this->uri->segment("3")?>';
+      var id = $(this).attr("data");
+      $.ajax({
+        type:'post',
+        dataType:'json',
+        data:{noTNBK, id},
+        url:url+'/Data_Master/updateStarKendaraan',
+        cache: false,
+        async: true,
+        success: function(data){
+          berhasil();
+          getGambar();
+        },
+        error: function(data){
+          gagal();
+        }
+      })
+    })
 
   })
   function cekKosong() {

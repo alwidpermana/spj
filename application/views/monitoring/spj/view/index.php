@@ -708,7 +708,10 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <?php foreach ($validasi as $vld): 
+                              <?php 
+                              $kmOut = 0 ;
+                              $kmIn = 0;
+                              foreach ($validasi as $vld): 
                                 $kmOut = $vld->KM_OUT;
                                 $kmIn = $vld->KM_IN;
                               ?>

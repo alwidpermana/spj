@@ -11,10 +11,15 @@
                 <button type="button" class="btn btn-tool toolKPS btnHapus" data="<?=$ganjil->ID_GK?>">
                   <i class="fas fa-trash-alt"></i>
                 </button>
+                <button type="button" class="btn btn-tool <?=$ganjil->STAR == 'Y'?'text-kps':'toolKPS'?> btnAktif" data="<?=$ganjil->ID_GK?>">
+                  <i class="fas fa-star"></i>
+                </button>
               </div>
             </div>
             <div class="card-body">
-              <img src="<?=base_url()?>assets/image/foto-kendaraan/<?=$ganjil->NAMA_FILE?>" class="img-thumbnail" alt="Kendaraan" width="100%">
+              <center>
+                <img src="<?=base_url()?>assets/image/foto-kendaraan/<?=$ganjil->NAMA_FILE?>" class="img-thumbnail" alt="Kendaraan" width="75%" height="75%">
+              </center>
 
             </div>
           </div>
@@ -37,10 +42,13 @@
                 <button type="button" class="btn btn-tool toolKPS btnHapus" data="<?=$genap->ID_GK?>">
                   <i class="fas fa-trash-alt"></i>
                 </button>
+                <button type="button" class="btn btn-tool <?=$genap->STAR == 'Y'?'text-kps':'toolKPS'?> btnAktif" data="<?=$genap->ID_GK?>">
+                  <i class="fas fa-star"></i>
+                </button>
               </div>
             </div>
             <div class="card-body">
-              <img src="<?=base_url()?>assets/image/foto-kendaraan/<?=$genap->NAMA_FILE?>" class="img-thumbnail" alt="Kendaraan" width="100%">
+              <center><img src="<?=base_url()?>assets/image/foto-kendaraan/<?=$genap->NAMA_FILE?>" class="img-thumbnail" alt="Kendaraan" width="75%" height="75%"></center>
             </div>
           </div>
         </div>

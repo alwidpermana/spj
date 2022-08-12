@@ -7,14 +7,25 @@
 		</tr>
 	</thead>
 	<tbody>
-		<?php foreach ($data as $key): ?>
+		<?php 
+		$i = 1;
+		$total=0;
+		foreach ($data as $key): ?>
 			<tr>
 				<td><?=date("Y-m-d", strtotime($key->TGL_INPUT))?></td>
 				<td><?=$key->TRANSAKSI?></td>
 				<td><?=$key->DEBIT==0?'':str_replace(',', '.', number_format($key->DEBIT))?></td>
 			</tr>
-		<?php endforeach ?>
+		<?php 
+		$total+=$key->DEBIT;
+		endforeach ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<th colspan="2" class="text-right">Total</th>
+			<th><?=str_replace(',', '.', number_format($total))?></th>
+		</tr>
+	</tfoot>
 </table>
 <script type="text/javascript">
 	$(document).ready(function(){

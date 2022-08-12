@@ -693,8 +693,8 @@ foreach ($data as $key): ?>
                           }
                         } else {
                           foreach ($validasi as $vld) {
-                            $kmOut = $vld->KM_OUT;
-                          }
+                              $kmOut = $vld->KM_OUT;
+                            }
                         }
 
                         if ($key->STATUS_PERJALANAN == 'IN') {
@@ -704,7 +704,7 @@ foreach ($data as $key): ?>
                         }
                       ?>
                       <center>
-                        <input type="number" id="inputKMOut" class="form-control form-control-sm" value="<?=$kmOut?>" readonly style="width: 75px;">
+                        <input type="number" id="inputKMOut" class="form-control form-control-sm" value="<?=$kmOut?>" style="width: 75px;">
                       </center>
                     </td>
                   </tr>
@@ -767,6 +767,34 @@ foreach ($data as $key): ?>
               </table>
             </div>
           </div>
+          <div class="col-md-4">
+            <div class="row">
+              <div class="col-md-12">
+                <?php if (count($history)>0): ?>
+                  <table class="table table-hover table-striped table-bordered" width="100%">
+                    <thead>
+                      <tr>
+                        <th>Status</th>
+                        <th>Tanggal</th>
+                        <th>Jam</th>
+                        <th>KM</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php foreach ($history as $hs): ?>
+                        <tr>
+                          <td><?=$hs->STATUS?></td>
+                          <td><?=date("d F Y", strtotime($hs->TGL_INPUT))?></td>
+                          <td><?=date("H:i", strtotime($hs->TGL_INPUT))?></td>
+                          <td><?=$hs->KM?></td>
+                        </tr>
+                      <?php endforeach ?>
+                    </tbody>
+                  </table>
+                <?php endif ?>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -774,15 +802,30 @@ foreach ($data as $key): ?>
 </div>
 <br>
 <div class="row">
+  <input type="hidden" id="inputGroupTujuan" value="<?=$key->GROUP_ID?>">
   <div class="col-md-8 offset-md-2">
-    <?php if ($key->STATUS_PERJALANAN == null): ?>
-      <button type="button" class="btn bg-orange btn-kps btn-block saveCheckOut ladda-button" data-style="zoom-in" id="btnCheckOut">
-        Check Out
-      </button>
-    <?php elseif($key->STATUS_PERJALANAN == 'OUT'): ?>
-      <button type="button" class="btn bg-orange btn-kps btn-block saveCheckIn ladda-button" data-style="zoom-in" id="btnCheckIn">
-        Check In
-      </button>
+    <?php if ($key->GROUP_ID == '4'): ?>
+      <?php if ($key->STATUS_SPJ == 'OPEN'): ?>
+        <?php if ($key->STATUS_PERJALANAN == null OR $key->STATUS_PERJALANAN == 'IN'): ?>
+          <button type="button" class="btn bg-orange btn-kps btn-block saveCheckOut ladda-button" data-style="zoom-in" id="btnCheckOut">
+            Check Out
+          </button>
+        <?php elseif($key->STATUS_PERJALANAN == 'OUT'): ?>
+          <button type="button" class="btn bg-orange btn-kps btn-block saveCheckIn ladda-button" data-style="zoom-in" id="btnCheckIn">
+            Check In
+          </button>
+        <?php endif ?>
+      <?php endif ?>
+    <?php else: ?>
+      <?php if ($key->STATUS_PERJALANAN == null): ?>
+        <button type="button" class="btn bg-orange btn-kps btn-block saveCheckOut ladda-button" data-style="zoom-in" id="btnCheckOut">
+          Check Out
+        </button>
+      <?php elseif($key->STATUS_PERJALANAN == 'OUT'): ?>
+        <button type="button" class="btn bg-orange btn-kps btn-block saveCheckIn ladda-button" data-style="zoom-in" id="btnCheckIn">
+          Check In
+        </button>
+      <?php endif ?>
     <?php endif ?>
   </div>
 </div>
@@ -865,6 +908,7 @@ foreach ($data as $key): ?>
         var inputNoSPJ = $('#inputNoSPJ').val();
         var jenis = 'Out';
         var inputVerifCountPIC = $('#inputVerifCountPIC').val()
+        
         $.ajax({
           type:'get',
           data:{inputNoSPJ, jenis},
@@ -880,7 +924,7 @@ foreach ($data as $key): ?>
               saveValidasiOut()
               
             } else {
-              Swal.fire("Verifikasi PIC Terlebih Dahulu","","warning")
+              Swal.fire("Verifikasi PIC Harus OK Terlebih Dahulu","Jika Data Tidak Sesuai, Hubungi PIC Pembuat SPJ","warning")
             }
             // if (parseInt(data) == 0) {
             //   // if (jenis == 'Out') {
@@ -998,15 +1042,20 @@ foreach ($data as $key): ?>
     var inputVerifikasiKendaraan = $('#inputVerifKendaraan').val();
     var inputKeteranganKendaraan = $('#inputKeteranganKendaraan').val();
     var inputKMOut = $('#inputKMOut').val();
+    var inputGroupTujuan = $('#inputGroupTujuan').val();
+    var urlTujuan = inputGroupTujuan == '4'?'saveValidasiOutLokal' :'saveValidasiOut';
+    var inputKMIn = $('#inputKMIn').val();
     if (inputVerifikasiKendaraan == '') {
       Swal.fire("Verifikasi Kendaraan Terlebih Dahulu!","","warning")
-    } else {
+    }else if(inputVerifikasiKendaraan == 'NG'){
+      Swal.fire("Verifikasi Kendaraan Harus OK Sebelum Check Out!","Jika Data Tidak Sesuai, Hubungi PIC Pembuat SPJ","warning");
+    }else {
       $('.saveCheckOut').attr("disabled","disabled");
       $.ajax({
         type:'post',
-        data:{inputNoSPJ, inputVerifikasiKendaraan, inputKeteranganKendaraan, inputKMOut},
+        data:{inputNoSPJ, inputVerifikasiKendaraan, inputKeteranganKendaraan, inputKMOut, inputKMIn},
         dataType: 'json',
-        url: url+'/Implementasi/saveValidasiOut',
+        url: url+'/Implementasi/'+urlTujuan,
         cache: false,
         async: true,
         success: function(data){
@@ -1027,6 +1076,7 @@ foreach ($data as $key): ?>
     var inputKMIn = $('#inputKMIn').val();
     var inputNoTNKB = $('#inputNoTNKB').val();
     var inputKMOut = $('#inputKMOut').val();
+    var inputGroupTujuan = $('#inputGroupTujuan').val();
     if (inputVerifikasiKendaraan == '') {
       Swal.fire("Verifikasi Kendaraan Terlebih Dahulu!","","warning")
     }else if(parseInt(inputKMOut) > parseInt(inputKMIn)){
@@ -1035,7 +1085,7 @@ foreach ($data as $key): ?>
       $('.saveCheckOut').attr("disabled","disabled");
       $.ajax({
         type:'post',
-        data:{inputNoSPJ, inputVerifikasiKendaraan, inputKeteranganKendaraan, inputKMIn, inputNoTNKB},
+        data:{inputNoSPJ, inputVerifikasiKendaraan, inputKeteranganKendaraan, inputKMIn, inputNoTNKB, inputGroupTujuan},
         dataType: 'json',
         url: url+'/Implementasi/saveValidasiIn',
         cache: false,

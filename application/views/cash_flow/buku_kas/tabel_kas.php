@@ -4,7 +4,7 @@
 <table class="table table-hover table-striped table-bordered" id="datatable" width="100%" style="font-size: 9px;">
 	<thead class="text-center bg-gray">
 		<tr>
-			<th></th>
+			<!-- <th></th> -->
 			<th>Tanggal</th>
 			<th>Transaksi</th>
 			<th>Dari</th>
@@ -20,7 +20,7 @@
 		$tglHariIni = date("Y-m-d");
 		foreach ($data as $key): ?>
 			<tr>
-				<td class="text-center">
+				<!-- <td class="text-center">
 					<?php if ($key->PENGAJUAN_SALDO_ID == 0): ?>
 					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown" <?=$jmlData == $i && $tglHariIni == date("Y-m-d", strtotime($key->TGL_KAS))  ?'':'disabled'?>>
                       <span class="sr-only">Toggle Dropdown</span>
@@ -48,7 +48,7 @@
                 			transaksi="<?=$key->TRANSAKSI?>"
                 			biaya="<?=$key->TRANSAKSI=='Modal Awal'?$key->DEBIT:$key->CREDIT?>">Hapus</a>
                     </div>
-				</td>
+				</td> -->
 				<td><?=date("d F Y", strtotime($key->TGL_KAS))?></td>
 				<td><?=$key->TRANSAKSI?></td>
 				<td><?=$key->DARI?></td>

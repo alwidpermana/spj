@@ -1,3 +1,6 @@
+<?php
+  date_default_timezone_set('Asia/Jakarta');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -241,8 +244,15 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div id="getQrCode"></div>
+                </div>
+                <div class="col-md-2">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div id="getSaldo"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -766,12 +776,12 @@
                                   <tr>
                                     <td class="font-weight-bold">Keberangkatan</td>
                                     <td><input type="date" id="inputTglBerangkat" class="form-control saveRencana"></td>
-                                    <td><input type="time" id="inputJamBerangkat" class="form-control saveRencana"></td>
+                                    <td><input type="time" id="inputJamBerangkat" class="form-control saveRencana" value="<?=date('H:i')?>"></td>
                                   </tr>
                                   <tr>
                                     <td class="font-weight-bold">Kepulangan</td>
                                     <td><input type="date" id="inputTglPulang" class="form-control saveRencana"></td>
-                                    <td><input type="time" id="inputJamPulang" class="form-control saveRencana"></td>
+                                    <td><input type="time" id="inputJamPulang" class="form-control saveRencana" value="<?=date('H:i')?>"></td>
                                   </tr>
                                 </tbody>
                               </table>
@@ -804,7 +814,7 @@
                           <div class="row">
                             <div class="col-md-12">
                               <div class="d-flex justify-content-center">
-                                <button type="button" id="btnSaveSPJ" class="btn bg-orange btn-kps">Save Data</button>
+                                <button type="button" id="btnSaveSPJ" class="btn bg-orange btn-kps" status="NEW">Save Data</button>
                               </div>
                             </div>
                           </div>
@@ -830,6 +840,20 @@
       <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content">
           <div class="modal-body">
+            <div class="row">
+              <div class="col-md-2"></div>
+              <div class="col-md-8">
+                <form id="search">
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <span class="fa fa-search form-control-icon"></span>
+                    <input type="search" class="form-control form-control-search" id="searchKendaraan" placeholder="Cari Berdasarkan No SPJ">
+                  </div>
+                </form>
+              </div>
+            </div>
+            <br>
+            <br>
             <div id="getKendaraan"></div>
           </div>
         </div>
@@ -844,8 +868,7 @@
                 <div class="form-group">
                   <label>Objek</label>
                   <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputObjek">
-                    <option value="">Pilih Objek</option>
-                    <option value="Customer">Customer</option>
+                    <option value="Customer" selected>Customer</option>
                     <option value="Supplier">Supplier</option>
                     <option value="Rekanan">Rekanan</option>
                     <option value="Lainnya">Lainnya...</option>

@@ -50,14 +50,14 @@
           </div>
           <div class="card">
             <div class="card-body">
-              <div class="row">
+              <!-- <div class="row">
                 <div class="col-md-2">
                   <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="btnTambah">
                     <i class="fas fa-plus"></i>&nbsp; Voucher BBM
                   </button>
                 </div>
-              </div>
-              <br>
+              </div> -->
+              <!-- <br> -->
               <div class="row">
                 <div class="col-md-12">
                   <div id="getTabel"></div>

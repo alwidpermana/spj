@@ -86,6 +86,7 @@
                         <th colspan="2">Rencana Pulang</th>
                         <th colspan="2">Aktual Pulang</th>
                         <th colspan="3">KM</th>
+                        <th rowspan="2">Voucher BBM</th>
                         <th colspan="4">Konsumsi BBM</th>
                         <th colspan="2">GAP BBM</th>
                         <th rowspan="2">Status</th>
@@ -259,6 +260,7 @@
                           <td><?=str_replace(',', '.', number_format($key->KM_OUT, 0))?></td>
                           <td><?=str_replace(',', '.', number_format($key->KM_IN, 0))?></td>
                           <td><?=str_replace(',', '.', number_format($key->KM_IN-$key->KM_OUT, 0))?></td>
+                          <td><?=$key->VOUCHER_BBM?></td>
                           <td></td>
                           <td></td>
                           <td></td>

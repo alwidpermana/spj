@@ -3,6 +3,7 @@
 		<tr class="bg-gray">
 			<td rowspan="2"></td>
 			<td rowspan="2">No</td>
+			<td rowspan="2">Status</td>
 			<td rowspan="2">Tanggal Input</td>
 			<td rowspan="2">Rekanan</td>
 			<td rowspan="2">NIK</td>
@@ -12,7 +13,6 @@
 			<td rowspan="2">jabatan</td>
 			<td colspan="5">Otoritas</td>
 			<td colspan="3">SIM</td>
-			<td rowspan="2">Status</td>
 			<td rowspan="2">Foto</td>
 		</tr>
 		<tr class="bg-gray">
@@ -37,6 +37,13 @@
 					</a>
 				</td>
 				<td><?=$i++?></td>
+				<td>
+					<?php if ($key->TGL_INPUT == null): ?>
+						<span class="badge bg-kps">No Data</span>
+					<?php else: ?>
+						<span class="badge <?=$key->STATUS_DATA == 'SAVED'?'bg-success':'bg-danger'?>"><?=$key->STATUS_DATA == 'SAVED'?'Tersimpan':'Belum di simpan'?></span>
+					<?php endif ?>
+				</td>
 				<td><?=$key->TGL_INPUT?></td>
 				<td><?=$key->REKANAN?></td>
 				<td><?=$key->nik?></td>
@@ -52,7 +59,6 @@
 				<td><?=$key->NO_SIM?></td>
 				<td><?=$key->BERLAKU_TERBIT?></td>
 				<td><?=$key->BERLAKU_AKHIR?></td>
-				<td><?=$key->STATUS_VERIF?></td>
 				<td>
 					<?php if ($key->FOTO_WAJAH != null || $key->FOTO_WAJAH != ''): ?>
 						<a href="javascript:;" data="<?=$key->FOTO_WAJAH?>" class="getGambar">

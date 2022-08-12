@@ -1,4 +1,4 @@
-<table class="table table-hover table-bordered table-striped" id="datatable"  width="100%" style="font-size: 9px">
+<table class="table table-hover table-bordered table-striped" id="datatable"  width="100%" style="font-size: 11px">
 	<thead class="text-center bg-gray">
 		<tr class="bg-gray">
 			<th rowspan="2">No</th>
@@ -44,13 +44,13 @@
 								$start = date_create($keberangkatan);
 								$end = date_create($kepulangan);
 								$gap = date_diff($start, $end);
-
+// '<a href="'.base_url().'monitoring/view_spj/'.$t->NO_SPJ.'" class="btn text-dark>'.$t->NO_SPJ.'</a>'
 								$noSPJ .= '<li style="padding-top: 5px">';
-								$noSPJ.=$t->NO_SPJ;
+								$noSPJ.='<a href="'.base_url().'monitoring/view_spj/'.$t->ID_SPJ.'" class="text-dark" style="font-size:12px">'.$t->NO_SPJ.'</a>';
 								$noSPJ .="<br>";
-								$noSPJ .=date("H:i", strtotime($t->KEBERANGKATAN)).' - '.date("H:i", strtotime($t->KEPULANGAN));
+								$noSPJ .=date("H:i", strtotime($t->KEBERANGKATAN)).'&nbsp;-&nbsp;'.date("H:i", strtotime($t->KEPULANGAN));
 								$noSPJ .="<br>";
-								$noSPJ .=' ('.$gap->h.' Jam '.$gap->i.' Menit)';
+								$noSPJ .='&nbsp;('.$gap->h.'&nbsp;Jam&nbsp;'.$gap->i.'&nbsp;Menit)';
 								
 							}
 						}

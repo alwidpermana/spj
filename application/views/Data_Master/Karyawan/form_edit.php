@@ -145,11 +145,12 @@
                     <label class="text-left labJudul">Subjek</label>
                   </div>
                   <div class="col-md-4">
-                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputSubjek">
+                    <input type="text" id="inputSubjek" class="form-control form-control-sm" readonly value="<?=$this->uri->segment("4")=='rental'?'Rental':'Internal'?>">
+                    <!-- <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputSubjek">
                       <option value="">Pilih Subjek</option>
                       <option value="Internal" <?=$key->SUBJEK == 'Internal'?'selected':''?>>Internal</option>
                       <option value="Rental" <?=$key->SUBJEK == 'Rental'?'selected':''?>>Rental</option>
-                    </select>
+                    </select> -->
                   </div>
                 </div>
                 <br>
@@ -211,10 +212,9 @@
                             type="checkbox" 
                             id="inputUangMakan" 
                             class="saveOtoritas" 
-                            field="OTORITAS_UANG_MAKAN"
-                            <?=$key->OTORITAS_UANG_MAKAN == 'Y'?'checked':''?>>
+                            field="OTORITAS_UANG_MAKAN" checked disabled>
                           <label for="inputUangMakan">
-                            Uang Makan <?=$key->OTORITAS_UANG_MAKAN?>
+                            Uang Makan
                           </label>
                         </div>
                       </div>
@@ -228,8 +228,7 @@
                             type="checkbox" 
                             id="inputUangSaku" 
                             class="saveOtoritas" 
-                            field="OTORITAS_UANG_SAKU"
-                            <?=$key->OTORITAS_UANG_SAKU == 'Y'?'checked':''?>>
+                            field="OTORITAS_UANG_SAKU" checked disabled>
                           <label for="inputUangSaku">
                             Uang Saku
                           </label>
@@ -237,7 +236,7 @@
                       </div>
                       </div>
                     </div>
-                    <div class="row">
+                    <!-- <div class="row">
                       <div class="col-md-12">
                         <div class="form-group clearfix">
                         <div class="icheck-orange icheck-kps d-inline">
@@ -254,7 +253,7 @@
                         </div>
                       </div>
                       </div>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
                 <br>
@@ -565,7 +564,7 @@
       var inputOtoritasPendamping = document.getElementById('inputOtoritasPendamping');
       var inputUangMakan = document.getElementById('inputUangMakan');
       var inputUangSaku = document.getElementById('inputUangSaku');
-      var inputAdj = document.getElementById('inputAdj');
+      // var inputAdj = document.getElementById('inputAdj');
       var inputSpjDlv = document.getElementById('inputSpjDlv');
       var inputSpjNdv = document.getElementById('inputSpjNdv');
       var inputSIM = $('#inputSIM').val();
@@ -580,7 +579,7 @@
       var isiUangSaku = inputUangSaku.checked == true ? 'Y' : 'N';
       var isiSpjDlv = inputSpjDlv.checked == true ? 'Y' : 'N';
       var isiSpjNdv = inputSpjNdv.checked == true ? 'Y' : 'N';
-      var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
+      // var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
       var isi = '';
       console.log(isiSpjDlv)
       if (isiDriver == 'Y' || isiPendamping == 'Y' || isiUangMakan == 'Y' || isiUangSaku == '' || isiAdj == '') {
@@ -685,13 +684,13 @@
       var isiPendamping = inputOtoritasPendamping.checked == true ? 'Y' : 'N';
       var isiUangMakan = inputUangMakan.checked == true ? 'Y' : 'N';
       var isiUangSaku = inputUangSaku.checked == true ? 'Y' : 'N';
-      var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
+      // var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
 
       var inputSubjek = $('#inputSubjek').val();
       $.ajax({
         type: 'post',
         dataType: 'json',
-        data:{nik, jenis, inputSubjek, isiDriver, isiPendamping, isiUangMakan, isiUangSaku, isiAdj},
+        data:{nik, jenis, inputSubjek, isiDriver, isiPendamping, isiUangMakan, isiUangSaku},
         url: url+'/Data_Master/saveDataOtoritasKaryawan2',
         cache: false,
         async: true,

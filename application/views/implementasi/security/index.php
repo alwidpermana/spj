@@ -66,6 +66,11 @@
           <br>
           <div class="row">
             <div class="col-md-12">
+              <center><h3><span id="keteranganSecurity" class="text-kps" style="font-size: 28px; font-weight: bold;"></span></h3></center>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
               <div id="getSPJ"></div>
             </div>
           </div>
@@ -130,19 +135,24 @@
           //   updateVerfikasiPICIn(scan)
           // }
           // var statusPerjalan = data.STATUS_PERJALANAN == null ? 'OUT':'IN';
-          var statusPerjalan = '';
-          if (data.STATUS_PERJALANAN == null) {
-            statusPerjalan = 'OUT';
-          }else if(data.STATUS_PERJALANAN == 'OUT'){
-            statusPerjalan = 'IN';
-          }else{
-            statusPerjalan = '-';
-          }
-          // console.log(data.STATUS_PERJALANAN);
-          // console.log(statusPerjalan)
+          if (data.STATUS_SPJ == 'CANCEL') {
+            Swal.fire("SPJ Sudah Di Cancel!","Tidak Bisa Scan Qr Code","warning")
+          } else {
+            var statusPerjalan = '';
+            if (data.STATUS_PERJALANAN == null) {
+              statusPerjalan = 'OUT';
+            }else if(data.STATUS_PERJALANAN == 'OUT'){
+              statusPerjalan = 'IN';
+            }else{
+              statusPerjalan = '-';
+            }
+            // console.log(data.STATUS_PERJALANAN);
+            // console.log(statusPerjalan)
 
-          var noSPJ = data.NO_SPJ;
-          verfikasiDataPICOutIn(scan, statusPerjalan, noSPJ)
+            var noSPJ = data.NO_SPJ;
+            verfikasiDataPICOutIn(scan, statusPerjalan, noSPJ)
+          }
+          
           
         }
         // if (data==0) {
@@ -222,6 +232,14 @@
         async: true,
         success: function(data){
           getSPJ(scan)
+          if (status == 'OUT') {
+            $('#keteranganSecurity').html("CHECK OUT KENDARAAN")
+          } else if(status == 'IN') {
+
+            $('#keteranganSecurity').html("CHECK IN KENDARAAN")
+          }else{
+            $('#keteranganSecurity').html("")
+          }
         },
         error: function(data){
 

@@ -21,22 +21,49 @@ class M_Cash_Flow extends CI_Model {
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
 
-		$sql = "INSERT INTO SPJ_KAS(TGL_INPUT, PIC_INPUT, TRANSAKSI, $fieldTujuan, $fieldBiaya, PENGAJUAN_SALDO_ID, STATUS_APPROVE, PIC_APPROVE, TGL_APPROVE) VALUES('$tanggal', '$user', '$inputTransaksi', '$inputTujuan', $inputBiaya, $inputIDPengajuan, 'APPROVED', 'KODE','$tanggal')";
+		$sql = "INSERT INTO SPJ_KAS(TGL_INPUT, PIC_INPUT, TRANSAKSI, $fieldTujuan, $fieldBiaya, PENGAJUAN_SALDO_ID) VALUES('$tanggal', '$user', '$inputTransaksi', '$inputTujuan', $inputBiaya, $inputIDPengajuan)";
 		return $this->db->query($sql);
 	}
 	public function getAllSaldo($jenis)
 	{
 		$sql = "SELECT
-					ID,
-					JENIS_SALDO,
-					REPLACE(JENIS_SALDO, 'Kasbon ', '') AS NAMA_SALDO,
-					JUMLAH,
-					JENIS_KAS
+					Q1.*,
+					RP AS RP_OUTSTANDING
 				FROM
-					SPJ_SALDO
-				WHERE
-					ID != 1 AND
-					JENIS_KAS LIKE '$jenis%'
+				(
+					SELECT
+						ID,
+						JENIS_SALDO,
+						REPLACE(JENIS_SALDO, 'Kasbon ', '') AS NAMA_SALDO,
+						JUMLAH,
+						JENIS_KAS
+					FROM
+						SPJ_SALDO
+					WHERE
+						ID != 1 AND
+						JENIS_KAS LIKE '$jenis'
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						CASE 
+							WHEN JENIS_KASBON = 'Kasbon BBM' THEN 'Voucher BBM'
+							WHEN JENIS_KASBON = 'Kasbon TOL' THEN 'TOL '+NAMA_JENIS
+							ELSE 'SPJ '+NAMA_JENIS
+						END AS JENIS_KASBON,
+						'SUB KAS' AS JENIS_KAS,
+						SUM(JUMLAH) AS RP
+					FROM
+						SPJ_PENGAJUAN_SALDO a
+					LEFT JOIN
+						SPJ_JENIS b
+					ON a.JENIS_ID = b.ID_JENIS
+					WHERE
+						STATUS_APPROVE = 'APPROVED' AND
+						STATUS_RECEIVE IS NULL
+					GROUP BY
+						JENIS_KASBON, NAMA_JENIS
+				)Q2 ON Q1.NAMA_SALDO = Q2.JENIS_KASBON AND Q1.JENIS_KAS = Q2.JENIS_KAS
 				ORDER BY ID ASC";
 		return $this->db->query($sql);
 	}
@@ -67,6 +94,52 @@ class M_Cash_Flow extends CI_Model {
 	public function getDataBukuKasInternal($filBulan, $filTahun, $bulan)
 	{
 		$sql = "Execute SPJ_monitoringBukuKasInternal $filBulan, $filTahun, '$bulan%'";
+		return $this->db->query($sql);
+	}
+	public function getTabelPengajuanKasInternal($bulan, $tahun)
+	{
+		$sql = "SELECT
+					ID,
+					TGL_INPUT,
+					PIC_INPUT,
+					TRANSAKSI,
+					CASE 
+						WHEN TRANSAKSI = 'Modal Awal' THEN DARI
+						ELSE KE
+					END AS DARI_KE,
+					CASE 
+						WHEN TRANSAKSI = 'Modal Awal' THEN DEBIT
+						ELSE CREDIT
+					END AS RP,
+					DEBIT,CREDIT,
+					DARI, KE,
+					PIC_APPROVE,
+					TGL_APPROVE,
+					STATUS_APPROVE,
+					b.namapeg AS NAMA_INPUT,
+					c.namapeg AS NAMA_APPROVE
+				FROM
+					[dbo].[SPJ_KAS] a
+				LEFT JOIN
+					dbhrm.dbo.tbPegawai b ON
+				a.PIC_INPUT = b.nik
+				LEFT JOIN
+					dbhrm.dbo.tbPegawai c ON
+				a.PIC_APPROVE = c.nik
+				WHERE
+					STATUS_APPROVE IS NULL AND
+					YEAR(TGL_INPUT) = '$tahun' AND
+					DATENAME(m, TGL_INPUT) LIKE '$bulan%'
+				ORDER BY
+					TGL_INPUT DESC, TGL_APPROVE ASC";
+		return $this->db->query($sql);
+	}
+	public function approvePengajuanKasInternal($id)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$sql = "UPDATE SPJ_KAS SET PIC_APPROVE = '$user', STATUS_APPROVE = 'APPROVED', TGL_APPROVE = '$tanggal' WHERE ID = $id";
 		return $this->db->query($sql);
 	}
 	public function getDataModalAwal($bulan, $tahun)
@@ -352,5 +425,26 @@ class M_Cash_Flow extends CI_Model {
 		$sql = "INSERT INTO SPJ_KAS_INDUK(JENIS_KASBON,DEBIT,CREDIT,TGL_INPUT,JENIS_FK,FK_ID)VALUES('$jenis',$jumlah, $jumlah, '$tanggal','PENGAJUAN SALDO',$id)";
 		$this->db->query("UPDATE SPJ_PENGAJUAN_SALDO SET PIC_APPROVE = '$user', TGL_APPROVE = '$tanggal', STATUS_APPROVE = 'APPROVED' WHERE ID=$id");
 		return $this->db->query($sql);
+	}
+	public function outstandingSaldoReceive()
+	{
+		$sql = "SELECT
+					CASE 
+						WHEN JENIS_KASBON = 'Kasbon BBM' THEN 'Voucher BBM'
+						WHEN JENIS_KASBON = 'Kasbon TOL' THEN 'TOL '+NAMA_JENIS
+						ELSE 'SPJ '+NAMA_JENIS
+					END AS JENIS_KASBON,
+					SUM(JUMLAH) AS RP
+				FROM
+					SPJ_PENGAJUAN_SALDO a
+				LEFT JOIN
+					SPJ_JENIS b
+				ON a.JENIS_ID = b.ID_JENIS
+				WHERE
+					STATUS_APPROVE = 'APPROVED' AND
+					STATUS_RECEIVE IS NULL
+				GROUP BY
+					JENIS_KASBON, NAMA_JENIS";
+		return $this->db->query($sql);;
 	}
 }

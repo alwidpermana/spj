@@ -73,6 +73,25 @@
           </div>
           <div class="card">
             <div class="card-body">
+              <div class="row">
+                <div class="col-md-7"></div>
+                <div class="col-md-5">
+                  <div class="row">
+                    <div class="col-md-6 col-sm-2">
+                      <div class="p-2 border border-dashed border-start-0 bg-white">
+                          <h6 class="mb-1" id="showSaldoKasInduk"></h6>
+                          <p class="text-muted mb-0">Saldo Kas Induk Bulan Sebelumnya</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6 col-sm-2">
+                      <div class="p-2 border border-dashed border-start-0 bg-white">
+                          <h6 class="mb-1" id="showSaldoSubKas"></h6>
+                          <p class="text-muted mb-0">Saldo Sub Kas Bulan Sebelumnya</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div id="getTabel"></div>
             </div>
           </div> 
@@ -104,8 +123,9 @@
    getTabel();
    $('.filter').on('change', function(){
     getTabel()
+    getLatestMonthKasbon();
    })
-
+   getLatestMonthKasbon();
   })
   function getTabel() {
     var filBulan = $("#filBulan").val();
@@ -131,6 +151,46 @@
 
       }      
     })
+  }
+
+  function getLatestMonthKasbon() {
+    var filBulan = $("#filBulan").val();
+    var filTahun = $('#filTahun').val();
+    var filJenis = 'Kasbon Voucher BBM';
+    $.ajax({
+      type:'get',
+      dataType:'json',
+      data:{filBulan,filTahun, filJenis},
+      cache: false,
+      async: true,
+      url:'getLatestMonthKasbon',
+      success: function(data){
+        console.log(data.SALDO_INDUK);
+        $('#showSaldoKasInduk').html(formatRupiah(Number(data.SALDO_INDUK).toFixed(0), 'Rp. '))
+        $('#showSaldoSubKas').html(formatRupiah(Number(data.SALDO_SUB).toFixed(0), 'Rp. '))
+        // 
+      },
+      error: function(data){
+
+      }
+    })
+  }
+  
+  function formatRupiah(angka, prefix){
+    var number_string = angka.replace(/[^,\d]/g, '').toString(),
+    split       = number_string.split(','),
+    sisa        = split[0].length % 3,
+    rupiah        = split[0].substr(0, sisa),
+    ribuan        = split[0].substr(sisa).match(/\d{3}/gi);
+
+    // tambahkan titik jika yang di input sudah menjadi angka ribuan
+    if(ribuan){
+      separator = sisa ? '.' : '';
+      rupiah += separator + ribuan.join('.');
+    }
+
+    rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+    return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
   }
   
 

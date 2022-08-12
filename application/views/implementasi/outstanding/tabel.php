@@ -1,6 +1,7 @@
 <table class="table table-hover table-bordered table-striped" id="datatable" width="100%">
     <thead class="text-center bg-gray">
         <tr>
+            <th rowspan="2"></th>
             <th rowspan="2">No</th>
             <th rowspan="2">Tanggal Input</th>
             <th rowspan="2">Jenis SPJ</th>
@@ -17,7 +18,6 @@
             <th rowspan="2">Makan Ke 2</th>
             <th colspan="3">Tanggal Closing</th>
             <th rowspan="2">Status</th>
-            <th rowspan="2"></th>
         </tr>
         <tr>
             <th>Group Tujuan</th>
@@ -40,6 +40,15 @@
         $no = 1;
         foreach ($data as $key): ?>
             <tr>
+                <td>
+                    <button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
+                      <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu" role="menu">
+                        <a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/view_spj/<?=$key->ID_SPJ?>">Lihat SPJ</a>
+                        <a class="dropdown-item dropButton btnKeputusan" href="javascript:;" no_spj = "<?=$key->NO_SPJ?>" nik = "<?=$key->PIC_INPUT?>" jenisSPJ = "<?=$key->NAMA_JENIS?>" idSPJ = "<?=$key->ID_SPJ?>">Keputusan Otoritas</a>
+                    </div>
+                </td>
                 <td><?=$no++?></td>
                 <td><?=$key->TGL_INPUT?></td>
                 <td><?=$key->NAMA_JENIS?></td>
@@ -80,15 +89,6 @@
                 <td></td>
                 <td></td>
                 <td><?=$key->STATUS_SPJ?></td>
-                <td>
-                    <button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
-                      <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <div class="dropdown-menu" role="menu">
-                        <a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/view_spj/<?=$key->ID_SPJ?>">Lihat SPJ</a>
-                        <a class="dropdown-item dropButton btnKeputusan" href="javascript:;" no_spj = "<?=$key->NO_SPJ?>" nik = "<?=$key->PIC_INPUT?>" jenisSPJ = "<?=$key->NAMA_JENIS?>" idSPJ = "<?=$key->ID_SPJ?>">Keputusan Otoritas</a>
-                    </div>
-                </td>
             </tr>
         <?php endforeach ?>
     </tbody>

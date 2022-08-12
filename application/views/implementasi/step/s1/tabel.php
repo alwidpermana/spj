@@ -48,7 +48,13 @@
 					<?php endforeach ?>
 					</ul>
 				</td>
-				<td><?=$key->STATUS_SPJ?></td>
+				<td>
+					<?php if ($key->STATUS_SPJ == 'CLOSE' && $key->NO_GENERATE == null): ?>
+						Waiting For Generate
+					<?php else: ?>
+						<?=$key->STATUS_SPJ?>	
+					<?php endif ?>
+				</td>
 				<td>
 					<a href="<?=base_url()?>implementasi/step_2/<?=$key->ID_SPJ?>" class="btn bg-orange btn-kps btn-sm" style="font-size: 9px;">
 						<i class="fas fa-caret-right"></i><br>

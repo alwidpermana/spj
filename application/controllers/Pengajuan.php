@@ -98,7 +98,9 @@ class Pengajuan extends CI_Controller {
 	{
 		$inputKendaraan = $this->input->get("inputKendaraan");
 		$inputJenisKendaraan = $this->input->get("inputJenisKendaraan");
-		$data['data'] = $this->M_Pengajuan->getListKendaraan($inputJenisKendaraan, $inputKendaraan)->result();
+		$inputTglSPJ = $this->input->get("inputTglSPJ");
+		$searchKendaraan = $this->input->get("searchKendaraan");
+		$data['data'] = $this->M_Pengajuan->getListKendaraan($inputJenisKendaraan, $inputKendaraan, $inputTglSPJ, $searchKendaraan)->result();
 		$this->load->view("pengajuan/form/listKendaraan", $data);
 	}
 	public function getViewJalur()
@@ -145,7 +147,7 @@ class Pengajuan extends CI_Controller {
 		$serlok = $this->M_Serlok->getCustomerByGroup($query="", $inputPerusahaan)->result();
 		$serlokKota = '';
 		foreach ($serlok as $key) {
-			$serlokKota = $key->nama_kabkota;
+			$serlokKota = $key->nama2;
 		}
 		$data = $this->M_Pengajuan->findGroupTujuan($serlokKota);
 		echo json_encode($data);
@@ -251,6 +253,7 @@ class Pengajuan extends CI_Controller {
 		$jabatan = $this->input->get("jabatan");
 		$inputJenisSPJ = $this->input->get("inputJenisSPJ");
 		$inputNoSPJ= $this->input->get("inputNoSPJ");
+		$inputTglSPJ = $this->input->get("inputTglSPJ");
 		if ($inputJenisSPJ == '1') {
 			if ($jabatan == 'Sopir') {
 				$where = " AND OTORITAS_DRIVER = 'Y' ";
@@ -280,7 +283,7 @@ class Pengajuan extends CI_Controller {
 			$whereJenis = " AND SPJ_NDV = 'Y'";
 		}
 
-		$data = $this->M_Pengajuan->getPIC($inputSubjek, $jabatan, $where, $inputNoSPJ, $where2, $whereJenis)->result();
+		$data = $this->M_Pengajuan->getPIC($inputSubjek, $jabatan, $where, $inputNoSPJ, $where2, $whereJenis, $inputTglSPJ)->result();
 		echo json_encode($data);
 	}
 	public function hitungUangSaku()
@@ -509,13 +512,25 @@ class Pengajuan extends CI_Controller {
 	}
 	public function saveSPJ()
 	{
+		$inputNoSPJ = $this->input->post("inputNoSPJ");
+		$getKasbon = $this->db->query("SELECT
+											TOTAL_UANG_SAKU + TOTAL_UANG_MAKAN + TOTAL_UANG_JALAN + TOTAL_UANG_BBM + TOTAL_UANG_TOL AS TOTAL 
+										FROM
+											SPJ_PENGAJUAN 
+										WHERE
+											NO_SPJ = '$inputNoSPJ'");
+		foreach ($getKasbon->result() as $kb) {
+			$oldKasbon = $kb->TOTAL;
+		}
+
+
 		$data= $this->M_Pengajuan->saveSPJ();
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$cek = $this->db->query("SELECT ID_PIC FROM SPJ_PENGAJUAN_PIC WHERE NO_PENGAJUAN = '$inputNoSPJ' AND JENIS_PIC = 'Manajemen'");
 		if ($cek->num_rows()>0) {
 			$this->M_Pengajuan->savePICManajemen($inputNoSPJ);	
 		}
-		$this->M_Pengajuan->saveKasbon();
+		// $this->M_Pengajuan->saveKasbon();
 		$inputTotalUangSaku = $this->input->post("inputTotalUangSaku");
         $inputTotalUangMakan = $this->input->post("inputTotalUangMakan");
         $inputTotalUangJalan = $this->input->post("inputTotalUangJalan");
@@ -523,11 +538,12 @@ class Pengajuan extends CI_Controller {
         $inputTOL = $this->input->post("inputTOL");
         $inputMediaBBM = $this->input->post("inputMediaBBM");
         $inputMediaTOL = $this->input->post("inputMediaTOL");
-        $inputNoSPJ = $this->input->post("inputNoSPJ");
+        
         $bbmSPJ = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
         $tolSPJ = $inputMediaTOL == 'Kasbon' ? $inputTol : 0;
         $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $inputTotalUangJalan + $bbmSPJ + $tolSPJ;
-		$this->updateSaldo($inputNoSPJ, $totalSPJ);
+        $status = $this->input->post("status");
+		$this->updateSaldo($inputNoSPJ, $totalSPJ, $oldKasbon, $status);
 		echo json_encode($data);
 	}
 	public function cekAdaDriver()
@@ -622,7 +638,7 @@ class Pengajuan extends CI_Controller {
 		$hasil = array('saldoSPJ' =>$saldoSPJ, 'saldoTOL'=>$saldoTOL, 'saldoBBM'=>$saldoBBM);
 		echo json_encode($hasil);
 	}
-	public function updateSaldo($inputNoSPJ, $totalSPJ)
+	public function updateSaldo($inputNoSPJ, $totalSPJ, $oldKasbon, $status)
 	{
 		$getSPJ = $this->M_Pengajuan->getIDByNoSPJ($inputNoSPJ)->result();
 		$id = 0;
@@ -637,9 +653,27 @@ class Pengajuan extends CI_Controller {
 		foreach ($getSaldo->result() as $key) {
 			$saldo  = $key->SALDO;
 		}
-		$totalSaldo = $saldo - $totalSPJ;
-		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
-		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalSPJ, 'KASBON', $id,'TRANSAKSI AWAL');
+		if ($status == 'NEW') {
+			$totalSaldo = $saldo - $totalSPJ;
+			$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
+			$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalSPJ, 'KASBON', $id,'TRANSAKSI AWAL');
+		} else {
+			if ($totalSPJ != $oldKasbon) {
+				$totalSaldo = ($saldo + $oldKasbon)-$totalSPJ;	
+				$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
+				$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalSPJ, 'KASBON', $id,'TRANSAKSI AWAL');
+			}
+		}
+		
+		
+	}
+	public function getSaldoPerJenis()
+	{
+		$jenis = $this->input->get("jenis");
+		$jenisSPJ = $jenis == '1'?'Kasbon SPJ Delivery':'Kasbon SPJ Non Delivery';
+		$data['data'] = $this->M_Cash_Flow->getSaldoPerJenis($jenisSPJ, 'SUB KAS')->result();
+		$data['jenis']= str_replace('Kasbon', 'Saldo', $jenisSPJ);
+		$this->load->view("pengajuan/form/saldo", $data);
 	}
 
 	public function temporary()

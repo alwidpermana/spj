@@ -1,4 +1,4 @@
-<table class="table table-hover table-bordered table-striped" id="datatable"  width="100%" style="font-size: 9px">
+<table class="table table-hover table-bordered table-striped" id="datatable"  width="100%" style="font-size: 11px">
     <thead class="text-center bg-gray">
         <tr class="bg-gray">
             <th rowspan="2">No</th>
@@ -39,13 +39,13 @@
                         foreach ($tgl as $t) {
                             if ($i == $t->JALAN && $key->NO_TNKB == $t->NO_TNKB) {
                                 $km .= '<li style="padding-top: 5px">';
-                                $km.=$t->NO_SPJ;
+                                $km.='<a href="'.base_url().'monitoring/view_spj/'.$t->ID_SPJ.'" class="text-dark" style="font-size:12px">'.$t->NO_SPJ.'</a>';
                                 $km .="<br>";
-                                $km .='KM Out= '.str_replace(',', '.', number_format($t->KM_OUT));
+                                $km .='KM&nbsp;Out= '.str_replace(',', '.', number_format($t->KM_OUT));
                                 $km .="<br>";
-                                $km .='KM In= '.str_replace(',', '.', number_format($t->KM_IN));
+                                $km .='KM&nbsp;In= '.str_replace(',', '.', number_format($t->KM_IN));
                                 $km .="<br>";
-                                $km .="<b>".str_replace(',', '.', number_format($t->KM_IN - $t->KM_OUT))."</b>";
+                                $km .="<b>Selisih&nbsp;=&nbsp;".str_replace(',', '.', number_format($t->KM_IN - $t->KM_OUT))."&nbsp;KM</b>";
                             }
                         }
                         echo "<td>".$km."</td>";

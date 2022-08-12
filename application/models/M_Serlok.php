@@ -16,7 +16,11 @@ class M_Serlok extends CI_Model {
 						id,
 						ALAMAT_LENGKAP_PLANT,
 						COMPANY_NAME,
-						nama_kabkota
+						nama_kabkota,
+						CASE 
+							WHEN SUBSTR(nama_kabkota,1,4) = 'KOTA' THEN REPLACE(nama_kabkota,'KOTA ','')
+							ELSE nama_kabkota
+						END AS nama2
 					FROM
 					(
 						SELECT
@@ -40,10 +44,13 @@ class M_Serlok extends CI_Model {
 						FROM
 							tref_kabkota
 					)Q2 ON Q1.ID_KAB_KOTA = Q2.ID_KK ";
-		$sql.=$query;
-		$sql .=" )Q1";
-		if ($id != '') {
+		$sql .=" )Q1 ";
+		if ($query != '' && $id == '') {
+			$sql.=$query;
+		}elseif($query=='' && $id != ''){
 			$sql .=" WHERE id = $id";
+		}else{
+			$sql.="";
 		}
 		$sql .=" ORDER BY COMPANY_NAME ASC";
 		$dbserlok = $this->load->database("dbserlok", TRUE);

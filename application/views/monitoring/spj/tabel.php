@@ -1,4 +1,4 @@
-<div class="<?=count($data)==1?'table-responsive':''?>">
+<div class="<?=count($data)<=2?'table-responsive':''?>">
 	<table class="table table-hover table-bordered table-striped " id="datatable">
 		<thead class="text-center bg-gray">
 			<tr>
@@ -7,7 +7,7 @@
 				<th rowspan="2">Tanggal Input</th>
 				<th rowspan="2">No SPJ</th>
 				<th rowspan="2">Tanggal SPJ</th>
-				<th rowspan="2">No Barcode</th>
+				<th rowspan="2">QR Code</th>
 				<th colspan="5">Pengaju</th>
 				<th colspan="6">Kendaraan</th>
 				<th colspan="2">Tujuan</th>
@@ -87,8 +87,11 @@
 	                    </button>
 	                    <div class="dropdown-menu" role="menu">
 	                    	<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/view_spj/<?=$key->ID_SPJ?>">Lihat Data</a>
-	                    	<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/export_spj/<?=$key->ID_SPJ?>" target="_blank">Export PDF</a>
-	                    	<?php if ($key->STATUS_PERJALANAN == null): ?>
+	                    	<?php if ($key->STATUS_SPJ != 'CANCEL'): ?>
+	                    		<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/print_spj/<?=$key->ID_SPJ?>" target="_blank">Print</a>
+	                    		<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/export_spj/<?=$key->ID_SPJ?>" target="_blank">Export PDF</a>
+	                    	<?php endif ?>
+	                    	<?php if ($key->STATUS_PERJALANAN == null && $this->session->userdata("LEVEL")<=4): ?>
 	                    		<?php if ($key->STATUS_SPJ == 'OPEN'): ?>
 	                    			<a 
 	                    				class="dropdown-item dropButton btnCancel" 
@@ -104,13 +107,15 @@
 	                    				Edit SPJ
 	                    			</a>			
 	                			<?php else: ?>
-	                				<a 
-	                    				class="dropdown-item dropButton btnCancel" 
-	                    				href="javascript:;" 
-	                    				data="<?=$key->ID_SPJ?>" 
-	                    				status = 'OPEN'>
-	                    				Open SPJ
-	                    			</a>
+	                				<?php if ($this->session->userdata("LEVEL")<2): ?>
+	                					<a 
+		                    				class="dropdown-item dropButton btnCancel" 
+		                    				href="javascript:;" 
+		                    				data="<?=$key->ID_SPJ?>" 
+		                    				status = 'OPEN'>
+		                    				Open SPJ
+		                    			</a>
+	                				<?php endif ?>
 	                			<?php endif ?>	
 	                    	<?php endif ?>
 	                    	
@@ -196,15 +201,21 @@
 					<?php endif ?>
 					<td><?=str_replace(',', '.', number_format($key->KM_OUT, 0))?></td>
 					<td><?=str_replace(',', '.', number_format($key->KM_IN, 0))?></td>
-					<td><?=str_replace(',', '.', number_format($key->KM_IN-$key->KM_OUT, 0))?></td>
+					<td><?=$key->STATUS_PERJALANAN=='IN'?str_replace(',', '.', number_format($key->KM_IN-$key->KM_OUT, 0)):''?></td>
 					<td></td>
 					<td></td>
 					<td></td>
 					<td></td>
 					<td></td>
 					<td></td>
-					<td><?=$key->STATUS_SPJ?></td>
-					<td></td>
+					<td class="text-center">
+						<?=$key->STATUS_SPJ == 'CLOSE' && $key->NO_GENERATE == null ? 'Waiting&nbsp;For&nbsp;Generate':$key->STATUS_SPJ?>
+					</td>
+					<?php if ($key->STATUS_SPJ == 'CANCEL'): ?>
+						<td class="text-center"><?=$key->STATUS_SPJ?></td>
+					<?php else: ?>
+						<td class="text-center"><?=$key->NO_GENERATE == null ?'OPEN':'CLOSE'?></td>	
+					<?php endif ?>
 					<td><?=$key->NO_GENERATE?></td>
 					
 				</tr>
@@ -216,7 +227,7 @@
 <script type="text/javascript">
 	$(document).ready(function(){
 		var jml = '<?=count($data)?>';
-		if (jml==1) {
+		if (jml<=2) {
 			var table = $('#datatable').DataTable( {
 	           
 	            paging:         false,

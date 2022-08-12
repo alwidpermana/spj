@@ -39,10 +39,18 @@ class Implementasi extends CI_Controller {
 	{
 		$noSPJ = $this->input->post("noSPJ");
 		$status = $this->input->post("status");
-		if ($status == 'OUT') {
-			$data = $this->db->query("DELETE FROM SPJ_VALIDASI_PIC WHERE NO_SPJ = '$noSPJ'");
-		} else {
-			$data = $this->db->query("UPDATE SPJ_VALIDASI_PIC SET SET_IN = null, KETERANGAN_IN = null WHERE NO_SPJ = '$noSPJ'");
+		$getGroup = $this->db->query("SELECT GROUP_ID FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ'");
+		foreach ($getGroup->result() as $key) {
+			$group = $key->GROUP_ID;
+		}
+		if ($group != '4') {
+			if ($status == 'OUT') {
+				$data = $this->db->query("DELETE FROM SPJ_VALIDASI_PIC WHERE NO_SPJ = '$noSPJ'");
+			} else {
+				$data = $this->db->query("UPDATE SPJ_VALIDASI_PIC SET SET_IN = null, KETERANGAN_IN = null WHERE NO_SPJ = '$noSPJ'");
+			}
+		}else{
+			$data = true;
 		}
 		echo json_encode($data);
 		
@@ -50,7 +58,7 @@ class Implementasi extends CI_Controller {
 	public function cekSPJ()
 	{
 		$scan = $this->input->get("scan");
-		$data = $this->db->query("SELECT ID_SPJ, STATUS_PERJALANAN, NO_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$scan'")->row();
+		$data = $this->db->query("SELECT ID_SPJ, STATUS_PERJALANAN, NO_SPJ, STATUS_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$scan'")->row();
 		
 		echo json_encode($data);
 	}
@@ -72,6 +80,7 @@ class Implementasi extends CI_Controller {
 		$data['validasiPIC'] = $this->M_Implementasi->getValidasiPIC($noSPJ)->result();
 		$data['km'] = $this->M_Implementasi->getKM($noTNKB)->result();
 		$data['validasi'] = $this->M_Implementasi->getValidasiSPJ($noSPJ)->result();
+		$data['history'] = $this->M_Implementasi->getHistoryInOutLokal($noSPJ)->result();
 		$this->load->view("implementasi/security/view", $data);
 	}
 	public function saveValidasiPIC()
@@ -100,6 +109,29 @@ class Implementasi extends CI_Controller {
 		$data = $this->M_Implementasi->saveValidasiOut($inputNoSPJ, $inputVerifikasiKendaraan, $inputKeteranganKendaraan, $inputKMOut);
 		echo json_encode($data);
 	}
+	public function saveValidasiOutLokal()
+	{
+		$inputNoSPJ = $this->input->post("inputNoSPJ");
+		$inputVerifikasiKendaraan = $this->input->post("inputVerifikasiKendaraan");
+		$inputKeteranganKendaraan = $this->input->post("inputKeteranganKendaraan");
+		$inputKMOut = $this->input->post("inputKMOut");
+		$inputKMIn = $this->input->post("inputKMIn");
+
+		$getHistory=$this->M_Implementasi->getHistoryInOutLokal($inputNoSPJ);
+		$km = $getHistory->num_rows()==0?$inputKMOut:$inputKMIn;
+		if ($getHistory->num_rows()==0) {
+			$data = $this->M_Implementasi->saveValidasiOut($inputNoSPJ, $inputVerifikasiKendaraan, $inputKeteranganKendaraan, $inputKMOut);
+		}
+
+		if ($getHistory->num_rows()>=2) {
+			$data = $this->db->query("UPDATE SPJ_VALIDASI SET VERIFIKASI_BULAK_BALIK='Y' WHERE NO_SPJ = '$inputNoSPJ'");
+		}
+
+		$data = $this->M_Implementasi->saveDataTemp($inputNoSPJ);
+		$data = $this->M_Implementasi->saveHistoryInOut($inputNoSPJ, 'OUT', $km);
+		echo json_encode($data);
+
+	}
 	public function saveValidasiIn()
 	{
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
@@ -107,9 +139,13 @@ class Implementasi extends CI_Controller {
 		$inputKeteranganKendaraan = $this->input->post("inputKeteranganKendaraan");
 		$inputKMIn = $this->input->post("inputKMIn");
 		$inputNoTNKB = $this->input->post("inputNoTNKB");
+		$inputGroupTujuan = $this->input->post("inputGroupTujuan");
 		$data = $this->M_Implementasi->deleteDataTemp($inputNoSPJ);
 		$data = $this->M_Implementasi->saveValidasiIn($inputNoSPJ, $inputVerifikasiKendaraan, $inputKeteranganKendaraan, $inputKMIn);
 		$data = $this->M_Implementasi->saveKMKendaraan($inputNoTNKB, $inputKMIn);
+		if ($inputGroupTujuan == '4') {
+			$this->M_Implementasi->saveHistoryInOut($inputNoSPJ, 'IN',$inputKMIn);
+		}
 		echo json_encode($data);
 	}
 	public function saveUangTambahan()
@@ -157,19 +193,21 @@ class Implementasi extends CI_Controller {
         $selisihHari = $selisihH->d;
         if ($selisihJam >= $jam1 && $selisihHari==0) {
           $jm = $selisihJam - $jam1;
-           
-          if ($jm>0) {
-          	// && $jm<=3
-            $uangSaku1 = $tambahanUangSaku1;
-          }else{
-            $uangSaku1 = 0;
-          }
+          
+          $uangSaku1 = $tambahanUangSaku1;
+          $uangSaku2 = $tambahanUangSaku2; 
+          // if ($jm>0) {
+          // 	// && $jm<=3
+          //   $uangSaku1 = $tambahanUangSaku1;
+          // }else{
+          //   $uangSaku1 = 0;
+          // }
 
-          if ($jm>3) {
-            $uangSaku2 = $tambahanUangSaku2;
-          } else {
-            $uangSaku2 = 0;
-          }
+          // if ($jm>3) {
+          //   $uangSaku2 = $tambahanUangSaku2;
+          // } else {
+          //   $uangSaku2 = 0;
+          // }
           
 
         }elseif($selisihHari>0){
@@ -612,17 +650,18 @@ class Implementasi extends CI_Controller {
 		$kasbonBBM = 0;
 		$kasbonTOL = 0;
 		for ($i=0; $i <$jmlNoSPJ ; $i++) { 
-			$this->db->query("UPDATE SPJ_PENGAJUAN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_SPJ = '$noSPJ[$i]'");
-			$getBiaya = $this->M_Implementasi->getBiayaTotalPerNoSPJ($noSPJ[$i])->result();
-			foreach ($getBiaya as $key) {
+			$getBiaya = $this->M_Implementasi->getBiayaTotalPerNoSPJ($noSPJ[$i]);
+			foreach ($getBiaya->result() as $key) {
 				$kasbonSPJ += $key->KASBON_SPJ;
 				$kasbonBBM += $key->KASBON_BBM;
 				$kasbonTOL += $key->KASBON_TOL;
 			}
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_SPJ = '$noSPJ[$i]'");
 		}
 		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis);
 		// $data = array('KASBON SPJ' =>$kasbonSPJ ,'KASBON BBM' =>$kasbonBBM, 'KASBON TOL' =>$kasbonTOL,'total'=>$kasbonSPJ+$kasbonBBM+$kasbonTOL );
 		$data = $this->M_Implementasi->generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $filJenis);
+		
 		echo json_encode($data);
 	}
 	public function cekSaldo()

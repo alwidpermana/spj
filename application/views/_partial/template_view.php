@@ -38,9 +38,7 @@
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.jquery.min.js"></script>
 <script type="text/javascript">
   $(document).ready(function(){
-    $('.select2').select2({
-        'width': '100%',
-    });
+    
     $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     

@@ -16,6 +16,7 @@
 		    <div class="p-2 border border-dashed border-start-0 bg-white">
 		        <h6 class="mb-1">Rp <?=str_replace(',', '.', number_format($key2->JUMLAH))?></h6>
 		        <p class="text-muted mb-0">Sub Kas <?=$key2->NAMA_SALDO?></p>
+		        <p class="text-muted mb-0 text-kps"><?=$key2->RP_OUTSTANDING == null?'&nbsp;':'-'.str_replace(',', '.', number_format($key2->RP_OUTSTANDING))?></p>
 		    </div>
 		</div>
 	<?php endforeach ?>

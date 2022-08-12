@@ -1,4 +1,4 @@
-<table class="table table-hover table-bordered table-striped" id="datatable" width="100%" style="font-size: 9px;">
+<table class="table table-hover table-bordered table-striped" id="datatable" width="100%" style="font-size: 11px;">
     <thead class="text-center bg-gray">
         <tr class="bg-gray">
             <th rowspan="2">No</th>
@@ -41,11 +41,11 @@
                         foreach ($tgl as $t) {
                             if ($i == $t->JALAN && $key->NIK == $t->NIK) {
                                 $noSPJ .= '<li style="padding-top: 5px">';
-                                $noSPJ.=$t->NO_SPJ;
+                                $noSPJ.='<a href="'.base_url().'monitoring/view_spj/'.$t->ID_SPJ.'" class="text-dark" style="font-size:12px">'.$t->NO_SPJ.'</a>';
                                 $noSPJ .="<br>";
-                                $noSPJ .='Uang Saku= Rp. '.str_replace(',', '.', number_format($t->UANG_SAKU));
+                                $noSPJ .='US=&nbsp;Rp.&nbsp;'.str_replace(',', '.', number_format($t->UANG_SAKU));
                                 $noSPJ .="<br>";
-                                $noSPJ .='Uang Makan= Rp. '.str_replace(',', '.', number_format($t->UANG_MAKAN));
+                                $noSPJ .='UM=&nbsp;Rp.&nbsp;'.str_replace(',', '.', number_format($t->UANG_MAKAN));
                                 $noSPJ .="<br>";
                                 $noSPJ .="<b>".$t->SEBAGAI."</b>";
                             }

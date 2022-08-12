@@ -5,6 +5,7 @@
             <td>Tanggal Input</td>
             <td>Kendaraan</td>
             <td>Kepemilikan</td>
+            <td>Pemakai</td>
             <td>Jenis Kendaraan</td>
             <td>No Inventaris</td>
             <td>Merk</td>
@@ -25,9 +26,10 @@
                 <td><?=$i++?></td>
                 <td><?=date("Y-m-d", strtotime($key->TglInput))?></td>
                 <td><?=$key->Jenis?></td>
+                <td><?=$key->NamaSTNK?></td>
                 <td><?=$key->Pemakai?></td>
                 <td>
-                    <select class="select2 form-control inputJenisKendaraan select2-orange" data-dropdown-css-class="select2-orange" style="font-size: 12px;" data = '<?=$key->NoTNKB?>'>
+                    <select class="select2 form-control inputJenisKendaraan select2-orange" data-dropdown-css-class="select2-orange" style="font-size: 12px; width:100px" data = '<?=$key->NoTNKB?>'>
                             <option value="">No Data</option>
                         <?php foreach ($jenis as $key2): ?>
                             <option value="<?=$key2->JENIS_KENDARAAN?>" <?=$key->Kategori == $key2->JENIS_KENDARAAN?'selected':''?>><?=$key2->JENIS_KENDARAAN?></option>

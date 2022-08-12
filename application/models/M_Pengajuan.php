@@ -67,12 +67,12 @@ class M_Pengajuan extends CI_Model {
 		return $this->db->query($sql);
 	}
 
-	public function getListKendaraan($jenis, $kategori)
+	public function getListKendaraan($jenis, $kategori, $tgl, $search)
 	{
-		$sqlDelivery = '';
-		if ($kategori == 'Delivery') {
+		if ($jenis != '') {
 			$sqlDelivery = " AND KATEGORI = '$jenis'";
 		}
+		
 		$sql = "SELECT
 					* 
 				FROM
@@ -102,10 +102,14 @@ class M_Pengajuan extends CI_Model {
 					SELECT
 						NO_TNKB
 					FROM
-						SPJ_TEMP_KENDARAAN
+						SPJ_PENGAJUAN
+					WHERE 
+						STATUS_DATA = 'SAVED' AND
+						TGL_SPJ = '$tgl'
 				)Q3 ON Q1.NoTNKB = Q3.NO_TNKB
 				WHERE
-					Q3.NO_TNKB IS NULL";
+					Q3.NO_TNKB IS NULL AND
+					Q1.NoTNKB LIKE '%$search%'";
 		return $this->db->query($sql);
 	}
 	public function findGroupTujuan($nama)
@@ -210,7 +214,7 @@ class M_Pengajuan extends CI_Model {
 					ID_LOKASI ASC";
 		return $this->db->query($sql);
 	}
-	public function getPIC($inputSubjek, $jabatan, $where, $noPengajuan, $where2, $whereJenis)
+	public function getPIC($inputSubjek, $jabatan, $where, $noPengajuan, $where2, $whereJenis, $inputTglSPJ)
 	{
 		$sql = "SELECT
 				   Q1.*
@@ -274,13 +278,19 @@ class M_Pengajuan extends CI_Model {
 				LEFT JOIN
 				(
 					SELECT
-						PIC
+						NIK
 					FROM
-						SPJ_TEMP_PIC
-				)Q3 ON Q1.NIK = Q3.PIC
+						SPJ_PENGAJUAN a
+					INNER JOIN
+						SPJ_PENGAJUAN_PIC b
+					ON a.NO_SPJ = b.NO_PENGAJUAN
+					WHERE
+						STATUS_DATA = 'SAVED' AND
+						TGL_SPJ = '$inputTglSPJ'
+				)Q3 ON Q1.NIK = Q3.NIK
 				WHERE
 					Q2.NIK IS NULL AND 
-					Q3.PIC IS NULL";
+					Q3.NIK IS NULL";
 		return $this->db->query($sql);
 	}
 	public function saveOtomatisUangSPJ($id, $group, $biaya)
@@ -779,6 +789,8 @@ class M_Pengajuan extends CI_Model {
 						DATEDIFF(hh, RENCANA_BERANGKAT, RENCANA_PULANG) AS DIFF_HOUR
 					FROM
 						SPJ_PENGAJUAN
+					WHERE 
+						STATUS_DATA = 'SAVED'
 				)Q1
 				LEFT JOIN
 				(

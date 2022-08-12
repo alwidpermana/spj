@@ -30,6 +30,9 @@
                     <label>Merk</label>
                     <select class="select2 filter form-control select2-orange" data-dropdown-css-class="select2-orange" id="filMerk">
                       <option value="">ALL</option>
+                      <?php foreach ($Merk as $mrk): ?>
+                        <option value="<?=$mrk->Merk?>"><?=$mrk->Merk?></option>
+                      <?php endforeach ?>
                     </select>
                   </div>
                 </div>
@@ -38,6 +41,9 @@
                     <label>Kendaraan</label>
                     <select class="select2 filter form-control select2-orange" data-dropdown-css-class="select2-orange" id="filKendaraan">
                       <option value="">ALL</option>
+                      <?php foreach ($jenis as $jns): ?>
+                        <option value="<?=$jns->Jenis?>"><?=$jns->Jenis?></option>
+                      <?php endforeach ?>
                     </select>
                   </div>
                 </div>
@@ -46,6 +52,8 @@
                     <label>Bahan Bakar</label>
                     <select class="select2 filter form-control select2-orange" data-dropdown-css-class="select2-orange" id="filBahan">
                       <option value="">ALL</option>
+                      <option value="Bensin">Bensin</option>
+                      <option value="Solar">Solar</option>
                     </select>
                   </div>
                 </div>

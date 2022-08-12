@@ -80,6 +80,7 @@
           flex-wrap: wrap;
           margin-right: -7.5px;
           margin-left: -7.5px;
+          padding-bottom: 0px;
         }
 	</style>
 </head>
@@ -167,7 +168,7 @@
 		</table>
 
 	<?php endforeach ?>
-	<div class="roShit">
+	<div class="roShit" style="background-color: red">
 		<table class="table" border="1" width="64%">
 			<tr class="text-center">
 				<th>Objek</th>
@@ -215,6 +216,18 @@
 				<td class="text-center"><?=str_replace(',', '.', number_format($key->TOTAL_UANG_TOL, 0))?></td>
 				<td class="text-center"><?=$key->MEDIA_UANG_TOL?></td>
 			</tr>
+			<?php if ($key->STATUS_PERJALANAN == 'IN'): ?>
+				<tr>
+					<td>Uang Saku Ke-2</td>
+					<td class="text-center"><?=str_replace(',', '.', number_format($key->US1+$key->US2, 0))?></td>
+					<td class="text-center"></td>
+				</tr>
+				<tr>
+					<td>Uang Makan Ke-2</td>
+					<td class="text-center"><?=str_replace(',', '.', number_format($key->UM, 0))?></td>
+					<td class="text-center"></td>
+				</tr>
+			<?php endif ?>
 			<tr>
 				<td><b>Jumlah</b></td>
 				<td class="text-center" style="border-top: 1px solid black;"><b><?=str_replace(',', '.', number_format($key->TOTAL_UANG_TOL+$key->TOTAL_UANG_SAKU+$key->TOTAL_UANG_MAKAN+$key->TOTAL_UANG_JALAN+$key->TOTAL_UANG_BBM, 0))?></b></td>

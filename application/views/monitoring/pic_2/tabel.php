@@ -36,10 +36,10 @@
                 <td><?=$key->jabatan?></td>
                 <?php
                 for ($i=1; $i <= 31; $i++) {
-                	$spj .="<ul>"; 
+                	$spj .='<ul style="padding-left: 10px">'; 
                     foreach ($pic as $pc) {
                     	if ($i == $pc->TGL && $key->NIK == $pc->NIK) {
-                    		$spj .="<li>".$pc->NO_SPJ."</li>";
+                    		$spj .='<li><a href="'.base_url().'monitoring/view_spj/'.$pc->ID_SPJ.'" class="text-dark" style="font-size:12px">'.$pc->NO_SPJ.'</a></li>';
                     	}
                     }
                     $spj.="</ul>";

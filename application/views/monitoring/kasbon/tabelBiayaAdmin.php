@@ -4,6 +4,7 @@
 		<thead class="text-center">
 			<tr>
 				<th rowspan="2"></th>
+				<th rowspan="2">No Biaya Admin</th>
 				<th colspan="2">Pengajuan</th>
 				<th colspan="4">Biaya Admin</th>
 				<th colspan="2">Approval</th>
@@ -45,6 +46,7 @@
 
 	                    </div>
 					</td>
+					<td><?=$key->NO_BIAYA_ADMIN?></td>
 					<td><?=date("d F Y", strtotime($key->TGL_INPUT))?></td>
 					<td><?=$key->PIC_INPUT.'-'.$key->NAMA_INPUT?></td>
 					<td><?=date("d F Y", strtotime($key->TGL_BIAYA))?></td>

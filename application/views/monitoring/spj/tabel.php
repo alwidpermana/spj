@@ -8,6 +8,7 @@
 				<th rowspan="2">No SPJ</th>
 				<th rowspan="2">Tanggal SPJ</th>
 				<th rowspan="2">QR Code</th>
+				<th rowspan="2">Abnormal</th>
 				<th colspan="5">Pengaju</th>
 				<th colspan="6">Kendaraan</th>
 				<th colspan="2">Tujuan</th>
@@ -126,6 +127,7 @@
 					<td><?=$key->NO_SPJ?></td>
 					<td><?=$key->TGL_SPJ?></td>
 					<td><?=$key->QR_CODE?></td>
+					<td><?=$key->ABNORMAL == 'Y'?'<span class="badge bg-danger">Yes</span>':''?></td>
 					<td><?=$key->PIC_INPUT?></td>
 					<td><?=$key->namapeg?></td>
 					<td><?=$key->jabatan?></td>
@@ -168,12 +170,15 @@
 							echo str_replace(',','.', number_format($total));
 						?>
 					</td>
-					<td><?=str_replace(',', '.', number_format($key->US1, 0))?></td>
-					<td><?=str_replace(',', '.', number_format($key->US2, 0))?></td>
-					<td><?=str_replace(',', '.', number_format($key->UM, 0))?></td>
+					<td><?=$key->KEPUTUSAN_US1 == 'OK'?str_replace(',', '.', number_format($key->US1, 0)):''?></td>
+					<td><?=$key->KEPUTUSAN_US2 == 'OK'?str_replace(',', '.', number_format($key->US2, 0)):''?></td>
+					<td><?=$key->KEPUTUSAN_MAKAN == 'OK'?str_replace(',', '.', number_format($key->UM, 0)):''?></td>
 					<td>
 						<?php
-							$totalTambahan = $key->US1 + $key->US2 + $key->UM;
+							$us1 = $key->KEPUTUSAN_US1 == 'OK'? $key->US1:0;
+							$us2 = $key->KEPUTUSAN_US2 == 'OK'?$key->US2:0;
+							$um= $key->KEPUTUSAN_MAKAN == 'OK'?$key->UM:0;
+							$totalTambahan = $us1 + $us2 + $um;
 							echo str_replace(',', '.', number_format($totalTambahan, 0));
 						?>
 					</td>

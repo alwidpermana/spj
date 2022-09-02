@@ -153,6 +153,14 @@
             <div class="row">
               <div class="col-md-12">
                 <div class="form-group">
+                  <label>Biaya Admin</label>
+                  <input type="text" id="inputNoBiayaAdmin" class="form-control" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
                   <label>Tanggal Biaya Admin</label>
                   <input type="date" id="inputTglBiaya" class="form-control form-control-sm input" value="<?=date("Y-m-d")?>">
                 </div>
@@ -258,6 +266,7 @@
       $('#modal-biaya_admin').modal("show");
       $('#inputID').val("");
       validasiData();
+      getNoBiayaAdmin();
     });
     $('.input').on('change', function(){
       validasiData();
@@ -588,6 +597,22 @@
       title: 'Gagal Menyimpan Data! Hubungi Staff IT',
       showConfirmButton: false,
       timer: 3000
+    })
+  }
+
+  function getNoBiayaAdmin() {
+    $.ajax({
+      type:'get',
+      dataType:'json',
+      url:'getNoBiayaAdmin',
+      cache: false,
+      async: true,
+      success: function(data){
+        $('#inputNoBiayaAdmin').val(data);
+      },
+      error:function(data){
+        $('#inputNoBiayaAdmin').val("");
+      }
     })
   }
 

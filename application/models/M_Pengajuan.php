@@ -71,6 +71,8 @@ class M_Pengajuan extends CI_Model {
 	{
 		if ($jenis != '') {
 			$sqlDelivery = " AND KATEGORI = '$jenis'";
+		}else{
+			$sqlDelivery = '';
 		}
 		
 		$sql = "SELECT
@@ -532,9 +534,9 @@ class M_Pengajuan extends CI_Model {
 				)Q2 ON Q1.NO_SPJ= Q2.NO_PENGAJUAN";
 		return $this->db->query($sql);
 	}
-	public function saveKendaraanSPJ($inv, $jenis, $noSPJ, $tnkb, $merk, $tipe, $kendaraan)
+	public function saveKendaraanSPJ($inv, $jenis, $noSPJ, $tnkb, $merk, $tipe, $kendaraan, $rental)
 	{
-		$sql = "UPDATE SPJ_PENGAJUAN SET NO_INVENTARIS = '$inv', JENIS_KENDARAAN = '$jenis', NO_TNKB = '$tnkb', MERK = '$merk', TYPE = '$tipe', KENDARAAN = '$kendaraan' WHERE NO_SPJ = '$noSPJ'";
+		$sql = "UPDATE SPJ_PENGAJUAN SET NO_INVENTARIS = '$inv', JENIS_KENDARAAN = '$jenis', NO_TNKB = '$tnkb', MERK = '$merk', TYPE = '$tipe', KENDARAAN = '$kendaraan', REKANAN_KENDARAAN = '$rental' WHERE NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);
 	}
 	public function saveGroupTujuanSPJ($inputNoSPJ, $inputGroupTujuan)
@@ -928,7 +930,8 @@ class M_Pengajuan extends CI_Model {
 							MEDIA_UANG_BBM,
 							MEDIA_UANG_TOL,
 							STATUS_PERJALANAN,
-							VOUCHER_BBM
+							VOUCHER_BBM,
+							REKANAN_KENDARAAN
 						FROM
 							SPJ_PENGAJUAN
 						WHERE

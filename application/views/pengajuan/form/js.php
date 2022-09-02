@@ -165,13 +165,21 @@
     $('#inputKendaraan').on('change', function(){
       kondisiKendaraan()
       var kendaraan = $(this).val();
+      if (kendaraan == 'Rental') {
+        $('.rekanan').removeClass("d-none");
+      }else{
+        $('#inputRekananKendaraan').val("")
+        $('.rekanan').addClass("d-none")
+      }
       if (kendaraan == 'Rental' || kendaraan == 'Pribadi') {
         $('#inputNoInventaris').val("-")
         $('#inputMerk').val("");
         $('#inputType').val("");
         $('#inputNoTNKB').val("");
+        
       }else{
         $('#inputNoInventaris').val("")
+        
       }
     });
     $('#pilihKendaraan').on('click', function(){
@@ -1379,9 +1387,10 @@
     var tnkb= $('#inputNoTNKB').val();
     var kendaraan = $('#inputKendaraan').val();
     var inputJenisSPJ = $('#inputJenisSPJ').val();
+    var inputRekananKendaraan = $('#inputRekananKendaraan').val();
     $.ajax({
       type: 'post',
-      data: {inv, inputJenisKendaraan, noSPJ, tnkb, merk, tipe, kendaraan},
+      data: {inv, inputJenisKendaraan, noSPJ, tnkb, merk, tipe, kendaraan, inputRekananKendaraan},
       dataType: 'json',
       url: url+'/pengajuan/saveKendaraanSPJ',
       cache: false,

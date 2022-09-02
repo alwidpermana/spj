@@ -1,11 +1,11 @@
 <div class="row">
   <div class="col-md-12">
     <table class="table table-hover table-bordered table-striped" id="datatable" width="100%" style="font-size: 9px">
-      <thead class="text-center bg-gray">
-        <tr>
+      <thead>
+        <tr class="text-center bg-gray">
           <th rowspan="2">No</th>
           <th rowspan="2">Tanggal Input</th>
-          <th rowspan="2">No SPJ</th>
+          <th rowspan="2">No SPJ / No Generate</th>
           <th rowspan="2">Tanggal SPJ</th>
           <th rowspan="2">No Barcode</th>
           <th rowspan="2">Transaksi</th>
@@ -23,7 +23,7 @@
           <?php endif ?>
           
         </tr>
-        <tr>
+        <tr class="text-center bg-gray">
           <th>Group Tujuan</th>
           <th>Tujuan</th>
           <th>Driver</th>
@@ -54,7 +54,16 @@
           <tr class="<?=$key->DETAIL_KASBON == 'BIAYA TAMBAHAN'?'text-kps':''?>" style="font-size: 9px;">
             <td><?=$i++?></td>
             <td><?=date("d F Y", strtotime($key->TGL_INPUT))?></td>
-            <td><?=$key->NO_SPJ?></td>
+            <td>
+              <?php
+              $url = $key->JENIS_FK == 'KASBON'?'monitoring/view_spj/'.$key->FK_ID:'monitoring/generate_spj';
+              ?>
+              <a href="<?=base_url()?><?=$url?>" class="btn <?=$key->DETAIL_KASBON == 'BIAYA TAMBAHAN'?'text-kps':''?>" style="font-size: 9px;">
+                <?=$key->NO_SPJ==null?$key->NO_GENERATE:$key->NO_SPJ?>
+              </a>
+              
+                
+            </td>
             <td><?=$key->TGL_SPJ == null ? '' :date("d F Y", strtotime($key->TGL_SPJ))?></td>
             <td><?=$key->QR_CODE?></td>
             <td><?=$key->JENIS_KASBON?></td>
@@ -106,7 +115,6 @@
       'ordering': false,
       order: [[0, 'asc']],
       info: false, 
-      
     } ); 
 	});
 </script>

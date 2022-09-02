@@ -42,6 +42,28 @@
 				</td>
 			</tr>
 		<?php endforeach ?>
+		<?php foreach ($dataBA as $ba): ?>
+			<tr>
+				<td><?=$ba->TGL_INPUT?></td>
+				<td><?=$ba->NO_BIAYA_ADMIN?></td>
+				<td><?=$ba->TGL_APPROVE?></td>
+				<td></td>
+				<td class="text-center">
+					<div class="icheck-orange icheck-kps d-inline">
+	          <input 
+	            type="checkbox" 
+	            id="<?=$ba->NO_BIAYA_ADMIN?>" 
+	            name="inputCheckBiayaAdmin"
+	            class="checkSPJ"
+	            value="<?=$ba->NO_BIAYA_ADMIN?>"
+	            rp="<?=$ba->BIAYA?>">
+	          <label for="<?=$ba->NO_BIAYA_ADMIN?>">
+	            
+	          </label>
+	        </div>
+				</td>
+			</tr>
+		<?php endforeach ?>
 	</tbody>
 </table>
 <script type="text/javascript">

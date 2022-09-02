@@ -176,6 +176,10 @@
                       Receive Generate
                     </a>
                   </td>
+                  <td style="display: none"></td>
+                  <td style="display: none"></td>
+                  <td style="display: none"></td>
+                  <td style="display: none"></td>
                 <?php else: ?>
                   <td><?=$key->TGL_RECEIVE==null?'':date("d F Y", strtotime($key->TGL_RECEIVE))?></td>
                   <td>

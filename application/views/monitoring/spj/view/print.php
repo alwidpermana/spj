@@ -10,7 +10,7 @@
       border-collapse: collapse;
       font-size: 12px;
     }
-    .tableTest th td {
+    .tableTest tbody,th,td {
         padding: 2px 3px 2px 3px;
     }
     .invoice-info{
@@ -69,54 +69,54 @@
     <!-- info row -->
     <br>
     <?php foreach ($data as $key): ?>
-      <div class="row invoice-info">
+      <div class="row invoice-info" style="font-size: 16px !important">
         <div class="col-sm-4">
           <div class="row">
-            <div class="col-sm-4">Jenis SPJ</div>
-            <div class="col-sm-8">: <?=$key->NAMA_JENIS?></div>
+            <div class="col-sm-5">Jenis SPJ</div>
+            <div class="col-sm-7">: <?=$key->NAMA_JENIS?></div>
           </div>
           <div class="row">
-            <div class="col-sm-4">Kendaraan</div>
-            <div class="col-sm-8">: <?=$key->KENDARAAN?></div>
+            <div class="col-sm-5">Kendaraan</div>
+            <div class="col-sm-7">: <?=$key->KENDARAAN?></div>
           </div>
           <div class="row">
-            <div class="col-sm-4">Merk</div>
-            <div class="col-sm-8">: <?=$key->MERK?></div>
+            <div class="col-sm-5">Merk</div>
+            <div class="col-sm-7">: <?=$key->MERK?></div>
           </div>
         </div>
         <div class="col-sm-4">
           <div class="row">
-            <div class="col-sm-4">Tanggal SPJ</div>
-            <div class="col-sm-8">: <?=date("d F Y", strtotime($key->TGL_SPJ))?></div>
+            <div class="col-sm-5">Tanggal SPJ</div>
+            <div class="col-sm-7">: <?=date("d F Y", strtotime($key->TGL_SPJ))?></div>
           </div>
           <div class="row">
-            <div class="col-sm-4">Jenis Kendaraan</div>
-            <div class="col-sm-8">: <?=$key->JENIS_KENDARAAN?></div>
+            <div class="col-sm-5">Jenis Kendaraan</div>
+            <div class="col-sm-7">: <?=$key->JENIS_KENDARAAN?></div>
           </div>
           <div class="row">
-            <div class="col-sm-4">Type</div>
-            <div class="col-sm-8">: <?=$key->TYPE?></div>
+            <div class="col-sm-5">Type</div>
+            <div class="col-sm-7">: <?=$key->TYPE?></div>
           </div>
         </div>
         <div class="col-sm-4">
           <div class="row">
-            <div class="col-sm-4">No SPJ</div>
-            <div class="col-sm-8">: <?=$key->NO_SPJ?></div>
+            <div class="col-sm-5">No SPJ</div>
+            <div class="col-sm-7">: <?=$key->NO_SPJ?></div>
           </div>
           <div class="row">
-            <div class="col-sm-4">No Inventaris</div>
-            <div class="col-sm-8">: <?=$key->NO_INVENTARIS?></div>
+            <div class="col-sm-5">No Inventaris</div>
+            <div class="col-sm-7">: <?=$key->NO_INVENTARIS?></div>
           </div>
           <div class="row">
-            <div class="col-sm-4">No TNKB</div>
-            <div class="col-sm-8">: <?=$key->NO_TNKB?></div>
+            <div class="col-sm-5">No TNKB</div>
+            <div class="col-sm-7">: <?=$key->NO_TNKB?></div>
           </div>
         </div>
       </div>
-      <div class="row invoice-info">
-        <div class="col-sm-4">
+      <div class="row invoice-info" style="font-size: 16px !important">
+        <div class="col-sm-5">
           <div class="row">
-            <div class="col-sm-4">No TNKB</div>
+            <div class="col-sm-4">Tujuan</div>
             <div class="col-sm-8">
               : <?php 
                 $noLokasi = 1;
@@ -134,7 +134,7 @@
       </div>
       <div class="row invoice-info">
         <div class="col-8">
-          <table class="tableTest" border="1" width="100%">
+          <table class="tableTest" border="1" width="100%" style="font-size: 16px !important">
             <tr class="text-center">
               <th>Objek</th>
               <th>Nama/Perusahaan</th>
@@ -151,7 +151,7 @@
           <?php endforeach ?>
           </table>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-4" style="font-size: 16px !important">
           <div class="row">
             <div class="col-sm-6">
               
@@ -230,7 +230,7 @@
       </div>
       <div class="row invoice-info" style="padding-top: 10px;">
         <div class="col-12">
-          <table class="tableTest" width="100%" border="1">
+          <table class="tableTest" width="100%" border="1" style="font-size: 16px !important;">
             <tr class="text-center">
               <td>PIC</td>
               <td>Subjek</td>
@@ -277,9 +277,9 @@
           </table>
         </div>
       </div>
-      <div class="row invoice-info" style="padding-top: 10px;">
+      <div class="row invoice-info" style="padding-top: 10px;" style="font-size: 16px !important;">
         <div class="col-6">
-          <table class="tableTest" border="1" width="100%">
+          <table class="tableTest" border="1" width="100%" style="font-size: 16px !important;">
             <tr class="text-center">
               <td rowspan="2" width="10%" style="border: 1px solid; border: 1px solid; border-top-color: white; border-bottom-color: white; border-left-color: white;"></td>
              
@@ -308,14 +308,14 @@
             </tr>
           </table>
         </div>
-        <div class="col-md-4"></div>
-        <div class="col-sm-2">
-          <table class="tableTest text-center" width="100%" border="1">
+        <div class="col-md-3"></div>
+        <div class="col-sm-3">
+          <table class="tableTest text-center" width="100%" border="1" style="font-size: 16px !important;">
             <tr>
               <th colspan="2">Validasi & Cap Security</th>
             </tr>
             <tr>
-              <td height="50px" width="50%"></td>
+              <td height="75px" width="50%"></td>
               <td></td>
             </tr>
             <tr>

@@ -508,6 +508,23 @@
                               </div>
                             </div>
                           </div>
+                          <br>
+                          <div class="row rekanan d-none">
+                            <div class="col-md-2">
+                              <div class="row">
+                                <div class="col-md-12"> 
+                                  <label>Rekanan</label>  
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-2">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <input type="text" id="inputRekananKendaraan" class="form-control form-control-sm inputan" value="<?=$key->REKANAN_KENDARAAN?>">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                           
 
                           <div class="row" style="padding-top: 50px">
@@ -843,13 +860,11 @@
             <div class="row">
               <div class="col-md-2"></div>
               <div class="col-md-8">
-                <form id="search">
-                  <div class="form-group">
-                    <label>&nbsp;</label>
-                    <span class="fa fa-search form-control-icon"></span>
-                    <input type="search" class="form-control form-control-search" id="searchKendaraan" placeholder="Cari Berdasarkan No SPJ">
-                  </div>
-                </form>
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <span class="fa fa-search form-control-icon"></span>
+                  <input type="search" class="form-control form-control-search" id="searchKendaraan" placeholder="Cari Berdasarkan No SPJ">
+                </div>
               </div>
             </div>
             <br>

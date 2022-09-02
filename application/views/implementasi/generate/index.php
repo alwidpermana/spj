@@ -55,6 +55,16 @@
                 <input type="hidden" id="inputTotalRP" value="">
               </div>
               <div class="row">
+                <div class="col-md-2"><label>Jumlah Biaya Admin</label></div>
+                <div class="col-md-4">: <span id="showJumlahBiayaAdmin"></span></div>
+                <input type="hidden" id="inputJumlahBiayaAdmin">
+              </div>
+              <div class="row">
+                <div class="col-md-2"><label>Total Biaya Admin Rp.</label></div>
+                <div class="col-md-4">: <span id="showTotalBiayaAdmin"></span></div>
+                <input type="hidden" id="inputTotalBiayaAdmin" value="">
+              </div>
+              <div class="row">
                 <div class="col-md-2"><label>No Generate Req</label></div>
                 <div class="col-md-4">: <span id="showNoGenerate"></span></div>
                 <input type="hidden" id="inputNoGenerate" value="">
@@ -110,9 +120,12 @@
       var cekAll = $(this)[0].checked;
       if (cekAll == true) {
         $('[name="inputCheckSPJ"]').attr("checked","checked");
+        $('[name="inputCheckBiayaAdmin"]').attr("checked","checked");
       } else {
         $('[name="inputCheckSPJ"]').removeAttr("checked","checked");
+        $('[name="inputCheckBiayaAdmin"]').removeAttr("checked","checked");
       }
+
       var totalRP = 0;
       var jmlSPJ = 0;
       var noSPJ = [];
@@ -123,8 +136,21 @@
       $('#inputJumlahSPJ').val(noSPJ.length);
       $('#inputTotalRP').val(totalRP);
       $('#showJumlahSPJ').html(noSPJ.length);
-      $('#showTotalRP').html(totalRP);
+      $('#showTotalRP').html(formatRupiah(Number(totalRP).toFixed(0), 'Rp. '));
       console.log(noSPJ);
+
+      var totalBA =0;
+      var jmlBA = 0;
+      var noBA = [];
+      $.each($('[name="inputCheckBiayaAdmin"]:checked'), function(){
+        totalBA +=parseInt($(this).attr("rp"))
+        noBA.push($(this).val());
+      })
+      $('#inputJumlahBiayaAdmin').val(noBA.length);
+      $('#inputTotalBiayaAdmin').val(totalBA);
+      $('#showJumlahBiayaAdmin').html(noBA.length);
+      $('#showTotalBiayaAdmin').html(formatRupiah(Number(totalBA).toFixed(0), 'Rp. '));
+      console.log(noBA)
     });
     $('#getTabel').on('click','[name="inputCheckSPJ"]', function(){
       var totalRP = 0;
@@ -137,7 +163,20 @@
       $('#inputJumlahSPJ').val(noSPJ.length);
       $('#inputTotalRP').val(totalRP);
       $('#showJumlahSPJ').html(noSPJ.length);
-      $('#showTotalRP').html(totalRP);
+      $('#showTotalRP').html(formatRupiah(Number(totalRP).toFixed(0), 'Rp. '));
+    })
+    $('#getTabel').on('click','[name="inputCheckBiayaAdmin"]', function(){
+      var totalRP = 0;
+      var jmlSPJ = 0;
+      var noSPJ = [];
+      $.each($('[name="inputCheckBiayaAdmin"]:checked'), function(){
+        totalRP +=parseInt($(this).attr("rp"))
+        noSPJ.push($(this).val());
+      })
+      $('#inputJumlahBiayaAdmin').val(noSPJ.length);
+      $('#inputTotalBiayaAdmin').val(totalRP);
+      $('#showJumlahBiayaAdmin').html(noSPJ.length);
+      $('#showTotalBiayaAdmin').html(formatRupiah(Number(totalRP).toFixed(0), 'Rp. '));
     })
     
 
@@ -154,16 +193,28 @@
         var filJenis = $('#filJenis').val();
         var noSPJ=[];
         var totalRP=0;
+        var noBA=[];
+        var totalBA=0;
+        var inputJumlahBA=0;
+        var inputTotalBA = 0;
         $.each($('[name="inputCheckSPJ"]:checked'), function(){
           noSPJ.push($(this).val());
           inputTotalRP +=parseInt($(this).attr("rp"))
         })
         inputJumlahSPJ = noSPJ.length;
         console.log(totalRP)
+        
+        $.each($('[name="inputCheckBiayaAdmin"]:checked'), function(){
+          noBA.push($(this).val());
+          inputTotalBA +=parseInt($(this).attr("rp"))
+        })
+        inputJumlahBA = noBA.length;
+        console.log(inputJumlahBA);
+
         if (noSPJ.length >0) {
           $.ajax({
             type:'post',
-            data:{noSPJ,inputNoGenerate,inputJumlahSPJ,inputTotalRP, filJenis},
+            data:{noSPJ,inputNoGenerate,inputJumlahSPJ,inputTotalRP, filJenis, inputJumlahBA, inputTotalBA, noBA},
             dataType:'json',
             url:url+'/Implementasi/saveGenerateSPJ',
             cache: false,
@@ -253,6 +304,22 @@
 
       }
     })
+  }
+  function formatRupiah(angka, prefix){
+    var number_string = angka.replace(/[^,\d]/g, '').toString(),
+    split       = number_string.split(','),
+    sisa        = split[0].length % 3,
+    rupiah        = split[0].substr(0, sisa),
+    ribuan        = split[0].substr(sisa).match(/\d{3}/gi);
+
+    // tambahkan titik jika yang di input sudah menjadi angka ribuan
+    if(ribuan){
+      separator = sisa ? '.' : '';
+      rupiah += separator + ribuan.join('.');
+    }
+
+    rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+    return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
   }
 </script>
 <!-- FootJS -->

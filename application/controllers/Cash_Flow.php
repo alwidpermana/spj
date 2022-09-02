@@ -125,7 +125,8 @@ class Cash_Flow extends CI_Controller {
 	{
 		$filJenis = $this->input->get("filJenis");
 		$filStatus = $this->input->get("filStatus");
-		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenis, $filStatus)->result();
+		$filJenisSPJ = $this->input->get("filJenisSPJ");
+		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenis, $filStatus, $filJenisSPJ)->result();
 		$this->load->view("cash_flow/pengajuan/tabel", $data); 
 	}
 	public function savePengajuanSaldo()
@@ -301,7 +302,7 @@ class Cash_Flow extends CI_Controller {
 		$filJenisKasbon = $this->input->get("filJenisKasbon");
 		$filJenisSPJ = $this->input->get("filJenisSPJ");
 		$filStatus = $this->input->get("filStatus");
-		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenisKasbon, $filStatus)->result();
+		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenisKasbon, $filStatus, $filJenisSPJ)->result();
 		$this->load->view("cash_flow/my_cash_flow/data", $data);
 	}
 	public function getAllSaldo()
@@ -361,8 +362,13 @@ class Cash_Flow extends CI_Controller {
 		$jenisKasbon = $this->input->post("jenisKasbon");
 		$jenisSPJ = $this->input->post("jenisSPJ");
 		$jumlah = $this->input->post("jumlah");
-
-		$jenis = $jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':$jenisKasbon.' '.$jenisSPJ;
+		if ($jenisKasbon == 'Kasbon BBM') {
+			$jenis = 'Kasbon Voucher BBM';
+		}elseif($jenisKasbon == 'Kasbon TOL (Biaya Admin)'){
+			$jenis = 'Kasbon TOL '.$jenisSPJ;
+		}else{
+			$jenis = $jenisKasbon.' '.$jenisSPJ;
+		}
 		$data = $this->M_Cash_Flow->approveGenerate($id, $jenis, $jumlah);
 		echo json_encode($data);
 	}
@@ -372,8 +378,14 @@ class Cash_Flow extends CI_Controller {
 		$jenisKasbon = $this->input->post("jenisKasbon");
 		$jenisSPJ = $this->input->post("jenisSPJ");
 		$jumlah = $this->input->post("jumlah");
-
-		$kasbon = $jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':$jenisKasbon.' '.$jenisSPJ;
+		if ($jenisKasbon == 'Kasbon BBM') {
+			$kasbon = 'Kasbon Voucher BBM';
+		}elseif ($jenisKasbon == 'Kasbon TOL (Biaya Admin)') {
+			$kasbon = 'Kasbon TOL '.$jenisSPJ;
+		}else{
+			$jenisKasbon.' '.$jenisSPJ;
+		}
+		// $kasbon = $jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':$jenisKasbon.' '.$jenisSPJ;
 
 		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($kasbon, 'SUB KAS');
 		$saldo = 0;

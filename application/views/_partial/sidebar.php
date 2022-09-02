@@ -98,7 +98,7 @@
                       <p>Supir Rental</p>
                     </a>
                   </li>
-                  <?php if ($this->session->userdata("LEVEL")<=1): ?>
+                  <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK")=='00004'): ?>
                     <li class="nav-item">
                       <a href="<?=base_url()?>data_master/verifikasi_karyawan" class="nav-link ">
                         <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_approve'?'text-dark':''?>" style="font-size: 11px;"></i>
@@ -126,7 +126,7 @@
                   <p>Konfigurasi</p>
                 </a>
               </li>
-              <?php if ($this->session->userdata("LEVEL")<=1): ?>
+              <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK")=='00004'): ?>
                 <li class="nav-item list-menu-open">
                   <a href="<?=base_url()?>data_master/verifikasi_konfigurasi" class="nav-link ">
                     <i class="fas fa-clipboard-check nav-icon <?=substr($side, 12) == 'verif_konfig'?'text-dark':''?>" style="font-size: 11px;"></i>
@@ -297,6 +297,12 @@
                 <a href="<?=base_url()?>monitoring/pic_jam_ke_2" class="nav-link ">
                   <i class="fas fa-user-plus nav-icon <?=substr($side, 11) == 'pic_2'?'text-dark':''?>" style="font-size: 11px;"></i>
                   <p>PIC Jam Ke-2</p>
+                </a>
+              </li>
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>monitoring/ng_security" class="nav-link ">
+                  <i class="fas fa-user-slash nav-icon <?=substr($side, 11) == 'ng'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>NG Security</p>
                 </a>
               </li>
             </ul>

@@ -8,9 +8,13 @@ class M_Implementasi extends CI_Model {
 	public function getValidasiPIC($noSPJ)
 	{
 		$sql = "SELECT
-					*
+					a.*,
+					JENIS_PIC
 				FROM
-					SPJ_VALIDASI_PIC
+					SPJ_VALIDASI_PIC a
+				INNER JOIN
+					SPJ_PENGAJUAN_PIC b 
+				ON a.PIC = b.NIK AND a.NO_SPJ = b.NO_PENGAJUAN
 				WHERE
 					NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);
@@ -391,13 +395,13 @@ class M_Implementasi extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-        $statusUS1 = $value[0] == 'OK' ? 'CLOSE' : 'OPEN';
-        $statusUS2 = $value[2] == 'OK' ? 'CLOSE' : 'OPEN';
-        $statusUM = $value[4] == 'OK' ? 'CLOSE' : 'OPEN';
+        // $statusUS1 = $value[0] == 'OK' ? 'CLOSE' : 'OPEN';
+        // $statusUS2 = $value[2] == 'OK' ? 'CLOSE' : 'OPEN';
+        // $statusUM = $value[4] == 'OK' ? 'CLOSE' : 'OPEN';
         $sql = $this->db->query("UPDATE SPJ_BIAYA_TAMBAHAN SET 
-        							STATUS_US1 = '$statusUS1', 
-        							STATUS_US2 = '$statusUS2', 
-        							STATUS_MAKAN = '$statusUM', 
+        							STATUS_US1 = 'CLOSE', 
+        							STATUS_US2 = 'CLOSE', 
+        							STATUS_MAKAN = 'CLOSE', 
         							PIC_US1 = '$user', 
         							PIC_US2 = '$user', 
         							PIC_MAKAN = '$user', 
@@ -504,7 +508,10 @@ class M_Implementasi extends CI_Model {
 						WHEN MEDIA_UANG_BBM = 'Voucher' THEN PIC_VOUCHER
 						WHEN ADJUSTMENT_MANAJEMEN= 'Y' THEN BBM_PIC
 						ELSE PIC_CLOSE
-					END AS PIC_BBM
+					END AS PIC_BBM,
+					KEPUTUSAN_US1,
+					KEPUTUSAN_US2,
+					KEPUTUSAN_MAKAN
 				FROM
 				(
 					SELECT
@@ -531,9 +538,23 @@ class M_Implementasi extends CI_Model {
 				(
 					SELECT
 						NO_SPJ,
-						UANG_SAKU1,
-						UANG_SAKU2,
-						UANG_MAKAN
+						CASE
+							WHEN KEPUTUSAN_US1 = 'NG' THEN 0
+							ELSE UANG_SAKU1
+						END AS UANG_SAKU1,
+
+						CASE
+							WHEN KEPUTUSAN_US2 = 'NG' THEN 0
+							ELSE UANG_SAKU2
+						END AS UANG_SAKU2,
+
+						CASE
+							WHEN KEPUTUSAN_MAKAN = 'NG' THEN 0
+							ELSE UANG_MAKAN
+						END AS UANG_MAKAN,
+						KEPUTUSAN_US1,
+						KEPUTUSAN_US2,
+						KEPUTUSAN_MAKAN
 					FROM
 						SPJ_BIAYA_TAMBAHAN
 				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
@@ -667,6 +688,23 @@ class M_Implementasi extends CI_Model {
 				ORDER BY TGL_INPUT ASC";
 		return $this->db->query($sql);
 	}
+	public function getDataBiayaAdmin($jenisId)
+	{
+		$sql = "SELECT
+					TGL_INPUT,
+					NO_BIAYA_ADMIN,
+					TGL_APPROVE,
+					BIAYA,
+					JENIS_ID
+				FROM
+					SPJ_BIAYA_ADMIN
+				WHERE
+					STATUS_APPROVE = 'APPROVED' AND
+					NO_BIAYA_ADMIN IS NOT NULL AND
+					NO_GENERATE IS NULL AND
+					JENIS_ID = '$jenisId'";
+		return $this->db->query($sql);
+	}
 	public function getTotalSPJ()
 	{
 		$sql = "SELECT
@@ -695,6 +733,37 @@ class M_Implementasi extends CI_Model {
 						STATUS_DATA = 'SAVED' AND
 						STATUS_SPJ = 'CLOSE' AND
 						NO_GENERATE IS NULL
+				)Q2 ON Q1.LINK = Q2.LINK";
+		return $this->db->query($sql);
+	}
+	public function getTotalBiayaAdmin()
+	{
+		$sql = "SELECT
+					JML_BIAYA_ADMIN,
+					TOTAL_BIAYA_ADMIN
+				FROM
+				(
+					SELECT
+						COUNT(ID) AS JML_BIAYA_ADMIN,
+						'LINK' AS LINK
+					FROM
+						SPJ_BIAYA_ADMIN
+					WHERE
+						STATUS_APPROVE = 'APPROVED' AND
+						NO_BIAYA_ADMIN IS NOT NULL AND
+						NO_GENERATE IS NULL
+				)Q1 
+				LEFT JOIN
+				(
+					SELECT
+						SUM(BIAYA) AS TOTAL_BIAYA_ADMIN,
+						'LINK' AS LINK
+					FROM
+						SPJ_BIAYA_ADMIN
+					WHERE
+						STATUS_APPROVE = 'APPROVED' AND
+						NO_BIAYA_ADMIN IS NOT NULL AND
+						NO_GENERATE IS NULL		
 				)Q2 ON Q1.LINK = Q2.LINK";
 		return $this->db->query($sql);
 	}
@@ -728,13 +797,13 @@ class M_Implementasi extends CI_Model {
         }
         return $noGenerate;
 	}
-	public function saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis)
+	public function saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis, $jmlBA, $inputTotalBA)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $tanggal2 = date("Y-m-d");
         $user = $this->session->userdata("NIK");
-		$sql = "INSERT INTO SPJ_GENERATE VALUES('$inputNoGenerate','$tanggal2',$inputJumlahSPJ, $inputTotalRP,null,null, '$user',$filJenis,'$tanggal')";
+		$sql = "INSERT INTO SPJ_GENERATE(NO_GENERATE, TGL_GENERATE, JML_SPJ, TOTAL_RP, PIC_INPUT, JENIS_SPJ, TGL_INPUT, JML_BA, TOTAL_BA) VALUES('$inputNoGenerate','$tanggal2',$inputJumlahSPJ, $inputTotalRP, '$user',$filJenis,'$tanggal',$jmlBA, $inputTotalBA)";
 		return $this->db->query($sql);
 	}
 	public function getBiayaTotalPerNoSPJ($noSPJ)
@@ -807,7 +876,7 @@ class M_Implementasi extends CI_Model {
 				)Q1";
 		return $this->db->query($sql);
 	}
-	public function generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $jenisID)
+	public function generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $jenisID, $jmlBA, $inputTotalBA)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
@@ -815,6 +884,10 @@ class M_Implementasi extends CI_Model {
 		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO)VALUES('$user','$tanggal','Generate',$kasbonSPJ, 'Kasbon SPJ','Kas Induk','$inputNoGenerate',$jenisID,'OPEN')");
 		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO)VALUES('$user','$tanggal','Generate',$kasbonBBM, 'Kasbon BBM','Kas Induk','$inputNoGenerate',$jenisID,'OPEN')");
 		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO)VALUES('$user','$tanggal','Generate',$kasbonTOL, 'Kasbon TOL','Kas Induk','$inputNoGenerate',$jenisID,'OPEN')");
+		if ($jmlBA>0) {
+			$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO)VALUES('$user','$tanggal','Generate',$inputTotalBA, 'Kasbon TOL (Biaya Admin)','Kas Induk','$inputNoGenerate',$jenisID,'OPEN')");
+		}
+		
 		return $sql;
 	}
 	public function getHistoryInOutLokal($noSPJ)
@@ -853,6 +926,24 @@ class M_Implementasi extends CI_Model {
         $user = $this->session->userdata("NIK");
 		$sql = "INSERT INTO SPJ_HISTORY_IN_OUT(TGL_INPUT, PIC_INPUT, NO_SPJ, STATUS, KM)VALUES('$tanggal','$user','$noSPJ','$status', $km)";
 		$this->db->query("UPDATE SPJ_PENGAJUAN SET STATUS_PERJALANAN = '$status' WHERE NO_SPJ= '$noSPJ'");
+		return $this->db->query($sql);
+	}
+	public function saveHistoryNG($noSPJ, $jenis, $subjek, $keterangan, $status)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "INSERT INTO SPJ_HISTORY_NG_SECURITY(NO_SPJ, PIC_INPUT, TGL_INPUT, JENIS, SUBJEK, ALASAN, STATUS)VALUES('$noSPJ','$user','$tanggal', '$jenis','$subjek','$keterangan','$status')";
+        return $this->db->query($sql);
+	}
+	public function updateHistoryNG($noSPJ)
+	{
+		$sql = "UPDATE SPJ_HISTORY_NG_SECURITY SET STATUS_NOTIF = 'READ' WHERE NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function saveLokalSelesai($noSPJ)
+	{
+		$sql = "UPDATE SPJ_PENGAJUAN SET LOKAL_SELESAI = 'Y' WHERE NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);
 	}
 }

@@ -70,6 +70,7 @@ class Monitoring extends CI_Controller {
 		$data['adjustment'] = $this->M_Implementasi->getDataAdjustment($no_spj)->result();
 		$data['realisasi'] = $this->M_Implementasi->realisasiBiayaSPJ($no_spj)->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['history'] = $this->M_Implementasi->getHistoryInOutLokal($no_spj)->result();
 		if ($id=='') {
 			redirect("Monitoring/spj");
 		}else{
@@ -410,8 +411,9 @@ class Monitoring extends CI_Controller {
 		$inputBiaya = $this->input->post("inputBiaya");
 		$inputKeterangan = $this->input->post("inputKeterangan");
 		$inputId = $this->input->post("inputID");
+		$inputNo = $this->M_Monitoring->getNoBiayaAdmin();
 		if ($inputId=='') {
-			$data = $this->M_Monitoring->saveBiayaAdmin($inputTglBiaya, $inputJenis, $inputBiaya, $inputKeterangan);
+			$data = $this->M_Monitoring->saveBiayaAdmin($inputTglBiaya, $inputJenis, $inputBiaya, $inputKeterangan, $inputNo);
 		}else{
 			$data = $this->M_Monitoring->updateBiayaAdmin($inputTglBiaya, $inputJenis, $inputBiaya, $inputKeterangan, $inputId);
 		}
@@ -476,7 +478,41 @@ class Monitoring extends CI_Controller {
 			$this->M_Cash_Flow->updateSaldo($kasbon, $totalSaldo, 'SUB KAS');
 			$this->M_Cash_Flow->saveSubKas($kasbon,'CREDIT', $total, 'KASBON', $id,'TRANSAKSI AWAL');
 		}
-		
+	}
+	public function ng_security()
+	{
+		$data['side']='monitoring-ng';
+		$data['page']='Monitoring NG Security';
+		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$this->load->view("monitoring/ng/security/index", $data);
+	}
+	public function monitoringNGSecurity()
+	{
+		$filBulan = $this->input->get("filBulan");
+		$filTahun = $this->input->get("filTahun");
+		$filJenis = $this->input->get("filJenis");
+		$filSearch = $this->input->get("filSearch");
+		$data['data'] = $this->M_Monitoring->monitoringNGSecurity($filBulan, $filTahun, $filJenis, $filSearch)->result();
+		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
+		$this->load->view("monitoring/ng/security/tabel", $data);
+	}
+	public function detailNGSecurity()
+	{
+		$noSPJ = $this->input->get("noSPJ");
+		$data['data'] = $this->M_Monitoring->detailNGSecurity($noSPJ)->result();
+		$this->M_Implementasi->updateHistoryNG($noSPJ);
+		$this->load->view("monitoring/ng/security/detail", $data);
+	}
+	public function getNotifNGSecurity()
+	{
+		$data = $this->M_Monitoring->getNotifNGSecurity()->num_rows();
+		echo json_encode($data);
+	}
+	public function getNoBiayaAdmin()
+	{
+		$data = $this->M_Monitoring->getNoBiayaAdmin();
+		echo json_encode($data);
 	}
 
 }

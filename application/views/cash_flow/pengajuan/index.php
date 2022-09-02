@@ -40,13 +40,27 @@
                     </div>
                     <div class="col-md-2">
                       <div class="form-group">
+                        <label>Jenis SPJ</label>
+                          <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenisSPJ">
+                            <option value="">ALL</option>
+                            <?php foreach ($spj as $js): ?>
+                              <option value="<?=$js->ID_JENIS?>"><?=$js->NAMA_JENIS?></option>
+                            <?php endforeach ?>
+                              <option value="0">-</option>
+                          </select>
+                      </div>
+                    </div>
+                    <div class="col-md-2">
+                      <div class="form-group">
                         <label>Status</label>
                         <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
-                          
+                          <option value="">ALL</option>
+                          <option value="OPEN">OPEN</option>
+                          <option value="CLOSE">CLOSE</option>
                         </select>
                       </div>
                     </div>
-                    <div class="col-md-6"></div>
+                    <div class="col-md-4"></div>
                     <div class="col-md-2">
                       <div class="form-group">
                         <label>&nbsp;</label>
@@ -113,7 +127,7 @@
               <div class="col-md-12">
                 <div class="form-group">
                   <label>Jenis SPJ</label>
-                  <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisSPJ">
+                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisSPJ">
                     <?php foreach ($spj as $key): ?>
                       <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
                     <?php endforeach ?>
@@ -193,6 +207,9 @@
     $('#inputJenisKasbon').on('change', function(){
       kondisiPilihanJenisSPJ()
     });
+    $('.filter').on('change', function(){
+      getPengajuan()  
+    })
     getPengajuan()
     kondisiPilihanJenisSPJ();
     var savePengajuan = $('.savePengajuan').ladda();
@@ -335,9 +352,10 @@
   function getPengajuan() {
     var filJenis = $('#filJenis').val();
     var filStatus = $('#filStatus').val();
+    var filJenisSPJ = filJenis == 'Kasbon BBM'?'':$('#filJenisSPJ').val();
     $.ajax({
       type:'get',
-      data:{filJenis, filStatus},
+      data:{filJenis, filStatus, filJenisSPJ},
       url:'getDataPengajuan',
       cache: false,
       async: true,

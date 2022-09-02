@@ -77,7 +77,7 @@ class Implementasi extends CI_Controller {
 		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
 		$data['pic2'] = $this->M_Pengajuan->getPengajuanPIC($group, $noSPJ)->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
-		$data['validasiPIC'] = $this->M_Implementasi->getValidasiPIC($noSPJ)->result();
+		$data['validasiPIC'] = $this->M_Implementasi->getValidasiPIC($noSPJ, '')->result();
 		$data['km'] = $this->M_Implementasi->getKM($noTNKB)->result();
 		$data['validasi'] = $this->M_Implementasi->getValidasiSPJ($noSPJ)->result();
 		$data['history'] = $this->M_Implementasi->getHistoryInOutLokal($noSPJ)->result();
@@ -146,11 +146,13 @@ class Implementasi extends CI_Controller {
 		if ($inputGroupTujuan == '4') {
 			$this->M_Implementasi->saveHistoryInOut($inputNoSPJ, 'IN',$inputKMIn);
 		}
+		// $data = true;
 		echo json_encode($data);
 	}
 	public function saveUangTambahan()
 	{
 		date_default_timezone_set('Asia/Jakarta');
+		$inputGroupTujuan = $this->input->post("inputGroupTujuan");
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$inputJenisId = $this->input->post("inputJenisId");
 		$validasi = $this->M_Implementasi->getValidasiSPJ($inputNoSPJ)->result();
@@ -172,6 +174,8 @@ class Implementasi extends CI_Controller {
           $kepulanganJ = date("Y-m-d H:i");
           $keberangkatanH = date("Y-m-d", strtotime($vld->KEBERANGKATAN));
           $kepulanganH = date("Y-m-d");
+          $tengahBerangkat = date("Y-m-d", strtotime($vld->KEBERANGKATAN)). ' 24:00';
+          $tengahPulang = date("Y-m-d"). ' 00:00';
         }
 
         foreach ($jam_tambahan as $jt) {
@@ -194,31 +198,39 @@ class Implementasi extends CI_Controller {
         if ($selisihJam >= $jam1 && $selisihHari==0) {
           $jm = $selisihJam - $jam1;
           
-          $uangSaku1 = $tambahanUangSaku1;
-          $uangSaku2 = $tambahanUangSaku2; 
-          // if ($jm>0) {
-          // 	// && $jm<=3
-          //   $uangSaku1 = $tambahanUangSaku1;
-          // }else{
-          //   $uangSaku1 = 0;
-          // }
-
-          // if ($jm>3) {
-          //   $uangSaku2 = $tambahanUangSaku2;
-          // } else {
-          //   $uangSaku2 = 0;
-          // }
-          
-
-        }elseif($selisihHari>0){
-        	$jm = $selisihHari>1?($selisihJam+($selisihHari*24)) - $jam2: $selisihJam - $jam2;
-          if ($jm>0) {
+          // $uangSaku1 = $tambahanUangSaku1;
+          // $uangSaku2 = $tambahanUangSaku2; 
+          if ($jm>=0) {
+          	// && $jm<=3
             $uangSaku1 = $tambahanUangSaku1;
           }else{
             $uangSaku1 = 0;
           }
 
-          if ($jm>3) {
+          if ($jm>=4) {
+            $uangSaku2 = $tambahanUangSaku2;
+          } else {
+            $uangSaku2 = 0;
+          }
+          
+
+        }elseif($selisihHari>0){
+        	$tengah1 = date_create($tengahBerangkat);
+        	$tengah2 = date_create($tengahPulang);
+        	$selisih1 = date_diff($berangkatJ, $tengah1);
+        	$selisihJamTengah1 = $selisih1->h;
+
+        	$selisih2 = date_diff($pulangJ, $tengah2);
+        	$selisihJamTengah2 = $selisih2->h;
+        	$selisihTengahFinal = $selisihJamTengah1 + $selisihJamTengah2;
+        	$jm = $selisihHari>1?($selisihJam+($selisihHari*24)) - $jam2: ($selisihTengahFinal - $jam2);
+          if ($jm>=0) {
+            $uangSaku1 = $tambahanUangSaku1;
+          }else{
+            $uangSaku1 = 0;
+          }
+
+          if ($jm>=4) {
             $uangSaku2 = $tambahanUangSaku2;
           } else {
             $uangSaku2 = 0;
@@ -234,20 +246,34 @@ class Implementasi extends CI_Controller {
         
         if ($jamPulang >= date("H:i",strtotime("19:00")) && $selisihHari == 0 || $selisihHari>0) {
           foreach ($uang_makan as $um) {
-            if ($jenisId == 1) {
-              $uangMakan = $um->BIAYA2;
-            }elseif ($jenisId == 2) {
-              $uangMakan = $um->BIAYA4;
-            }else{
-              $uangMakan = 0;
-            }
+          	if ($inputGroupTujuan == '4') {
+          		if ($um->JENIS_GROUP == 'Lokal') {
+          			if ($jenisId == 1) {
+		              $uangMakan = $um->BIAYA2;
+		            }elseif ($jenisId == 2) {
+		              $uangMakan = $um->BIAYA4;
+		            }else{
+		              $uangMakan = 0;
+		            }
+          		}
+          	}else{
+          		if ($um->JENIS_GROUP == 'Luar Kota') {
+        				if ($jenisId == 1) {
+		              $uangMakan = $um->BIAYA2;
+		            }elseif ($jenisId == 2) {
+		              $uangMakan = $um->BIAYA4;
+		            }else{
+		              $uangMakan = 0;
+		            }
+          		}	
+          	}
           }
         }else{
           $uangMakan = 0;
         }
 
         $data = $this->M_Implementasi->saveUangTambahan($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
-        // $test = array('uang saku1' =>$uangSaku1 ,'uang saku 2'=> $uangSaku2, 'uangMakan'=>$uangMakan, 'selisih jam'=>$selisihJam, 'selisih Hari'=>$selisihHari, 'jam 2'=>$jam2, 'jm'=>$jm);
+        // $test = array('uang saku1' =>$uangSaku1 ,'uang saku 2'=> $uangSaku2, 'uangMakan'=>$uangMakan, 'selisih jam'=>$selisihJam, 'selisih Hari'=>$selisihHari, 'jam 2'=>$jam2, 'jm'=>$jm,'selisih jam tengah 1 '=>$selisihJamTengah1, 'selsiih jam tengah 2'=>$selisihJamTengah2);
         // $this->M_Implementasi->saveAdjustmentUangTambah($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
         echo json_encode($data);
 
@@ -588,7 +614,10 @@ class Implementasi extends CI_Controller {
   	
   	$data = $this->M_Implementasi->saveKeputusanAdjustment2($value2, $inputNoSPJ);
   	$kasbon = 'Kasbon SPJ '.$inputJenisSPJ;
-  	$this->updateSaldo($inputIdSPJ, $kasbon, $totalBiaya,'BIAYA TAMBAHAN');
+  	if ($totalBiaya>0) {
+  		$this->updateSaldo($inputIdSPJ, $kasbon, $totalBiaya,'BIAYA TAMBAHAN');
+  	}
+  	
   	// $data = $this->M_Implementasi->updateKasbonOtomatis($inputNoSPJ, $inputUangMakanDiajukan, $inputUangJalanDiajukan, $inputBBMDiajukan);
   	echo json_encode($data);
 	}
@@ -622,6 +651,7 @@ class Implementasi extends CI_Controller {
 	{
 		$inputJenisSPJ = $this->input->get("filJenis");
 		$total = $this->M_Implementasi->getTotalSPJ()->result();
+		$dataBA = $this->M_Implementasi->getTotalBiayaAdmin()->result();
 		$noGenerate = $this->M_Implementasi->getNoGenerate($inputJenisSPJ);
 		$jumlahSPJ =0;
 		$totalRP = 0;
@@ -629,13 +659,20 @@ class Implementasi extends CI_Controller {
 			$jumlahSPJ = $key->JUMLAH_SPJ;
 			$totalRP = $key->TOTAL_RP;
 		}
-		$hasil = array('noGenerate' =>$noGenerate ,'jumlahSPJ'=>round($jumlahSPJ), 'totalRP'=> round($totalRP));
+		$jumlahBA = 0;
+		$totalBA = 0;
+		foreach ($dataBA as $ba) {
+			$jumlahBA = $ba->JML_BIAYA_ADMIN;
+			$totalBA = $ba->TOTAL_BIAYA_ADMIN;
+		}
+		$hasil = array('noGenerate' =>$noGenerate ,'jumlahSPJ'=>round($jumlahSPJ), 'totalRP'=> round($totalRP),'jumlahBA'=>round($jumlahBA), 'totalBA'=>round($totalBA));
 		echo json_encode($hasil);
 	}
 	public function getTabelGenerate()
 	{
 		$inputJenisSPJ = $this->input->get("filJenis");
 		$data['data'] = $this->M_Implementasi->getSPJForGenerate($inputJenisSPJ)->result();
+		$data['dataBA'] = $this->M_Implementasi->getDataBiayaAdmin($inputJenisSPJ)->result(); 
 		$this->load->view("implementasi/generate/tabel", $data);
 	}
 	public function saveGenerateSPJ()
@@ -645,6 +682,10 @@ class Implementasi extends CI_Controller {
 		$inputJumlahSPJ = $this->input->post("inputJumlahSPJ");
 		$inputTotalRP = $this->input->post("inputTotalRP");
 		$filJenis = $this->input->post("filJenis");
+		$inputJumlahBA = $this->input->post("inputJumlahBA");
+		$inputTotalBA = $this->input->post("inputTotalBA");
+		$noBA = $this->input->post("noBA");
+		$jmlBA = count($noBA);
 		$jmlNoSPJ = count($noSPJ);
 		$kasbonSPJ = 0;
 		$kasbonBBM = 0;
@@ -658,9 +699,18 @@ class Implementasi extends CI_Controller {
 			}
 			$this->db->query("UPDATE SPJ_PENGAJUAN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_SPJ = '$noSPJ[$i]'");
 		}
-		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis);
-		// $data = array('KASBON SPJ' =>$kasbonSPJ ,'KASBON BBM' =>$kasbonBBM, 'KASBON TOL' =>$kasbonTOL,'total'=>$kasbonSPJ+$kasbonBBM+$kasbonTOL );
-		$data = $this->M_Implementasi->generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $filJenis);
+
+		for ($ba=0; $ba <$jmlBA ; $ba++) { 
+			$this->db->query("UPDATE SPJ_BIAYA_ADMIN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_BIAYA_ADMIN='$noBA[$ba]'");
+		}
+
+		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis, $jmlBA, $inputTotalBA);
+		
+
+		// $data = array('KASBON SPJ' =>$kasbonSPJ ,'KASBON BBM' =>$kasbonBBM, 'KASBON TOL' =>$kasbonTOL,'total'=>$kasbonSPJ+$kasbonBBM+$kasbonTOL,'jmlBiayaAdmin'=>$jmlBA, 'totalBiayaAdmin'=>$inputTotalBA );
+
+
+		$data = $this->M_Implementasi->generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $filJenis, $jmlBA, $inputTotalBA);
 		
 		echo json_encode($data);
 	}
@@ -686,6 +736,41 @@ class Implementasi extends CI_Controller {
 		$totalSaldo = $saldo - $totalBiaya;
 		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
 		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalBiaya, 'KASBON', $id,$keterangan);
+	}
+	public function saveHistoryNG()
+	{
+		$noSPJ = $this->input->post("noSPJ");
+		$jenis = $this->input->post("jenis");
+		$status = $this->input->post("status");
+		$keteranganKendaraan = $this->input->post("keteranganKendaraan");
+		$noTNKB = $this->input->post("noTNKB");
+		if ($jenis == 'KENDARAAN') {
+			$data = $this->M_Implementasi->saveHistoryNG($noSPJ, $jenis, $noTNKB, $keteranganKendaraan, $status);	
+		}else{
+			if ($status == 'OUT') {
+				$fieldSet = 'SET_OUT';
+				$fieldKet = 'KETERANGAN_OUT';
+			}else{
+				$fieldSet = 'SET_IN';
+				$fieldKet = 'KETERANGAN_IN';
+			}
+			$where = " AND $fieldSet ='NG'";
+			$getPIC = $this->M_Implementasi->getValidasiPIC($noSPJ, $where)->result();
+			foreach ($getPIC as $key) {
+				$subjek = $key->PIC;
+				$jenisPIC = $key->JENIS_PIC;
+				$keterangan = $key->$fieldKet;
+				$data = $this->M_Implementasi->saveHistoryNG($noSPJ, $jenisPIC, $subjek, $keterangan, $status);
+			}
+		}
+		
+		echo json_encode($data);
+	}
+	public function spjLokalSelesai()
+	{
+		$inputNoSPJ = $this->input->post("inputNoSPJ");
+		$data = $this->M_Implementasi->saveLokalSelesai($inputNoSPJ);
+		echo json_encode($data);
 	}
 }
 ?>

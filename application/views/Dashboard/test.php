@@ -22,23 +22,16 @@
       <?php $this->load->view('_partial/content-header');?>
       <div class="content">
         <div class="container-fluid">
-          <div class="card">
-            <input type="time" id="inputJamBerangkat" class="form-control saveRencana" value="<?=date('H:i')?>">
-            <div class="card-header">
-              <ul class="nav nav-tabs card-header-tabs">
-                <li class="nav-item">
-                  <a class="nav-link active" href="#">Eclipse IDE</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#">NetBeans IDE</a>
-                </li>
-             </ul>
-            </div>
-            <div class="card-body">
-              <h5 class="card-title">Eclipse IDE Introduction</h5>
-              <p class="card-text">Eclipse is a widely used Java IDE.</p>
-            </div>
-          </div>
+          <?php
+            $tglAwal = date("H", strtotime('2022-08-15 08:13'));
+            $tglAkhir = date("H", strtotime('2022-08-16 07:53'));
+
+            if ($tglAwal>$tglAkhir) {
+              echo 'kurang';
+            }else{
+              echo 'tambah';
+            }
+          ?>
         </div>
       </div>
     </div>

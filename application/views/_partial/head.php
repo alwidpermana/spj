@@ -282,6 +282,11 @@ body{
 .bg-danger{
     background-color: #B36969 !important;
 }
+.bg-light-danger{
+  color: #e7515a !important;
+  background-color: #fbeced !important;
+  border-color: rgba(231, 81, 90, 0.55) !important;
+}
 .bg-warning{
     background-color: #f9dc5c !important;
 }

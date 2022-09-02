@@ -16,11 +16,46 @@
 			$('#modal-profil').modal('show');
 		})
 		redirectLogin();
+		notifNGSecurity();
 	});
 	function redirectLogin() {
 		var nik = '<?=$this->session->userdata("NIK")?>';
 		if (nik == '') {
 			window.location.href= '<?=base_url("Auth")?>';
+		}
+	}
+	function notifNGSecurity() {
+		var level = '<?=$this->session->userdata("LEVEL")?>';
+		var side = '<?=$side?>';
+		if (level >= 0) {
+			if (side !='monitoring-ng' && side != 'implementasi-security') {
+				$.ajax({
+					type:'get',
+					dataType:'json',
+					url:url+'/Monitoring/getNotifNGSecurity',
+					cache: false,
+					async:true,
+					success:function(data){
+						if (parseInt(data)>0) {
+							Swal.fire({
+							  title: '<strong>Terdapat SPJ yang NG</strong>',
+							  icon: 'warning',
+							  html:
+							    'Cek SPJ nya di ' +
+							    '<a href="<?=base_url()?>monitoring/ng_security">sini</a>',
+							  showCloseButton: false,
+							  showCancelButton: false,
+							  focusConfirm: false,
+							  
+							})
+						}
+					},
+					error:function(data){
+						console.log(data)
+					}
+				})	
+			}
+			
 		}
 	}
 </script>

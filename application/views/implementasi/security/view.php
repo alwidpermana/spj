@@ -704,7 +704,7 @@ foreach ($data as $key): ?>
                         }
                       ?>
                       <center>
-                        <input type="number" id="inputKMOut" class="form-control form-control-sm" value="<?=$kmOut?>" style="width: 75px;">
+                        <input type="number" id="inputKMOut" class="form-control form-control-sm" value="<?=$kmOut?>" style="width: 75px;" <?=$key->STATUS_PERJALANAN == null?'':'disabled'?>>
                       </center>
                     </td>
                   </tr>
@@ -806,10 +806,12 @@ foreach ($data as $key): ?>
   <div class="col-md-8 offset-md-2">
     <?php if ($key->GROUP_ID == '4'): ?>
       <?php if ($key->STATUS_SPJ == 'OPEN'): ?>
-        <?php if ($key->STATUS_PERJALANAN == null OR $key->STATUS_PERJALANAN == 'IN'): ?>
-          <button type="button" class="btn bg-orange btn-kps btn-block saveCheckOut ladda-button" data-style="zoom-in" id="btnCheckOut">
-            Check Out
-          </button>
+        <?php if ($key->STATUS_PERJALANAN == null || $key->STATUS_PERJALANAN == 'IN'): ?>
+          <?php if ($key->LOKAL_SELESAI == null && $key->TGL_SPJ >= date("Y-m-d")): ?>
+            <button type="button" class="btn bg-orange btn-kps btn-block saveCheckOut ladda-button" data-style="zoom-in" id="btnCheckOut">
+              Check Out
+            </button>    
+          <?php endif ?>
         <?php elseif($key->STATUS_PERJALANAN == 'OUT'): ?>
           <button type="button" class="btn bg-orange btn-kps btn-block saveCheckIn ladda-button" data-style="zoom-in" id="btnCheckIn">
             Check In
@@ -842,6 +844,29 @@ foreach ($data as $key): ?>
         <div class="row">
           <div class="col-md-12">
             <center><div id="getFoto"></div></center>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="modal-bulak_balik" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <button type="button" class="btn btn-secondary btn-block btnLanjut">
+              Melanjutkan Perjalan
+            </button>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-12">
+            <button type="button" class="btn btn-kps bg-orange btn-block btnSelesai">
+              Perjalanan Selesai
+            </button>
           </div>
         </div>
       </div>
@@ -925,6 +950,7 @@ foreach ($data as $key): ?>
               
             } else {
               Swal.fire("Verifikasi PIC Harus OK Terlebih Dahulu","Jika Data Tidak Sesuai, Hubungi PIC Pembuat SPJ","warning")
+              saveHistoryNG(inputNoSPJ, 'PIC', 'OUT', '', '');
             }
             // if (parseInt(data) == 0) {
             //   // if (jenis == 'Out') {
@@ -962,7 +988,7 @@ foreach ($data as $key): ?>
         var inputNoSPJ = $('#inputNoSPJ').val();
         var inputKMIn = parseInt($('#inputKMIn').val());
         var inputVerifCountPIC = $('#inputVerifCountPIC').val()
-        console.log("kontol")
+        // console.log("kontol")
         var jenis = 'In';
         $.ajax({
           type:'get',
@@ -980,6 +1006,7 @@ foreach ($data as $key): ?>
               
             } else {
               Swal.fire("Verifikasi PIC Terlebih Dahulu","","warning")
+              saveHistoryNG(inputNoSPJ, 'PIC', 'IN', '', '');
             }
             // if (parseInt(data) == 0) {
             //   // if (jenis == 'Out') {
@@ -1018,6 +1045,28 @@ foreach ($data as $key): ?>
     $('#inputKMIn').on('keyup', function(){
       $('#rowkepulangan').removeClass("fokusKendaraan")
     })
+    $('.btnLanjut').on('click', function(){
+      location.reload();
+    })
+    $('.btnSelesai').on('click', function(){
+      var inputNoSPJ = $('#inputNoSPJ').val();
+      $.ajax({
+        type:'post',
+        data:{inputNoSPJ},
+        dataType:'json',
+        url:url+'/implementasi/spjLokalSelesai',
+        cache: false,
+        async: true,
+        success: function(data){
+          berhasil();
+          location.reload();
+        },
+        error: function(data){
+          Swal.fire("gagal Menyimpan Data!","Hubungi Staff IT",'error');
+          location.reload();
+        }
+      })
+    })
     
 
   });
@@ -1045,10 +1094,12 @@ foreach ($data as $key): ?>
     var inputGroupTujuan = $('#inputGroupTujuan').val();
     var urlTujuan = inputGroupTujuan == '4'?'saveValidasiOutLokal' :'saveValidasiOut';
     var inputKMIn = $('#inputKMIn').val();
+    var inputNoTNKB = $('#inputNoTNKB').val();
     if (inputVerifikasiKendaraan == '') {
       Swal.fire("Verifikasi Kendaraan Terlebih Dahulu!","","warning")
     }else if(inputVerifikasiKendaraan == 'NG'){
       Swal.fire("Verifikasi Kendaraan Harus OK Sebelum Check Out!","Jika Data Tidak Sesuai, Hubungi PIC Pembuat SPJ","warning");
+      saveHistoryNG(inputNoSPJ, 'KENDARAAN', 'OUT', inputKeteranganKendaraan, inputNoTNKB);
     }else {
       $('.saveCheckOut').attr("disabled","disabled");
       $.ajax({
@@ -1077,6 +1128,9 @@ foreach ($data as $key): ?>
     var inputNoTNKB = $('#inputNoTNKB').val();
     var inputKMOut = $('#inputKMOut').val();
     var inputGroupTujuan = $('#inputGroupTujuan').val();
+    if (inputVerifikasiKendaraan == 'NG') {
+      saveHistoryNG(inputNoSPJ, 'PIC', 'IN', inputKeteranganKendaraan, inputNoTNKB);
+    }
     if (inputVerifikasiKendaraan == '') {
       Swal.fire("Verifikasi Kendaraan Terlebih Dahulu!","","warning")
     }else if(parseInt(inputKMOut) > parseInt(inputKMIn)){
@@ -1102,21 +1156,42 @@ foreach ($data as $key): ?>
   function saveUangTambahan() {
     var inputNoSPJ = $('#inputNoSPJ').val();
     var inputJenisId = $('#inputJenisId').val();
+    var inputGroupTujuan = $('#inputGroupTujuan').val();
     $.ajax({
       type:'post',
-      data:{inputNoSPJ,inputJenisId},
+      data:{inputNoSPJ,inputJenisId, inputGroupTujuan},
       dataType:'json',
       url:url+'/Implementasi/saveUangTambahan',
       cache: false,
       async: true,
       success: function(data){
         berhasil();
-        location.reload();
+        if (inputGroupTujuan == '4') {
+          $('#modal-bulak_balik').modal("show");
+        }else{
+          location.reload();  
+        }
+        
       },
       error: function(data){
         gagal();
       }
     });
-
+  }
+  function saveHistoryNG(noSPJ, jenis, status, keteranganKendaraan, noTNKB ) {
+    $.ajax({
+      type:'post',
+      data:{noSPJ, jenis, status, keteranganKendaraan, noTNKB},
+      url:url+'/Implementasi/saveHistoryNG',
+      dataType:'json',
+      cache: false,
+      async: true,
+      success: function(data){
+        console.log("berhasil menyimpan history NG")
+      },
+      error: function(data){
+        Swal.fire("Terjadi Error Pada Program","Hubungi Segera Staff IT", "error");
+      }
+    })
   }
 </script>

@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-centered table-hover table-valign-middle table-nowrap mb-0" width="100%">
+    <table class="table table-centered table-hover table-valign-middle table-nowrap mb-0" width="100%" id="datatable">
         <thead class="text-center">
             <tr>
                 <th>Tanggal</th>
@@ -74,3 +74,19 @@
         </tbody>
     </table>
 </div>
+<script type="text/javascript">
+  $(document).ready(function(){
+    var table = $('#datatable').DataTable( {
+                scrollY:        "350px",
+                scrollX:        true,
+                scrollCollapse: true,
+                paging:         false,
+                'searching': false,
+                'ordering': false,
+                "autoWidth": false,
+                "info": false,
+                order: [[0, 'asc']],
+                
+              } );   
+  })
+</script>

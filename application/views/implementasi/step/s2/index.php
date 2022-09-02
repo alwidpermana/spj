@@ -1000,8 +1000,14 @@
         url:url+'/implementasi/closeSPJ',
         cache: false,
         async: true,
+        beforeSend:function(data){
+          $('.closeSPJ').attr("disabled","disabled");
+        },
         success: function(data){
           window.location.href = url+'/Implementasi/step_1?notif=1';
+        },
+        complete: function(data){
+          $('.closeSPJ').removeAttr("disabled","disabled");
         },
         error: function(data){
           Swal.fire("Gagal Menyimpan Data!","Reload Terlebih Dahulu Halaman Ini atau Hubungi Staff IT","error")

@@ -411,7 +411,7 @@
                               $totalUangMakan=0;
                               foreach ($pic as $pc): ?>
                                 <tr>
-                                  <td>Pendamping</td>
+                                  <td><?=$pc->JENIS_PIC?></td>
                                   <td><?=$pc->OBJEK?></td>
                                   <td>
                                     <?php if ($pc->FOTO_WAJAH != null || $pc->FOTO_WAJAH !=''): ?>
@@ -531,148 +531,260 @@
                                 <th>PIC</th>
                               </tr>
                             </thead>
-                            <tbody>
-                              <?php foreach ($realisasi as $rl): 
-                                $kasbonUangSaku = $rl->TOTAL_UANG_SAKU;
-                                $realisasiUangSaku = $rl->REALISASI_UANG_SAKU;
-                                $kasbonUangMakan = $rl->TOTAL_UANG_MAKAN;
-                                $realisasiUangMakan = $rl->REALISASI_UANG_MAKAN;
-                                $kasbonUangJalan = $rl->TOTAL_UANG_JALAN;
-                                $realisasiUangJalan = $rl->REALISASI_UANG_JALAN;
-                                $realisasiTOL = $rl->TOTAL_UANG_TOL;
-                              ?>
-                                <tr>
-                                  <td>Uang Saku</td>
-                                  <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_SAKU, 0))?></td>
-                                  <td><?=$rl->MEDIA_UANG_SAKU?></td>
-                                  <td>
-                                    <?=str_replace(',', '.', number_format($rl->REALISASI_UANG_SAKU, 0))?>
-                                    <input type="hidden" id="inputRealisasiUangSaku" value="<?=$rl->REALISASI_UANG_SAKU?>">    
-                                  </td>
-                                  <td><?=str_replace(',', '.', number_format($rl->REALISASI_UANG_SAKU - $rl->TOTAL_UANG_SAKU, 0))?></td>
-                                  <td>
-                                    <?=date("d-m-Y", strtotime($tglUS1))?>
-                                  </td>
-                                  <td><?=$picUS1?></td>
-                                  <td><?=$statusUS1?></td>
-                                  <td><?=$rl->US1_TAMBAHAN>0 || $rl->US2_TAMBAHAN>0 ? 'Mendapatkan Uang Saku Ke 2':''?></td>
-                                </tr>
-                                <tr>
-                                  <td>Uang Makan</td>
-                                  <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_MAKAN, 0))?></td>
-                                  <td><?=$rl->MEDIA_UANG_MAKAN?></td>
-                                  <td>
-                                    <?=str_replace(',', '.', number_format($rl->REALISASI_UANG_MAKAN, 0))?>
-                                    <input type="hidden" id="inputRealisasiUangMakan" value="<?=$rl->REALISASI_UANG_MAKAN?>">    
-                                  </td>
-                                  <td><?=str_replace(',', '.', number_format($rl->REALISASI_UANG_MAKAN - $rl->TOTAL_UANG_MAKAN, 0))?></td>
-                                  <?php if ($rl->ADJUSTMENT_MANAJEMEN == 'Y'): ?>
-                                    <td><?=$statusAdjMakan?></td>
-                                    <td><?=$tglAdjMakan?></td>
-                                    <td><?=$picAdjMakan?></td>
-                                  <?php else: ?>
+                            <?php if ($key->STATUS_PERJALANAN == 'IN'): ?>
+                              <tbody>
+                                <?php foreach ($realisasi as $rl): 
+                                  $kasbonUangSaku = $rl->TOTAL_UANG_SAKU;
+                                  $realisasiUangSaku = $rl->REALISASI_UANG_SAKU;
+                                  $kasbonUangMakan = $rl->TOTAL_UANG_MAKAN;
+                                  $realisasiUangMakan = $rl->REALISASI_UANG_MAKAN;
+                                  $kasbonUangJalan = $rl->TOTAL_UANG_JALAN;
+                                  $realisasiUangJalan = $rl->REALISASI_UANG_JALAN;
+                                  $realisasiTOL = $rl->TOTAL_UANG_TOL;
+                                ?>
+                                  <tr>
+                                    <td>Uang Saku</td>
+                                    <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_SAKU, 0))?></td>
+                                    <td><?=$rl->MEDIA_UANG_SAKU?></td>
                                     <td>
-                                     <?=date("d-m-Y", strtotime($tglMakan))?>
+                                      <?=str_replace(',', '.', number_format($rl->REALISASI_UANG_SAKU, 0))?>
+                                      <input type="hidden" id="inputRealisasiUangSaku" value="<?=$rl->REALISASI_UANG_SAKU?>">    
                                     </td>
-                                    <td><?=$picMakan?></td>
-                                    <td><?=$statusMakan?></td>   
-                                  <?php endif ?>
-                                  
-                                  <td><?=$rl->UM_TAMBAHAN>0  ? 'Mendapatkan Uang Makan Ke 2':''?></td>
-                                </tr>
-                                <tr>
-                                  <td>Uang Jalan</td>
-                                  <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?></td>
-                                  <td><?=$rl->MEDIA_UANG_JALAN?></td>
-                                  <td>
-                                    <?=str_replace(',', '.', number_format($rl->REALISASI_UANG_JALAN, 0))?>
-                                    <input type="hidden" id="inputRealisasiUangJalan" value="<?=$rl->REALISASI_UANG_JALAN?>">    
-                                  </td>
-                                  <td><?=str_replace(',', '.', number_format($rl->REALISASI_UANG_JALAN - $rl->TOTAL_UANG_JALAN, 0))?></td>
-                                  <td><?=$tglAdjJalan?></td>
-                                  <td><?=$picAdjJalan?></td>
-                                  <td><?=$statusAdjJalan?></td>
-                                  <td><?=$rl->ABNORMAL == 'Y'?'SPJ Abnormal':''?></td>
-                                </tr>
-                                <tr>
-                                  <?php
-                                    $kasbonBBM = $key->MEDIA_UANG_BBM == 'Kasbon' ? round($key->TOTAL_UANG_BBM):0;
-                                    $kasbonTOL = $key->MEDIA_UANG_TOL == 'Kasbon' ? round($key->TOTAL_UANG_TOL) : 0;
-                                  ?>
-                                  <td>Uang BBM</td>
-                                  <td>
-                                    <?=$rl->MEDIA_UANG_BBM == 'Kasbon'?str_replace(',', '.', number_format($rl->TOTAL_UANG_BBM, 0)):''?>
-                                       
-                                  </td>
-                                  <td><?=$rl->MEDIA_UANG_BBM?><?=$key->VOUCHER_BBM != ''?'<br>'.$key->VOUCHER_BBM:''?></td>
-                                  <?php 
-                                  $valUangBBM = $key->MEDIA_UANG_BBM == 'Kasbon' ? 0 : round($key->TOTAL_UANG_BBM);
-                                  $valUangTOL = $key->MEDIA_UANG_TOL == 'Kasbon' ? 0 : round($key->TOTAL_UANG_TOL);
-                                  
-                                  if ($rl->ADJUSTMENT_MANAJEMEN == 'Y'): ?>
+                                    <td><?=str_replace(',', '.', number_format($rl->REALISASI_UANG_SAKU - $rl->TOTAL_UANG_SAKU, 0))?></td>
                                     <td>
-                                      <?=str_replace(',', '.', number_format($rl->BBM_DIAJUKAN, 0))?>  
+                                      <?=$tglUS1==''?'':date("d-m-Y", strtotime($tglUS1))?>
                                     </td>
-                                    <td><?=str_replace(',', '.', number_format($rl->BBM_DIAJUKAN - $rl->TOTAL_UANG_BBM, 0))?></td>
-                                  <?php else: ?>
+                                    <td><?=$picUS1?></td>
+                                    <td><?=$statusUS1?></td>
                                     <td>
-                                      
-                                      <center>
-                                        <?=str_replace(',', '.', number_format($valUangBBM, 0))?>
-                                      </center>
-                                      <input type="hidden" id="inputMediaUangBBM" value="<?=$key->MEDIA_UANG_BBM?>">
-                                    </td>
-                                    <td>
-                                      <?=str_replace(',', '.', number_format($valUangBBM-$kasbonBBM, 0))?>
+                                      <?php
+                                        if ($rl->KEPUTUSAN_US1 == 'OK') {
+                                          echo "Mendapatkan Uang Saku Tambahan Pertama";
+                                        }elseif ($rl->KEPUTUSAN_US1 == 'NG') {
+                                          echo "Tidak Mendapatkan Uang Saku Tambahan Pertama!";
+                                        }else{
+                                          echo "";
+                                        }
+
+                                        if ($rl->KEPUTUSAN_US2 == 'OK') {
+                                          echo "<br>Mendapatkan Uang Saku Tambahan Kedua";
+                                        }elseif ($rl->KEPUTUSAN_US2 == 'NG') {
+                                          echo "<br>Tidak Mendapatkan Uang Saku Tambahan Kedua!";
+                                        }else{
+                                          echo "";
+                                        }
+
+                                      ?>
                                       
                                     </td>
-                                  <?php endif ?>
-                                  <td><?=$rl->TGL_BBM == null ? '' :date("d-m-Y", strtotime($rl->TGL_BBM))?></td>
-                                  <td><?=$rl->PIC_BBM?></td>
-                                  <td><?=$rl->PIC_BBM == null ? 'OPEN':'CLOSE'?></td>
-                                  <td><?='Uang BBM Menggunakan Media '.$rl->MEDIA_UANG_BBM?></td>
-                                </tr>
-                                <tr>
-                                  <td>Uang Tol</td>
-                                  <td><?=$rl->MEDIA_UANG_TOL == 'Kasbon'?str_replace(',', '.', number_format($rl->TOTAL_UANG_TOL, 0)):'0'?></td>
-                                  <td><?=$rl->MEDIA_UANG_TOL?></td>
-                                  <td>
-                                    <center>
-                                      <?=str_replace(',', '.', number_format($rl->TOTAL_UANG_TOL))?>
-                                    </center>
-                                  </td>
-                                  <td>
-                                    <?=str_replace(',', '.', number_format($rl->TOTAL_UANG_TOL - $kasbonTOL))?>
-                                    <input type="hidden" id="inputKbTOL" class="form-control form-control-sm" style="width: 120px" readonly>
-                                  </td>
-                                  <td><?=$rl->TGL_CLOSE == null ? '' :date("d-m-Y", strtotime($rl->TGL_CLOSE))?></td>
-                                  <td><?=$rl->PIC_CLOSE?></td>
-                                  <td><?=$rl->PIC_CLOSE == null ? 'OPEN':'CLOSE'?></td>
-                                  <td><?='Uang TOL Menggunakan Media '.$rl->MEDIA_UANG_TOL?></td>
-                                </tr>
-                              <?php endforeach ?>
-                            </tbody>
-                            <tfoot>
-                              <tr>
-                                <th>TOTAL:</th>
-                                <th>Rp. <?=str_replace(',', '.', number_format($key->TOTAL_UANG_SAKU+$key->TOTAL_UANG_MAKAN+$key->TOTAL_UANG_JALAN+$kasbonBBM+$kasbonTOL, 0))?></th>
-                                <th></th>
-                                <th>Rp. 
-                                  <?php
-                                    $totalRealisasi = $realisasiUangSaku + $realisasiUangMakan + $realisasiUangJalan + $valUangBBM + $realisasiTOL;
-                                    echo str_replace(',', '.', number_format($totalRealisasi));
-                                  ?>
+                                  </tr>
+                                  <tr>
+                                    <td>Uang Makan</td>
+                                    <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_MAKAN, 0))?></td>
+                                    <td><?=$rl->MEDIA_UANG_MAKAN?></td>
+                                    <td>
+                                      <?=str_replace(',', '.', number_format($rl->REALISASI_UANG_MAKAN, 0))?>
+                                      <input type="hidden" id="inputRealisasiUangMakan" value="<?=$rl->REALISASI_UANG_MAKAN?>">    
+                                    </td>
+                                    <td><?=str_replace(',', '.', number_format($rl->REALISASI_UANG_MAKAN - $rl->TOTAL_UANG_MAKAN, 0))?></td>
+                                    <?php if ($rl->ADJUSTMENT_MANAJEMEN == 'Y'): ?>
+                                      <td><?=$statusAdjMakan?></td>
+                                      <td><?=$tglAdjMakan==''?'':date("d-m-Y", strtotime($tglAdjMakan))?></td>
+                                      <td><?=$picAdjMakan?></td>
+                                    <?php else: ?>
+                                      <td>
+                                       <?=$tglMakan==''?'':date("d-m-Y", strtotime($tglMakan))?>
+                                      </td>
+                                      <td><?=$picMakan?></td>
+                                      <td><?=$statusMakan?></td>   
+                                    <?php endif ?>
                                     
-                                </th>
-                                <th>Rp. 
-                                  <?php
-                                    $totalKB = ($realisasiUangSaku - $kasbonUangSaku) + ($realisasiUangMakan - $kasbonUangMakan) + ($realisasiUangJalan - $kasbonUangJalan)+($valUangBBM-$kasbonBBM)+($realisasiTOL-$kasbonTOL);
-                                    echo str_replace(',', '.', number_format($totalKB));
-                                  ?>
-                                </th>
-                                <th colspan="4"></th>
-                              </tr>
-                            </tfoot>
+                                    <td>
+                                      <?php
+                                        if ($rl->KEPUTUSAN_MAKAN == 'OK') {
+                                          echo 'Mendapatkan Uang Makan Ke 2';
+                                        }elseif ($rl->KEPUTUSAN_MAKAN == 'NG') {
+                                          echo "Uang Makan Tambahan Ditolak!";
+                                        }else{
+                                          echo '';
+                                        }
+                                      ?>
+                                      
+                                  </tr>
+                                  <tr>
+                                    <td>Uang Jalan</td>
+                                    <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?></td>
+                                    <td><?=$rl->MEDIA_UANG_JALAN?></td>
+                                    <td>
+                                      <?=str_replace(',', '.', number_format($rl->REALISASI_UANG_JALAN, 0))?>
+                                      <input type="hidden" id="inputRealisasiUangJalan" value="<?=$rl->REALISASI_UANG_JALAN?>">    
+                                    </td>
+                                    <td><?=str_replace(',', '.', number_format($rl->REALISASI_UANG_JALAN - $rl->TOTAL_UANG_JALAN, 0))?></td>
+                                    <td><?=$tglAdjJalan?></td>
+                                    <td><?=$picAdjJalan?></td>
+                                    <td><?=$statusAdjJalan?></td>
+                                    <td><?=$rl->ABNORMAL == 'Y'?'SPJ Abnormal':''?></td>
+                                  </tr>
+                                  <tr>
+                                    <?php
+                                      $kasbonBBM = $key->MEDIA_UANG_BBM == 'Kasbon' ? round($key->TOTAL_UANG_BBM):0;
+                                      $kasbonTOL = $key->MEDIA_UANG_TOL == 'Kasbon' ? round($key->TOTAL_UANG_TOL) : 0;
+                                    ?>
+                                    <td>Uang BBM</td>
+                                    <td>
+                                      <?=$rl->MEDIA_UANG_BBM == 'Kasbon'?str_replace(',', '.', number_format($rl->TOTAL_UANG_BBM, 0)):''?>
+                                         
+                                    </td>
+                                    <td><?=$rl->MEDIA_UANG_BBM?><?=$key->VOUCHER_BBM != ''?'<br>'.$key->VOUCHER_BBM:''?></td>
+                                    <?php 
+                                    $valUangBBM = $key->MEDIA_UANG_BBM == 'Kasbon' ? 0 : round($key->TOTAL_UANG_BBM);
+                                    $valUangTOL = $key->MEDIA_UANG_TOL == 'Kasbon' ? 0 : round($key->TOTAL_UANG_TOL);
+                                    
+                                    if ($rl->ADJUSTMENT_MANAJEMEN == 'Y'): ?>
+                                      <td>
+                                        <?=str_replace(',', '.', number_format($rl->BBM_DIAJUKAN, 0))?>  
+                                      </td>
+                                      <td><?=str_replace(',', '.', number_format($rl->BBM_DIAJUKAN - $rl->TOTAL_UANG_BBM, 0))?></td>
+                                    <?php else: ?>
+                                      <td>
+                                        
+                                        <center>
+                                          <?=str_replace(',', '.', number_format($valUangBBM, 0))?>
+                                        </center>
+                                        <input type="hidden" id="inputMediaUangBBM" value="<?=$key->MEDIA_UANG_BBM?>">
+                                      </td>
+                                      <td>
+                                        <?=str_replace(',', '.', number_format($valUangBBM-$kasbonBBM, 0))?>
+                                        
+                                      </td>
+                                    <?php endif ?>
+                                    <td><?=$rl->TGL_BBM == null ? '' :date("d-m-Y", strtotime($rl->TGL_BBM))?></td>
+                                    <td><?=$rl->PIC_BBM?></td>
+                                    <td><?=$rl->PIC_BBM == null ? 'OPEN':'CLOSE'?></td>
+                                    <td><?='Uang BBM Menggunakan Media '.$rl->MEDIA_UANG_BBM?></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Uang Tol</td>
+                                    <td><?=$rl->MEDIA_UANG_TOL == 'Kasbon'?str_replace(',', '.', number_format($rl->TOTAL_UANG_TOL, 0)):'0'?></td>
+                                    <td><?=$rl->MEDIA_UANG_TOL?></td>
+                                    <td>
+                                      <center>
+                                        <?=str_replace(',', '.', number_format($rl->TOTAL_UANG_TOL))?>
+                                      </center>
+                                    </td>
+                                    <td>
+                                      <?=str_replace(',', '.', number_format($rl->TOTAL_UANG_TOL - $kasbonTOL))?>
+                                      <input type="hidden" id="inputKbTOL" class="form-control form-control-sm" style="width: 120px" readonly>
+                                    </td>
+                                    <td><?=$rl->TGL_CLOSE == null ? '' :date("d-m-Y", strtotime($rl->TGL_CLOSE))?></td>
+                                    <td><?=$rl->PIC_CLOSE?></td>
+                                    <td><?=$rl->PIC_CLOSE == null ? 'OPEN':'CLOSE'?></td>
+                                    <td><?='Uang TOL Menggunakan Media '.$rl->MEDIA_UANG_TOL?></td>
+                                  </tr>
+                                <?php endforeach ?>
+                              </tbody>
+                              <tfoot>
+                                <?php
+                                $realUS1 = $rl->KEPUTUSAN_US1 == 'OK' && $statusUS1 == 'CLOSE' ? $rl->US1_TAMBAHAN:0;
+
+                                ?>
+                                <tr>
+                                  <th>TOTAL:</th>
+                                  <th>Rp. <?=str_replace(',', '.', number_format($key->TOTAL_UANG_SAKU+$key->TOTAL_UANG_MAKAN+$key->TOTAL_UANG_JALAN+$kasbonBBM+$kasbonTOL, 0))?></th>
+                                  <th></th>
+                                  <th>Rp. 
+                                    <?php
+                                      $totalRealisasi = $realisasiUangSaku + $realisasiUangMakan + $realisasiUangJalan + $valUangBBM + $realisasiTOL;
+                                      echo str_replace(',', '.', number_format($totalRealisasi));
+                                    ?>
+                                      
+                                  </th>
+                                  <th>Rp. 
+                                    <?php
+                                      $totalKB = ($realisasiUangSaku - $kasbonUangSaku) + ($realisasiUangMakan - $kasbonUangMakan) + ($realisasiUangJalan - $kasbonUangJalan)+($valUangBBM-$kasbonBBM)+($realisasiTOL-$kasbonTOL);
+                                      echo str_replace(',', '.', number_format($totalKB));
+                                    ?>
+                                  </th>
+                                  <th colspan="4"></th>
+                                </tr>
+                              </tfoot> 
+                            <?php else: ?>
+                              <tbody>
+                                <?php foreach ($realisasi as $rl): 
+                                  $kasbonUangSaku = $rl->TOTAL_UANG_SAKU;
+                                  $realisasiUangSaku = $rl->REALISASI_UANG_SAKU;
+                                  $kasbonUangMakan = $rl->TOTAL_UANG_MAKAN;
+                                  $realisasiUangMakan = $rl->REALISASI_UANG_MAKAN;
+                                  $kasbonUangJalan = $rl->TOTAL_UANG_JALAN;
+                                  $realisasiUangJalan = $rl->REALISASI_UANG_JALAN;
+                                  $realisasiTOL = $rl->TOTAL_UANG_TOL;
+                                ?>
+                                  <tr>
+                                    <td>Uang Saku</td>
+                                    <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_SAKU, 0))?></td>
+                                    <td><?=$rl->MEDIA_UANG_SAKU?></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Uang Makan</td>
+                                    <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_MAKAN, 0))?></td>
+                                    <td><?=$rl->MEDIA_UANG_MAKAN?></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Uang Jalan</td>
+                                    <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?></td>
+                                    <td><?=$rl->MEDIA_UANG_JALAN?></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                  </tr>
+                                  <tr>
+                                    <?php
+                                      $kasbonBBM = $key->MEDIA_UANG_BBM == 'Kasbon' ? round($key->TOTAL_UANG_BBM):0;
+                                      $kasbonTOL = $key->MEDIA_UANG_TOL == 'Kasbon' ? round($key->TOTAL_UANG_TOL) : 0;
+                                    ?>
+                                    <td>Uang BBM</td>
+                                    <td>
+                                      <?=$rl->MEDIA_UANG_BBM == 'Kasbon'?str_replace(',', '.', number_format($rl->TOTAL_UANG_BBM, 0)):''?>
+                                         
+                                    </td>
+                                    <td><?=$rl->MEDIA_UANG_BBM?><?=$key->VOUCHER_BBM != ''?'<br>'.$key->VOUCHER_BBM:''?></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Uang Tol</td>
+                                    <td><?=$rl->MEDIA_UANG_TOL == 'Kasbon'?str_replace(',', '.', number_format($rl->TOTAL_UANG_TOL, 0)):'0'?></td>
+                                    <td><?=$rl->MEDIA_UANG_TOL?></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                  </tr>
+                                <?php endforeach ?>
+                              </tbody>
+                            <?php endif ?>
+                            
                           </table>
                         </div>
                       </div>
@@ -723,6 +835,8 @@
                                   <td><?=date("H:i", strtotime($vld->KEBERANGKATAN))?></td>
                                   <td>
                                     <?php
+                                      $aktualKeberangkatan = date("Y-m-d H:i", strtotime($vld->KEBERANGKATAN));
+                                      $aktualKepulangan = date("Y-m-d H:i", strtotime($vld->KEPULANGAN));
                                       $aktualBerangkat = date("Y-m-d", strtotime($vld->KEBERANGKATAN));
                                       $aktualBerangkatJam = date("H:i", strtotime($vld->KEBERANGKATAN));
                                       $rencanaBerangkat = date("Y-m-d", strtotime($key->RENCANA_BERANGKAT));
@@ -751,33 +865,41 @@
                                   <td class="text-left">Kepulangan</td>
                                   <td><?=date("d F Y", strtotime($key->RENCANA_PULANG))?></td>
                                   <td><?=date("H:i", strtotime($key->RENCANA_PULANG))?></td>
-                                  <td><?=date("d F Y", strtotime($vld->KEPULANGAN))?></td>
-                                  <td><?=date("H:i", strtotime($vld->KEPULANGAN))?></td>
-                                  <td>
-                                    <?php
-                                        $aktualPulang = $vld->KEPULANGAN == null?date("Y-m-d"):date("Y-m-d", strtotime($vld->KEPULANGAN));
-                                        $aktualPulangJam = $vld->KEPULANGAN == null?date("H:i"):date("H:i", strtotime($vld->KEPULANGAN));
-                                        $rencanaPulang = date("Y-m-d", strtotime($key->RENCANA_PULANG));
-                                        $rencanaPulang2 = date('H:i', strtotime($key->RENCANA_PULANG));
-                                        $rBerJam = date_create($rencanaPulang2);
-                                        $aBerJam = date_create($aktualPulangJam);
-                                        $gapPulangJam = date_diff($rBerJam, $aBerJam);
+                                  <?php if ($key->STATUS_PERJALANAN == 'IN'): ?>
+                                    <td><?=date("d F Y", strtotime($vld->KEPULANGAN))?></td>
+                                    <td><?=date("H:i", strtotime($vld->KEPULANGAN))?></td>
+                                    <td>
+                                      <?php
+                                          $aktualPulang = $vld->KEPULANGAN == null?date("Y-m-d"):date("Y-m-d", strtotime($vld->KEPULANGAN));
+                                          $aktualPulangJam = $vld->KEPULANGAN == null?date("H:i"):date("H:i", strtotime($vld->KEPULANGAN));
+                                          $rencanaPulang = date("Y-m-d", strtotime($key->RENCANA_PULANG));
+                                          $rencanaPulang2 = date('H:i', strtotime($key->RENCANA_PULANG));
+                                          $rBerJam = date_create($rencanaPulang2);
+                                          $aBerJam = date_create($aktualPulangJam);
+                                          $gapPulangJam = date_diff($rBerJam, $aBerJam);
 
-                                        $rBer = date_create($rencanaPulang);
-                                        $aBer = date_create($aktualPulang);
-                                        $gapPulang = date_diff($rBer, $aBer);
-                                        if ($aktualPulang == $rencanaPulang) {
-                                          
-                                          echo $gapPulangJam->h.' Jam '.$gapPulangJam->i.' Menit';
-                                        } else {
-                                          
-                                           
-                                          echo $gapPulang->d.' Hari '.$gapPulangJam->h.' Jam '.$gapPulangJam->i.' Menit';
-                                        }
-                                      
-                                    ?>
-                                  </td>
-                                  <td><?=str_replace(',', '.', number_format($vld->KM_IN, 0))?></td>
+                                          $rBer = date_create($rencanaPulang);
+                                          $aBer = date_create($aktualPulang);
+                                          $gapPulang = date_diff($rBer, $aBer);
+                                          if ($aktualPulang == $rencanaPulang) {
+                                            
+                                            echo $gapPulangJam->h.' Jam '.$gapPulangJam->i.' Menit';
+                                          } else {
+                                            
+                                             
+                                            echo $gapPulang->d.' Hari '.$gapPulangJam->h.' Jam '.$gapPulangJam->i.' Menit';
+                                          }
+                                        
+                                      ?>
+                                    </td>
+                                    <td><?=str_replace(',', '.', number_format($vld->KM_IN, 0))?></td>  
+                                  <?php else: ?>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                  <?php endif ?>
+                                  
                                 </tr>    
                               <?php endforeach ?>
                             </tbody>
@@ -786,13 +908,68 @@
                                 <th colspan="6" class="text-right">Selisih KM</th>
                                 <th>
                                   <?php
-                                    $gapKM = $kmIn - $kmOut;
-                                    echo str_replace(',', '.', number_format($gapKM, 0))
+                                    if ($key->STATUS_PERJALANAN == 'IN') {
+                                      $gapKM = $kmIn - $kmOut;
+                                      echo '<span class="text-kps">'.str_replace(',', '.', number_format($gapKM, 0)).'</span>';
+                                    }
+                                  ?>
+                                </th>
+                              </tr>
+                              <tr>
+                                <th colspan="6" class="text-right">Total Keberangkatan</th>
+                                <th class="text-center">
+                                  <?php
+                                  if ($key->STATUS_PERJALANAN == 'IN') {
+                                    $dcBerangkat = date_create($aktualKeberangkatan);
+                                    $dcPulang = date_create($aktualKepulangan);
+                                    $dcGap = date_diff($dcBerangkat, $dcPulang);
+                                    $tampilGapAktual = '';
+                                    if ($dcGap->d>0) {
+                                      $tampilGapAktual .= $dcGap->d.' Hari ';
+                                    }
+                                    if ($dcGap->h>0) {
+                                      $tampilGapAktual .= $dcGap->h.' Jam ';
+                                    }
+
+                                    if ($dcGap->i>0) {
+                                      $tampilGapAktual .= $dcGap->i.' Menit ';
+                                    }
+                                    
+                                    echo '<span class="text-kps">'.$tampilGapAktual.'</span>';
+                                  }
                                   ?>
                                 </th>
                               </tr>
                             </tfoot>
                           </table>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="row">
+                          <div class="col-md-12">
+                            <?php if (count($history)>0): ?>
+                              <table class="table table-hover table-striped table-bordered" width="100%">
+                                <thead>
+                                  <tr>
+                                    <th>Status</th>
+                                    <th>Tanggal</th>
+                                    <th>Jam</th>
+                                    <th>KM</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <?php foreach ($history as $hs): ?>
+                                    <tr>
+                                      <td><?=$hs->STATUS?></td>
+                                      <td><?=date("d F Y", strtotime($hs->TGL_INPUT))?></td>
+                                      <td><?=date("H:i", strtotime($hs->TGL_INPUT))?></td>
+                                      <td><?=$hs->KM?></td>
+                                    </tr>
+                                  <?php endforeach ?>
+                                </tbody>
+                              </table>
+                            <?php endif ?>
+                          </div>
                         </div>
                       </div>
                     </div>

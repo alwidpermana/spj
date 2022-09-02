@@ -104,4 +104,49 @@ class M_Serlok extends CI_Model {
 		$dbserlok = $this->load->database("dbserlok", TRUE);
 		return $dbserlok->query($sql);
 	}
+	public function getSPJByOutGoing2($noTNKB, $tglSPJ)
+	{
+		$sql = "SELECT DISTINCT
+					Q1.*,
+					COMPANY_NAME,
+					nama_kabkota
+				FROM
+				(
+					SELECT
+						VEHICLE_NO,
+						DELIVERY_DATE,
+						PLANT1_CITY,
+						kps_customer_delivery_setup AS ID,
+						d.KPS_CUSTOMER_ID,
+						ID_CITY_SETUP AS ID_KAB_KOTA
+					FROM
+						kps_vehicle a
+					JOIN
+						kps_outgoing_finished_good b
+					ON b.KPS_VEHICLE_ID = a.KPS_VEHICLE_ID
+					JOIN kps_customer_delivery_setup d 
+					ON d.KPS_CUSTOMER_DELIVERY_SETUP = b.KPS_CUSTOMER_DELIVERY_SETUP_ID 
+					WHERE
+						VEHICLE_NO = '$noTNKB' AND
+						DELIVERY_DATE = '$tglSPJ'
+				)Q1
+				INNER JOIN
+				(
+					SELECT
+						COMPANY_NAME,
+						KPS_CUSTOMER_ID 
+					FROM
+						kps_customer 
+				)Q2 ON Q2.KPS_CUSTOMER_ID = Q1.KPS_CUSTOMER_ID
+				LEFT JOIN
+				(
+					SELECT
+						ID_KK,
+						nama_kabkota
+					FROM
+						tref_kabkota
+				)Q3 ON Q1.ID_KAB_KOTA = Q3.ID_KK";
+		$dbserlok = $this->load->database("dbserlok", TRUE);
+		return $dbserlok->query($sql);
+	}
 }

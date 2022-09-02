@@ -115,7 +115,7 @@ class Pengajuan extends CI_Controller {
 		$inputNoTNKB = $this->input->post("inputNoTNKB");
 		$inputTglSPJ = $this->input->post("inputTglSPJ");
 		$this->db->query("DELETE FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$inputNoSPJ'");
-		$getSerlok = $this->M_Serlok->getSPJByOutGoing($inputNoTNKB, $inputTglSPJ);
+		$getSerlok = $this->M_Serlok->getSPJByOutGoing2($inputNoTNKB, $inputTglSPJ);
 		foreach ($getSerlok->result() as $key) {
 			$serlokID = $key->ID;
 			$serlokAlamat = $key->PLANT1_CITY;
@@ -179,7 +179,7 @@ class Pengajuan extends CI_Controller {
 	{
 		$inputNoTNKB = $this->input->get("inputNoTNKB");
 		$inputTglSPJ = $this->input->get("inputTglSPJ");
-		$data = $this->M_Serlok->getSPJByOutGoing($inputNoTNKB, $inputTglSPJ)->result();
+		$data = $this->M_Serlok->getSPJByOutGoing2($inputNoTNKB, $inputTglSPJ)->result();
 		echo json_encode($data);
 	}
 	public function updateGroupTujuan()
@@ -464,7 +464,8 @@ class Pengajuan extends CI_Controller {
 		$merk = $this->input->post("merk");
 		$tipe = $this->input->post("tipe");
 		$kendaraan = $this->input->post("kendaraan");
-		$data = $this->M_Pengajuan->saveKendaraanSPJ($inv, $jenis, $noSPJ, $tnkb, $merk, $tipe, $kendaraan);
+		$inputRekananKendaraan = $this->input->post("inputRekananKendaraan");
+		$data = $this->M_Pengajuan->saveKendaraanSPJ($inv, $jenis, $noSPJ, $tnkb, $merk, $tipe, $kendaraan, $inputRekananKendaraan);
 		echo json_encode($data);
 	}
 	public function saveGroupTujuanSPJ()

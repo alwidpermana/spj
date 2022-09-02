@@ -56,7 +56,9 @@ class M_Monitoring extends CI_Model {
 							MEDIA_UANG_TOL,
 							STATUS_PERJALANAN,
 							VOUCHER_BBM,
-							NO_GENERATE
+							NO_GENERATE,
+							ABNORMAL,
+							LOKAL_SELESAI
 						FROM
 							SPJ_PENGAJUAN
 						WHERE
@@ -186,14 +188,26 @@ class M_Monitoring extends CI_Model {
 							NO_BT,
 							UANG_SAKU1 * JML_PIC AS US1,
 							UANG_SAKU2 * JML_PIC AS US2,
-							UANG_MAKAN * JML_PIC AS UM
+							UANG_MAKAN * JML_PIC AS UM,
+							STATUS_US1,
+							STATUS_US2,
+							STATUS_MAKAN,
+							KEPUTUSAN_US1,
+							KEPUTUSAN_US2,
+							KEPUTUSAN_MAKAN
 						FROM
 						(
 							SELECT
 								NO_SPJ AS NO_BT,
 								UANG_SAKU1,
 								UANG_SAKU2,
-								UANG_MAKAN
+								UANG_MAKAN,
+								STATUS_US1,
+								STATUS_US2,
+								STATUS_MAKAN,
+								KEPUTUSAN_US1,
+								KEPUTUSAN_US2,
+								KEPUTUSAN_MAKAN
 							FROM
 								SPJ_BIAYA_TAMBAHAN
 						)Q1
@@ -2007,12 +2021,12 @@ class M_Monitoring extends CI_Model {
 						TGL_INPUT DESC";
 		return $this->db->query($sql);
 	}
-	public function saveBiayaAdmin($inputTglBiaya, $inputJenis, $inputBiaya, $inputKeterangan)
+	public function saveBiayaAdmin($inputTglBiaya, $inputJenis, $inputBiaya, $inputKeterangan, $inputNo)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d');
         $user = $this->session->userdata("NIK");
-		$sql = "INSERT INTO SPJ_BIAYA_ADMIN(TGL_INPUT, PIC_INPUT, BIAYA, KETERANGAN, JENIS_ID, TGL_BIAYA)VALUES('$tanggal','$user','$inputBiaya','$inputKeterangan','$inputJenis','$inputTglBiaya')";
+		$sql = "INSERT INTO SPJ_BIAYA_ADMIN(TGL_INPUT, PIC_INPUT, BIAYA, KETERANGAN, JENIS_ID, TGL_BIAYA, NO_BIAYA_ADMIN)VALUES('$tanggal','$user','$inputBiaya','$inputKeterangan','$inputJenis','$inputTglBiaya','$inputNo')";
 		return $this->db->query($sql);
 	}
 	public function updateBiayaAdmin($inputTglBiaya, $inputJenis, $inputBiaya, $inputKeterangan, $inputId)
@@ -2040,6 +2054,140 @@ class M_Monitoring extends CI_Model {
 	{
 		$sql = "DELETE FROM SPJ_BIAYA_ADMIN WHERE ID= $id";
 		return $this->db->query($sql);
+	}
+	public function monitoringNGSecurity($bulan, $tahun, $jenis, $search)
+	{
+		$sql = "SELECT
+					Q1.*,
+					JML_NG,
+					JML_NO_READ
+				FROM
+				(
+					SELECT
+						ID_SPJ,
+						NO_SPJ,
+						TGL_SPJ,
+						a.PIC_INPUT,
+						NO_TNKB,
+						MERK,
+						TYPE,
+						GROUP_ID,
+						RENCANA_BERANGKAT,
+						RENCANA_PULANG,
+						JENIS_ID,
+						NAMA_JENIS,
+						NAMA_GROUP,
+						namapeg,
+						Departemen,
+						jabatan,
+						QR_CODE,
+						JENIS_KENDARAAN
+					FROM
+						SPJ_PENGAJUAN a
+					INNER JOIN
+						SPJ_JENIS b ON
+					a.JENIS_ID = b.ID_JENIS
+					INNER JOIN
+						SPJ_GROUP_TUJUAN c ON
+					a.GROUP_ID = c.ID_GROUP
+					INNER JOIN
+						dbhrm.dbo.tbPegawai d ON
+					a.PIC_INPUT = d.nik
+					WHERE
+						STATUS_DATA = 'SAVED' AND
+						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
+						YEAR(TGL_SPJ) LIKE '$tahun%' AND
+						JENIS_ID LIKE '$jenis%'
+				)Q1
+				INNER JOIN
+				(
+					SELECT
+						NO_SPJ,
+						COUNT(NO_SPJ) AS JML_NG
+					FROM
+						SPJ_HISTORY_NG_SECURITY
+					GROUP BY
+						NO_SPJ
+				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
+				LEFT JOIN
+				(
+					SELECT
+						NO_SPJ,
+						COUNT(NO_SPJ) AS JML_NO_READ
+					FROM
+						SPJ_HISTORY_NG_SECURITY
+					WHERE
+						STATUS_NOTIF IS NULL
+					GROUP BY
+						NO_SPJ
+				)Q3 ON Q1.NO_SPJ = Q3.NO_SPJ
+				WHERE
+					Q1.NO_SPJ LIKE '%$search%' OR
+					QR_CODE LIKE '%$search%'
+				ORDER BY
+					TGL_SPJ DESC";
+		return $this->db->query($sql);
+	}
+	public function detailNGSecurity($noSPJ)
+	{
+		$sql = "SELECT
+					a.*,
+					CASE 
+						WHEN JENIS = 'Sopir' THEN 'PIC Driver'
+						WHEN JENIS = 'Pendamping' THEN 'PIC Pendamping'
+						ELSE JENIS
+					END AS JENIS_DETAIL,
+					namapeg
+				FROM
+					[dbo].[SPJ_HISTORY_NG_SECURITY] a
+				LEFT JOIN
+				dbhrm.dbo.tbPegawai b ON
+				a.PIC_INPUT = b.NIK
+				WHERE
+					NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function getNotifNGSecurity()
+	{
+		$sql = "SELECT
+					ID
+				FROM
+					SPJ_HISTORY_NG_SECURITY
+				WHERE
+					STATUS_NOTIF IS NULL";
+		return $this->db->query($sql);
+	}
+	public function getNoBiayaAdmin()
+	{
+		$tahun = date('Y');
+        $bulan = date('m');
+		$gabung = "BA".$tahun."".$bulan;
+		$cekNoDoc=$this->db->query("SELECT MAX
+											( RIGHT ( NO_BIAYA_ADMIN, 4 ) ) AS SETNODOC
+										FROM
+											SPJ_BIAYA_ADMIN
+										WHERE
+											NO_BIAYA_ADMIN LIKE '$gabung%'");
+		foreach ($cekNoDoc->result() as $data) {
+            if ($data->SETNODOC =="") {
+                $URUTZERO = $gabung."0001";
+
+                $hasil= $URUTZERO;
+            }else{
+                $zero='';
+                $length= 4;
+                $index=$data->SETNODOC;
+
+                for ($i=0; $i <$length-strlen($index+1) ; $i++) { 
+                    $zero = $zero.'0';
+                }
+                $URUTDOCNO = $gabung.$zero.($index+1);
+                
+                $hasil=$URUTDOCNO;  
+            }
+            
+        }
+        return $hasil;
 	}
 }
 ?>

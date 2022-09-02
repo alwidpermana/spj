@@ -49,6 +49,7 @@ class M_Cash_Flow extends CI_Model {
 						CASE 
 							WHEN JENIS_KASBON = 'Kasbon BBM' THEN 'Voucher BBM'
 							WHEN JENIS_KASBON = 'Kasbon TOL' THEN 'TOL '+NAMA_JENIS
+							WHEN JENIS_KASBON = 'Kasbon TOL (Biaya Admin)' THEN 'TOL '+NAMA_JENIS
 							ELSE 'SPJ '+NAMA_JENIS
 						END AS JENIS_KASBON,
 						'SUB KAS' AS JENIS_KAS,
@@ -200,7 +201,7 @@ class M_Cash_Flow extends CI_Model {
 		$sql = "DELETE FROM SPJ_KAS_INDUK WHERE JENIS_FK = '$jenisFK' AND FK_ID = $fkID";
 		return $this->db->query($sql);
 	}
-	public function getPengajuanSaldoByJenisSPJ($jenis, $status)
+	public function getPengajuanSaldoByJenisSPJ($jenis, $status, $jenisId)
 	{
 		$sql = "SELECT
 					ID,
@@ -247,8 +248,9 @@ class M_Cash_Flow extends CI_Model {
 					SPJ_JENIS e ON
 				a.JENIS_ID = e.ID_JENIS
 				WHERE 
-					a.JENIS_ID LIKE '$jenis%'
-					AND STATUS_PENGAJUAN_SALDO LIKE '$status%'
+					a.JENIS_KASBON LIKE '$jenis%'
+					AND STATUS_PENGAJUAN_SALDO LIKE '$status%' AND
+					a.JENIS_ID LIKE '$jenisId%'
 				ORDER BY TGL_PENGAJU DESC";
 		return $this->db->query($sql);
 	}

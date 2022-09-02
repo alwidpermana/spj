@@ -426,6 +426,14 @@
                       <td><textarea class="form-control otoritas kondisiUM" id="inputUMKeterangan" rows="2">Otomatis</textarea></td>
                     </tr>
                   </tbody>
+                  <tfoot>
+                    <tr>
+                      <th class="text-right">TOTAL</th>
+                      <th class="text-center"><span class="totalNormal"></span></th>
+                      <th class="text-center"><span class="totalDiajukan"></span></th>
+                      <th colspan="3"></th>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </div>
@@ -529,7 +537,12 @@
         $('#inputUS1Keterangan').val(data.uangUS1Keterangan);
         $('#inputUS2Keterangan').val(data.uangUS2Keterangan)
         $('#inputManajemen').val(data.manajemen);
-        
+        var uangAdjustmentNormal = data.manajemen == 'Y' ? parseInt(data.uangMakan1) + parseInt(data.uangBBM) + parseInt(data.uangJalan) : 0;
+        var uangAdjustmentDiajukan = data.manajemen == 'Y' ? parseInt(data.uangMakanDiajukan) + parseInt(data.uangBBMDiajukan) + parseInt(data.uangJalanDiajukan) : 0;
+        var totalNormal = parseInt(data.uangSaku1) + parseInt(data.uangSaku2) + parseInt(data.uangMakan2) + uangAdjustmentNormal;
+        var totalDiajukan = parseInt(data.uangSaku1) + parseInt(data.uangSaku2) + parseInt(data.uangMakan2) + uangAdjustmentDiajukan;
+        $('.totalNormal').html(formatRupiah(String(totalNormal), 'Rp. '));
+        $('.totalDiajukan').html(formatRupiah(String(totalDiajukan), 'Rp. '));
         
         if (data.uangUS1Keputusan == 'OK') {
           $('[name="US1"]#USOK').attr("checked","checked");
@@ -873,12 +886,27 @@
   function cekSaldo(inputManajemen) {
     var inputJenisSPJ = $('#inputJenisSPJ').val();
     var kasbon = "Kasbon SPJ "+inputJenisSPJ;
-    var inputUangMakanDiajukan = inputManajemen == '' ? 0: parseInt($('#inputUangMakanDiajukan').val());
-    var inputUangJalanDiajukan = inputManajemen == '' ? 0: parseInt($('#inputUangJalanDiajukan').val());
-    var inputBBMDiajukan = inputManajemen == '' ? 0: parseInt($('#inputBBMDiajukan').val());
-    var inputUS1Diajukan = parseInt($('#inputUS1Diajukan').val());
-    var inputUS2Diajukan = parseInt($('#inputUS2Diajukan').val());
-    var inputUMDiajukan = parseInt($('#inputUMDiajukan').val());
+    
+    var inputKeputusanUS1 = $('#inputKeputusanUS1').val();
+    var inputKeputusanUS2 = $('#inputKeputusanUS2').val();
+    var inputKeputusanUM = $('#inputKeputusanUM').val();
+    
+    if (inputManajemen == '') {
+      var inputUangMakanDiajukan = 0;
+      var inputUangJalanDiajukan = 0;
+      var inputBBMDiajukan = 0;
+    }else{
+      var inputKeputusanBBM = $('#inputKeputusanBBM').val();
+      var inputKeputusanUangMakan = $('#inputKeputusanUangMakan').val();
+      var inputKeputusanUangJalan = $('#inputKeputusanUangJalan').val();
+      var inputUangMakanDiajukan = inputKeputusanUangMakan == 'OK' ? parseInt($('#inputUangMakanDiajukan').val()):0 ;
+      var inputUangJalanDiajukan = inputKeputusanUangJalan == 'OK' ? parseInt($('#inputUangJalanDiajukan').val()):0 ;
+      var inputBBMDiajukan = inputKeputusanBBM == 'OK' ? parseInt($('#inputBBMDiajukan').val()): 0;
+    }
+    
+    var inputUS1Diajukan = inputKeputusanUS1 == 'OK'?parseInt($('#inputUS1Diajukan').val()):0;
+    var inputUS2Diajukan = inputKeputusanUS2 == 'OK'?parseInt($('#inputUS2Diajukan').val()):0;
+    var inputUMDiajukan = inputKeputusanUM == 'OK' ? parseInt($('#inputUMDiajukan').val()):0;
     var total = inputUangMakanDiajukan+inputUangJalanDiajukan+inputUS1Diajukan+inputUS2Diajukan+inputUMDiajukan+inputBBMDiajukan;
     $.ajax({
       type:'get',
@@ -892,6 +920,7 @@
           Swal.fire("Saldo Tidak Mencukupi!","Hubungi PIC Terkait","warning")
         }else{
           saveKeputusan(inputManajemen, total)
+          console.log(total)
         }
         
       },

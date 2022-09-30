@@ -249,7 +249,7 @@
 				}
 				$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET $field = '$file', TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE NIK = '$nik'";
 			}else{
-				$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT, JENIS_DATA)VALUES('$nik','$file','$tanggal','$user','$jenis')";	
+				$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT, JENIS_DATA, OTORITAS_ADJUSMENT)VALUES('$nik','$file','$tanggal','$user','$jenis','N')";	
 			}
 			
 			return $this->db->query($sql);
@@ -263,7 +263,7 @@
             if ($getNIK->num_rows()>0) {
             	$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET $field = '$isi', TGL_INPUT = '$tanggal', PIC_INPUT = '$user'  WHERE NIK = '$nik'";
             } else {
-            	$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT, JENIS_DATA)VALUES('$nik','$isi','$tanggal','$user','$jenis')";
+            	$sql = "INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, $field, TGL_INPUT, PIC_INPUT, JENIS_DATA, OTORITAS_ADJUSMENT)VALUES('$nik','$isi','$tanggal','$user','$jenis','N')";
             }
             return $this->db->query($sql);
 		}
@@ -272,7 +272,7 @@
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
-            $sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET STATUS_DATA = 'SAVED', TGL_INPUT = '$tanggal', PIC_INPUT = '$user', OTORITAS_DRIVER = '$isiDriver', OTORITAS_PENDAMPING = '$isiPendamping', OTORITAS_UANG_MAKAN = 'Y', OTORITAS_UANG_SAKU = 'Y', SUBJEK='$inputSubjek'  WHERE NIK = '$nik'";
+            $sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET STATUS_DATA = 'SAVED', TGL_INPUT = '$tanggal', PIC_INPUT = '$user', OTORITAS_DRIVER = '$isiDriver', OTORITAS_PENDAMPING = '$isiPendamping', OTORITAS_UANG_MAKAN = 'Y', OTORITAS_UANG_SAKU = 'Y', SUBJEK='$inputSubjek' WHERE NIK = '$nik'";
             if ($isiDriver == 'N') {
             	$this->db->query("UPDATE SPJ_PEGAWAI_OTORITAS SET NO_SIM = null, BERLAKU_TERBIT = null, BERLAKU_AKHIR = null WHERE NIK = '$nik'");
             }
@@ -381,6 +381,11 @@
 			$sql = "SELECT ID_JENIS, NAMA_JENIS FROM SPJ_JENIS";
 			return $this->db->query($sql);
 		}
+		public function getJenisOther()
+		{
+			$sql = "SELECT ID, TUJUAN FROM SPJ_OTHER";
+			return $this->db->query($sql);
+		}
 		public function getJenisKendaraan()
 		{
 			$sql = "SELECT * FROM [dbo].[SPJ_JENIS_KENDARAAN]";
@@ -391,6 +396,20 @@
 			$sql = "SELECT TOP $top
 						*,
 						TIPE_KOTA + ' '+NAMA_KOTA+' Provinsi '+PROVINSI AS VAL
+					FROM
+						SPJ_KOTA
+					WHERE
+						TIPE_KOTA LIKE '%$cari%' OR
+						NAMA_KOTA LIKE '%$cari%' OR
+						PROVINSI LIKE '%$cari%'
+					ORDER BY NAMA_KOTA ASC";
+			return $this->db->query($sql);
+		}
+		public function getKota2($cari)
+		{
+			$sql = "SELECT TOP 25
+						TIPE_KOTA+' '+NAMA_KOTA AS KOTA,
+						TIPE_KOTA+' '+NAMA_KOTA+' Provinsi '+PROVINSI AS VAL
 					FROM
 						SPJ_KOTA
 					WHERE
@@ -1077,6 +1096,67 @@
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
 			$sql = "UPDATE SPJ_VERIFIKASI_KONFIGURASI SET STATUS_APPROVE = '$status', TGL_APPROVE='$tanggal', PIC_APPROVE='$user' WHERE ID=$id";
+			return $this->db->query($sql);
+		}
+		public function getDataAdjustmentKaryawan($search, $adjustment)
+		{
+			$sql = "SELECT
+						*
+					FROM
+					(
+						SELECT
+							Q1.NIK,
+							namapeg AS NAMA,
+							jabatan AS JABATAN,
+							departemen AS DEPARTEMEN,
+							OTORITAS_ADJUSMENT
+						FROM
+						(
+							SELECT
+								NIK,
+								OTORITAS_ADJUSMENT
+							FROM
+								SPJ_PEGAWAI_OTORITAS
+						)Q1
+						LEFT JOIN
+						(
+							SELECT
+								nik,
+								namapeg,
+								jabatan,
+								departemen
+							FROM
+								dbhrm.dbo.tbPegawai
+							UNION
+							SELECT
+								KdSopir,
+								NamaSopir,
+								Status,
+								NULL AS departemen
+							FROM
+								TrTs_SopirLogistik
+							UNION
+							SELECT
+								KdSopir,
+								NamaSopir,
+								Status,
+								NULL AS departemen
+							FROM
+								TrTs_SopirRental
+						)Q2 ON Q1.NIK = Q2.nik
+						WHERE OTORITAS_ADJUSMENT LIKE '$adjustment%'
+					)Q1
+					WHERE
+						NIK LIKE '%$search%' OR
+						NAMA LIKE '%$search%' OR
+						DEPARTEMEN LIKE '%$search%' OR
+						JABATAN LIKE '%$search%'
+					ORDER BY OTORITAS_ADJUSMENT DESC, NIK ASC";
+			return $this->db->query($sql);
+		}
+		public function saveOtoritasAdjustment($nik, $isi)
+		{
+			$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET OTORITAS_ADJUSMENT = '$isi' WHERE NIK = '$nik'";
 			return $this->db->query($sql);
 		}
 	}

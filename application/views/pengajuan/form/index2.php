@@ -183,6 +183,19 @@
                         </div>
                       </div>
                       <br>
+                      <div class="row otherTujuan d-none">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label>Tujuan</label>
+                            <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisOther">
+                              <option value="Bengkel">Bengkel</option>
+                              <option value="Pengurusan Pajak Kendaraan">Pengurusan Pajak Kendaraan</option>
+                              <option value="KIR/BOM">KIR/BOM</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <br>
                       <div class="row">
                         <div class="col-md-12 text-right">
                           <div class="form-group clearfix">
@@ -381,7 +394,7 @@
                           </div>
                           <div class="row" style="padding-top: 50px">
                             <div class="col-sm-4">
-                              <button class="btn btn-secondary btnStepNext" onclick="stepper.next()">Next</button>
+                              <button class="btn btn-secondary btnStepNext" onclick="stepper.next()">Next</button> 
                             </div>
                           </div>
                         </div>
@@ -520,20 +533,17 @@
                             <div class="col-md-2">
                               <div class="row">
                                 <div class="col-md-12">
-                                  <input type="text" id="inputRekananKendaraan" class="form-control form-control-sm inputan" value="<?=$key->REKANAN_KENDARAAN?>">
+                                  <input type="text" id="inputRekananKendaraan" class="form-control form-control-sm inputan" value="">
                                 </div>
                               </div>
                             </div>
                           </div>
-                          
-
-                          <div class="row" style="padding-top: 50px">
+                          <div class="row" style="padding-top: 25px">
                             <div class="col-md-4">
                               <button class="btn btn-secondary btnStepPrevios">Previous</button>
                               <button class="btn btn-secondary btnStepNext" id="btnNextKendaraan">Next</button> 
                             </div>
                           </div>
-                          
                         </div>
                         <div id="stepTujuan" class="content" role="tabpanel" aria-labelledby="stepTujuan-trigger">
                           <input type="hidden" id="inputGroupTujuan">
@@ -895,34 +905,63 @@
             <div class="objekLainnya d-none">
               <div class="row">
                 <div class="col-md-12">
-                  <input type="text" id="inputObjekLainnya" class="form-control" placeholder="Isi Objek Lainnya">
+                  <input type="text" id="inputObjekLainnya" class="form-control" placeholder="Isi Objek Lainnya" readonly>
                 </div>
               </div>
               <br>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>Perusahaan</label>
-                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan">
-                    
-                  </select>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Kota/Kabupaten</label>
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputKotaKabupaten" style="width:100%">
+                      
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Nama Tempat</label>
+                    <input type="text" id="inputNamaTempat" class="form-control">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Alamat</label>
+                    <input type="text" id="inputAlamat" class="form-control">
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>Group Tujuan</label>
-                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputGroupPerusahaan">
-                    <option value="">Pilih Group</option>
-                    <?php foreach ($group as $gr): ?>
-                      <option value="<?=$gr->ID_GROUP?>"><?=$gr->NAMA_GROUP?></option>
-                    <?php endforeach ?>
-                  </select>
+            <div class="objekNormal">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Perusahaan</label>
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan">
+                      
+                    </select>
+                  </div>
                 </div>
               </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Group Tujuan</label>
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputGroupPerusahaan">
+                      <option value="">Pilih Group</option>
+                      <?php foreach ($group as $gr): ?>
+                        <option value="<?=$gr->ID_GROUP?>"><?=$gr->NAMA_GROUP?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+              </div> 
             </div>
+            
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

@@ -1028,7 +1028,11 @@ class M_Monitoring extends CI_Model {
 	{
 		$sql = $this->db->query("Execute SPJ_monitoringHarian $tahun, $bulan, $jenis");
     	return $sql;
-
+	}
+	public function getMonitoringSPJHarianSummary($bulan, $tahun, $jenis, $where)
+	{
+		$sql = $this->db->query("Execute SPJ_monitoringHarianSummary $tahun, $bulan, $jenis, '$where'");
+		return $sql;
 	}
 	public function getUrutanTerbesar($bulan, $tahun, $jenis)
 	{
@@ -1847,10 +1851,10 @@ class M_Monitoring extends CI_Model {
 					ID_SPJ
 				FROM
 					SPJ_TEMP_KENDARAAN a
-				INNER JOIN
+				LEFT JOIN
 					SPJ_PENGAJUAN b ON
 				a.NO_SPJ = b.NO_SPJ
-				INNER JOIN
+				LEFT JOIN
 					SPJ_GROUP_TUJUAN c ON
 				b.GROUP_ID = c.ID_GROUP
 				ORDER BY a.NO_SPJ ASC";

@@ -169,7 +169,7 @@ class Data_Master extends CI_Controller {
 	public function Supir_Logistik()
 	{
 		$data['side'] = 'data_master-karyawan_logistik';
-		$data['page'] = 'Master Data - Supir Logistik';
+		$data['page'] = 'Master Data - Logistik Sopir & Kenek';
 		$this->load->view("Data_Master/Karyawan/index_supir", $data);
 	}
 	public function tabelLogistik()
@@ -184,7 +184,7 @@ class Data_Master extends CI_Controller {
 	public function Supir_Rental()
 	{
 		$data['side'] = 'data_master-karyawan_rental';
-		$data['page'] = 'Master Data - Supir Rental';
+		$data['page'] = 'Master Data - Rental Sopir & Kenek';
 		$this->load->view("Data_Master/Karyawan/index_rental", $data);
 	}
 	public function tabelRental()
@@ -594,6 +594,26 @@ class Data_Master extends CI_Controller {
 			}
 		}
 		$data = $this->M_Data_Master->verifikasiKonfigurasi($id, $status);
+		echo json_encode($data);
+	}
+	public function karyawan_adjustment()
+	{
+		$data['side'] = 'data_master-karyawan_adjustment';
+		$data['page'] = 'Monitoring Karyawan Adjustment';
+		$this->load->view("data_master/karyawan/adjustment/index", $data);
+	}
+	public function getTabelAdjustmentKaryawan()
+	{
+		$filSearch = $this->input->get("filSearch");
+		$filAdjustment = $this->input->get("filAdjustment");
+		$data['data'] = $this->M_Data_Master->getDataAdjustmentKaryawan($filSearch, $filAdjustment)->result();
+		$this->load->view("Data_Master/karyawan/adjustment/tabel", $data);
+	}
+	public function saveOtoritasAdjustment()
+	{
+		$nik = $this->input->post("nik");
+		$adjustment = $this->input->post("adjustment");
+		$data = $this->M_Data_Master->saveOtoritasAdjustment($nik, $adjustment);
 		echo json_encode($data);
 	}
 

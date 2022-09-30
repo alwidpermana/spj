@@ -190,6 +190,19 @@
                         </div>
                       </div>
                       <br>
+                      <div class="row otherTujuan d-none">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label>Tujuan</label>
+                            <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisOther">
+                              <option value="Bengkel">Bengkel</option>
+                              <option value="Pengurusan Pajak Kendaraan">Pengurusan Pajak Kendaraan</option>
+                              <option value="KIR/BOM">KIR/BOM</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <br>
                       <div class="row">
                         <div class="col-md-12 text-right">
                           <div class="form-group clearfix">

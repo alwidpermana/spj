@@ -254,6 +254,8 @@ class Monitoring extends CI_Controller {
 		$filBulan = $this->input->get("filBulan");
 		$filJenis = $this->input->get("filJenis");
 		$data['data'] = $this->M_Monitoring->getMonitoringSPJHarian2($filBulan, $filTahun, $filJenis)->result();
+		$data['summaryOK'] = $this->M_Monitoring->getMonitoringSPJHarianSummary($filBulan, $filTahun, $filJenis, "OK")->result();
+		// $data['summaryCancel'] = $this->M_Monitoring->getMonitoringSPJHarianSummary($filBulan, $filTahun, $filJenis, $whereCancel)->result();
 		$this->load->view("monitoring/harian/tabel", $data);
 	}
 	public function getIdSPJ()

@@ -96,8 +96,10 @@ class Implementasi extends CI_Controller {
 	{
 		$inputNoSPJ = $this->input->get("inputNoSPJ");
 		$jenis = $this->input->get("jenis");
+		$sql = $this->db->query("SELECT JENIS_ID FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$inputNoSPJ'")->row();
 		$data = $this->M_Implementasi->cekValidasiPICNew($inputNoSPJ, $jenis)->num_rows();
-		echo json_encode($data);
+		$hasil = array('jumlah' =>$data ,'jenis_spj'=>$sql->JENIS_ID);
+		echo json_encode($hasil);
 	}
 	public function saveValidasiOut()
 	{
@@ -770,6 +772,61 @@ class Implementasi extends CI_Controller {
 	{
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$data = $this->M_Implementasi->saveLokalSelesai($inputNoSPJ);
+		echo json_encode($data);
+	}
+	public function getTabelAktual()
+	{
+		$inputScan = $this->input->get("inputScan");
+		$getSPJ = $this->db->query("SELECT NO_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$inputScan'")->row();
+		$noSPJ = $getSPJ->NO_SPJ;
+		$data= $this->M_Implementasi->getTabelAktualSecurityCheck($noSPJ)->result();
+		echo json_encode($data);
+	}
+	public function getPICAktual()
+	{
+		$cari = $this->input->get("cari");
+		$sql = $this->M_Implementasi->getPICAktual($cari);
+		$item = $sql->result_array();
+		$data = array();
+		foreach ($item as $key) {
+			$data[] = array('id' =>$key['ID'] , 'text' =>$key['VAL']);
+		}
+		echo json_encode($data);
+	}
+	public function saveAktualPIC()
+	{
+		$inputScan = $this->input->post("inputScan");
+		$getSPJ = $this->db->query("SELECT NO_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$inputScan'")->row();
+		$noSPJ = $getSPJ->NO_SPJ;
+		$inputNIK = $this->input->post("inputNIK");
+		$inputNama = $this->input->post("inputNama");
+		$inputSebagai = $this->input->post("inputSebagai");
+		$data = $this->M_Implementasi->saveAktualPIC($inputNIK, $inputNama, $inputSebagai, $noSPJ);
+		echo json_encode($data);
+	}
+	public function hapusPICAktual()
+	{
+		$inputScan = $this->input->post("inputScan");
+		$getSPJ = $this->db->query("SELECT NO_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$inputScan'")->row();
+		$noSPJ = $getSPJ->NO_SPJ;
+		$nik = $this->input->post("nik");
+		$nama = $this->input->post("nama");
+		$sebagai = $this->input->post("sebagai");
+		$data = $this->M_Implementasi->hapusPICAktual($noSPJ, $nik, $nama, $sebagai);
+		echo json_encode($data);
+	}
+	public function getKendaraanNotSPJ()
+	{
+		$scan = $this->input->get("scan");
+		$data = $this->M_Implementasi->getKendaraanNotSPJ($scan)->row();
+		echo json_encode($data);
+	}
+	public function scanKendaraanNotSPJ($value='')
+	{
+		$noTNKB = $this->input->post("noTNKB");
+		$status = $this->input->post("status");
+		$keterangan = $this->input->post("keterangan");
+		$data = $this->M_Implementasi->scanKendaraanNotSPJ($noTNKB, $status, $keterangan);
 		echo json_encode($data);
 	}
 }

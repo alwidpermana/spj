@@ -115,7 +115,7 @@
               <div class="col-md-12">
                 <div class="form-group">
                   <label>Jenis Kasbon</label>
-                  <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisKasbon">
+                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisKasbon">
                     <option value="Kasbon SPJ">Kasbon SPJ</option>
                     <option value="Kasbon TOL">Kasbon TOL</option>
                     <option value="Kasbon BBM">Kasbon BBM</option>
@@ -309,12 +309,18 @@
           url:'cekPasswordReceive',
           cache: false,
           async: true,
+          beforeSend: function(data){
+            $('.saveApprove').attr("disabled","disabled")
+          },
           success: function(data){
             if (parseInt(data)==0) {
               Swal.fire("Kode Untuk Receive Yang Anda Masukan Salah!","Perhatikan Besar dan Kecil Kodenya!","warning")
             } else {
               receivePengajuan(id, jumlah, kasbon)
             }
+          },
+          complete: function(data){
+            $('.saveApprove').removeAttr("disabled","disabled")
           },
           error: function(data){
             gagal()

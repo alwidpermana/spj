@@ -64,8 +64,9 @@ class Pengajuan extends CI_Controller {
 		$inputJenisSPJ = $this->input->post("inputJenisSPJ");
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$inputTglSPJ = $this->input->post("inputTglSPJ");
+		$inputJenisOther = $this->input->post("inputJenisOther");
 		$namaFile = str_replace('/', '', $inputNoSPJ);
-		$data = $this->M_Pengajuan->saveTemporaryPengajuan($inputJenisSPJ, $inputNoSPJ, $namaFile, $inputTglSPJ);
+		$data = $this->M_Pengajuan->saveTemporaryPengajuan($inputJenisSPJ, $inputNoSPJ, $namaFile, $inputTglSPJ, $inputJenisOther);
 		$config['cacheable']    = true; //boolean, the default is true
         $config['cachedir']     = './assets/image/'; //string, the default is application/cache/
         $config['errorlog']     = './assets/image/'; //string, the default is application/logs/
@@ -158,18 +159,26 @@ class Pengajuan extends CI_Controller {
 		$inputGroupTujuan= $this->input->post("inputGroupTujuan");
 		$inputObjek= $this->input->post("inputObjek");
 		$inputNoSPJ= $this->input->post("inputNoSPJ");
-
-		$serlok = $this->M_Serlok->getCustomerByGroup($query='', $inputPerusahaan)->result();
-		$serlokID = '';
-		$serlokAlamat = '';
-		$serlokPerusahaan = '';
-		$serlokKota = '';
-		foreach ($serlok as $key) {
-			$serlokID = $key->id;
-			$serlokAlamat = $key->ALAMAT_LENGKAP_PLANT;
-			$serlokPerusahaan = $key->COMPANY_NAME;
-			$serlokKota = $key->nama_kabkota;
+		$objek = $this->input->post("objek");
+		if ($objek == 'Lainnya') {
+			$serlokID = 0;
+			$serlokAlamat = $this->input->post("inputAlamat");
+			$serlokPerusahaan = $this->input->post("inputNamaTempat");
+			$serlokKota = $this->input->post("inputKotaKabupaten");
+		}else{
+			$serlok = $this->M_Serlok->getCustomerByGroup($query='', $inputPerusahaan)->result();
+			$serlokID = '';
+			$serlokAlamat = '';
+			$serlokPerusahaan = '';
+			$serlokKota = '';
+			foreach ($serlok as $key) {
+				$serlokID = $key->id;
+				$serlokAlamat = $key->ALAMAT_LENGKAP_PLANT;
+				$serlokPerusahaan = $key->COMPANY_NAME;
+				$serlokKota = $key->nama_kabkota;
+			}	
 		}
+		
 
 		$data = $this->M_Pengajuan->saveLokasiTujuan($inputGroupTujuan, $inputObjek, $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota);
 		echo json_encode($data);
@@ -299,6 +308,7 @@ class Pengajuan extends CI_Controller {
         $inputJamBerangkat = $this->input->get("inputJamBerangkat");
         $inputTglPulang = $this->input->get("inputTglPulang");
         $inputJamPulang = $this->input->get("inputJamPulang");
+        $inputKendaraan = $this->input->get("inputKendaraan");
         $rencanaBerangkat = $inputTglBerangkat.' '.$inputJamBerangkat;
         $rencanaPulang = $inputTglPulang.' '.$inputJamPulang;
         $waktu_awal  = strtotime($rencanaBerangkat);
@@ -307,41 +317,46 @@ class Pengajuan extends CI_Controller {
         $jam    =floor($diff / (60 * 60));
         $jam2 = 0;
         $totalJam = 0;
-        $cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $nik);
+        if ($inputKendaraan == 'Rental' && $inputPIC == 'Sopir') {
+        	$hasil = array('BIAYA' =>0 ,'Menggunakan Kendaraan Rental' );
+        }else{
+        	$cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $nik);
         
-        if ($cekPIC->num_rows()>0) {
-        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+	        if ($cekPIC->num_rows()>0) {
+	        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
 
-    //     	foreach ($cekPIC->result() as $pic) {
-    //     		$jam2 += $pic->DIFF_HOUR;	
-    //     	}
+	    //     	foreach ($cekPIC->result() as $pic) {
+	    //     		$jam2 += $pic->DIFF_HOUR;	
+	    //     	}
 
-    //     	$totalJam = $jam+$jam2;
-    //     	if ($totalJam<=14) {
-    //     		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
-    //     	}else{
-    //     		$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
-			
-				// if ($data->num_rows()>0) {
-				// 	foreach ($data->result() as $key) {
-				// 		$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
-				// 	}
-				// } else {
-				// 	$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-				// }
-    //     	}
+	    //     	$totalJam = $jam+$jam2;
+	    //     	if ($totalJam<=14) {
+	    //     		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+	    //     	}else{
+	    //     		$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
+				
+					// if ($data->num_rows()>0) {
+					// 	foreach ($data->result() as $key) {
+					// 		$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
+					// 	}
+					// } else {
+					// 	$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
+					// }
+	    //     	}
 
-        } else {
-        	$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
-			
-			if ($data->num_rows()>0) {
-				foreach ($data->result() as $key) {
-					$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+	        } else {
+	        	$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
+				
+				if ($data->num_rows()>0) {
+					foreach ($data->result() as $key) {
+						$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+					}
+				} else {
+					$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
 				}
-			} else {
-				$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-			}
+	        }
         }
+        
         
 		
 		
@@ -539,12 +554,14 @@ class Pengajuan extends CI_Controller {
         $inputTOL = $this->input->post("inputTOL");
         $inputMediaBBM = $this->input->post("inputMediaBBM");
         $inputMediaTOL = $this->input->post("inputMediaTOL");
+        if ($inputTotalUangSaku != 0 && $inputTotalUangMakan != 0 && $inputTotalUangJalan != 0) {
+        	$bbmSPJ = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
+	        $tolSPJ = $inputMediaTOL == 'Kasbon' ? $inputTol : 0;
+	        $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $inputTotalUangJalan + $bbmSPJ + $tolSPJ;
+	        $status = $this->input->post("status");
+			$this->updateSaldo($inputNoSPJ, $totalSPJ, $oldKasbon, $status);
+        }
         
-        $bbmSPJ = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
-        $tolSPJ = $inputMediaTOL == 'Kasbon' ? $inputTol : 0;
-        $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $inputTotalUangJalan + $bbmSPJ + $tolSPJ;
-        $status = $this->input->post("status");
-		$this->updateSaldo($inputNoSPJ, $totalSPJ, $oldKasbon, $status);
 		echo json_encode($data);
 	}
 	public function cekAdaDriver()
@@ -707,6 +724,17 @@ class Pengajuan extends CI_Controller {
 	{
 		$noSPJ = $this->input->post("noSPJ");
 		$data = $this->M_Pengajuan->hapusPengajuan($noSPJ);
+		echo json_encode($data);
+	}
+	public function getKotaAPI()
+	{
+		$cari = $this->input->post("cari");
+		$sql = $this->M_Data_Master->getKota2($cari);
+		$item = $sql->result_array();
+		$data = array();
+		foreach ($item as $key) {
+			$data[] = array('id' =>$key['KOTA'] , 'text' =>$key['VAL']);
+		}
 		echo json_encode($data);
 	}
 

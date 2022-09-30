@@ -77,7 +77,194 @@
         </div>
       </div>
     </div>
-    
+    <div class="modal fade" id="modal-aktualPIC" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="modal-title">
+              <label><h4>Terdapat PIC yang Tidak OK! Isi Data Aktual PIC yang CheckOut!</h4></label>
+            </div>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <div class="icheck-orange icheck-kps d-inline">
+                    <input 
+                      type="checkbox" 
+                      id="inputCentang" 
+                      field="Y">
+                    <label for="inputCentang">
+                      Isi Manual
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="getDB">
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <label>PIC</label>
+                    <select class="select2 form-control select2-orange" id="inputPIC" data-dropdown-css-class="select2-orange" style="width:100%">
+                      
+                    </select>
+                  </div>
+                  <input type="hidden" id="inputHiddenNIK">
+                  <input type="hidden" id="inputHiddenNama">
+                  
+                </div>
+                <div class="col-md-4">
+                  <label>Sebagai</label>
+                  <select class="select2 form-control select2-orange" id="inputSebagai" data-dropdown-css-class="select2-orange" style="width:100%">
+                    <option value="Driver">Driver</option>
+                    <option value="Pendamping">Pendamping</option>
+                  </select>
+                </div>
+              </div>  
+            </div>
+            <div class="manual d-none">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>NIK</label>
+                    <input type="text" id="inputNIK" class="form-control">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Nama</label>
+                    <input type="text" id="inputNama" class="form-control">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label>Sebagai</label>
+                  <select class="select2 form-control select2-orange" id="inputSebagai2" data-dropdown-css-class="select2-orange" style="width:100%">
+                    <option value="Driver">Driver</option>
+                    <option value="Pendamping">Pendamping</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-md-12 d-flex justify-content-end">
+                <button type="button" class="btn bg-orange btn-kps ladda-button" data-style="expand-right" id="btnSaveAktual">
+                  Save
+                </button>
+              </div>
+            </div>
+            <hr style="border-width: 5px;">
+            <br>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="table-responsive">
+                  <table class="table table-valign-middle table-striped" width="100%">
+                    <thead>
+                      <tr>
+                        <th width="65%">PIC</th>
+                        <th width="25">Sebagai</th>
+                        <th width="5%"></th>
+                        <th width="5%"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="getTabelAktual">
+                      
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bg-orange btn-kps checkOutAktual ladda-button" data-style="expand-right">Check Out Dengan Data Aktual</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal-kendaraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="modal-title">
+              <label>Scan Kendaraan Tanpa SPJ</label>
+            </div>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="scanStatusKendaraan">
+            <div class="row">
+              <div class="col-md-12">
+                <div id="setImage"></div>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-md-2"></div>
+              <div class="col-md-8 font-weight-bold">
+                <div class="row">
+                  <div class="col-md-4 col-sm-4">
+                    No TNKB
+                  </div>
+                  <div class="col-md-8 col-sm-8">
+                    <div id="scanNoTNKB"></div>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-md-4 col-sm-4">
+                    Merk Mobil
+                  </div>
+                  <div class="col-md-8 col-sm-8">
+                    <div id="scanMerk"></div>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-md-4 col-sm-4">
+                    Type Mobil
+                  </div>
+                  <div class="col-md-8 col-sm-8">
+                    <div id="scanType"></div>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-md-4 col-sm-4">
+                    Kendaraan
+                  </div>
+                  <div class="col-md-8 col-sm-8">
+                    <div id="scanKendaraan"></div>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-md-4 col-sm-4">
+                    Jenis Kendaraan
+                  </div>
+                  <div class="col-md-8 col-sm-8">
+                    <div id="scanJenis"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-1"></div>
+              <div class="col-md-10">
+                <div class="form-group">
+                  <label>Keterangan</label>
+                  <textarea class="form-control" id="inputKeteranganScanKendaraan" rows="2"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bg-orange btn-kps scanKendaraan ladda-button" data-style="expand-right">Scan</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <?php $this->load->view('_partial/footer');?>
 </div>
 <?php $this->load->view("_partial/js");?>
@@ -110,9 +297,173 @@
 
    $('#inputScan').on('keyup', function(){
     var scan = $(this).val();
-    cekSPJ(scan);
+    var jenis = scan.substring(0, 3);
+    
+    if (jenis != '') {
+      if (jenis == 'SPJ') {
+        cekSPJ(scan);
+      }else{
+        cekKendaraan(scan)
+      }  
+    }
+    
+    
 
    })
+   $('#inputCentang').on('change', function(){
+    var inputCentang = document.getElementById('inputCentang');
+    if (inputCentang.checked == true) {
+      $('.getDB').addClass("d-none");
+      $('.manual').removeClass("d-none");
+    }else{
+      $('.getDB').removeClass("d-none");
+      $('.manual').addClass("d-none");
+    }
+   })
+    $("#inputPIC").select2({
+      ajax: { 
+        url: url+'/Implementasi/getPICAktual',
+        type: "get",
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return {
+              cari: params.term // search term
+            };
+        },
+        processResults: function (response) {
+            return {
+               results: response
+            };
+            console.log(response)
+
+        },
+        cache: true
+      }
+    });
+    $('#inputPIC').on('change', function(){
+      var isi = $(this).val();
+      var data = isi.split("||");
+      var nik = data[0]
+      var nama = data[1]
+      $('#inputHiddenNIK').val(nik)
+      $('#inputHiddenNama').val(nama)
+    });
+   $('#btnSaveAktual').on('click', function(){
+    
+    
+   })
+    var btnSaveAktual = $('#btnSaveAktual').ladda();
+      btnSaveAktual.click(function () {
+      // Start loading
+      btnSaveAktual.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var inputCentang = document.getElementById('inputCentang');
+        var inputNIK = inputCentang.checked == true ?$('#inputNIK').val():$('#inputHiddenNIK').val();
+        var inputNama = inputCentang.checked == true ? $('#inputNama').val():$('#inputHiddenNama').val();
+        var inputSebagai = inputCentang.checked == true ? $('#inputSebagai2').val():$('#inputSebagai').val();
+        
+        if (inputNIK == '' || inputNama == '' || inputSebagai == '') {
+          Swal.fire("Lengkapi Datanya Terlebih Dahulu!","","warning")
+        }else{
+          saveAktual(inputNIK, inputNama, inputSebagai)
+        }
+        btnSaveAktual.ladda('stop');
+        return false;
+          
+      }, 500)
+    });
+    $('#getTabelAktual').on('click','.aktualHapus', function(){
+      var nik = $(this).attr("nik");
+      var nama = $(this).attr("nama");
+      var sebagai= $(this).attr("sebagai");
+      var inputScan = $("#inputScan").val()
+      Swal.fire({
+          title: 'Apakah Anda Yakin?',
+          text: "Anda Akan Menghapus Data Aktual PIC",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#B22222',
+          cancelButtonColor: '#CD5C5C',
+          confirmButtonText: 'Ya, Hapus Data Ini!'
+      }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              type:'post',
+              data:{nik, nama, sebagai, inputScan},
+              dataType:'json',
+              cache: false,
+              async: true,
+              url:url+'/implementasi/hapusPICAktual',
+              success: function(data){
+                Swal.fire(
+                  'Berhasil!',
+                  'Data Telah Dihapus',
+                  'success'
+                )
+                getTabelAktual()
+              },
+              error: function(data){
+                gagal("Gagal Menghapus Data! Hubungi Staff IT!");
+              }
+            })
+              
+          }
+      })
+    });
+    var checkOutAktual = $('.checkOutAktual').ladda();
+      checkOutAktual.click(function () {
+      // Start loading
+      checkOutAktual.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        saveValidasiOut();
+        checkOutAktual.ladda('stop');
+        return false;
+          
+      }, 500)
+    });
+    var scanKendaraan = $('.scanKendaraan').ladda();
+      scanKendaraan.click(function () {
+      // Start loading
+      scanKendaraan.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var noTNKB = $('#inputScan').val();
+        var status = $('#scanStatusKendaraan').val();
+        var keterangan = $('#inputKeteranganScanKendaraan').val();
+        $.ajax({
+          type:'post',
+          data:{noTNKB, status, keterangan},
+          dataType:'json',
+          cache: false,
+          async: true,
+          url:url+'/Implementasi/scanKendaraanNotSPJ',
+          beforeSend: function(data){
+            $('.scanKendaraan').attr("disabled","disabled")
+          },
+          success: function(data){
+            berhasil();
+            $('#modal-kendaraan').modal("hide")
+          },
+          complete: function(data){
+            
+            $('.scanKendaraan').removeAttr("disabled","disabled")
+            scanKendaraan.ladda('stop');    
+          },
+          error: function(data){
+            gagal();
+          }
+        })
+        
+        return false;
+          
+      }, 500)
+    });
   })
   
   function cekSPJ(scan) {
@@ -181,17 +532,45 @@
         $('.preloader-no-bg').fadeOut("slow");
       },
       error: function(data){
-        Swal.fire({
-          position: 'top-end',
-          toast : true,
-          icon: 'error',
-          title: 'Gagal Meng-Scan QrCode!',
-          showConfirmButton: false,
-          timer: 3000
-        })
+        gagalScan()
         
       }
     });
+  }
+  function cekKendaraan(scan) {
+    $.ajax({
+      type:'get',
+      data:{scan},
+      dataType:'json',
+      cache: false,
+      async: true,
+      url:url+'/Implementasi/getKendaraanNotSPJ',
+      beforeSend: function(data){
+        $('.preloader-no-bg').show();
+      },
+      success: function(data){
+        if (data == null) {
+          $('#modal-kendaraan').modal("hide");
+
+        }else{
+          $('#modal-kendaraan').modal("show");
+          $('#setImage').html('<img src="'+url+'/assets/image/'+data.NAMA_FILE+'" class="img-thumbnail rounded mx-auto d-block" width="400px"></img>');
+          $('#scanNoTNKB').html(': '+data.NoTNKB)
+          $('#scanMerk').html(': '+data.Merk)
+          $('#scanType').html(': '+data.Type)
+          $('#scanKendaraan').html(': '+data.Jenis)
+          $('#scanJenis').html(': '+data.Kategori)
+          $('#scanStatusKendaraan').val(data.STATUS)
+        }
+        
+      },
+      complete: function(data){
+        $('.preloader-no-bg').fadeOut("slow");
+      },
+      error: function(data){
+        gagalScan()
+      }
+    })
   }
 
   function getSPJ(scan) {
@@ -247,7 +626,66 @@
       })  
       // console.log(status)
     }
-    
+  }
+  function getTabelAktual() {
+    var inputScan = $('#inputScan').val();
+    $.ajax({
+      type:'get',
+      data:{inputScan},
+      dataType:'json',
+      url:url+'/Implementasi/getTabelAktual',
+      cache: false,
+      async: true,
+      success: function(data){
+        var html="";
+        var jml = data.length;
+        for (var i = 0; i < jml; i++) {
+          html+='<tr>';
+          html+='<td>'+data[i].NIK+' - '+data[i].NAMA+'</td>';
+          html+='<td>'+data[i].SEBAGAI+'</td>';
+          html+='<td><a href="javascript:;" class="btn text-kps text-orange aktualEdit"><i class="fas fa-edit"></i></a></td>';
+          html+='<td><a href="javascript:;" class="btn text-kps text-orange aktualHapus" nik="'+data[i].NIK+'" nama="'+data[i].NAMA+'" sebagai="'+data[i].SEBAGAI+'"><i class="fas fa-trash-alt"></i></a></td>';
+          html+='</tr>';
+        }
+        $('#getTabelAktual').html(html);
+      },
+      error: function(data){
+        $('#getTabelAktual').html("");
+      }
+    });
+  }
+  function saveAktual(inputNIK, inputNama, inputSebagai) {
+    var inputScan = $('#inputScan').val();
+    $.ajax({
+      type:'post',
+      data:{inputNIK, inputNama, inputSebagai, inputScan},
+      dataType:'json',
+      cache:false,
+      async: true,
+      url:url+'/Implementasi/saveAktualPIC',
+      beforeSend: function(data){
+        $('#btnSaveAktual').attr("disabled","disabled")
+      },
+      success: function(data){
+        berhasil()
+        var html="";
+        html+='<tr>';
+        html+='<td>'+inputNIK+' - '+inputNama+'</td>';
+        html+='<td>'+inputSebagai+'</td>';
+        html+='<td><a href="javascript:;" class="btn text-kps text-orange aktualEdit"><i class="fas fa-edit"></i></a></td>';
+        html+='<td><a href="javascript:;" class="btn text-kps text-orange aktualHapus" nik="'+inputNIK+'" nama="'+inputNama+'" sebagai="'+inputSebagai+'"><i class="fas fa-trash-alt"></i></a></td>';
+        html+='</tr>';
+        $("#getTabelAktual").prepend(html);
+        $('#inputNIK').val("");
+        $('#inputNama').val("");
+      },
+      complete: function(data){
+        $('#btnSaveAktual').removeAttr("disabled","disabled")
+      },
+      error: function(data){
+        gagal()
+      }
+    })
   }
   function berhasil() {
       Swal.fire({
@@ -266,6 +704,16 @@
       toast : true,
       icon: 'error',
       title: 'Gagal Menyimpan Data! Hubungi Staff IT',
+      showConfirmButton: false,
+      timer: 3000
+    })
+  }
+  function gagalScan() {
+    Swal.fire({
+      position: 'top-end',
+      toast : true,
+      icon: 'error',
+      title: 'Gagal Meng-Scan QrCode!',
       showConfirmButton: false,
       timer: 3000
     })

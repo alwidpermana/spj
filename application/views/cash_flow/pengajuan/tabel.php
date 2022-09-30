@@ -45,7 +45,7 @@
                       <?php elseif($key->STATUS_PENGAJUAN_SALDO == 'OPEN' && $key->STATUS_APPROVE == 'APPROVED'):?>
                         <span class="badge bg-kps">Waiting For Receive</span>
                       <?php else: ?>
-                        <span class="badge bg-warning">OPEN</span>
+                        <span class="badge bg-warning"><?=$key->STATUS_PENGAJUAN_SALDO?></span>
                       <?php endif ?>
                    </td>
                    <td>

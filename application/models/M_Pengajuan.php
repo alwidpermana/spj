@@ -7,7 +7,13 @@ class M_Pengajuan extends CI_Model {
 
 	public function getNoSPJ($jenis, $kode)
 	{
-		$kodeJenis = $jenis == '1'?'DLV':'NDV';
+		if ($jenis == '1') {
+			$kodeJenis = 'DLV';
+		}elseif ($jenis == '2') {
+			$kodeJenis = 'NDV';
+		}else{
+			$kodeJenis = 'OTR';
+		}
 		$tahun = date('Y');
         $bulan = date('m');
 		$gabung = "SPJ/".$kodeJenis."/".$tahun."/".$bulan."/";
@@ -50,7 +56,7 @@ class M_Pengajuan extends CI_Model {
         $this->db->query("DELETE FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$noSPJ'");
         return $this->db->query($sql);
 	}
-	public function saveTemporaryPengajuan($jenis, $no, $namaFile, $inputTglSPJ)
+	public function saveTemporaryPengajuan($jenis, $no, $namaFile, $inputTglSPJ, $inputJenisOther)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
@@ -63,7 +69,7 @@ class M_Pengajuan extends CI_Model {
 		if(file_exists($link)){
 			unlink($link);
 		}
-		$sql = "INSERT INTO SPJ_PENGAJUAN(TGL_INPUT, PIC_INPUT, STATUS_DATA, JENIS_ID, NO_SPJ, QR_CODE, TGL_SPJ)VALUES('$tanggal','$user','TEMPORARY','$jenis','$no','$namaFile','$inputTglSPJ')";
+		$sql = "INSERT INTO SPJ_PENGAJUAN(TGL_INPUT, PIC_INPUT, STATUS_DATA, JENIS_ID, NO_SPJ, QR_CODE, TGL_SPJ, TUJUAN_OTHER)VALUES('$tanggal','$user','TEMPORARY','$jenis','$no','$namaFile','$inputTglSPJ','$inputJenisOther')";
 		return $this->db->query($sql);
 	}
 
@@ -279,20 +285,24 @@ class M_Pengajuan extends CI_Model {
 				)Q2 ON Q1.NIK = Q2.NIK
 				LEFT JOIN
 				(
-					SELECT
-						NIK
-					FROM
-						SPJ_PENGAJUAN a
-					INNER JOIN
-						SPJ_PENGAJUAN_PIC b
-					ON a.NO_SPJ = b.NO_PENGAJUAN
-					WHERE
-						STATUS_DATA = 'SAVED' AND
-						TGL_SPJ = '$inputTglSPJ'
-				)Q3 ON Q1.NIK = Q3.NIK
+					SELECT PIC FROM SPJ_TEMP_PIC
+				)Q3 ON Q1.NIK = Q3.PIC
 				WHERE
 					Q2.NIK IS NULL AND 
-					Q3.NIK IS NULL";
+					Q3.PIC IS NULL";
+		// LEFT JOIN
+		// (
+		// 	SELECT
+		// 		NIK
+		// 	FROM
+		// 		SPJ_PENGAJUAN a
+		// 	INNER JOIN
+		// 		SPJ_PENGAJUAN_PIC b
+		// 	ON a.NO_SPJ = b.NO_PENGAJUAN
+		// 	WHERE
+		// 		STATUS_DATA = 'SAVED' AND
+		// 		TGL_SPJ = '$inputTglSPJ'
+		// )Q3 ON Q1.NIK = Q3.NIK
 		return $this->db->query($sql);
 	}
 	public function saveOtomatisUangSPJ($id, $group, $biaya)
@@ -792,7 +802,8 @@ class M_Pengajuan extends CI_Model {
 					FROM
 						SPJ_PENGAJUAN
 					WHERE 
-						STATUS_DATA = 'SAVED'
+						STATUS_DATA = 'SAVED' AND
+						JENIS_ID != '3'
 				)Q1
 				LEFT JOIN
 				(
@@ -826,18 +837,19 @@ class M_Pengajuan extends CI_Model {
 	public function getKendaraanWithAutoComplete($postData)
 	{
 		$cari = $postData['search'];
-		$sql = $this->db->query("SELECT TOP 10
+		$sql = $this->db->query("SELECT DISTINCT TOP 10 
 					ID_SPJ,
 					NO_TNKB,
 					MERK,
-					TYPE
+					TYPE,
+					REKANAN_KENDARAAN
 				FROM
 					SPJ_PENGAJUAN
 				WHERE
 					KENDARAAN = 'Rental' AND NO_TNKB LIKE '%$cari%'
 				ORDER BY ID_SPJ DESC");
 		foreach ($sql->result() as $key) {
-			$response[] = array("merk"=>$key->MERK,"label"=>$key->NO_TNKB,"type"=>$key->TYPE);			
+			$response[] = array("merk"=>$key->MERK,"label"=>$key->NO_TNKB,"type"=>$key->TYPE,'rekanan'=>$key->REKANAN_KENDARAAN);			
 		}
 		// if ($sql->num_rows()>0) {
 

@@ -124,7 +124,7 @@
                         <a class="dropdown-item dropButton approvePengajuan" data="<?=$key->ID?>" status="REJECTED" href="javascript:;">Reject</a>
                       </div>
                     <?php else: ?>
-                      <a 
+                      <!-- <a 
                         href="javascript:;" 
                         class="btn bg-orange btn-kps btn-sm approveGenerate" 
                         data="<?=$key->ID?>"
@@ -132,7 +132,8 @@
                         jenisSPJ = "<?=$key->NAMA_JENIS?>"
                         jumlah="<?=$key->JUMLAH?>">
                         Approve Generate
-                      </a>
+                      </a> -->
+                      <label>Waiting For Generate</label>
                     <?php endif ?>
                     
                   </td>

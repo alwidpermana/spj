@@ -89,13 +89,13 @@
                   <li class="nav-item">
                     <a href="<?=base_url()?>data_master/supir_logistik" class="nav-link ">
                       <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_logistik'?'text-dark':''?>" style="font-size: 11px;"></i>
-                      <p>Supir Logistik</p>
+                      <p>Logistik</p>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="<?=base_url()?>data_master/supir_rental" class="nav-link ">
                       <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_rental'?'text-dark':''?>" style="font-size: 11px;"></i>
-                      <p>Supir Rental</p>
+                      <p>Rental</p>
                     </a>
                   </li>
                   <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK")=='00004'): ?>
@@ -105,6 +105,12 @@
                         <p>Verifikasi Karyawan</p>
                       </a>
                     </li> 
+                    <li class="nav-item">
+                      <a href="<?=base_url()?>data_master/karyawan_adjustment" class="nav-link ">
+                        <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_adjustment'?'text-dark':''?>" style="font-size: 11px;"></i>
+                        <p>Adjustment</p>
+                      </a>
+                    </li>
                   <?php endif ?>
                 </ul>
               </li>

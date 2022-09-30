@@ -946,5 +946,123 @@ class M_Implementasi extends CI_Model {
 		$sql = "UPDATE SPJ_PENGAJUAN SET LOKAL_SELESAI = 'Y' WHERE NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);
 	}
+	public function getTabelAktualSecurityCheck($noSPJ)
+	{
+		$sql = "SELECT
+					ID,
+					NIK,
+					NAMA,
+					SEBAGAI
+				FROM
+					SPJ_AKTUAL_PIC_SECURITY
+				WHERE
+					NO_SPJ = '$noSPJ'
+				ORDER BY ID DESC";
+		return $this->db->query($sql);
+	}
+	public function getPICAktual($cari)
+	{
+		$sql = "SELECT TOP 25
+					SUBSTRING(nik, 1, 5)+'||'+namapeg AS ID,
+					SUBSTRING(nik, 1, 5)+' - '+namapeg AS VAL
+				FROM
+				(
+					SELECT
+						nik,
+						namapeg
+					FROM
+						dbhrm.dbo.tbPegawai
+					WHERE
+						status_aktif = 'AKTIF'
+					UNION
+					SELECT
+						KdSopir,
+						NamaSopir
+					FROM
+						TrTS_SopirRental
+					WHERE
+						StatusAktif = 'Aktif'
+					UNION
+					SELECT
+						KdSopir,
+						NamaSopir
+					FROM
+						TrTS_SopirLogistik
+					WHERE
+						StatusAktif = 'Aktif'
+				)Q1
+				WHERE
+					nik LIKE '%$cari%' OR
+					namapeg LIKE '%$cari%'";
+		return $this->db->query($sql);
+	}
+	public function saveAktualPIC($nik, $nama, $sebagai, $noSPJ)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "INSERT INTO SPJ_AKTUAL_PIC_SECURITY(NO_SPJ, PIC_INPUT, TGL_INPUT, NIK, NAMA, SEBAGAI)VALUES('$noSPJ','$user','$tanggal','$nik','$nama','$sebagai')";
+       	return $this->db->query($sql);
+	}
+	public function hapusPICAktual($noSPJ, $nik, $nama, $sebagai)
+	{
+		$sql ="DELETE FROM SPJ_AKTUAL_PIC_SECURITY WHERE NO_SPJ= '$noSPJ' AND NIK = '$nik' AND NAMA = '$nama' AND SEBAGAI = '$sebagai'";
+		return $this->db->query($sql);
+	}
+	public function getKendaraanNotSPJ($no)
+	{
+		$sql = "SELECT
+					Q1.*,
+					CASE 
+						WHEN NAMA_FILE IS NULL THEN 'car.png'
+						ELSE 'foto-kendaraan/'+NAMA_FILE
+					END AS NAMA_FILE
+				FROM
+				(
+					SELECT
+						NoTNKB,
+						Merk,
+						Type,
+						Jenis,
+						Kategori,
+						CASE 
+							WHEN NO_TNKB IS NULL THEN 'OUT'
+							ELSE 'IN'
+						END AS STATUS
+					FROM
+						GA.dbo.GA_TKendaraan a
+					LEFT JOIN
+						SPJ_TEMP_KENDARAAN b
+					ON a.NoTNKB = b.NO_TNKB
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						NO_TNBK,
+						NAMA_FILE
+					FROM
+						SPJ_GAMBAR_KENDARAAN
+					WHERE
+						STAR = 'Y'
+				)Q2 ON Q1.NoTNKB = Q2.NO_TNBK
+				WHERE
+					NoTNKB = '$no'";
+		return $this->db->query($sql);
+	}
+	public function scanKendaraanNotSPJ($no, $status, $keterangan)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$save = $this->db->query("INSERT INTO SPJ_SCAN_KENDARAAN(NO_TNKB, TGL_SCAN, PIC_SCAN, STATUS, KETERANGAN)VALUES('$no','$tanggal','$user','$status','$keterangan')");
+		if ($status == 'OUT') {
+			$this->db->query("INSERT INTO SPJ_TEMP_KENDARAAN(NO_TNKB, NO_SPJ)VALUES('$no','-')");
+		}else{
+			$this->db->query("DELETE FROM SPJ_TEMP_KENDARAAN WHERE NO_TNKB = '$no'");
+		}
+
+		return $save;
+		
+	}
 }
 ?>

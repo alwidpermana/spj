@@ -945,12 +945,18 @@ foreach ($data as $key): ?>
             $('.preloader-no-bg').show();
           },
           success: function(data){
-            if (parseInt(inputVerifCountPIC)==parseInt(data)) {
+            if (parseInt(inputVerifCountPIC)==parseInt(data.jumlah)) {
               saveValidasiOut()
               
             } else {
-              Swal.fire("Verifikasi PIC Harus OK Terlebih Dahulu","Jika Data Tidak Sesuai, Hubungi PIC Pembuat SPJ","warning")
-              saveHistoryNG(inputNoSPJ, 'PIC', 'OUT', '', '');
+              if (data.jenis_spj == '2') {
+                $('#modal-aktualPIC').modal("show")
+                getTabelAktual();
+              }else{
+                Swal.fire("Verifikasi PIC Harus OK Terlebih Dahulu","Jika Data Tidak Sesuai, Hubungi PIC Pembuat SPJ","warning")
+                saveHistoryNG(inputNoSPJ, 'PIC', 'OUT', '', '');  
+              }
+              
             }
             // if (parseInt(data) == 0) {
             //   // if (jenis == 'Out') {
@@ -1001,12 +1007,18 @@ foreach ($data as $key): ?>
             $('.preloader-no-bg').show();
           },
           success: function(data){
-            if (parseInt(inputVerifCountPIC)==parseInt(data)) {
-              saveValidasiIn()
+            if (parseInt(inputVerifCountPIC)==parseInt(data.jumlah)) {
+              
               
             } else {
-              Swal.fire("Verifikasi PIC Terlebih Dahulu","","warning")
-              saveHistoryNG(inputNoSPJ, 'PIC', 'IN', '', '');
+              if (data.jenis_spj == '2') {
+                saveValidasiIn()
+                saveHistoryNG(inputNoSPJ, 'PIC', 'IN', '', '');
+              }else{
+                Swal.fire("Verifikasi PIC Terlebih Dahulu","","warning")
+                saveHistoryNG(inputNoSPJ, 'PIC', 'IN', '', '');
+              }
+              
             }
             // if (parseInt(data) == 0) {
             //   // if (jenis == 'Out') {

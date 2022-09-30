@@ -108,6 +108,13 @@
     });
     $('.preloader').fadeOut('slow');
     getTabel();
+    $('.filter').on('change', function(){
+      getTabel();
+    })
+    $('#search').submit(function(e){
+      e.preventDefault();
+      getTabel();
+    })
     $('#getTabel').on('click','.getGambar', function(){
       
       var link = $(this).attr("data");

@@ -13,6 +13,7 @@
 			<td rowspan="2">jabatan</td>
 			<td colspan="5">Otoritas</td>
 			<td colspan="3">SIM</td>
+			<td rowspan="2">Status</td>
 			<td rowspan="2">Foto</td>
 		</tr>
 		<tr class="bg-gray">
@@ -59,6 +60,15 @@
 				<td><?=$key->NO_SIM?></td>
 				<td><?=$key->BERLAKU_TERBIT?></td>
 				<td><?=$key->BERLAKU_AKHIR?></td>
+				<td>
+					<?php if ($key->STATUS_VERIF == 'VERIFIED'): ?>
+						<span class="badge bg-kps-success text-center"><?=$key->STATUS_VERIF?></span>
+					<?php elseif($key->STATUS_VERIF == 'CANCEL'): ?>
+						<span class="badge bg-kps2"><?=$key->STATUS_VERIF?></span>
+					<?php else: ?>
+						<?=$key->STATUS_VERIF?>
+					<?php endif ?>
+				</td>
 				<td>
 					<?php if ($key->FOTO_WAJAH != null || $key->FOTO_WAJAH != ''): ?>
 						<a href="javascript:;" data="<?=$key->FOTO_WAJAH?>" class="getGambar">

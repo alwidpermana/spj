@@ -421,6 +421,38 @@
                             </div>
                           </div>
                           <br>
+                          <div class="row rekanan d-none">
+                            <div class="col-md-2">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <label>Rekanan</label>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-2">
+                              <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputRekanan">
+                                
+                              </select>
+                            </div>
+                          </div>
+                          <br>
+                          <div class="row rekanan d-none">
+                            <div class="col-md-2">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <label>Kendaraan</label>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-2">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputKendaraanRekanan"></select>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <br>
                           <div class="row">
                             <div class="col-md-2">
                               <div class="row">
@@ -533,7 +565,7 @@
                             <div class="col-md-2">
                               <div class="row">
                                 <div class="col-md-12">
-                                  <input type="text" id="inputRekananKendaraan" class="form-control form-control-sm inputan" value="">
+                                  <input type="text" id="inputRekananKendaraan" class="form-control form-control-sm inputan" value="" readonly>
                                 </div>
                               </div>
                             </div>

@@ -114,12 +114,36 @@
                   <?php endif ?>
                 </ul>
               </li>
-              <li class="nav-item list-menu-open">
-                <a href="<?=base_url()?>data_master/kendaraan" class="nav-link ">
-                  <i class="fas fa-car nav-icon <?=substr($side, 12) == 'kendaraan'?'text-dark':''?>" style="font-size: 11px;"></i>
-                  <p>Kendaraan</p>
+              <li class="nav-item list-menu-open <?=substr($side, 12, 9) == 'kendaraan'?'menu-open':''?>">
+                <a href="javascript:void(0);" class="nav-link">
+                  <i class="fas fa-car nav-icon <?=substr($side, 12, 9) == 'kendaraan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>
+                    Kendaraan
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
                 </a>
+                <ul class="nav nav-treeview menu_sub">
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>data_master/kendaraan" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'kendaraan-internal'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Internal</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>data_master/kendaraan_rental" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'kendaraan-rental'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Rental</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>data_master/verifikasi_kendaraan" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'kendaraan-verifikasi'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Verifikasi</p>
+                    </a>
+                  </li>
+                </ul>
               </li>
+              
               <li class="nav-item list-menu-open">
                 <a href="<?=base_url()?>data_master/group_jalur" class="nav-link ">
                   <i class="fas fa-signs-post nav-icon <?=substr($side, 12) == 'jalur'?'text-dark':''?>" style="font-size: 11px;"></i>

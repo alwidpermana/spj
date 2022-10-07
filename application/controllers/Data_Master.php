@@ -96,7 +96,7 @@ class Data_Master extends CI_Controller {
 	public function Edit_Karyawan($nik, $jenis)
 	{
 		$data['page'] = 'Form Edit Data Karyawan';
-		
+		$data['rekanan'] = $this->M_Data_Master->getDataRekanan()->result();
 		if ($jenis == 'internal') {
 			$data['data'] = $this->M_Data_Master->getKaryawan($filDepartemen='', $filJabatan='', $filSearch='', $nik, $top = 1)->result();
 			$data['side'] = 'data_master-karyawan_internal';
@@ -199,7 +199,7 @@ class Data_Master extends CI_Controller {
 	public function Kendaraan()
 	{
 		$data['page'] = 'Master Data - Kendaraan';
-		$data['side'] = 'data_master-kendaraan';
+		$data['side'] = 'data_master-kendaraan-internal';
 		$data['jenis'] = $this->M_Data_Master->getFilterJenisKendaraan()->result();
 		$data['Merk'] = $this->M_Data_Master->getFilterMerkKendaraan()->result();
 		$this->load->view("Data_Master/Kendaraan/index", $data);
@@ -477,7 +477,15 @@ class Data_Master extends CI_Controller {
 		$filDepartemen = $this->input->get("filDepartemen");
 		$filJabatan = $this->input->get("filJabatan");
 		$filSearch = $this->input->get("filSearch");
-		$data['data'] = $this->M_Data_Master->getKaryawanOtoritasALL($filDepartemen, $filJabatan, $filSearch)->result();
+		$filStatus = $this->input->get("filStatus");
+		if ($filStatus == '') {
+			$status = '';
+		}elseif($filStatus == 'OUTSTANDING'){
+			$status = ' AND STATUS_VERIF IS NULL';
+		}else{
+			$status = " AND STATUS_VERIF = '$filStatus'";
+		}
+		$data['data'] = $this->M_Data_Master->getKaryawanOtoritasALL($filDepartemen, $filJabatan, $filSearch, $status)->result();
 		$this->load->view("Data_Master/Karyawan/Approve/tabel", $data);
 	}
 	public function verifKaryawan()
@@ -497,26 +505,46 @@ class Data_Master extends CI_Controller {
 	{
 		$data['side'] = 'data_master-voucher';
 		$data['page'] = 'Master Data Voucher BBM';
+		$data['romawi']= $this->M_Data_Master->getRomawi()->result();
 		$this->load->view("Data_Master/voucher/index", $data);
 	}
 	public function getTabelVoucherBBM()
 	{
 		$filStatus = $this->input->get("filStatus");
 		$filSearch = $this->input->get("filSearch");
-		$data['data'] = $this->M_Data_Master->getDataVoucher($filStatus, $filSearch, $id='')->result();
+		$filRomawi = $this->input->get("filRomawi");
+		$filTahun = $this->input->get("filTahun");
+		$offset = $this->input->get("offset")==''?0:$this->input->get("offset")+1;
+		$limit = $this->input->get("limit");
+		$where = " WHERE NO_URUT >= $offset AND NO_URUT < $offset + $limit";
+		$data['data'] = $this->M_Data_Master->getDataVoucher($filStatus, $filSearch, $id='', $filRomawi, $filTahun, $where)->result();
 		$this->load->view("Data_Master/voucher/tabel", $data);
+	}
+	public function getPagingVoucherBBM()
+	{
+		$filStatus = $this->input->get("filStatus");
+		$filSearch = $this->input->get("filSearch");
+		$filRomawi = $this->input->get("filRomawi");
+		$filTahun = $this->input->get("filTahun");
+		$offset = $this->input->get("offset");
+		$limit = $this->input->get("limit");
+		$data['offset'] = $offset;
+		$data['limit'] = $limit;
+		$data['data'] = $this->M_Data_Master->getDataVoucher($filStatus, $filSearch, $id='', $filRomawi, $filTahun,'')->num_rows();
+		$this->load->view("_partial/paging", $data);
 	}
 	public function getNoVoucher()
 	{
-		$data = $this->M_Data_Master->getNoVoucher();
+		// $data = $this->M_Data_Master->getNoVoucher();
+		$data = $this->M_Data_Master->getNoVoucherNew()->row();
 		echo json_encode($data);
 	}
 	public function saveVoucherBBM()
 	{
-		$inputVoucher = $this->input->post("inputVoucher");
-		$inputRp = $this->input->post("inputRp");
-		$inputId = $this->input->post("inputId");
-		$data = $this->M_Data_Master->saveVoucherBBM($inputVoucher, $inputRp, $inputId);
+		$inputKodeRomawi = $this->input->post("inputKodeRomawi");
+		$inputDari = $this->input->post("inputDari");
+		$inputSampai = $this->input->post("inputSampai");
+		$data = $this->M_Data_Master->saveVoucherBBMNew($inputKodeRomawi, $inputDari, $inputSampai);
 		echo json_encode($data);
 	}
 	public function hapusVoucherBBM()
@@ -616,5 +644,115 @@ class Data_Master extends CI_Controller {
 		$data = $this->M_Data_Master->saveOtoritasAdjustment($nik, $adjustment);
 		echo json_encode($data);
 	}
+	public function kendaraan_rental()
+	{
+		$data['side'] = 'data_master-kendaraan-rental';
+		$data['page'] = 'Data Master - Kendaraan Rental';
+		$data['jenis'] = $this->M_Data_Master->getJenisKendaraan()->result();
+		$this->load->view("Data_Master/kendaraan/rental/index", $data);
+	}
+	public function getDataRekanan()
+	{
+		$data['data'] = $this->M_Data_Master->getDataRekanan()->result();
+		$this->load->view("data_master/kendaraan/rental/tabelRekanan", $data);
+	}
+	public function setKodeRekanan()
+	{
+		$data = $this->M_Data_Master->setKodeRekanan();
+		echo json_encode($data);
+	}
+	public function saveRekanan()
+	{
+		$inputKode = $this->M_Data_Master->setKodeRekanan();
+		$inputNama = $this->input->post("inputNama");
+		$inputAlamat = $this->input->post("inputAlamat");
+		$inputIdRekanan = $this->input->post("inputIdRekanan");
+		if ($inputIdRekanan == '') {
+			$data = $this->M_Data_Master->saveRekanan($inputKode, $inputNama, $inputAlamat);
+		} else {
+			$data = $this->M_Data_Master->updateRekanan($inputNama, $inputAlamat, $inputIdRekanan);
+		}
+		
+		
+		echo json_encode($data);
+	}
+	public function updateStatusRekanan()
+	{
+		$id = $this->input->post("id");
+		$status= $this->input->post("status");
+		$data = $this->M_Data_Master->updateStatusRekanan($id, $status);
+		echo json_encode($data);
+	}
+	public function getKendaraanRekanan()
+	{
+		$id = $this->input->get("id");
+		$data['data']= $this->M_Data_Master->getKendaraanRekanan($id)->result();
+		$this->load->view("Data_Master/Kendaraan/rental/tabelKendaraan", $data);
+	}
+	public function saveKendaraanRental()
+	{
+		$inputRekananId= $this->input->post("inputRekananId");
+		$inputIdKendaraan= $this->input->post("inputIdKendaraan");
+		$inputNoTNKB= $this->input->post("inputNoTNKB");
+		$inputMerk= $this->input->post("inputMerk");
+		$inputType= $this->input->post("inputType");
+		$inputJenis= $this->input->post("inputJenis");
+		$inputWarna= $this->input->post("inputWarna");
+		$inputBahanBakar= $this->input->post("inputBahanBakar");
+		$inputLiter= $this->input->post("inputLiter");
+		if ($inputIdKendaraan == '') {
+			$data = $this->M_Data_Master->tambahKendaraanRental($inputRekananId, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter);
+		}else{
+			$data = $this->M_Data_Master->updateKendaraanRental($inputIdKendaraan, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter);
+		}
+		echo json_encode($data);
+	}
+	public function hapusKendaraanRental()
+	{
+		$id = $this->input->post("id");
+		$data = $this->M_Data_Master->hapusKendaraanRental($id);
+		echo json_encode($data);
+	}
+	public function verifikasi_kendaraan()
+	{
+		$data['side'] = 'data_master-kendaraan-verifikasi';
+		$data['page'] = 'Data Master - Verifikasi Kendaraan';
+		$data['jenis'] = $this->M_Data_Master->getJenisKendaraan()->result();
+		$this->load->view("Data_Master/Kendaraan/verifikasi", $data);
+	}
+	public function getTabelVerifikasiKendaraan()
+	{
+		$filSearch = $this->input->get("filSearch");
+		$filKendaraan = $this->input->get("filKendaraan");
+		$filJenis = $this->input->get("filJenis");
+		$filData = $this->input->get("filData");
+		$filStatus = $this->input->get("filStatus");
+		if ($filStatus == '') {
+			$status = '';
+		}elseif($filStatus == 'OUTSTANDING'){
+			$status = ' AND STATUS IS NULL';
+		}else{
+			$status = " AND STATUS = '$filStatus'";
+		}
+		$data['data'] = $this->M_Data_Master->getVerifikasiKendaraan($filSearch, $filKendaraan, $filJenis, $filData, $status)->result();
+		$this->load->view("Data_Master/Kendaraan/tabel_verifikasi", $data);
+	}
+	public function verificationKendaraan()
+	{
+		$noTNKB = $this->input->post("noTNKB");
+		$status = $this->input->post("status");
+		$data = $this->M_Data_Master->verificationKendaraan($noTNKB, $status);
+		echo json_encode($data);
+	}
+	public function checkDataKaryawan()
+	{
+		$isi = $this->input->post("isi");
+		$nik = $this->input->post("nik");
+		$field = $this->input->post("jenis");
+		$data =$this->M_Data_Master->checkDataKaryawan($isi, $nik, $field);
+		echo json_encode($data);
+	}
+
+
 
 }

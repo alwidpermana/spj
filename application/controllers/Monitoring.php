@@ -343,12 +343,16 @@ class Monitoring extends CI_Controller {
 		$id = $this->input->post("id");
 		$status = $this->input->post("status");
 		$data = $this->db->query("UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = '$status' WHERE ID_SPJ = $id");
-		$getSPJ = $this->db->query("SELECT ID_SPJ, JENIS_ID, TOTAL_UANG_SAKU, TOTAL_UANG_MAKAN, TOTAL_UANG_JALAN FROM SPJ_PENGAJUAN WHERE ID_SPJ = $id");
+		$getSPJ = $this->db->query("SELECT ID_SPJ, JENIS_ID, TOTAL_UANG_SAKU, TOTAL_UANG_MAKAN, TOTAL_UANG_JALAN, VOUCHER_BBM FROM SPJ_PENGAJUAN WHERE ID_SPJ = $id");
+		$voucher = '';
 		foreach ($getSPJ->result() as $key) {
 			$total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN;
 			$jenis = $key->JENIS_ID;
+			$voucher = $key->VOUCHER_BBM;
 			$this->updateSaldoSPJ($id, $total, $jenis, $status);
 		}
+		$statusVoucher = $status == 'CANCEL'?'NOT':'USED';
+		$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = '$statusVoucher' WHERE NO_VOUCHER = '$voucher'");
 		echo json_encode($data);
 	}
 	public function getMonitoringKasbon()

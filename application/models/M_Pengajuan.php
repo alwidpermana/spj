@@ -93,7 +93,7 @@ class M_Pengajuan extends CI_Model {
 					FROM
 						GA.dbo.GA_Tkendaraan
 					WHERE
-						Jenis = '$kategori' $sqlDelivery
+						Jenis = '$kategori' $sqlDelivery 
 				)Q1
 				LEFT JOIN
 				(
@@ -114,7 +114,21 @@ class M_Pengajuan extends CI_Model {
 					WHERE 
 						STATUS_DATA = 'SAVED' AND
 						TGL_SPJ = '$tgl'
+					UNION
+					SELECT
+						NO_TNKB
+					FROM
+						SPJ_TEMP_KENDARAAN
 				)Q3 ON Q1.NoTNKB = Q3.NO_TNKB
+				INNER JOIN
+				(
+					SELECT
+						NO_TNKB
+					FROM
+						SPJ_VERIFIKASI_KENDARAAN
+					WHERE
+						STATUS = 'VERIFIED'
+				)Q4 ON Q1.NoTNKB = Q4.NO_TNKB
 				WHERE
 					Q3.NO_TNKB IS NULL AND
 					Q1.NoTNKB LIKE '%$search%'";
@@ -222,7 +236,7 @@ class M_Pengajuan extends CI_Model {
 					ID_LOKASI ASC";
 		return $this->db->query($sql);
 	}
-	public function getPIC($inputSubjek, $jabatan, $where, $noPengajuan, $where2, $whereJenis, $inputTglSPJ)
+	public function getPIC($inputSubjek, $jabatan, $where, $noPengajuan, $where2, $whereJenis, $inputTglSPJ, $whereRekanan)
 	{
 		$sql = "SELECT
 				   Q1.*
@@ -239,9 +253,11 @@ class M_Pengajuan extends CI_Model {
 							SPJ_PEGAWAI_OTORITAS
 						WHERE
 							STATUS_DATA = 'SAVED' AND
-							SUBJEK = '$inputSubjek'
+							SUBJEK = '$inputSubjek' AND
+							STATUS_VERIF = 'VERIFIED'
 							$whereJenis
 							$where
+							$whereRekanan
 					)Q1
 					LEFT JOIN
 					(
@@ -716,7 +732,7 @@ class M_Pengajuan extends CI_Model {
        	// if ($inputTOL>0 || $inputTOL != '') {
        	// 	$this->db->query("Execute SPJ_tambahBiayaKasbon 'TOL','spj','$inputTOL','$inputNoSPJ','$detail','$user','$tanggal'");
        	// }
-
+       	$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'USED' WHERE NO_VOUCHER = '$inputNoVoucher'");
         return $this->db->query($sql);
 	}
 	public function saveKasbon()
@@ -813,9 +829,19 @@ class M_Pengajuan extends CI_Model {
 					FROM
 						SPJ_PENGAJUAN_PIC
 				)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+				LEFT JOIN
+				(
+					SELECT
+						NIK
+					FROM
+						SPJ_PEGAWAI_OTORITAS
+					WHERE
+						OTORITAS_UANG_SAKU = 'Y'
+				)Q3 ON Q2.NIK = Q3.NIK
 				WHERE
 					TGL_SPJ = '$inputTglSPJ' AND
-					NIK = '$nik'";
+					Q2.NIK = '$nik' AND
+					Q3.NIK IS NOT NULL";
 		return $this->db->query($sql);
 	}
 	public function hapusPICDriverCzMarketing($noSPJ)
@@ -1175,6 +1201,17 @@ class M_Pengajuan extends CI_Model {
 				)Q1 
 				ORDER BY
 					TGL_SPJ DESC";
+		return $this->db->query($sql);
+	}
+	public function cekOtoritasUangRumsum($nik)
+	{
+		$sql ="SELECT
+					OTORITAS_UANG_SAKU,
+					OTORITAS_UANG_MAKAN
+				FROM
+					SPJ_PEGAWAI_OTORITAS
+				WHERE
+					NIK = '$nik'";
 		return $this->db->query($sql);
 	}
 }

@@ -1008,8 +1008,7 @@ foreach ($data as $key): ?>
           },
           success: function(data){
             if (parseInt(inputVerifCountPIC)==parseInt(data.jumlah)) {
-              
-              
+              saveValidasiIn()
             } else {
               if (data.jenis_spj == '2') {
                 saveValidasiIn()

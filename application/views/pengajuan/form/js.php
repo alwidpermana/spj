@@ -202,6 +202,7 @@
       var kendaraan = $(this).val();
       if (kendaraan == 'Rental') {
         $('.rekanan').removeClass("d-none");
+        getListRekanan();
       }else{
         $('#inputRekananKendaraan').val("")
         $('.rekanan').addClass("d-none")
@@ -387,6 +388,7 @@
         var inputAlamat = $('#inputAlamat').val();
         if (objek == '' || inputPerusahaan == '' || inputGroupTujuan == '') {
           Swal.fire("Lengkapi Dulu Datanya!","","warning");
+          saveLokasi.ladda('stop');
         }else{
           $.ajax({
             type:'post',
@@ -402,12 +404,15 @@
               getUangJalan();
               updateGroupTujuan();
             },
+            complete: function(data){
+              saveLokasi.ladda('stop');
+            },
             error: function(data){
               gagal()
             },
           });
         }
-        saveLokasi.ladda('stop');
+        
         return false;
           
       }, 1000)
@@ -757,6 +762,52 @@
       }
     });
 
+    $('#inputRekanan').on('change', function(){
+      var rekananId = $(this).val();
+      $.ajax({
+        type:'get',
+        data:{rekananId},
+        dataType:'json',
+        cache:false,
+        async:true,
+        url:url+'/pengajuan/getKendaraanRekanan',
+        success:function(data){
+          var html="";
+          html+='<option value="">Pilih Kendaraan</option>';
+          for (var i = 0; i < data.length; i++) {
+            html+='<option value="'+data[i].ID+'">'+data[i].NoTNKB+' - '+data[i].Merk+' '+data[i].Type+'</option>';
+          }
+          $('#inputKendaraanRekanan').html(html)
+        },
+        error:function(data){
+
+        }
+      });
+    })
+
+    $('#inputKendaraanRekanan').on('change', function(){
+      var id = $(this).val();
+      $.ajax({
+        type:'get',
+        data:{id},
+        dataType:'json',
+        url:url+'/pengajuan/getKendaraanRentalById',
+        cache:false,
+        async:true,
+        success:function(data){
+          $('#inputMerk').val(data.Merk);
+          $('#inputType').val(data.Type);
+          $('#inputNoTNKB').val(data.NoTNKB);
+          $("select#inputJenisKendaraan option[value='"+data.Kategori+"']").prop("selected","selected");
+          $("select#inputJenisKendaraan").trigger("change") 
+          $('#inputRekananKendaraan').val(data.NAMA)
+        },
+        error:function(data){
+
+        }
+      })
+    })
+
 
   })
   function getNoSPJ(jenis) {
@@ -796,9 +847,14 @@
 
   function kondisiKendaraan() {
     var kendaraan = $('#inputKendaraan').val();
-      if (kendaraan == 'Rental' || kendaraan == 'Pribadi') {
+
+      if (kendaraan == 'Pribadi') {
         $('#pilihKendaraan').attr("disabled","disabled");
         $('.inputan').removeAttr("readonly","readonly");
+        
+      }else if(kendaraan == 'Rental'){
+        $('#pilihKendaraan').attr("disabled","disabled");
+        $('.inputan').attr("readonly","readonly");
         
       }else{
         $('#pilihKendaraan').removeAttr("disabled","disabled");
@@ -906,13 +962,15 @@
     var inputJenisSPJ = $('#inputJenisSPJ').val();
     var inputNoSPJ = $('#inputNoSPJ').val();
     var inputTglSPJ = $('#inputTglSPJ').val();
+    var inputKendaraan = $('#inputKendaraan').val();
+    var inputRekanan = $('#inputRekanan').val();
     if (inputSubjek == '' && jabatan == '') {
 
     }else{
       $.ajax({
         type:'get',
         dataType:'json',
-        data:{inputSubjek, jabatan, inputJenisSPJ, inputNoSPJ, inputTglSPJ},
+        data:{inputSubjek, jabatan, inputJenisSPJ, inputNoSPJ, inputTglSPJ, inputKendaraan, inputRekanan},
         url:url+'/pengajuan/getNIKPic',
         cache: false,
         async: true,
@@ -1407,6 +1465,7 @@
       async: true,
       url:url+'/pengajuan/cekSaldoSubKas',
       success: function(data){
+        getNoVoucher();
         if (inputJenisSPJ == '3') {
           saveSPJ(status);
         }else{
@@ -1626,7 +1685,7 @@
       async: true,
       cache: false,
       success: function(data){
-        $('#inputNoVoucher').val(data.voucher);
+        $('#inputNoVoucher').val(data.NO_VOUCHER);
       },
       error: function(data){
         
@@ -1790,6 +1849,26 @@
       $('#tampilTotalUangJalan').removeClass("d-none");
       $('#manualUangJalan').addClass("d-none");
     }
+  }
+
+  function getListRekanan() {
+    $.ajax({
+      type:'get',
+      dataType:'json',
+      url:url+'/pengajuan/getListRekanan',
+      cache:false,
+      async:true,
+      success:function(data){
+        var html ='';
+        for (var i = 0; i < data.length; i++) {
+          html+='<option value="'+data[i].ID+'">'+data[i].NAMA+'</option>';
+        }
+        $('#inputRekanan').html(html);
+      },
+      error:function(data){
+
+      }
+    })
   }
 
   function berhasil() {

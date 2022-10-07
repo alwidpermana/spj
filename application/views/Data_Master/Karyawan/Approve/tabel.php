@@ -33,11 +33,11 @@
 			<tr>
 				<td>
 					<?php if ($key->STATUS_VERIF == 'VERIFIED'): ?>
-						<a href="javascript:;" class="btn btn-danger btn-kps btnVerif" nik="<?=$key->NIK?>" data="CANCEL">
+						<a href="javascript:;" class="btn btn-danger btn-kps btnVerif" nik="<?=$key->NIK?>" data="CANCEL" style="font-size: 11px !important;">
 							CANCEL
 						</a>
 					<?php else: ?>
-						<a href="javascript:;" class="btn btn-success btn-kps-success btnVerif" nik="<?=$key->NIK?>" data="VERIFIED">
+						<a href="javascript:;" class="btn btn-success btn-kps-success btnVerif" nik="<?=$key->NIK?>" data="VERIFIED" style="font-size: 11px !important;">
 							VERIFICATION
 						</a>
 					<?php endif ?>
@@ -51,39 +51,94 @@
 				<td><?=$key->Subdepartemen?></td>
 				<td><?=$key->jabatan?></td>
 				<td class="text-center">
-					<?php if ($key->OTORITAS_DRIVER == 'Y'): ?>
+					<div class="icheck-orange icheck-kps d-inline">
+	                    <input 
+	                      type="checkbox" 
+	                      id="cekDriver<?=$key->NIK?>" 
+	                      name="inputDriver<?=$key->NIK?>"
+	                      class="checkData"
+	                      jenis="OTORITAS_DRIVER"
+	                      nik="<?=$key->NIK?>"
+	                      value="Y" <?=$key->OTORITAS_DRIVER=='Y'?'checked':''?>>
+	                    <label for="cekDriver<?=$key->NIK?>"></label>
+                  </div>
+					<!-- <?php if ($key->OTORITAS_DRIVER == 'Y'): ?>
 						<span class="badge bg-kps-success text-center"><center><i class="fas fa-check"></i></center></span>
 					<?php else: ?>
 						<span class="badge bg-kps text-center"><center><i class="fas fa-times"></i></center></span>
-					<?php endif ?>	
+					<?php endif ?>	 -->
 				</td>
 				<td class="text-center">
-					<?php if ($key->OTORITAS_PENDAMPING == 'Y'): ?>
+					<div class="icheck-orange icheck-kps d-inline">
+	                    <input 
+	                      type="checkbox" 
+	                      id="cekPendamping<?=$key->NIK?>" 
+	                      name="inputPendamping<?=$key->NIK?>"
+	                      class="checkData"
+	                      jenis="OTORITAS_PENDAMPING"
+	                      nik="<?=$key->NIK?>"
+	                      value="Y" <?=$key->OTORITAS_PENDAMPING=='Y'?'checked':''?>>
+	                    <label for="cekPendamping<?=$key->NIK?>"></label>
+                  	</div>
+					<!-- <?php if ($key->OTORITAS_PENDAMPING == 'Y'): ?>
 						<span class="badge bg-kps-success text-center"><center><i class="fas fa-check"></i></center></span>
 					<?php else: ?>
 						<span class="badge bg-kps text-center"><center><i class="fas fa-times"></i></center></span>
-					<?php endif ?>	
+					<?php endif ?> -->	
 				</td>
 				<td class="text-center">
-					<?php if ($key->OTORITAS_UANG_SAKU == 'Y'): ?>
+					<div class="icheck-orange icheck-kps d-inline">
+	                    <input 
+	                      type="checkbox" 
+	                      id="cekUangSaku<?=$key->NIK?>" 
+	                      name="inputUangSaku<?=$key->NIK?>"
+	                      class="checkData"
+	                      jenis="OTORITAS_UANG_SAKU"
+	                      nik="<?=$key->NIK?>"
+	                      value="Y" <?=$key->OTORITAS_UANG_SAKU=='Y'?'checked':''?> disabled>
+	                    <label for="cekUangSaku<?=$key->NIK?>"></label>
+                  	</div>
+					<!-- <?php if ($key->OTORITAS_UANG_SAKU == 'Y'): ?>
 						<span class="badge bg-kps-success text-center"><center><i class="fas fa-check"></i></center></span>
 					<?php else: ?>
 						<span class="badge bg-kps text-center"><center><i class="fas fa-times"></i></center></span>
-					<?php endif ?>	
+					<?php endif ?> -->	
 				</td>
 				<td class="text-center">
-					<?php if ($key->OTORITAS_UANG_MAKAN == 'Y'): ?>
+					<div class="icheck-orange icheck-kps d-inline">
+	                    <input 
+	                      type="checkbox" 
+	                      id="cekUangMakan<?=$key->NIK?>" 
+	                      name="inputUangMakan<?=$key->NIK?>"
+	                      class="checkData"
+	                      jenis="OTORITAS_UANG_MAKAN"
+	                      nik="<?=$key->NIK?>"
+	                      value="Y" <?=$key->OTORITAS_UANG_MAKAN=='Y'?'checked':''?> disabled>
+	                    <label for="cekUangMakan<?=$key->NIK?>"></label>
+                  	</div>
+					<!-- <?php if ($key->OTORITAS_UANG_MAKAN == 'Y'): ?>
 						<span class="badge bg-kps-success text-center"><center><i class="fas fa-check"></i></center></span>
 					<?php else: ?>
 						<span class="badge bg-kps text-center"><center><i class="fas fa-times"></i></center></span>
-					<?php endif ?>	
+					<?php endif ?> -->	
 				</td>
 				<td class="text-center">
-					<?php if ($key->OTORITAS_ADJUSMENT == 'Y'): ?>
+					<div class="icheck-orange icheck-kps d-inline">
+	                    <input 
+	                      type="checkbox" 
+	                      id="cekAdjustment<?=$key->NIK?>" 
+	                      name="inputAdjustment<?=$key->NIK?>"
+	                      class="checkData"
+	                      jenis="OTORITAS_ADJUSMENT"
+	                      nik="<?=$key->NIK?>"
+	                      value="Y" <?=$key->OTORITAS_ADJUSMENT=='Y'?'checked':''?>>
+	                    <label for="cekAdjustment<?=$key->NIK?>"></label>
+                  	</div>
+					<!-- <?php if ($key->OTORITAS_ADJUSMENT == 'Y'): ?>
 						<span class="badge bg-kps-success text-center"><center><i class="fas fa-check"></i></center></span>
 					<?php else: ?>
 						<span class="badge bg-kps text-center"><center><i class="fas fa-times"></i></center></span>
-					<?php endif ?>	
+					<?php endif ?> -->	
 				</td>
 				<td><?=$key->NO_SIM?></td>
 				<td><?=$key->BERLAKU_TERBIT?></td>
@@ -118,7 +173,7 @@
 <script type="text/javascript">
 	$(document).ready(function(){
 		var table = $('#datatable').DataTable( {
-            scrollY:        "400px",
+            scrollY:        "350px",
             scrollX:        true,
             scrollCollapse: true,
             paging:         true,
@@ -128,9 +183,6 @@
             columnDefs: [
 	            { orderable: false, targets: 0 }
 	        ],
-            fixedColumns:   {
-	         	left: 1
-	        }
           } ); 
 
 		

@@ -95,66 +95,67 @@
 			$sql = "UPDATE SPJ_USER SET LEVEL = '$level' WHERE NIK = '$nik'";
 			$this->db->query($sql);
 		}
-		public function getKaryawanOtoritasALL($departemen, $jabatan, $search)
+		public function getKaryawanOtoritasALL($departemen, $jabatan, $search, $status)
 		{
 			$sql = "SELECT
 						*
 					FROM
 					(
 						SELECT
-							a.*,
-							b.namapeg,
-							b.jabatan,
-							b.departemen,
-							CASE 
-								WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
-								ELSE Subdepartemen1+' ,'+Subdepartemen2
-							END AS Subdepartemen
+							Q1.*,
+							namapeg,
+							jabatan,
+							departemen,
+							Subdepartemen
 						FROM
-							SPJ_PEGAWAI_OTORITAS a
-						LEFT JOIN dbhrm.dbo.tbPegawai b ON
-						a.nik = b.nik
-						WHERE
-							JENIS_DATA = 'internal' AND
-							STATUS_DATA = 'SAVED'
-						UNION
-						SELECT
-							a.*,
-							NamaSopir AS namapeg,
-							Status AS jabatan,
-							'-' AS departemen,
-							'-' AS Subdepartemen
-						FROM
-							SPJ_PEGAWAI_OTORITAS a
-						LEFT JOIN TrTs_SopirLogistik b ON
-						a.nik = b.KdSopir
-						WHERE
-							JENIS_DATA = 'logistik' AND
-							STATUS_DATA = 'SAVED'
-						UNION
-						SELECT
-							a.*,
-							NamaSopir AS namapeg,
-							Status AS jabatan,
-							'-' AS departemen,
-							'-' AS Subdepartemen
-						FROM
-							SPJ_PEGAWAI_OTORITAS a
-						LEFT JOIN TrTS_SopirRental b ON
-						a.nik = b.KdSopir
-						WHERE
-							JENIS_DATA = 'rental' AND
-							STATUS_DATA = 'SAVED'
+						(
+							SELECT
+								* 
+							FROM
+								SPJ_PEGAWAI_OTORITAS
+							WHERE
+								STATUS_DATA = 'SAVED' $status
+						)Q1
+						INNER JOIN
+						(
+							SELECT
+								nik,
+								namapeg,
+								jabatan,
+								departemen,
+								CASE 
+									WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
+									ELSE Subdepartemen1+' ,'+Subdepartemen2
+								END AS Subdepartemen
+							FROM
+								dbhrm.dbo.tbPegawai
+							UNION
+							SELECT
+								KdSopir,
+								NamaSopir,
+								Status,
+								'-',
+								'-'
+							FROM
+								TrTs_SopirLogistik
+							UNION
+							SELECT
+								KdSopir,
+								NamaSopir,
+								Status,
+								'-',
+								'-'
+							FROM
+								TrTS_SopirRental
+						)Q2 ON Q1.NIK = Q2.nik
+						WHERE 
+							departemen LIKE '$departemen%' AND
+							jabatan LIKE '$jabatan%'
 					)Q1
 					WHERE
-						departemen LIKE '%$departemen%' AND
-						jabatan LIKE '%$jabatan%' AND
-						namapeg LIKE '%$search%' OR
-						NIK LIKE '%$search%' AND
-						departemen LIKE '%$departemen%' AND
-						jabatan LIKE '%$jabatan%'
-					ORDER BY 
-						namapeg ASC";
+						Q1.NIK LIKE '%$search%' OR
+						namapeg LIKE '%$search%'
+					ORDER BY namapeg ASC";
 			return $this->db->query($sql);
 		}
 		public function getKaryawan($filDepartemen, $filJabatan, $filSearch, $nik, $top)
@@ -907,13 +908,14 @@
 	        }
 	        return $hasil;
 		}
-		public function getDataVoucher($status, $search, $id)
+		public function getDataVoucher($status, $search, $id, $romawi, $tahun, $where)
 		{
 			$sql = "SELECT
 						*
 					FROM
 					(
 						SELECT
+							ROW_NUMBER() over (partition by 'SAMA' order by NO_VOUCHER ASC) AS NO_URUT,
 							ID,
 							NO_VOUCHER,
 							RP,
@@ -923,17 +925,22 @@
 						WHERE
 							NO_VOUCHER LIKE '$search%' AND
 							STATUS != 'DELETED' AND
-							ID LIKE '$id%'
-					)Q1";
-			if ($status != '') {
-				$sql .=" WHERE";
-				if ($status == '1') {
-					$sql.=" STATUS = 'USED'";
-				} else {
-					$sql.=" STATUS = 'NOT'";
-				}
-			}
-			$sql.=" ORDER BY NO_VOUCHER DESC";
+							ID LIKE '$id%' AND
+							KODE_ROMAWI LIKE '$romawi%' AND
+							TAHUN LIKE '$tahun%' AND
+							STATUS LIKE '$status%'
+					)Q1
+					LEFT JOIN
+					(
+						SELECT
+							ID_SPJ,
+							NO_SPJ,
+							VOUCHER_BBM
+						FROM
+							SPJ_PENGAJUAN
+					)Q2 ON Q1.NO_VOUCHER = Q2.VOUCHER_BBM
+					$where
+					ORDER BY NO_VOUCHER ASC";
 			return $this->db->query($sql);
 		}
 		public function saveVoucherBBM($no, $rp)
@@ -1157,6 +1164,239 @@
 		public function saveOtoritasAdjustment($nik, $isi)
 		{
 			$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET OTORITAS_ADJUSMENT = '$isi' WHERE NIK = '$nik'";
+			return $this->db->query($sql);
+		}
+		public function getDataRekanan()
+		{
+			$sql = "SELECT
+						ID,
+						KODE,
+						NAMA,
+						ALAMAT,
+						STATUS
+					FROM
+						SPJ_REKANAN
+					ORDER BY
+						KODE DESC";
+			return $this->db->query($sql);
+		}
+		public function setKodeRekanan()
+		{
+			$gabung = "RKN";
+			$cekNoDoc=$this->db->query("SELECT MAX
+												( RIGHT ( KODE, 3 ) ) AS KODE
+											FROM
+												SPJ_REKANAN
+											WHERE
+												KODE LIKE '$gabung%'");
+			foreach ($cekNoDoc->result() as $data) {
+	            if ($data->KODE =="") {
+	                $URUTZERO = $gabung."001";
+
+	                $kode = $URUTZERO;
+	                // $hasil = array('kode' =>$URUTZERO,);
+	            }else{
+	                $zero='';
+	                $length= 3;
+	                $index=$data->KODE;
+
+	                for ($i=0; $i <$length-strlen($index+1) ; $i++) { 
+	                    $zero = $zero.'0';
+	                }
+	                $URUTKODE = $gabung.$zero.($index+1);
+	                $kode = $URUTKODE;
+	                // $hasil = array('kode' =>$URUTZERO,);
+	            }
+	            
+	        }
+	        return $kode;
+		}
+		public function saveRekanan($inputKode, $inputNama, $inputAlamat)
+		{
+			$sql = "INSERT INTO SPJ_REKANAN(KODE, NAMA, ALAMAT, STATUS)VALUES('$inputKode','$inputNama','$inputAlamat','AKTIF')";
+			return $this->db->query($sql);
+		}
+		public function updateRekanan($nama, $alamat, $id)
+		{
+			$sql = "UPDATE SPJ_REKANAN SET NAMA = '$nama', ALAMAT = '$alamat' WHERE ID = $id";
+			return $this->db->query($sql);
+		}
+		public function updateStatusRekanan($id, $status)
+		{
+			$sql = "UPDATE SPJ_REKANAN SET STATUS = '$status' WHERE ID= $id";
+			return $this->db->query($sql);
+		}
+		public function getKendaraanRekanan($id)
+		{
+			$sql = "SELECT
+						ID,
+						REKANAN_ID,
+						NoTNKB,
+						Merk,
+						Type,
+						Warna,
+						BahanBakar,
+						Kategori,
+						BBMPerLiter
+					FROM
+						[dbo].[SPJ_KENDARAAN_REKANAN]
+					WHERE
+						REKANAN_ID = '$id'
+					ORDER BY
+						ID DESC";
+			return $this->db->query($sql);
+		}
+		public function tambahKendaraanRental($rekananId, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			$sql = "INSERT INTO SPJ_KENDARAAN_REKANAN(NoTNKB, Merk, Type, Warna, BahanBakar, Kategori, BBMPerLiter, REKANAN_ID, PIC_INPUT, TGL_INPUT)VALUES('$noTNKB','$merk','$type','$warna', '$bbm','$jenis','$liter','$rekananId','$user','$tanggal')";
+			return $this->db->query($sql);
+		}
+		public function updateKendaraanRental($id, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter )
+		{
+			$sql = "UPDATE SPJ_KENDARAAN_REKANAN SET NoTNKB = '$noTNKB', Merk = '$merk', Type='$type', Kategori = '$jenis', warna='$warna', BahanBakar = '$bbm', BBMPerLiter = '$liter' WHERE ID = $id";
+			return $this->db->query($sql);
+		}
+		public function hapusKendaraanRental($id)
+		{
+			$sql = "DELETE FROM SPJ_KENDARAAN_REKANAN WHERE ID = $id";
+			return $this->db->query($sql);
+		}
+		public function getVerifikasiKendaraan($search, $kendaraan, $jenis, $data, $status)
+		{
+			$sql = "SELECT
+						*
+					FROM
+					(
+						SELECT
+							Q1.*,
+							Q2.STATUS
+						FROM
+						(
+							SELECT
+								NoTNKB,
+								Merk,
+								Type,
+								Jenis,
+								BahanBakar,
+								CASE 
+									WHEN Kategori IS NULL THEN 'No Data'
+									ELSE Kategori
+								END AS Kategori,
+								BBMPerLiter,
+								NULL AS Rekanan,
+								'Internal' AS JenisData
+							FROM
+								GA.[dbo].[GA_TKendaraan]
+							WHERE
+								StatusAktif = 'Aktif' AND
+								Jenis NOT IN ('Alat Angkut dan Alat Angkat')
+							UNION
+							SELECT
+								NoTNKB,
+								Merk,
+								Type,
+								'Rental',
+								BahanBakar,
+								Kategori,
+								BBMPerLiter,
+								NAMA,
+								'Rental'
+							FROM
+								SPJ_KENDARAAN_REKANAN a
+							INNER JOIN
+								SPJ_REKANAN b
+							ON a.REKANAN_ID = b.ID
+						)Q1
+						LEFT JOIN
+						(
+							SELECT
+								NO_TNKB,
+								STATUS
+							FROM
+								SPJ_VERIFIKASI_KENDARAAN
+						)Q2 ON Q1.NoTNKB = Q2.NO_TNKB
+						WHERE
+							Kategori LIKE '$jenis%' AND
+							Jenis LIKE '$kendaraan%' AND
+							JenisData LIKE '$data%' $status
+					)Q1
+					WHERE
+						NoTNKB LIKE '%$search%' OR
+						Type LIKE '%$search%' OR
+						Merk LIKE '%$search%'";
+			return $this->db->query($sql);
+		}
+		public function verificationKendaraan($no, $status)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			$getData = $this->db->query("SELECT NO_TNKB FROM SPJ_VERIFIKASI_KENDARAAN WHERE NO_TNKB = '$no'");
+			if ($getData->num_rows()==0) {
+				$sql = "INSERT INTO SPJ_VERIFIKASI_KENDARAAN(TGL_INPUT, PIC_INPUT, NO_TNKB, STATUS)VALUES('$tanggal','$user','$no','$status')";
+			}else{
+				$sql = "UPDATE SPJ_VERIFIKASI_KENDARAAN SET TGL_INPUT = '$tanggal', PIC_INPUT = '$user', STATUS = '$status' WHERE NO_TNKB = '$no'";
+			}
+			return $this->db->query($sql);
+		}
+		public function checkDataKaryawan($isi, $nik, $field)
+		{
+			$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET $field = '$isi' WHERE NIK = '$nik'";
+			return $this->db->query($sql);
+		}
+		public function getRomawi()
+		{
+			$sql = "SELECT
+						KODE,
+						ROMAWI
+					FROM
+						SPJ_ROMAWI
+					ORDER BY KODE ASC";
+			return $this->db->query($sql);
+		}
+		public function saveVoucherBBMNew($kode, $dari, $sampai)
+		{
+			$tahun = date("Y");
+			$thn = date('y');
+			$user = $this->session->userdata("NIK");
+			
+			try {
+				$this->db->query("Execute SPJ_createNoVoucher '$kode','$dari', '$sampai', '$tahun','$thn','$user'");
+				return true;
+			} catch (Exception $e) {
+				return false;
+			}
+		}
+		public function getKendaraanRentalById($id)
+		{
+			$sql = "SELECT
+						NoTNKB,
+						Merk,
+						Type,
+						Kategori,
+						NAMA
+					FROM
+						[dbo].[SPJ_KENDARAAN_REKANAN] a
+					INNER JOIN
+						SPJ_REKANAN b
+					ON a.REKANAN_ID = b.ID
+					WHERE
+						a.ID = $id";
+			return $this->db->query($sql);
+		}
+		public function getNoVoucherNew()
+		{
+			$sql = "SELECT TOP 1
+						NO_VOUCHER
+					FROM
+						SPJ_VOUCHER_BBM
+					WHERE
+						STATUS = 'NOT'
+					ORDER BY
+						KODE_ROMAWI ASC, TAHUN ASC";
 			return $this->db->query($sql);
 		}
 	}

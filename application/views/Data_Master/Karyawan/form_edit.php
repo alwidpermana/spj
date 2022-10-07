@@ -160,7 +160,13 @@
                       <label class="labJudul">Rekanan</label>
                     </div>
                     <div class="col-md-4">
-                      <input type="text" id="inputRekanan" class="form-control" value="<?=$key->REKANAN?>">
+                      <select class="select2 form-control" id="inputRekanan">
+                          <option value="">Pilih Rekanan</option>
+                        <?php foreach ($rekanan as $rkn): ?>
+                          <option value="<?=$rkn->ID?>" <?=$key->REKANAN == $rkn->ID?'selected':''?>><?=$rkn->NAMA?></option>
+                        <?php endforeach ?>
+                      </select>
+                      <!-- <input type="text" id="inputRekanan" class="form-control" value="<?=$key->REKANAN?>"> -->
                     </div>
                   </div>
                 </div>
@@ -579,36 +585,43 @@
       var isiUangSaku = inputUangSaku.checked == true ? 'Y' : 'N';
       var isiSpjDlv = inputSpjDlv.checked == true ? 'Y' : 'N';
       var isiSpjNdv = inputSpjNdv.checked == true ? 'Y' : 'N';
+      var inputRekanan = $('#inputRekanan').val();
       // var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
+      var jenis = '<?=$this->uri->segment("4")?>';
       var isi = '';
       console.log(isiSpjDlv)
-      if (isiDriver == 'Y' || isiPendamping == 'Y' || isiUangMakan == 'Y' || isiUangSaku == '' || isiAdj == '') {
-        if (isiDriver == 'Y') {
-          if (inputSIM == '') {
-            pemberitahuan(isi = 'Anda Belum Mengisi No SIM!')
-          }else if(inputTerbit == '' || inputSd==''){
-            pemberitahuan(isi = 'Anda Belum Mengisi Tanggal Berlaku SIM!')
-          }else if(textFotoWajah == ''){
-            pemberitahuan(isi = 'Anda Belum Upload Wajah!')
-          }else if(textFotoKTP == ''){
-            pemberitahuan(isi='Anda Belum Upload KTP!')
-          }else if(textFotoSIM == ''){
-            pemberitahuan(isi='Anda Belum Upload SIM!')
-          }else{
-            saveDataOtoritas();
-          }
+      // if (isiDriver == 'Y') {
+        
+      // }else{
+      //   var isi = 'Anda Belum Memilih Otoritas!'
+      //   pemberitahuan(isi);
+      // }
+      if (isiDriver == 'Y') {
+        if (inputSIM == '') {
+          pemberitahuan(isi = 'Anda Belum Mengisi No SIM!')
+        }else if(inputTerbit == '' || inputSd==''){
+          pemberitahuan(isi = 'Anda Belum Mengisi Tanggal Berlaku SIM!')
+        }else if(textFotoWajah == ''){
+          pemberitahuan(isi = 'Anda Belum Upload Wajah!')
+        }else if(textFotoKTP == ''){
+          pemberitahuan(isi='Anda Belum Upload KTP!')
+        }else if(textFotoSIM == ''){
+          pemberitahuan(isi='Anda Belum Upload SIM!')
+        }else if(jenis == 'rental' && inputRekanan == ''){
+          pemberitahuan(isi='Isi Terlebih Dahulu Rekanan!')
         }else{
-          if(textFotoWajah == ''){
-            pemberitahuan(isi = 'Anda Belum Upload Wajah!')
-          }else if(textFotoKTP == ''){
-            pemberitahuan(isi='Anda Belum Upload KTP!')
-          }else{
-            saveDataOtoritas();
-          }
+          saveDataOtoritas();
         }
       }else{
-        var isi = 'Anda Belum Memilih Otoritas!'
-        pemberitahuan(isi);
+        if(textFotoWajah == ''){
+          pemberitahuan(isi = 'Anda Belum Upload Wajah!')
+        }else if(textFotoKTP == ''){
+          pemberitahuan(isi='Anda Belum Upload KTP!')
+        }else if(jenis == 'rental' && inputRekanan == ''){
+          pemberitahuan(isi='Isi Terlebih Dahulu Rekanan!')
+        }else{
+          saveDataOtoritas();
+        }
       }
 
       // alert(isiDriver);
@@ -685,7 +698,14 @@
       var isiUangMakan = inputUangMakan.checked == true ? 'Y' : 'N';
       var isiUangSaku = inputUangSaku.checked == true ? 'Y' : 'N';
       // var isiAdj = inputAdj.checked == true ? 'Y' : 'N';
-
+      var halaman;
+      if (jenis == 'internal') {
+        halaman = 'data_master/karyawan_internal';
+      }else if(jenis == 'logistik'){
+        halaman = 'data_master/supir_logistik';
+      }else{
+        halaman = 'data_master/supir_rental';
+      }
       var inputSubjek = $('#inputSubjek').val();
       $.ajax({
         type: 'post',
@@ -695,8 +715,9 @@
         cache: false,
         async: true,
         success: function(data){
+
           berhasil();
-          location.reload();
+          window.location.href = url+'/'+halaman;
         },
         error: function(data){
           gagal()

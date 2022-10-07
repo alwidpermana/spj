@@ -55,6 +55,21 @@
                 <input type="hidden" id="inputTotalRP" value="">
               </div>
               <div class="row">
+                <div class="col-md-2"><label>SPJ Rp.</label></div>
+                <div class="col-md-4">: <span id="showSPJRP"></span></div>
+                <input type="hidden" id="inputSPJRP" value="">
+              </div>
+              <div class="row">
+                <div class="col-md-2"><label>BBM Rp.</label></div>
+                <div class="col-md-4">: <span id="showBBMRP"></span></div>
+                <input type="hidden" id="inputBBMRP" value="">
+              </div>
+              <div class="row">
+                <div class="col-md-2"><label>TOL Rp.</label></div>
+                <div class="col-md-4">: <span id="showTOLRP"></span></div>
+                <input type="hidden" id="inputTOLRP" value="">
+              </div>
+              <div class="row">
                 <div class="col-md-2"><label>Jumlah Biaya Admin</label></div>
                 <div class="col-md-4">: <span id="showJumlahBiayaAdmin"></span></div>
                 <input type="hidden" id="inputJumlahBiayaAdmin">
@@ -129,14 +144,26 @@
       var totalRP = 0;
       var jmlSPJ = 0;
       var noSPJ = [];
+      var totalSPJ = 0;
+      var totalBBM = 0;
+      var totalTOL = 0;
       $.each($('[name="inputCheckSPJ"]:checked'), function(){
         totalRP +=parseInt($(this).attr("rp"))
         noSPJ.push($(this).val());
+        totalSPJ +=parseInt($(this).attr("spj"))
+        totalBBM +=parseInt($(this).attr("bbm"))
+        totalTOL +=parseInt($(this).attr("tol"))
       })
       $('#inputJumlahSPJ').val(noSPJ.length);
       $('#inputTotalRP').val(totalRP);
       $('#showJumlahSPJ').html(noSPJ.length);
       $('#showTotalRP').html(formatRupiah(Number(totalRP).toFixed(0), 'Rp. '));
+      $('#inputSPJRP').val(totalSPJ);
+      $('#showSPJRP').html(formatRupiah(Number(totalSPJ).toFixed(0), 'Rp. '))
+      $('#inputBBMRP').val(totalBBM);
+      $('#showBBMRP').html(formatRupiah(Number(totalBBM).toFixed(0), 'Rp. '))
+      $('#inputTOLRP').val(totalTOL);
+      $('#showTOLRP').html(formatRupiah(Number(totalTOL).toFixed(0), 'Rp. '))
       console.log(noSPJ);
 
       var totalBA =0;
@@ -156,14 +183,30 @@
       var totalRP = 0;
       var jmlSPJ = 0;
       var noSPJ = [];
+      var totalSPJ = 0;
+      var totalBBM = 0;
+      var totalTOL = 0;
       $.each($('[name="inputCheckSPJ"]:checked'), function(){
         totalRP +=parseInt($(this).attr("rp"))
         noSPJ.push($(this).val());
+        totalSPJ +=parseInt($(this).attr("spj"))
+        totalBBM +=parseInt($(this).attr("bbm"))
+        totalTOL +=parseInt($(this).attr("tol"))
       })
       $('#inputJumlahSPJ').val(noSPJ.length);
       $('#inputTotalRP').val(totalRP);
       $('#showJumlahSPJ').html(noSPJ.length);
       $('#showTotalRP').html(formatRupiah(Number(totalRP).toFixed(0), 'Rp. '));
+      $('#inputSPJRP').val(totalSPJ);
+      $('#showSPJRP').html(formatRupiah(Number(totalSPJ).toFixed(0), 'Rp. '))
+      $('#inputBBMRP').val(totalBBM);
+      $('#showBBMRP').html(formatRupiah(Number(totalBBM).toFixed(0), 'Rp. '))
+      $('#inputTOLRP').val(totalTOL);
+      $('#showTOLRP').html(formatRupiah(Number(totalTOL).toFixed(0), 'Rp. '))
+      console.log(totalRP)
+      console.log(totalSPJ)
+      console.log(totalBBM)
+      console.log(totalTOL)
     })
     $('#getTabel').on('click','[name="inputCheckBiayaAdmin"]', function(){
       var totalRP = 0;
@@ -236,6 +279,7 @@
             },
             complete: function(data){
               $('.preloader-no-bg').fadeOut('slow');
+              btnGenerate.ladda('stop');
             },
             error: function(data){
               Swal.fire({
@@ -250,10 +294,11 @@
           });
         } else {
           Swal.fire("Pilih SPJ nya Terlebih Dahulu!","","warning")
+          btnGenerate.ladda('stop');
         }
         
         
-        btnGenerate.ladda('stop');
+        
         return false;
           
       }, 1000)
@@ -274,9 +319,15 @@
         $('#inputJumlahSPJ').val(data.jumlahSPJ);
         $('#inputNoGenerate').val(data.noGenerate);
         $('#inputTotalRP').val(data.totalRP);
+        $('#inputBBMRP').val(data.totalBBM);
+        $('#inputSPJRP').val(data.totalSPJ);
+        $('#inputTOLRP').val(data.totalTOL);
         $('#showJumlahSPJ').html(data.jumlahSPJ);
         $('#showNoGenerate').html(data.noGenerate);
-        $('#showTotalRP').html(data.totalRP);
+        $('#showTotalRP').html(formatRupiah(Number(data.totalRP).toFixed(0), 'Rp. '));
+        $('#showBBMRP').html(formatRupiah(Number(data.totalBBM).toFixed(0), 'Rp. '));
+        $('#showSPJRP').html(formatRupiah(Number(data.totalSPJ).toFixed(0), 'Rp. '));
+        $('#showTOLRP').html(formatRupiah(Number(data.totalTOL).toFixed(0), 'Rp. '));
       },
       error: function(data){
 

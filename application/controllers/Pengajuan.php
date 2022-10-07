@@ -263,6 +263,8 @@ class Pengajuan extends CI_Controller {
 		$inputJenisSPJ = $this->input->get("inputJenisSPJ");
 		$inputNoSPJ= $this->input->get("inputNoSPJ");
 		$inputTglSPJ = $this->input->get("inputTglSPJ");
+		$inputKendaraan = $this->input->get("inputKendaraan");
+		$inputRekanan = $this->input->get("inputRekanan");
 		if ($inputJenisSPJ == '1') {
 			if ($jabatan == 'Sopir') {
 				$where = " AND OTORITAS_DRIVER = 'Y' ";
@@ -291,8 +293,12 @@ class Pengajuan extends CI_Controller {
 			}
 			$whereJenis = " AND SPJ_NDV = 'Y'";
 		}
+		$whereRekanan='';
+		if ($inputKendaraan == 'Rental' && $jabatan == 'Sopir') {
+			$whereRekanan = " AND REKANAN = '$inputRekanan'";
+		}
 
-		$data = $this->M_Pengajuan->getPIC($inputSubjek, $jabatan, $where, $inputNoSPJ, $where2, $whereJenis, $inputTglSPJ)->result();
+		$data = $this->M_Pengajuan->getPIC($inputSubjek, $jabatan, $where, $inputNoSPJ, $where2, $whereJenis, $inputTglSPJ, $whereRekanan)->result();
 		echo json_encode($data);
 	}
 	public function hitungUangSaku()
@@ -345,15 +351,21 @@ class Pengajuan extends CI_Controller {
 	    //     	}
 
 	        } else {
-	        	$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
-				
-				if ($data->num_rows()>0) {
-					foreach ($data->result() as $key) {
-						$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+	        	$cekRumsu = $this->M_Pengajuan->cekOtoritasUangRumsum($nik)->row();
+	        	if ($cekRumsu->OTORITAS_UANG_SAKU == 'Y') {
+	        		$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
+					
+					if ($data->num_rows()>0) {
+						foreach ($data->result() as $key) {
+							$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+						}
+					} else {
+						$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
 					}
-				} else {
-					$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-				}
+	        	}else{
+	        		$hasil = array('BIAYA' =>0 ,'KET'=>'OTORITAS UANG SAKU = N');
+	        	}
+	        	
 	        }
         }
         
@@ -367,8 +379,8 @@ class Pengajuan extends CI_Controller {
 		$inputJenisSPJ = $this->input->get("inputJenisSPJ");
 		$inputGroupTujuan = $this->input->get("inputGroupTujuan"); 
 		$jenisTujuan = $inputGroupTujuan == 4?'Lokal':'Luar Kota';
-		$inputPIC = $this->input->post("inputPIC");
-		$inputTglSPJ = $this->input->post("inputTglSPJ");
+		$inputPIC = $this->input->get("inputPIC");
+		$inputTglSPJ = $this->input->get("inputTglSPJ");
 		$inputTglBerangkat = $this->input->get("inputTglBerangkat");
         $inputJamBerangkat = $this->input->get("inputJamBerangkat");
         $inputTglPulang = $this->input->get("inputTglPulang");
@@ -405,15 +417,21 @@ class Pengajuan extends CI_Controller {
     //     	}
 
         } else {
-        	$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
-			
-			if ($data->num_rows()>0) {
-				foreach ($data->result() as $key) {
-					$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+        	$cekRumsu = $this->M_Pengajuan->cekOtoritasUangRumsum($inputPIC)->row();
+        	if ($cekRumsu->OTORITAS_UANG_MAKAN == 'Y') {
+        		$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
+				
+				if ($data->num_rows()>0) {
+					foreach ($data->result() as $key) {
+						$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+					}
+				} else {
+					$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
 				}
-			} else {
-				$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-			}
+        	}else{
+        		$hasil = array('BIAYA' =>0 ,'KET'=>'OTORITAS UANG MAKAN = N');
+        	}
+        	
         }
 		echo json_encode($hasil);
 	}
@@ -589,7 +607,7 @@ class Pengajuan extends CI_Controller {
 	public function getVoucherBBM()
 	{
 		$cari = $this->input->post("cari");
-		$sql = $this->M_Data_Master->getDataVoucher('2',$cari,'');
+		$sql = $this->M_Data_Master->getDataVoucher('NOT',$cari,'','','','');
 		$item = $sql->result_array();
 		$data = array();
 		$value = "";
@@ -602,7 +620,7 @@ class Pengajuan extends CI_Controller {
 	public function getVoucherBBMPerId()
 	{
 		$id = $this->input->get("id");
-		$data = $this->M_Data_Master->getDataVoucher('2','',$id)->row();
+		$data = $this->M_Data_Master->getDataVoucher('NOT','',$id,'','','')->row();
 		echo json_encode($data);
 	}
 	public function cekManajemen()
@@ -735,6 +753,23 @@ class Pengajuan extends CI_Controller {
 		foreach ($item as $key) {
 			$data[] = array('id' =>$key['KOTA'] , 'text' =>$key['VAL']);
 		}
+		echo json_encode($data);
+	}
+	public function getListRekanan()
+	{
+		$data = $this->M_Data_Master->getDataRekanan()->result();
+		echo json_encode($data);
+	}
+	public function getKendaraanRekanan()
+	{
+		$rekananId = $this->input->get("rekananId");
+		$data = $this->M_Data_Master->getKendaraanRekanan($rekananId)->result();
+		echo json_encode($data);
+	}
+	public function getKendaraanRentalById()
+	{
+		$id = $this->input->get("id");
+		$data = $this->M_Data_Master->getKendaraanRentalById($id)->row();
 		echo json_encode($data);
 	}
 

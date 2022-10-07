@@ -186,9 +186,9 @@ class M_Monitoring extends CI_Model {
 					(
 						SELECT
 							NO_BT,
-							UANG_SAKU1 * JML_PIC AS US1,
-							UANG_SAKU2 * JML_PIC AS US2,
-							UANG_MAKAN * JML_PIC AS UM,
+							UANG_SAKU1 * JML_PIC_SAKU AS US1,
+							UANG_SAKU2 * JML_PIC_SAKU AS US2,
+							UANG_MAKAN * JML_PIC_MAKAN AS UM,
 							STATUS_US1,
 							STATUS_US2,
 							STATUS_MAKAN,
@@ -214,12 +214,25 @@ class M_Monitoring extends CI_Model {
 						INNER JOIN
 						(
 							SELECT
-								COUNT(NO_PENGAJUAN) AS JML_PIC,
-								NO_PENGAJUAN
+								NO_PENGAJUAN,
+								SUM(JML_PIC) AS JML_PIC_SAKU,
+								COUNT(NIK) AS JML_PIC_MAKAN
 							FROM
-								SPJ_PENGAJUAN_PIC
-							GROUP BY
-								NO_PENGAJUAN
+							(
+								SELECT
+									NIK,
+									NO_PENGAJUAN,
+									CASE 
+										WHEN Kendaraan = 'Rental' AND JENIS_PIC = 'Sopir' THEN 0
+										ELSE 1
+									END AS JML_PIC
+								FROM
+									SPJ_PENGAJUAN_PIC a
+								INNER JOIN
+									SPJ_PENGAJUAN b
+								ON a.NO_PENGAJUAN = b.NO_SPJ
+							)Q1
+							GROUP BY NO_PENGAJUAN
 						)Q2 ON Q1.NO_BT = Q2.NO_PENGAJUAN
 					)Q8 ON Q1.NO_SPJ = Q8.NO_BT
 					LEFT JOIN
@@ -753,8 +766,14 @@ class M_Monitoring extends CI_Model {
 					Q2.SET_IN,
 					Q2.KETERANGAN_OUT,
 					Q2.KETERANGAN_IN,
-					UANG_SAKU1,
-					UANG_SAKU2,
+					CASE 
+						WHEN KENDARAAN = 'Rental' AND JENIS_PIC = 'Driver' THEN 0
+						ELSE UANG_SAKU1
+					END AS UANG_SAKU1,
+					CASE 
+						WHEN KENDARAAN = 'Rental' AND JENIS_PIC = 'Driver' THEN 0
+						ELSE UANG_SAKU2
+					END AS UANG_SAKU2,
 					UANG_MAKAN_TAMBAHAN,
 					STATUS_US1,
 					STATUS_US2,
@@ -914,13 +933,24 @@ class M_Monitoring extends CI_Model {
 						FOTO_WAJAH
 					FROM
 						SPJ_PEGAWAI_OTORITAS
-				)Q6 ON Q1.NIK = Q6.NIK";
+				)Q6 ON Q1.NIK = Q6.NIK
+				LEFT JOIN
+				(
+					SELECT
+						NO_SPJ,
+						KENDARAAN
+					FROM
+						SPJ_PENGAJUAN
+				)Q7 ON Q1.NO_PENGAJUAN = Q7.NO_SPJ";
 		return $this->db->query($sql);
 	}
 	public function getGenerateSPJ($bulan, $tahun, $jenisSPJ, $status, $wherePeiode, $whereID)
 	{
 		$sql = "SELECT
-					*
+					Q1.*,
+					TOTAL_SPJ,
+					TOTAL_BBM,
+					TOTAL_TOL
 				FROM
 				(
 					SELECT
@@ -938,7 +968,39 @@ class M_Monitoring extends CI_Model {
 					DATENAME(MONTH,TGL_GENERATE) LIKE '$bulan%' AND
 					YEAR(TGL_GENERATE) LIKE '$tahun%' AND
 					JENIS_SPJ LIKE '$jenisSPJ%' $wherePeiode
-				)Q1 $whereID
+				)Q1 
+				LEFT JOIN
+				(
+					SELECT
+						JUMLAH AS TOTAL_SPJ,
+						DETAIL_TRANSAKSI
+					FROM
+						SPJ_PENGAJUAN_SALDO
+					WHERE
+						JENIS_KASBON = 'Kasbon SPJ'
+				)Q2 ON Q1.NO_GENERATE = Q2.DETAIL_TRANSAKSI
+				LEFT JOIN
+				(
+					SELECT
+						JUMLAH AS TOTAL_BBM,
+						DETAIL_TRANSAKSI
+					FROM
+						SPJ_PENGAJUAN_SALDO
+					WHERE
+						JENIS_KASBON = 'Kasbon BBM'
+				)Q3 ON Q1.NO_GENERATE = Q3.DETAIL_TRANSAKSI
+				LEFT JOIN
+				(
+					SELECT
+						JUMLAH AS TOTAL_TOL,
+						DETAIL_TRANSAKSI
+					FROM
+						SPJ_PENGAJUAN_SALDO
+					WHERE
+						JENIS_KASBON = 'Kasbon TOL'
+				)Q4 ON Q1.NO_GENERATE = Q4.DETAIL_TRANSAKSI
+				$whereID
+
 				ORDER BY
 					NO_GENERATE DESC";
 		return $this->db->query($sql);
@@ -1422,7 +1484,7 @@ class M_Monitoring extends CI_Model {
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
 		if ($getData->num_rows() == 0) {
-			$sql = "INSERT INTO SPJ_VOUCHER_BBM VALUES('$inputNoVoucher', '$inputBiaya','USED','$tanggal','$user')";
+			$sql = "INSERT INTO SPJ_VOUCHER_BBM VALUES('$inputNoVoucher', '$inputBiaya','USED','$tanggal','$user', NULL, NULL)";
 		}else{
 			$sql = "UPDATE SPJ_VOUCHER_BBM SET RP = '$inputBiaya', TGL_INPUT='$tanggal', PIC_INPUT = '$user' WHERE NO_VOUCHER = '$inputNoVoucher'";
 		}

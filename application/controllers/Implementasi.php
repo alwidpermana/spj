@@ -274,6 +274,14 @@ class Implementasi extends CI_Controller {
           $uangMakan = 0;
         }
 
+        // $getSPJ = $this->db->query("SELECT NO_TNKB FROM SPJ_PENGAJUAN WHERE NO_SPJ='$inputNoSPJ'")->row();
+        // $cekKendaraanRental = $this->M_Implementasi->cekKendaraanRental($getSPJ->NO_TNKB)->num_rows();
+
+        // if ($cekKendaraanRental>0) {
+        // 	$uangSaku1 = 0;
+        // 	$uangSaku2 = 0;
+        // }
+
         $data = $this->M_Implementasi->saveUangTambahan($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
         // $test = array('uang saku1' =>$uangSaku1 ,'uang saku 2'=> $uangSaku2, 'uangMakan'=>$uangMakan, 'selisih jam'=>$selisihJam, 'selisih Hari'=>$selisihHari, 'jam 2'=>$jam2, 'jm'=>$jm,'selisih jam tengah 1 '=>$selisihJamTengah1, 'selsiih jam tengah 2'=>$selisihJamTengah2);
         // $this->M_Implementasi->saveAdjustmentUangTambah($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
@@ -652,14 +660,20 @@ class Implementasi extends CI_Controller {
 	public function getInfo()
 	{
 		$inputJenisSPJ = $this->input->get("filJenis");
-		$total = $this->M_Implementasi->getTotalSPJ()->result();
+		$total = $this->M_Implementasi->getTotalSPJ($inputJenisSPJ)->result();
 		$dataBA = $this->M_Implementasi->getTotalBiayaAdmin()->result();
 		$noGenerate = $this->M_Implementasi->getNoGenerate($inputJenisSPJ);
 		$jumlahSPJ =0;
 		$totalRP = 0;
+		$totalSPJ = 0;
+		$totalBBM = 0;
+		$totalTOL = 0;
 		foreach ($total as $key) {
 			$jumlahSPJ = $key->JUMLAH_SPJ;
 			$totalRP = $key->TOTAL_RP;
+			$totalSPJ = $key->TOTAL_SPJ;
+			$totalBBM = $key->TOTAL_BBM;
+			$totalTOL = $key->TOTAL_TOL;
 		}
 		$jumlahBA = 0;
 		$totalBA = 0;
@@ -667,7 +681,7 @@ class Implementasi extends CI_Controller {
 			$jumlahBA = $ba->JML_BIAYA_ADMIN;
 			$totalBA = $ba->TOTAL_BIAYA_ADMIN;
 		}
-		$hasil = array('noGenerate' =>$noGenerate ,'jumlahSPJ'=>round($jumlahSPJ), 'totalRP'=> round($totalRP),'jumlahBA'=>round($jumlahBA), 'totalBA'=>round($totalBA));
+		$hasil = array('noGenerate' =>$noGenerate ,'jumlahSPJ'=>round($jumlahSPJ), 'totalRP'=> round($totalRP),'jumlahBA'=>round($jumlahBA), 'totalBA'=>round($totalBA),'totalSPJ'=>round($totalSPJ), 'totalBBM'=>round($totalBBM), 'totalTOL'=>round($totalTOL));
 		echo json_encode($hasil);
 	}
 	public function getTabelGenerate()

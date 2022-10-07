@@ -4,6 +4,7 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/select2/css/select2.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/jquery-ui-1.12.1.custom/jquery-ui.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <?php $this->load->view("_partial/head")?>
   
 </head>
@@ -24,10 +25,10 @@
           <div class="card">
             <div class="card-body">
               <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-2">
                   <div class="form-group">
                     <label>Departemen</label>
-                    <select class="select2 form-control filter" id="filDepartemen">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filDepartemen">
                       <option value="">ALL</option>
                       <?php foreach ($departemen as $dep): ?>
                         <option value="<?=$dep->nm_dept?>"><?=$dep->nm_dept?></option>
@@ -38,7 +39,7 @@
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Jabatan</label>
-                    <select class="select2 form-control filter" id="filJabatan">
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJabatan">
                       <option value="">ALL</option>
                       <?php foreach ($jabatan as $jab): ?>
                         <option value="<?=$jab->jabatan?>"><?=$jab->jabatan?></option>
@@ -48,7 +49,17 @@
                     </select>
                   </div>
                 </div>
-                <div class="col-md-1"></div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label>Status</label>
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
+                      <option value="">ALL</option>
+                      <option value="VERIFIED">VERIFIED</option>
+                      <option value="CANCEL">CANCEL</option>
+                      <option value="OUTSTANDING">OUTSTANDING</option>
+                    </select>
+                  </div>
+                </div>
                 <div class="col-md-6">
                   <form id="search">
                     <div class="form-group">
@@ -101,6 +112,12 @@
 <script src="<?= base_url()?>assets/plugins/select2/js/select2.full.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.js"></script>
+<script src="<?= base_url()?>assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<script>
+    $(function () {
+      bsCustomFileInput.init();
+    });
+</script>
 <script type="text/javascript">
   $(document).ready(function(){
     $('.select2').select2({
@@ -147,12 +164,37 @@
         }
       }); 
     });
+    $('#getTabel').on('click','.checkData', function(){
+      if ($(this).is(":checked")){
+        var isi = 'Y';
+      }else{
+        var isi = 'N';
+      }
+      var nik = $(this).attr("nik")
+      var jenis = $(this).attr("jenis")
+      $.ajax({
+        type:'post',
+        data:{isi, nik, jenis},
+        dataType:'json',
+        url:'checkDataKaryawan',
+        async:true,
+        cache:false,
+        success: function(data){
+          berhasil();
+        },
+        error:function(data){
+          gagal();
+        }
+      })
+      
+    })
 
   })
   function getTabel() {
     var filDepartemen = $('#filDepartemen').val();
     var filJabatan = $('#filJabatan').val();
     var filSearch = $('#filSearch').val();
+    var filStatus = $('#filStatus').val();
     var gagal = '<div class="alert alert-danger bg-kps alert-dismissible">';
         gagal +='<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
         gagal +='<h5><i class="icon fas fa-ban"></i>Gagal Meload Data!</h5>';
@@ -160,7 +202,7 @@
         gagal +='</div>';
     $.ajax({
       type: 'get',
-      data: {filDepartemen, filJabatan, filSearch},
+      data: {filDepartemen, filJabatan, filSearch, filStatus},
       url:'getTabelApproveKaryawan',
       cache: false,
       async: true,

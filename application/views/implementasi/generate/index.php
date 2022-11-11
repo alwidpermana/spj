@@ -37,7 +37,7 @@
                     <label>Jenis SPJ</label>
                     <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                       <?php foreach ($jenis as $key): ?>
-                        <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
+                        <option value="<?=$key->ID_JENIS?>" <?=$key->ATTRIBUT?>><?=$key->NAMA_JENIS?></option>
                       <?php endforeach ?>
                     </select>
                   </div>

@@ -106,6 +106,22 @@
 	                    				href="<?=base_url()?>pengajuan/form_edit/<?=$key->ID_SPJ?>" 
 	                    				data="<?=$key->ID_SPJ?>">
 	                    				Edit SPJ
+	                    			</a>
+	                    			<!-- <a 
+	                    				class="dropdown-item dropButton" 
+	                    				href="javascript:;" 
+	                    				data="<?=$key->ID_SPJ?>"
+	                    				voucher="<?=$key->VOUCHER_BBM?>">
+	                    				Voucher NG
+	                    			</a> -->
+	                    			<a 
+	                    				class="dropdown-item dropButton reloadTujuan" 
+	                    				href="javascript:;" 
+	                    				noSPJ="<?=$key->NO_SPJ?>"
+	                    				noTNKB = "<?=$key->NO_TNKB?>"
+	                    				tglSPJ = "<?=$key->TGL_SPJ?>"
+	                    				groupId = "<?=$key->GROUP_ID?>">
+	                    				Reload Tujuan
 	                    			</a>			
 	                			<?php else: ?>
 	                				<?php if ($this->session->userdata("LEVEL")<2): ?>

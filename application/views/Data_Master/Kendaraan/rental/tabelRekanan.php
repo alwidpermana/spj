@@ -5,6 +5,8 @@
 			<th>Nama Rekanan</th>
 			<th>Alamat Rekanan</th>
 			<th>Status</th>
+			<th>Berbadan Hukum</th>
+			<th>NPWP/NIK</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -20,27 +22,35 @@
 						<option value="TIDAK AKTIF" <?=$key->STATUS == 'TIDAK AKTIF'?'selected':''?>>TIDAK AKTIF</option>
 					</select>
 				</td>
+				<td class="text-center"><span class="badge <?=$key->BERBADAN_HUKUM == 'Y'?'bg-kps':'bg-danger'?>"><?=$key->BERBADAN_HUKUM == 'Y'?'Ya':'Tidak'?></span></td>
+				<td><?=$key->NPWP_NIK?></td>
 				<td class="text-center">
 					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
                    		<span class="sr-only">Toggle Dropdown</span>
                   	</button>
                   	<div class="dropdown-menu" role="menu">
-                    	<a 
-                    		class="dropdown-item dropButton editRekanan" 
-                    		data="<?=$key->ID?>"
-                    		kode = "<?=$key->KODE?>"
-                    		nama="<?=$key->NAMA?>"
-                    		alamat="<?=$key->ALAMAT?>" 
-                    		href="javascript:;">
-                    		Edit
-                    	</a>
-                    	<a 
-                    		class="dropdown-item dropButton dataKendaraan" 
-                    		data="<?=$key->ID?>" 
-                    		nama="<?=$key->NAMA?>"
-                    		href="javascript:;">
-                    		Data Kendaraan
-                    	</a>
+                    	<?php if ($jenis == 'master'): ?>
+                    		<a 
+	                    		class="dropdown-item dropButton editRekanan" 
+	                    		data="<?=$key->ID?>"
+	                    		kode = "<?=$key->KODE?>"
+	                    		nama="<?=$key->NAMA?>"
+	                    		alamat="<?=$key->ALAMAT?>" 
+	                    		hukum="<?=$key->BERBADAN_HUKUM?>"
+	                    		npwp = "<?=$key->NPWP_NIK?>"
+	                    		href="javascript:;">
+	                    		Edit
+	                    	</a>
+                    	<?php endif ?>
+                    	<?php if ($jenis == 'kendaraan'): ?>
+                    		<a 
+	                    		class="dropdown-item dropButton dataKendaraan" 
+	                    		data="<?=$key->ID?>" 
+	                    		nama="<?=$key->NAMA?>"
+	                    		href="javascript:;">
+	                    		Data Kendaraan
+	                    	</a>
+                    	<?php endif ?>
                     	
                   	</div>
 				</td>

@@ -46,7 +46,7 @@
 					<?php endif ?>
 				</td>
 				<td><?=$key->TGL_INPUT?></td>
-				<td><?=$key->REKANAN?></td>
+				<td><?=$key->NAMA_REKANAN?></td>
 				<td><?=$key->nik?></td>
 				<td><?=$key->namapeg?></td>
 				<td><?=$key->departemen?></td>
@@ -94,10 +94,7 @@
             info: false,  
             columnDefs: [
 	            { orderable: false, targets: 0 }
-	        ],
-            fixedColumns:   {
-	         	left: 1
-	        }
+	        ]
           } ); 
 	});
 </script>

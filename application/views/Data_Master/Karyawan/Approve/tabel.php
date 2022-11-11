@@ -44,7 +44,7 @@
 				</td>
 				<td><?=$i++?></td>
 				<td><?=$key->TGL_INPUT?></td>
-				<td><?=$key->REKANAN?></td>
+				<td><?=$key->NAMA_REKANAN?></td>
 				<td><?=$key->NIK?></td>
 				<td><?=$key->namapeg?></td>
 				<td><?=$key->departemen?></td>

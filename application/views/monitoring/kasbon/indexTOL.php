@@ -8,6 +8,8 @@
     $penguranTahun = date('Y', strtotime('-'.$i.' year', strtotime( $tanggal )));
     array_push($tahun, $penguranTahun); 
   }
+  $dlv = $this->session->userdata("DLV");
+  $ndv = $this->session->userdata("NDV");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,8 +63,8 @@
                   <div class="form-group">
                     <label>Jenis Kasbon</label>
                     <select class="select2 filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
-                      <option value="Kasbon TOL Delivery">TOL Delivery</option>
-                      <option value="Kasbon TOL Non Delivery">TOL Non Delivery</option>
+                      <option value="Kasbon TOL Delivery" <?=$dlv == 'Y' ? '' : 'disabled'?>>TOL Delivery</option>
+                      <option value="Kasbon TOL Non Delivery" <?=$ndv == 'Y' ? '' : 'disabled'?>>TOL Non Delivery</option>
                     </select>
                   </div>
                 </div>

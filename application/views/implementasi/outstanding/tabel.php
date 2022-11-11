@@ -82,9 +82,9 @@
                 <td>Rp.<?=str_replace(',', '.', number_format($key->TOTAL_UANG_MAKAN))?></td>
                 <td>Rp.<?=str_replace(',', '.', number_format($key->TOTAL_UANG_JALAN))?></td>
                 <td>Rp.<?=str_replace(',', '.', number_format($key->TOTAL_UANG_BBM))?></td>
-                <td class="text-center"><?=$key->JML_US_TAMBAHAN_1 >0?'<i class="fas fa-check"></i>':''?></td>
-                <td class="text-center"><?=$key->JML_US_TAMBAHAN_2 >0?'<i class="fas fa-check"></i>':''?></td>
-                <td class="text-center"><?=$key->JML_MAKAN_TAMBAHAN>0?'<i class="fas fa-check"></i>':''?></td>
+                <td class="text-center"><?=$key->CHECK_UANG_SAKU1 =='Y'?'<i class="fas fa-check"></i>':''?></td>
+                <td class="text-center"><?=$key->CHECK_UANG_SAKU2 =='Y'?'<i class="fas fa-check"></i>':''?></td>
+                <td class="text-center"><?=$key->CHECK_UANG_MAKAN=='Y'?'<i class="fas fa-check"></i>':''?></td>
                 <td></td>
                 <td></td>
                 <td></td>

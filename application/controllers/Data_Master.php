@@ -96,7 +96,7 @@ class Data_Master extends CI_Controller {
 	public function Edit_Karyawan($nik, $jenis)
 	{
 		$data['page'] = 'Form Edit Data Karyawan';
-		$data['rekanan'] = $this->M_Data_Master->getDataRekanan()->result();
+		$data['rekanan'] = $this->M_Data_Master->getDataRekanan('')->result();
 		if ($jenis == 'internal') {
 			$data['data'] = $this->M_Data_Master->getKaryawan($filDepartemen='', $filJabatan='', $filSearch='', $nik, $top = 1)->result();
 			$data['side'] = 'data_master-karyawan_internal';
@@ -653,7 +653,10 @@ class Data_Master extends CI_Controller {
 	}
 	public function getDataRekanan()
 	{
-		$data['data'] = $this->M_Data_Master->getDataRekanan()->result();
+		$filSearch = $this->input->get("filSearch");
+		$jenis = $this->input->get('jenis');
+		$data['jenis'] = $jenis;
+		$data['data'] = $this->M_Data_Master->getDataRekanan($filSearch)->result();
 		$this->load->view("data_master/kendaraan/rental/tabelRekanan", $data);
 	}
 	public function setKodeRekanan()
@@ -667,10 +670,12 @@ class Data_Master extends CI_Controller {
 		$inputNama = $this->input->post("inputNama");
 		$inputAlamat = $this->input->post("inputAlamat");
 		$inputIdRekanan = $this->input->post("inputIdRekanan");
+		$inputBerbadanHukum = $this->input->post("inputBerbadanHukum");
+		$inputNPWP = $this->input->post("inputNPWP");
 		if ($inputIdRekanan == '') {
-			$data = $this->M_Data_Master->saveRekanan($inputKode, $inputNama, $inputAlamat);
+			$data = $this->M_Data_Master->saveRekanan($inputKode, $inputNama, $inputAlamat, $inputBerbadanHukum, $inputNPWP);
 		} else {
-			$data = $this->M_Data_Master->updateRekanan($inputNama, $inputAlamat, $inputIdRekanan);
+			$data = $this->M_Data_Master->updateRekanan($inputNama, $inputAlamat, $inputIdRekanan, $inputBerbadanHukum, $inputNPWP);
 		}
 		
 		
@@ -700,10 +705,11 @@ class Data_Master extends CI_Controller {
 		$inputWarna= $this->input->post("inputWarna");
 		$inputBahanBakar= $this->input->post("inputBahanBakar");
 		$inputLiter= $this->input->post("inputLiter");
+		$inputTahun = $this->input->post("inputTahun");
 		if ($inputIdKendaraan == '') {
-			$data = $this->M_Data_Master->tambahKendaraanRental($inputRekananId, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter);
+			$data = $this->M_Data_Master->tambahKendaraanRental($inputRekananId, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter, $inputTahun);
 		}else{
-			$data = $this->M_Data_Master->updateKendaraanRental($inputIdKendaraan, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter);
+			$data = $this->M_Data_Master->updateKendaraanRental($inputIdKendaraan, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter, $inputTahun);
 		}
 		echo json_encode($data);
 	}
@@ -750,6 +756,58 @@ class Data_Master extends CI_Controller {
 		$nik = $this->input->post("nik");
 		$field = $this->input->post("jenis");
 		$data =$this->M_Data_Master->checkDataKaryawan($isi, $nik, $field);
+		echo json_encode($data);
+	}
+	public function rekanan()
+	{
+		$data['side'] = 'data_master-rekanan';
+		$data['page'] = 'Data Master Rekanan';
+		$this->load->view("Data_Master/rekanan/index", $data);
+	}
+	public function tabelRekanan()
+	{
+		
+	}
+	public function biaya_abnormal()
+	{
+		$data['side'] = 'data_master-abnormal';
+		$data['page'] = 'Data Master - Biaya Uang Jalan Abnormal';
+		$this->load->view("Data_Master/abnormal/index", $data); 
+	}
+	public function getBiayaAbnormal()
+	{
+		$filSearch = $this->input->get("filSearch");
+		$offset = $this->input->get("offset")==''?0:$this->input->get("offset")+1;
+		$limit = $this->input->get("limit");
+		$where = " WHERE NO_URUT >= $offset AND NO_URUT < $offset + $limit";
+		$data['data'] = $this->M_Data_Master->getBiayaAbnormal($filSearch, $where)->result();
+		$this->load->view("Data_Master/abnormal/tabel", $data);
+	}
+	public function getPaggingAbnormal()
+	{
+		$filSearch = $this->input->get("filSearch");
+		$offset = $this->input->get("offset");
+		$limit = $this->input->get("limit");
+		$data['offset'] = $offset;
+		$data['limit'] = $limit;
+		$data['data'] = $this->M_Data_Master->getBiayaAbnormal($filSearch,'')->num_rows();
+		$this->load->view("_partial/paging", $data);
+	}
+	public function saveBiayaAbnormal()
+	{
+		$inputBiaya = $this->input->post("inputBiaya");
+		$inputSerlokID = $this->input->post("inputSerlokID");
+		$inputKodeSerlok = $this->input->post("inputKodeSerlok");
+		$data = $this->M_Data_Master->saveBiayaAbnormal($inputBiaya, $inputSerlokID, $inputKodeSerlok);
+		echo json_encode($data);
+	}
+	public function saveOtoritasAkunSPJ()
+	{
+		$isi = $this->input->post("isi");
+		$jenis = $this->input->post("jenis");
+		$nik = $this->input->post("nik");
+		$field = $jenis == 'DLV' ? 'OTORITAS_DLV' : 'OTORITAS_NDV';
+		$data = $this->M_Data_Master->saveOtoritasAkunSPJ($isi, $nik, $field);
 		echo json_encode($data);
 	}
 

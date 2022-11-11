@@ -118,7 +118,8 @@ class Cash_Flow extends CI_Controller {
 	{
 		$data['side'] = 'cash_flow-pengajuan';
 		$data['page'] = 'Pengajuan Sub Kas';
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled';
 		$this->load->view("cash_flow/pengajuan/index", $data);
 	}
 	public function getDataPengajuan()
@@ -293,7 +294,8 @@ class Cash_Flow extends CI_Controller {
 	{
 		$data['side'] = 'cash_flow-mcf';
 		$data['page'] = 'My Cash Flow';
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled';
 		$this->load->view("cash_flow/my_cash_flow/index", $data);
 	}
 	public function getDataMyCashFlow()

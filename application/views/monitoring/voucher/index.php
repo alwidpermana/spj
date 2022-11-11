@@ -1,3 +1,7 @@
+<?php
+  $dlv = $this->session->userdata("DLV");
+  $ndv = $this->session->userdata("NDV");
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,9 +43,9 @@
                   <div class="form-group">
                     <label>Jenis SPJ</label>
                     <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
-                      <option value="">ALL</option>
+                      <option value="" <?=$dlv == 'Y' && $ndv == 'Y'?'':'disabled'?>>ALL</option>
                       <?php foreach ($spj as $key): ?>
-                      <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
+                      <option value="<?=$key->ID_JENIS?>" <?=$key->ATTRIBUT?>><?=$key->NAMA_JENIS?></option>
                       <?php endforeach ?>
                     </select>
                   </div>

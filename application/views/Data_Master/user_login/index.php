@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/jquery-ui-1.12.1.custom/jquery-ui.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/ladda-buttons/css/ladda-themeless.min.css">
+  <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <?php $this->load->view("_partial/head")?>
   
 </head>
@@ -99,6 +100,12 @@
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/spin.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.jquery.min.js"></script>
+<script src="<?= base_url()?>assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<script>
+    $(function () {
+      bsCustomFileInput.init();
+    });
+</script>
 <script type="text/javascript">
   $(document).ready(function(){
     $('.select2').select2({
@@ -107,6 +114,10 @@
     $('.ladda-button').ladda('bind', {timeout: 1000});
 
     getTabel();
+    $('#search').submit(function(e){
+      e.preventDefault();
+      getTabel();
+    })
     $("#inputNIK").select2({
       ajax: { 
         url: 'getKaryawanAdmin',
@@ -232,7 +243,46 @@
         }
       })
     });
-
+    $('#getTabel').on('click','.checkOtoritas', function(){
+      if ($(this).is(":checked")){
+        var isi = 'Y';
+      }else{
+        var isi = 'N';
+      }
+      var jenis = $(this).attr("jenis");
+      var nik = $(this).attr("nik");
+      console.log(isi)
+      console.log(jenis)
+      console.log(nik)
+      $.ajax({
+        type:'post',
+        data:{isi, jenis, nik},
+        url:'saveOtoritasAkunSPJ',
+        dataType:'json',
+        cache:false,
+        async:true,
+        success:function(data){
+          Swal.fire({
+            position: 'top-end',
+            toast : true,
+            icon: 'success',
+            title: 'Otoritas Berhasil Disimpan',
+            showConfirmButton: false,
+            timer: 1500
+          })
+        },
+        error:function(data){
+          Swal.fire({
+            position: 'top-end',
+            toast : true,
+            icon: 'error',
+            title: 'Otoritas Gagal Disimpan! Hubungi Staff IT',
+            showConfirmButton: false,
+            timer: 1500
+          })
+        }
+      })
+    })
   })
   
   function getTabel() {

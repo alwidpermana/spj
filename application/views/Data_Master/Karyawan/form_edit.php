@@ -125,12 +125,24 @@
                       <div class="col-md-12">
                         <div class="form-group clearfix">
                           <div class="icheck-orange icheck-kps d-inline">
+                            <?php
+                              $checkedNDV = '';
+                              if ($key->SPJ_NDV == null) {
+                                if ($this->uri->segment("4") == 'internal') {
+                                  $checkedNDV = 'checked';
+                                }
+                              }else{
+                                if ($key->SPJ_NDV == 'Y') {
+                                  $checkedNDV = 'checked';
+                                }
+                              }
+                            ?>
                             <input 
                               type="checkbox" 
                               id="inputSpjNdv" 
                               class="saveSPJ" 
                               field="SPJ_NDV" 
-                              <?=$key->SPJ_NDV == 'Y'?'checked':''?>>
+                              <?=$checkedNDV?>>
                             <label for="inputSpjNdv">
                               Non Delivery
                             </label>
@@ -162,6 +174,7 @@
                     <div class="col-md-4">
                       <select class="select2 form-control" id="inputRekanan">
                           <option value="">Pilih Rekanan</option>
+                          <option value="-">-</option>
                         <?php foreach ($rekanan as $rkn): ?>
                           <option value="<?=$rkn->ID?>" <?=$key->REKANAN == $rkn->ID?'selected':''?>><?=$rkn->NAMA?></option>
                         <?php endforeach ?>
@@ -179,6 +192,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group clearfix">
+                          
                         <div class="icheck-orange icheck-kps d-inline">
                           <input 
                             type="checkbox" 
@@ -195,6 +209,18 @@
                     </div>
                     <div class="row">
                       <div class="col-md-12">
+                        <?php
+                          $checkedPendamping = '';
+                          if ($key->OTORITAS_PENDAMPING == null) {
+                            if ($this->uri->segment("4") == 'internal') {
+                              $checkedPendamping = 'checked';
+                            }
+                          }else{
+                            if ($key->OTORITAS_PENDAMPING == 'Y') {
+                              $checkedPendamping = 'checked';
+                            }
+                          }
+                        ?>
                         <div class="form-group clearfix">
                         <div class="icheck-orange icheck-kps d-inline">
                           <input 
@@ -202,7 +228,7 @@
                             id="inputOtoritasPendamping" 
                             class="saveOtoritas" 
                             field="OTORITAS_PENDAMPING"
-                            <?=$key->OTORITAS_PENDAMPING == 'Y'?'checked':''?>>
+                            <?=$checkedPendamping?>>
                           <label for="inputOtoritasPendamping">
                             Pendamping
                           </label>

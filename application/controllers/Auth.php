@@ -59,7 +59,9 @@ class Auth extends CI_Controller {
 					'AVATAR'=>$value->AVATAR,
 					'KODE_DEPT' => $value->KODE_DEPT,
 					'SUB_DEPARTEMEN' => $value->SUB_DEPARTEMEN,
-					'status' => "login"
+					'status' => "login",
+					'DLV' => $value->OTORITAS_DLV,
+					'NDV' => $value->OTORITAS_NDV,
 					);
 	 
 				$this->session->set_userdata($data_session);

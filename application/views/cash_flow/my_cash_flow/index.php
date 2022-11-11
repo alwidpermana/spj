@@ -59,9 +59,9 @@
                       <div class="form-group">
                         <label>Jenis SPJ</label>
                         <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenisSPJ">
-                          <option value="">ALL</option>
+                          <option value="" <?=$attribut?>>ALL</option>
                           <?php foreach ($spj as $key): ?>
-                            <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
+                            <option value="<?=$key->ID_JENIS?>" <?=$key->ATTRIBUT?>><?=$key->NAMA_JENIS?></option>
                           <?php endforeach ?>
                         </select>
                       </div>

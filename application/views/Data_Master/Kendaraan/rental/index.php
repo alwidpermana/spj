@@ -176,6 +176,14 @@
             <div class="row">
               <div class="col-md-12">
                 <div class="form-group">
+                  <label>Tahun</label>
+                  <input type="text" id="inputTahun" class="form-control form-control-sm">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
                   <label>Bahan Bakar</label>
                   <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputBahanBakar">
                     <option value="Bensin">Bensin</option>
@@ -331,6 +339,7 @@
         var inputWarna = $('#inputWarna').val();
         var inputBahanBakar = $('#inputBahanBakar').val();
         var inputLiter = $('#inputLiter').val();
+        var inputTahun = $('#inputTahun').val();
         if (inputNoTNKB == '' || inputMerk == '' || inputType == '') {
           Swal.fire("Lengkapi Datanya Terlebih Dahulu","No TNKB, Merk, dan Type Kendaraan Tidak Boleh Kosong","warning")
           saveKendaraan.ladda('stop');
@@ -338,7 +347,7 @@
           $.ajax({
             type:'post',
             dataType:'json',
-            data:{inputRekananId, inputIdKendaraan, inputNoTNKB, inputMerk, inputType, inputJenis, inputWarna, inputBahanBakar, inputLiter},
+            data:{inputRekananId, inputIdKendaraan, inputNoTNKB, inputMerk, inputType, inputJenis, inputWarna, inputBahanBakar, inputLiter, inputTahun},
             url:url+'/data_master/saveKendaraanRental',
             cache:false,
             async:true,
@@ -352,6 +361,7 @@
               $('#inputType').val("")
               $('#inputWarna').val("")
               $('#inputLiter').val("")
+              $('#inputTahun').val("");
             },
             complete: function(data){
               saveKendaraan.ladda('stop');
@@ -373,12 +383,14 @@
       var warna = $(this).attr("warna");
       var bbm = $(this).attr("bbm");
       var liter = $(this).attr("liter");
+      var tahun = $(this).attr("tahun");
       $('#inputIdKendaraan').val(id);
       $('#inputMerk').val(merk)
       $('#inputType').val(type)
       $('#inputNoTNKB').val(noTNKB)
       $('#inputWarna').val(warna)
       $('#inputLiter').val(liter);
+      $('#inputTahun').val(tahun);
       $("select#inputJenis option[value='" + jenis + "']").prop("selected","selected");
       $("select#inputJenis").trigger("change");
       $("select#inputBahanBakar option[value='" + bbm + "']").prop("selected","selected");
@@ -419,9 +431,11 @@
     })
   })
   function getTabelRekanan() {
+    var jenis = 'kendaraan';
     $.ajax({
       type:'get',
       url:url+'/data_master/getDataRekanan',
+      data:{jenis},
       cache: false,
       async: true,
       beforeSend: function(data){

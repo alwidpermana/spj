@@ -110,9 +110,13 @@
 						FROM
 						(
 							SELECT
-								* 
+								a.*,
+								NAMA AS NAMA_REKANAN
 							FROM
-								SPJ_PEGAWAI_OTORITAS
+								SPJ_PEGAWAI_OTORITAS a
+							LEFT JOIN
+								SPJ_REKANAN b
+							ON a.REKANAN = b.ID
 							WHERE
 								STATUS_DATA = 'SAVED' $status
 						)Q1
@@ -154,7 +158,7 @@
 					)Q1
 					WHERE
 						Q1.NIK LIKE '%$search%' OR
-						namapeg LIKE '%$search%'
+						namapeg LIKE '%$search%' 
 					ORDER BY namapeg ASC";
 			return $this->db->query($sql);
 		}
@@ -185,9 +189,13 @@
 					LEFT JOIN
 					(
 						SELECT
-							*
+							a.*,
+							b.NAMA AS NAMA_REKANAN
 						FROM
-							SPJ_PEGAWAI_OTORITAS
+							SPJ_PEGAWAI_OTORITAS a
+						LEFT JOIN
+							SPJ_REKANAN b ON
+						a.REKANAN = b.ID
 					)Q2 ON Q1.nik = Q2.NIK
 					WHERE
 						Q1.nik LIKE '%$filSearch%' OR
@@ -221,9 +229,13 @@
 						LEFT JOIN
 						(
 							SELECT
-								*
+								a.*,
+								b.NAMA AS NAMA_REKANAN
 							FROM
-								SPJ_PEGAWAI_OTORITAS
+								SPJ_PEGAWAI_OTORITAS a
+							LEFT JOIN
+								SPJ_REKANAN b ON
+							a.REKANAN = b.ID
 						)Q2 ON Q1.nik = Q2.NIK
 						WHERE
 							Q1.nik LIKE '%$search%' OR
@@ -380,6 +392,53 @@
 		public function getJenisSPJ()
 		{
 			$sql = "SELECT ID_JENIS, NAMA_JENIS FROM SPJ_JENIS";
+			return $this->db->query($sql);
+		}
+		public function getJenisSPJByOtoritas()
+		{
+			$nik = 'SPJ-'.$this->session->userdata("NIK");
+			$sql = "SELECT
+						ID_JENIS,
+						NAMA_JENIS,
+						CASE ID_JENIS
+							WHEN 1 THEN DLV
+							ELSE NDV
+						END AS ATTRIBUT
+					FROM
+					(
+						SELECT
+							ID_JENIS,
+							NAMA_JENIS,
+							CASE 
+								WHEN ID_JENIS = 1 AND OTORITAS_DLV = 'Y' THEN ''
+								ELSE 'disabled'
+							END AS DLV,
+							CASE 
+								WHEN ID_JENIS IN (2,3) AND OTORITAS_NDV = 'Y' THEN ''
+								ELSE 'disabled'
+							END AS NDV
+						FROM
+						(
+							SELECT
+								ID_JENIS,
+								NAMA_JENIS,
+								'SAMA' AS SAMA
+							FROM
+								[dbo].[SPJ_JENIS]
+						)Q1
+						LEFT JOIN
+						(
+							SELECT
+								NIK,
+								OTORITAS_DLV,
+								OTORITAS_NDV,
+								'SAMA' AS SAMA
+							FROM
+								SPJ_USER
+							WHERE
+								NIK = '$nik'
+						)Q2 ON Q1.SAMA = Q2.SAMA
+					)Q1";
 			return $this->db->query($sql);
 		}
 		public function getJenisOther()
@@ -1166,16 +1225,22 @@
 			$sql = "UPDATE SPJ_PEGAWAI_OTORITAS SET OTORITAS_ADJUSMENT = '$isi' WHERE NIK = '$nik'";
 			return $this->db->query($sql);
 		}
-		public function getDataRekanan()
+		public function getDataRekanan($search)
 		{
 			$sql = "SELECT
 						ID,
 						KODE,
 						NAMA,
 						ALAMAT,
-						STATUS
+						STATUS,
+						BERBADAN_HUKUM,
+						NPWP_NIK
 					FROM
 						SPJ_REKANAN
+					WHERE
+						KODE LIKE '%$search%' OR
+						NAMA LIKE '%$search%' OR
+						ALAMAT LIKE '%$search%'
 					ORDER BY
 						KODE DESC";
 			return $this->db->query($sql);
@@ -1211,14 +1276,14 @@
 	        }
 	        return $kode;
 		}
-		public function saveRekanan($inputKode, $inputNama, $inputAlamat)
+		public function saveRekanan($inputKode, $inputNama, $inputAlamat, $hukum, $npwp)
 		{
-			$sql = "INSERT INTO SPJ_REKANAN(KODE, NAMA, ALAMAT, STATUS)VALUES('$inputKode','$inputNama','$inputAlamat','AKTIF')";
+			$sql = "INSERT INTO SPJ_REKANAN(KODE, NAMA, ALAMAT, STATUS, BERBADAN_HUKUM, NPWP_NIK)VALUES('$inputKode','$inputNama','$inputAlamat','AKTIF','$hukum','$npwp')";
 			return $this->db->query($sql);
 		}
-		public function updateRekanan($nama, $alamat, $id)
+		public function updateRekanan($nama, $alamat, $id, $hukum, $npwp)
 		{
-			$sql = "UPDATE SPJ_REKANAN SET NAMA = '$nama', ALAMAT = '$alamat' WHERE ID = $id";
+			$sql = "UPDATE SPJ_REKANAN SET NAMA = '$nama', ALAMAT = '$alamat', BERBADAN_HUKUM = '$hukum', NPWP_NIK='$npwp' WHERE ID = $id";
 			return $this->db->query($sql);
 		}
 		public function updateStatusRekanan($id, $status)
@@ -1237,7 +1302,8 @@
 						Warna,
 						BahanBakar,
 						Kategori,
-						BBMPerLiter
+						BBMPerLiter,
+						Tahun
 					FROM
 						[dbo].[SPJ_KENDARAAN_REKANAN]
 					WHERE
@@ -1246,17 +1312,17 @@
 						ID DESC";
 			return $this->db->query($sql);
 		}
-		public function tambahKendaraanRental($rekananId, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter)
+		public function tambahKendaraanRental($rekananId, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter, $tahun)
 		{
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
-			$sql = "INSERT INTO SPJ_KENDARAAN_REKANAN(NoTNKB, Merk, Type, Warna, BahanBakar, Kategori, BBMPerLiter, REKANAN_ID, PIC_INPUT, TGL_INPUT)VALUES('$noTNKB','$merk','$type','$warna', '$bbm','$jenis','$liter','$rekananId','$user','$tanggal')";
+			$sql = "INSERT INTO SPJ_KENDARAAN_REKANAN(NoTNKB, Merk, Type, Warna, BahanBakar, Kategori, BBMPerLiter, REKANAN_ID, PIC_INPUT, TGL_INPUT, Tahun)VALUES('$noTNKB','$merk','$type','$warna', '$bbm','$jenis','$liter','$rekananId','$user','$tanggal','$tahun')";
 			return $this->db->query($sql);
 		}
-		public function updateKendaraanRental($id, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter )
+		public function updateKendaraanRental($id, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter, $tahun)
 		{
-			$sql = "UPDATE SPJ_KENDARAAN_REKANAN SET NoTNKB = '$noTNKB', Merk = '$merk', Type='$type', Kategori = '$jenis', warna='$warna', BahanBakar = '$bbm', BBMPerLiter = '$liter' WHERE ID = $id";
+			$sql = "UPDATE SPJ_KENDARAAN_REKANAN SET NoTNKB = '$noTNKB', Merk = '$merk', Type='$type', Kategori = '$jenis', warna='$warna', BahanBakar = '$bbm', BBMPerLiter = '$liter', Tahun='$tahun' WHERE ID = $id";
 			return $this->db->query($sql);
 		}
 		public function hapusKendaraanRental($id)
@@ -1397,6 +1463,51 @@
 						STATUS = 'NOT'
 					ORDER BY
 						KODE_ROMAWI ASC, TAHUN ASC";
+			return $this->db->query($sql);
+		}
+		public function getBiayaAbnormal($search, $where)
+		{
+			$sql = "SELECT
+						*
+					FROM
+					(
+						SELECT
+							ROW_NUMBER() over (partition by 'SAMA' order by NamaSerlok ASC) AS NO_URUT,
+							KodeSerlok,
+							NamaSerlok,
+							Alamat
+						FROM
+							ERPKPS.dbo.SLS_Customer
+						WHERE
+							NamaSerlok LIKE '%$search%'
+					)Q1
+					LEFT JOIN
+					(
+						SELECT
+							SERLOK_ID,
+							BIAYA
+						FROM
+							SPJ_UANG_ABNORMAL
+					)Q2 ON Q1.KodeSerlok = SERLOK_ID
+					$where
+					ORDER BY NamaSerlok ASC";
+			return $this->db->query($sql);
+		}
+		public function saveBiayaAbnormal($biaya, $serlokID, $kodeSerlok)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NIK");
+			if ($serlokID == '') {
+				$sql = "INSERT INTO SPJ_UANG_ABNORMAL(SERLOK_ID, BIAYA, TGL_INPUT, PIC_INPUT)VALUES($kodeSerlok, $biaya, '$tanggal','$user')";
+			}else{
+				$sql ="UPDATE SPJ_UANG_ABNORMAL SET BIAYA = $biaya, TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE SERLOK_ID = $serlokID";
+			}
+			return $this->db->query($sql);
+		}
+		public function saveOtoritasAkunSPJ($isi, $nik, $field)
+		{
+			$sql = "UPDATE SPJ_USER SET $field ='$isi' WHERE NIK = 'SPJ-$nik'";
 			return $this->db->query($sql);
 		}
 	}

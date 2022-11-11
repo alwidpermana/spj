@@ -22,7 +22,9 @@
 							SUBSTRING(NIK, 5, 10) AS NIK,
 							[LEVEL],
 							STATUS,
-							AVATAR
+							AVATAR,
+							OTORITAS_DLV,
+							OTORITAS_NDV
 						FROM
 							SPJ_USER
 						WHERE

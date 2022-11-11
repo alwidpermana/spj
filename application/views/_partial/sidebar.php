@@ -98,7 +98,7 @@
                       <p>Rental</p>
                     </a>
                   </li>
-                  <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK")=='00004'): ?>
+                  <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK")=='00004' || $this->session->userdata("NIK") == '00099'): ?>
                     <li class="nav-item">
                       <a href="<?=base_url()?>data_master/verifikasi_karyawan" class="nav-link ">
                         <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'karyawan_approve'?'text-dark':''?>" style="font-size: 11px;"></i>
@@ -113,6 +113,12 @@
                     </li>
                   <?php endif ?>
                 </ul>
+              </li>
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>data_master/rekanan" class="nav-link ">
+                  <i class="fas fa-hands-helping nav-icon <?=substr($side, 12) == 'rekanan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Rekanan</p>
+                </a>
               </li>
               <li class="nav-item list-menu-open <?=substr($side, 12, 9) == 'kendaraan'?'menu-open':''?>">
                 <a href="javascript:void(0);" class="nav-link">
@@ -135,12 +141,15 @@
                       <p>Rental</p>
                     </a>
                   </li>
-                  <li class="nav-item">
-                    <a href="<?=base_url()?>data_master/verifikasi_kendaraan" class="nav-link ">
-                      <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'kendaraan-verifikasi'?'text-dark':''?>" style="font-size: 11px;"></i>
-                      <p>Verifikasi</p>
-                    </a>
-                  </li>
+                  <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK")=='00004' || $this->session->userdata("NIK") == '00099'): ?>
+                    <li class="nav-item">
+                      <a href="<?=base_url()?>data_master/verifikasi_kendaraan" class="nav-link ">
+                        <i class="fas fa-circle text-sm nav-icon <?=substr($side, 12) == 'kendaraan-verifikasi'?'text-dark':''?>" style="font-size: 11px;"></i>
+                        <p>Verifikasi</p>
+                      </a>
+                    </li>  
+                  <?php endif ?>
+                  
                 </ul>
               </li>
               
@@ -170,11 +179,21 @@
                   <p>Voucher BBM</p>
                 </a>
               </li>
+              <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK") == '00099'): ?>
+                <li class="nav-item list-menu-open">
+                  <a href="<?=base_url()?>data_master/biaya_abnormal" class="nav-link ">
+                    <i class="fas fa-file-invoice-dollar nav-icon <?=substr($side, 12) == 'abnormal'?'text-dark':''?>" style="font-size: 11px;"></i>
+                    <p>Biaya Abnormal</p>
+                  </a>
+                </li>  
+              <?php endif ?>
+              
+              
               
             </ul>
           </li>
           <?php endif ?>
-          <?php if ($this->session->userdata("LEVEL")<2): ?>
+          <?php if ($this->session->userdata("LEVEL")<=3): ?>
            <li class="nav-item <?=$this->uri->segment("1")=='cash_flow'?'menu-open':''?>">
             <a href="javascript:void(0);" class="nav-link <?=$this->uri->segment("1")=='cash_flow'?'active':''?>">
               <i class="nav-icon fas fa-money-check-alt"></i>
@@ -184,12 +203,14 @@
               </p>
             </a>
             <ul class="nav nav-treeview menu-open-kps">
-              <li class="nav-item list-menu-open">
-                <a href="<?=base_url()?>cash_flow/buku_kas" class="nav-link ">
-                  <i class="fas fa-book nav-icon <?=substr($side, 10) == 'buku'?'text-dark':''?>" style="font-size: 11px;"></i>
-                  <p>Buku Kas Internal</p>
-                </a>
-              </li>
+              <?php if ($this->session->userdata("LEVEL")<=1): ?>
+                <li class="nav-item list-menu-open">
+                  <a href="<?=base_url()?>cash_flow/buku_kas" class="nav-link ">
+                    <i class="fas fa-book nav-icon <?=substr($side, 10) == 'buku'?'text-dark':''?>" style="font-size: 11px;"></i>
+                    <p>Buku Kas Internal</p>
+                  </a>
+                </li>
+              <?php endif ?>
               <li class="nav-item list-menu-open">
                 <a href="<?=base_url()?>cash_flow/pengajuan" class="nav-link ">
                   <i class="fas fa-hand-holding-usd nav-icon <?=substr($side, 10) == 'pengajuan'?'text-dark':''?>" style="font-size: 11px;"></i>
@@ -335,14 +356,46 @@
                   <p>NG Security</p>
                 </a>
               </li>
+              <li class="nav-item <?=substr($side, 11, 6) == 'rental'?'menu-open':''?> list-menu-open">
+                <a href="javascript:void(0);" class="nav-link">
+                  <i class="nav-icon  fas fa-file-invoice-dollar <?=substr($side, 11, 6) == 'rental'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>
+                    Kendaraan Rental
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview menu_sub">
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>monitoring/pemakaian_rental" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=$side == 'monitoring-rental-pemakaian'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Pemakaian Kendaraan</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>monitoring/jumlah_pemakaian" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=$side == 'monitoring-rental-jumlah'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Jumlah Pemakaian</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="<?=base_url()?>monitoring/breakdown_pemakaian" class="nav-link ">
+                      <i class="fas fa-circle text-sm nav-icon <?=$side == 'monitoring-rental-breakdown'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Breakdown Pemakaian Kendaraan</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
             </ul>
           </li>
-          <li class="nav-item">
-            <a href="<?=base_url()?>security" class="nav-link <?=$side == 'implementasi-security'?'active':''?>">
-              <i class="fas fa-user-shield nav-icon"></i>
-              <p>Security Check</p>
-            </a>
-          </li>
+          <?php if ($this->session->userdata("LEVEL")<=2 || $this->session->userdata("LEVEL")==5): ?>
+            <li class="nav-item">
+              <a href="<?=base_url()?>security" class="nav-link <?=$side == 'implementasi-security'?'active':''?>">
+                <i class="fas fa-user-shield nav-icon"></i>
+                <p>Security Check</p>
+              </a>
+            </li>  
+          <?php endif ?>
+          
           <?php if ($this->session->userdata("LEVEL")<=2): ?>
             <li class="nav-item">
               <a href="<?=base_url()?>implementasi/step_1?notif=" class="nav-link <?=$side == 'implementasi-step'?'active':''?>">

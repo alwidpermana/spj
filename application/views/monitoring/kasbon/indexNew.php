@@ -8,6 +8,8 @@
     $penguranTahun = date('Y', strtotime('-'.$i.' year', strtotime( $tanggal )));
     array_push($tahun, $penguranTahun); 
   }
+  $dlv = $this->session->userdata("DLV");
+  $ndv = $this->session->userdata("NDV");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,11 +64,11 @@
                     <label>Jenis Kasbon</label>
                     <select class="select2 filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                       <?php if ($kasbon == 'SPJ'): ?>
-                        <option value="Kasbon SPJ Delivery">SPJ Delivery</option>
-                        <option value="Kasbon SPJ Non Delivery">SPJ Non Delivery</option>
+                        <option value="Kasbon SPJ Delivery" <?=$dlv == 'Y' ? '' : 'disabled'?>>SPJ Delivery</option>
+                        <option value="Kasbon SPJ Non Delivery" <?=$ndv == 'Y' ? '' : 'disabled'?>>SPJ Non Delivery</option>
                       <?php else: ?>
-                        <option value="Kasbon TOL Delivery">TOL Delivery</option>
-                        <option value="Kasbon TOL Non Delivery">TOL Non Delivery</option>
+                        <option value="Kasbon TOL Delivery" <?=$dlv == 'Y' ? '' : 'disabled'?>>TOL Delivery</option>
+                        <option value="Kasbon TOL Non Delivery" <?=$ndv == 'Y' ? '' : 'disabled'?>>TOL Non Delivery</option>
                       <?php endif ?>
                     </select>
                   </div>

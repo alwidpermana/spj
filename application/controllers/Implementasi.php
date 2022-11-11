@@ -296,7 +296,8 @@ class Implementasi extends CI_Controller {
 		}
 		$data['side'] = 'implementasi-step';
 		$data['page'] = 'Implementasi Step 1';
-		$data['jenis'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['jenis'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled';
 		$data['group'] = $this->M_Data_Master->getOnlyGroup('')->result();
 		$this->load->view("implementasi/step/s1/index", $data);
 	}
@@ -342,7 +343,8 @@ class Implementasi extends CI_Controller {
 	{
 		$data['side'] = 'implementasi-adjustment';
 		$data['page'] = 'Pengajuan Adjustment';
-		$data['jenis'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['jenis'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled';
 		$data['group'] = $this->M_Data_Master->getOnlyGroup('')->result();
 		$this->load->view("implementasi/adjustment/index", $data);
 	}
@@ -571,7 +573,8 @@ class Implementasi extends CI_Controller {
 	{
 		$data['side'] = 'implementasi-os';
 		$data['page'] = 'Outstanding Otoritas';
-		$data['jenis'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['jenis'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled';
 		$data['group'] = $this->M_Data_Master->getOnlyGroup('')->result();
 		$this->load->view("implementasi/outstanding/index", $data);
 	}
@@ -584,7 +587,7 @@ class Implementasi extends CI_Controller {
 		$filGroup = $this->input->get("filGroup");
 		$filPeriode = $this->input->get("filPeriode");
 
-		$data['data']= $this->M_Monitoring->getSPJ2($filBulan, $filTahun, $filJenis, $filSearch, $filGroup)->result();
+		$data['data']= $this->M_Implementasi->getListSPJForOutstanding($filBulan, $filTahun, $filJenis, $filSearch, $filGroup)->result();
 		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
 		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
@@ -654,7 +657,7 @@ class Implementasi extends CI_Controller {
 	{
 		$data['side']= 'implementasi-generate';
 		$data['page']= 'Generate SPJ';
-		$data['jenis'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['jenis'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
 		$this->load->view("implementasi/generate/index", $data);
 	}
 	public function getInfo()

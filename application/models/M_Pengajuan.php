@@ -1214,4 +1214,17 @@ class M_Pengajuan extends CI_Model {
 					NIK = '$nik'";
 		return $this->db->query($sql);
 	}
+	public function getUangAbnormal($noSPJ)
+	{
+		$sql = "SELECT
+					SUM(BIAYA) AS BIAYA
+				FROM
+					SPJ_PENGAJUAN_LOKASI a
+				INNER JOIN
+					SPJ_UANG_ABNORMAL b ON
+				a.SERLOK_ID = b.SERLOK_ID
+				WHERE
+					NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
 }

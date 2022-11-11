@@ -8,6 +8,7 @@
 			<th>Warna</th>
 			<th>Bahan Bakar</th>
 			<th>BBM Per Liter</th>
+			<th>Tahun</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -21,6 +22,7 @@
 				<td><?=$key->Warna?></td>
 				<td><?=$key->BahanBakar?></td>
 				<td><?=number_format($key->BBMPerLiter, 2)?></td>
+				<td><?=$key->Tahun?></td>
 				<td>
 					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
                    		<span class="sr-only">Toggle Dropdown</span>
@@ -36,6 +38,7 @@
                     		bbm="<?=$key->BahanBakar?>"
                     		liter="<?=$key->BBMPerLiter?>" 
                     		noTNKB ="<?=$key->NoTNKB?>"
+                    		tahun = "<?=$key->Tahun?>"
                     		href="javascript:;">
                     		Edit
                     	</a>

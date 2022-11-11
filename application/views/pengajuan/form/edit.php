@@ -384,9 +384,9 @@
                               <label>: <?=$this->session->userdata("SUB_DEPARTEMEN")?></label>
                             </div>
                           </div>
-                          <div class="row" style="padding-top: 50px">
+                          <div class="row nextStart" style="padding-top: 50px">
                             <div class="col-md-4">
-                              <button class="btn btn-secondary btnStepNext" onclick="stepper.next()">Next</button>
+                              <button class="btn btn-secondary btnStepNext" onclick="stepper.next()" id="btnNextStart">Next</button>
                             </div>
                           </div>
                         </div>
@@ -564,9 +564,9 @@
                           </div>
                           
 
-                          <div class="row" style="padding-top: 50px">
+                          <div class="row nextKendaraan" style="padding-top: 50px">
                             <div class="col-md-4">
-                              <button class="btn btn-secondary btnStepPrevios">Previous</button>
+                              <button class="btn btn-secondary btnStepPrevios" id="btnPrevKendaraan">Previous</button>
                               <button class="btn btn-secondary btnStepNext" id="btnNextKendaraan">Next</button> 
                             </div>
                           </div>
@@ -628,9 +628,9 @@
                             </div>
                           </div>
                           <br>
-                          <div class="row" style="padding-top: 50px">
+                          <div class="row nextTujuan" style="padding-top: 50px">
                             <div class="col-md-4">
-                              <button class="btn btn-secondary btnStepPrevios">Previous</button>
+                              <button class="btn btn-secondary btnStepPrevios" id="btnPrevTujuan">Previous</button>
                               <button class="btn btn-secondary" id="btnNextTujuan">Next</button> 
                             </div>
                           </div>
@@ -669,9 +669,9 @@
                             </div>
                           </div>
                           <br>
-                          <div class="row" style="padding-top: 50px">
+                          <div class="row nextPIC" style="padding-top: 50px">
                             <div class="col-md-4">
-                              <button class="btn btn-secondary btnStepPrevios">Previous</button>
+                              <button class="btn btn-secondary btnStepPrevios" id="btnPrevPIC">Previous</button>
                               <button class="btn btn-secondary btnStepNext" id="btnNextPIC">Next</button> 
                             </div>
                           </div>
@@ -805,10 +805,10 @@
                             </div>
                           </div>
                           <br>
-                          <div class="row" style="padding-top: 50px">
+                          <div class="row nextBiaya" style="padding-top: 50px">
                             <div class="col-md-4">
-                              <button class="btn btn-secondary btnStepPrevios">Previous</button>
-                              <button class="btn btn-secondary btnStepNext nextBiaya">Next</button> 
+                              <button class="btn btn-secondary btnStepPrevios" id="btnPrevBiaya">Previous</button>
+                              <button class="btn btn-secondary btnStepNext nextBiaya" id="btnNextBiaya">Next</button> 
                             </div>
                           </div>
                         </div>
@@ -842,9 +842,9 @@
                             </div>
                           </div>
                           <br>
-                          <div class="row" style="padding-top: 50px">
+                          <div class="row nextRencana" style="padding-top: 50px">
                             <div class="col-md-4">
-                              <button class="btn btn-secondary btnStepPrevios">Previous</button>
+                              <button class="btn btn-secondary btnStepPrevios" id="btnPrevRencana">Previous</button>
                               <button class="btn btn-secondary" id="btnNextRencana">Next</button> 
                             </div>
                           </div>
@@ -873,9 +873,9 @@
                             </div>
                           </div>
                           <br>
-                          <div class="row" style="padding-top: 50px">
+                          <div class="row nextFinish" style="padding-top: 50px">
                             <div class="col-md-4">
-                              <button class="btn btn-secondary btnStepPrevios">Previous</button>
+                              <button class="btn btn-secondary btnStepPrevios" id="btnPrevFinish">Previous</button>
                             </div>
                           </div>
                         </div>
@@ -1144,6 +1144,7 @@
     });
 </script>
 <?php $this->load->view("pengajuan/form/js");?>
+<?php $this->load->view("pengajuan/form/jsEdit");?>
 <!-- FootJS -->
 </body>
 </html>

@@ -403,6 +403,10 @@
               getLokasi();
               getUangJalan();
               updateGroupTujuan();
+              var inputAbnormal = document.getElementById("inputAbnormal");
+              if (inputAbnormal.checked == true) {
+                getUangAbnormalDM();
+              }
             },
             complete: function(data){
               saveLokasi.ladda('stop');
@@ -664,6 +668,10 @@
     $('#btnNextPIC').on('click', function(){
       stepper.next()
       getNoVoucher()
+      var inputAbnormal = document.getElementById("inputAbnormal");
+      if (inputAbnormal.checked == true) {
+        getUangAbnormalDM();
+      }
     })
     $('#inputMediaBBM').on('change', function(){
       kondisiBBM();
@@ -680,6 +688,10 @@
     settingManualJalan();
     $('#inputAbnormal').on('click', function(){
       settingManualJalan();
+      var inputAbnormal = document.getElementById("inputAbnormal");
+      if (inputAbnormal.checked == true) {
+        getUangAbnormalDM();
+      }
     });
 
     $('#inputManualUangJalan').on('keyup', function(){
@@ -692,7 +704,6 @@
       if (inputAbnormal.checked == true && inputManualUangJalan == '') {
         Swal.fire("Lengkapi Datanya Terlebih Dahulu!","","warning")
       }else{
-        console.log("kontol")
         console.log(inputAbnormal)
         stepper.next()
       }
@@ -721,6 +732,10 @@
             $('#modal-serlok').modal("hide");
             getLokasi();
             updateGroupTujuan()
+            var inputAbnormal = document.getElementById("inputAbnormal");
+            if (inputAbnormal.checked == true) {
+              getUangAbnormalDM();
+            }
           },
           error:function(data){
             gagal()
@@ -1465,7 +1480,8 @@
       async: true,
       url:url+'/pengajuan/cekSaldoSubKas',
       success: function(data){
-        getNoVoucher();
+        // getNoVoucher();
+        kondisiBBM()
         if (inputJenisSPJ == '3') {
           saveSPJ(status);
         }else{
@@ -1867,6 +1883,23 @@
       },
       error:function(data){
 
+      }
+    })
+  }
+  function getUangAbnormalDM() {
+    var inputNoSPJ = $('#inputNoSPJ').val();
+    $.ajax({
+      type:'get',
+      data:{inputNoSPJ},
+      dataType:'json',
+      url:url+'/pengajuan/getUangAbnormalDM',
+      cache:false,
+      async:true,
+      success:function(data){
+        $('#inputManualUangJalan').val(data)
+      },
+      error:function(data){
+        $('#inputManualUangJalan').val(0)
       }
     })
   }

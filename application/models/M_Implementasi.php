@@ -981,7 +981,7 @@ class M_Implementasi extends CI_Model {
         if ($jenisID == '1') {
         	$coa = "6-1101";
         }else{
-        	$coa = "";
+        	$coa = "6-3106";
         }
 		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonSPJ, 'Kasbon SPJ','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','$coa')");
 		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonBBM, 'Kasbon BBM','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
@@ -1186,6 +1186,110 @@ class M_Implementasi extends CI_Model {
 					FROM
 						SPJ_KENDARAAN_REKANAN
 				)Q2 ON Q1.NO_TNKB = Q2.NoTNKB";
+		return $this->db->query($sql);
+	}
+	public function getListSPJForOutstanding($bulan, $tahun, $jenis, $search, $group)
+	{
+		$sql = "SELECT
+					Q1.*,
+					TGL_INPUT,
+					PIC_INPUT,
+					NAMA_INPUT,
+					DEPARTEMEN_INPUT,
+					JABATAN_INPUT,
+					ID_SPJ,
+					STATUS_SPJ,
+					NAMA_JENIS,
+					TGL_SPJ,
+					QR_CODE,
+					NAMA_GROUP,
+					NIK_DRIVER+' - '+NAMA_DRIVER AS PIC_DRIVER,
+					NIK_DRIVER,
+					NAMA_DRIVER,
+					TOTAL_UANG_SAKU,
+					TOTAL_UANG_MAKAN,
+					TOTAL_UANG_JALAN,
+					TOTAL_UANG_BBM,
+					CASE 
+						WHEN UANG_SAKU1>0 THEN 'Y'
+						ELSE 'N'
+					END CHECK_UANG_SAKU1,
+					CASE 
+						WHEN UANG_SAKU2>0 THEN 'Y'
+						ELSE 'N'
+					END CHECK_UANG_SAKU2,
+					CASE 
+						WHEN UANG_MAKAN>0 THEN 'Y'
+						ELSE 'N'
+					END CHECK_UANG_MAKAN
+				FROM
+				(
+					SELECT
+						NO_SPJ,
+						UANG_SAKU1,
+						UANG_SAKU2,
+						UANG_MAKAN
+					FROM
+						SPJ_BIAYA_TAMBAHAN
+					WHERE
+						STATUS_US1 = 'OUTSTANDING' OR
+						STATUS_US2 = 'OUTSTANDING' OR
+						STATUS_MAKAN = 'OUTSTANDING'
+				)Q1
+				INNER JOIN
+				(
+					SELECT
+						a.TGL_INPUT,
+						NO_SPJ,
+						ID_SPJ,
+						NAMA_JENIS,
+						TGL_SPJ,
+						QR_CODE,
+						NAMA_GROUP,
+						d.NIK AS NIK_DRIVER,
+						d.NAMA AS NAMA_DRIVER,
+						a.PIC_INPUT,
+						e.namapeg AS NAMA_INPUT,
+						e.departemen AS DEPARTEMEN_INPUT,
+						e.jabatan AS JABATAN_INPUT,
+						TOTAL_UANG_JALAN,
+						TOTAL_UANG_BBM,
+						STATUS_SPJ
+					FROM
+						SPJ_PENGAJUAN a
+					INNER JOIN
+						SPJ_JENIS b ON
+					a.JENIS_ID = b.ID_JENIS
+					INNER JOIN
+						SPJ_GROUP_TUJUAN c ON
+					a.GROUP_ID = c.ID_GROUP
+					INNER JOIN
+						SPJ_PENGAJUAN_PIC d
+					ON a.NO_SPJ = d.NO_PENGAJUAN
+					LEFT JOIN
+						dbhrm.dbo.tbPegawai e ON
+					a.PIC_INPUT = e.nik
+					WHERE
+						JENIS_PIC = 'Sopir' AND
+						YEAR(TGL_SPJ) LIKE '$tahun%' AND
+						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
+						JENIS_ID LIKE '$jenis%' AND
+						GROUP_ID LIKE '$group%' AND
+						STATUS_SPJ LIKE '%'
+				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
+				LEFT JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+						SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
+					FROM
+						SPJ_PENGAJUAN_PIC
+					GROUP BY NO_PENGAJUAN
+				)Q3 ON Q1.NO_SPJ = Q3.NO_PENGAJUAN
+				WHERE
+					Q1.NO_SPJ LIKE '%$search%'
+				ORDER BY Q2.TGL_SPJ DESC";
 		return $this->db->query($sql);
 	}
 }

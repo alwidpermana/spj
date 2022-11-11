@@ -133,7 +133,7 @@
                         jumlah="<?=$key->JUMLAH?>">
                         Approve Generate
                       </a> -->
-                      <label>Waiting For Generate</label>
+                      <label>Waiting For Approve</label>
                     <?php endif ?>
                     
                   </td>
@@ -143,8 +143,8 @@
                   <td style="display: none"></td>
                 <?php else: ?>
                   <td><?=$key->TGL_APPROVE==null?'':date("d F Y", strtotime($key->TGL_APPROVE))?></td>
-                  <td><?=$key->PIC_APPROVE?><br><?=$key->NAMA_APPROVE?></td>
                   <td><?=$key->TRANSAKSI == 'Pinbuk'?'Kas Induk':'Treasury'?></td>
+                  <td><?=$key->PIC_APPROVE?><br><?=$key->NAMA_APPROVE?></td>
                   <td>
                     <?php
                       $tglPengajuan = date("Y-m-d", strtotime($key->TGL_PENGAJU));

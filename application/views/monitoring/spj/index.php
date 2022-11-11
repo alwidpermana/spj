@@ -10,6 +10,8 @@
     $penguranTahun = date('Y', strtotime('-'.$i.' year', strtotime( $tanggal )));
     array_push($tahun, $penguranTahun); 
   }
+  $dlv = $this->session->userdata("DLV");
+  $ndv = $this->session->userdata("NDV");
 ?>
 <html lang="en">
 <head>
@@ -71,9 +73,9 @@
                   <div class="form-group">
                     <label>Jenis SPJ</label>
                     <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
-                      <option value="">ALL</option>
+                      <option value="" <?=$dlv == 'Y' && $ndv == 'Y' ? '' : 'disabled'?>>ALL</option>
                       <?php foreach ($spj as $key): ?>
-                      <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
+                      <option value="<?=$key->ID_JENIS?>" <?=$key->ATTRIBUT?>><?=$key->NAMA_JENIS?></option>
                       <?php endforeach ?>
                     </select>
                   </div>
@@ -166,6 +168,34 @@
         }
       });
     });
+    $('#getTabel').on('click','.reloadTujuan', function(){
+      var inputNoSPJ = $(this).attr("noSPJ");
+      var inputNoTNKB = $(this).attr("noTNKB");
+      var inputTglSPJ = $(this).attr("tglSPJ")
+      var groupId = $(this).attr("groupID")
+      console.log(inputNoSPJ)
+      console.log(inputNoTNKB)
+      console.log(inputTglSPJ)
+      console.log(groupId)
+
+
+      $.ajax({
+        type:'post',
+        dataType:'json',
+        data:{inputNoSPJ, inputTglSPJ, inputNoTNKB},
+        url:url+'/pengajuan/saveCustomerSerlok',
+        cache: false,
+        async: true,
+        success: function(data){
+          berhasil();
+          getTabel();
+          cekGroupTujuanBaru(groupId, inputNoSPJ)
+        },
+        error:function(data){
+          gagal()
+        }
+      })
+    })
   })
 
   function getTabel() {
@@ -194,7 +224,24 @@
       }
     });
   }
-  
+  function cekGroupTujuanBaru(groupId, inputNoSPJ) {
+    $.ajax({
+      type:'get',
+      data:{inputNoSPJ, groupId},
+      cache:false,
+      async:true,
+      dataType:'json',
+      url:'getGroupTujuan',
+      success:function(data){
+        if (parseInt(groupId) != parseInt(data)) {
+          updateSaldo();
+        }
+      },
+      error:function(data){
+        gagal();
+      }
+    })
+  }
 
   function berhasil() {
       Swal.fire({

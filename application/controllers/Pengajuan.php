@@ -31,6 +31,7 @@ class Pengajuan extends CI_Controller {
 		$data['side'] = 'spj-pengajuan';
 		$data['page'] = 'Form Pengajuan';
 		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spjOtoritas'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
 		$data['kendaraan'] = $this->M_Data_Master->getKategoriKendaraan()->result();
 		$data['jenis'] = $this->M_Data_Master->getJenisKendaraan()->result();
 		$data['group'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
@@ -757,7 +758,7 @@ class Pengajuan extends CI_Controller {
 	}
 	public function getListRekanan()
 	{
-		$data = $this->M_Data_Master->getDataRekanan()->result();
+		$data = $this->M_Data_Master->getDataRekanan('')->result();
 		echo json_encode($data);
 	}
 	public function getKendaraanRekanan()
@@ -771,6 +772,14 @@ class Pengajuan extends CI_Controller {
 		$id = $this->input->get("id");
 		$data = $this->M_Data_Master->getKendaraanRentalById($id)->row();
 		echo json_encode($data);
+	}
+	public function getUangAbnormalDM()
+	{
+		$noSPJ = $this->input->get("inputNoSPJ");
+		$data = $this->M_Pengajuan->getUangAbnormal($noSPJ)->row();
+		$biaya = 0;
+		$biaya += $data->BIAYA;
+		echo json_encode(round($biaya));
 	}
 
 

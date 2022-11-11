@@ -34,7 +34,7 @@ class Monitoring extends CI_Controller {
 		$data['page'] = 'Monitoring SPJ';
 		$data['side'] = 'monitoring-spj';
 		$data['status'] = $status;
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
 		$this->load->view('monitoring/spj/index', $data);
 	}
 	public function getTabelSPJ()
@@ -130,7 +130,7 @@ class Monitoring extends CI_Controller {
 		$data['side'] = "monitoring-kasbon-SPJ";
 		$data['page'] = 'Kasbon SPJ';
 		$data['kasbon'] = 'SPJ';
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] =$this->M_Data_Master->getJenisSPJByOtoritas()->result();
 		$this->load->view("monitoring/kasbon/indexNew", $data);
 	}
 	public function kasbon_bbm()
@@ -174,7 +174,7 @@ class Monitoring extends CI_Controller {
 	{
 		$data['side'] = 'monitoring-voucher';
 		$data['page'] = 'Monitoring - Voucher';
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
 		$this->load->view("monitoring/voucher/index", $data);
 	}
 	public function getMonVoucherBBM()
@@ -203,7 +203,8 @@ class Monitoring extends CI_Controller {
 	{
 		$data['side'] = 'monitoring-generate';
 		$data['page'] = 'Monitoring SPJ (Per Generate)';
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled';
 		$this->load->view("monitoring/generate/index", $data);
 	}
 	public function getTabelGenerate()
@@ -244,7 +245,8 @@ class Monitoring extends CI_Controller {
 	{
 		$data['side'] = 'monitoring-harian';
 		$data['page'] = 'Monitoring Harian SPJ';
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled'; 
 		$this->load->view('monitoring/harian/index', $data);
 	}
 	public function getTabelHarianSPJ()
@@ -311,7 +313,8 @@ class Monitoring extends CI_Controller {
 	{
 		$data['side'] = 'monitoring-kendaraan_2';
 		$data['page'] = 'Monitoring Kendaraan Jam Ke 2';
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled';
 		$this->load->view("monitoring/kendaraan_2/index", $data);
 	}
 	public function getMonitoringKendaraanKe2()
@@ -489,7 +492,8 @@ class Monitoring extends CI_Controller {
 	{
 		$data['side']='monitoring-ng';
 		$data['page']='Monitoring NG Security';
-		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['attribut'] = $this->session->userdata("DLV") == 'Y' && $this->session->userdata("NDV") == 'Y' ? '' : 'disabled';
 		$this->load->view("monitoring/ng/security/index", $data);
 	}
 	public function monitoringNGSecurity()
@@ -519,6 +523,68 @@ class Monitoring extends CI_Controller {
 	{
 		$data = $this->M_Monitoring->getNoBiayaAdmin();
 		echo json_encode($data);
+	}
+	public function pemakaian_rental()
+	{
+		$data['side'] = 'monitoring-rental-pemakaian';
+		$data['page'] = 'Monitoring Pemakaian Kendaraan Rental';
+		$this->load->view("monitoring/rental/pemakaian/index", $data);
+	}
+	public function listDataRekanan()
+	{
+		$cari = $this->input->get("cari");
+		$sql = $this->M_Data_Master->getDataRekanan($cari);
+		$item = $sql->result_array();
+		$data = array();
+		foreach ($item as $key) {
+			$data[] = array('id' =>$key['ID'] , 'text' =>$key['KODE'].' - '.$key['NAMA']);
+		}
+		echo json_encode($data);
+	}
+	public function getTabelMonitoringPemakaianKendaraan()
+	{
+		$filRekanan = $this->input->get("filRekanan");
+		$bulan = $this->input->get("filBulan");
+		$tahun = $this->input->get("filTahun");
+		$data['data'] = $this->M_Monitoring->getTabelMonitoringPemakaianKendaraan($filRekanan, $bulan, $tahun)->result();
+		$this->load->view("monitoring/rental/pemakaian/tabel", $data);
+	}
+	public function jumlah_pemakaian()
+	{
+		$data['side'] = 'monitoring-rental-jumlah';
+		$data['page'] = 'Monitoring Jumlah Pemakaian Kendaraan Rental';
+		$this->load->view("monitoring/rental/jumlah/index", $data); 
+	}
+	public function getTabelJumlahPemakaianKendaraanRental()
+	{
+		$filBulan = $this->input->get("filBulan");
+		$filTahun = $this->input->get("filTahun");
+		$data['data']= $this->M_Monitoring->getTabelJumlahPemakaianKendaraanRental($filBulan, $filTahun)->result();
+		$this->load->view("monitoring/rental/jumlah/tabel", $data); 
+	}
+	public function breakdown_pemakaian()
+	{
+		$data['side'] = 'monitoring-rental-breakdown';
+		$data['page'] = 'Breakdown Pemakaian Kendaraan Rental';
+		$this->load->view("monitoring/rental/breakdown/index", $data); 
+	}
+	public function getTabelBreakdownPemakaianKendaraanRental()
+	{
+		$filRekanan = $this->input->get("filRekanan");
+		$tglMulai = $this->input->get("filTglMulai");
+		$tglSelesai = $this->input->get("filTglSelesai");
+		$filSearch = $this->input->get("filSearch");
+		$data['data'] = $this->M_Monitoring->getBreakdownKendaraanRental($filRekanan, $tglMulai, $tglSelesai, $filSearch)->result();
+		$this->load->view("monitoring/rental/breakdown/tabel", $data); 
+	}
+	public function getGroupTujuan()
+	{
+		$inputNoSPJ = $this->input->get("inputNoSPJ");
+		$groupId = $this->input->get("groupId");
+		$data = $this->db->query("SELECT GROUP_ID FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$inputNoSPJ'")->row();
+		$group = $data->GROUP_ID;
+		$this->M_Monitoring->saveHistoryReloadLokasi($inputNoSPJ, $groupId, $group);
+		echo json_encode($group);
 	}
 
 }

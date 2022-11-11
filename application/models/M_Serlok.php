@@ -116,7 +116,7 @@ class M_Serlok extends CI_Model {
 						VEHICLE_NO,
 						DELIVERY_DATE,
 						PLANT1_CITY,
-						kps_customer_delivery_setup AS ID,
+						d.KPS_CUSTOMER_ID AS ID,
 						d.KPS_CUSTOMER_ID,
 						ID_CITY_SETUP AS ID_KAB_KOTA
 					FROM

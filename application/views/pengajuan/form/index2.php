@@ -173,9 +173,16 @@
                         <div class="col-md-12" id="beforeNext">
                           <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisSPJ">
                             <option value="">Pilih SPJ</option>
-                            <?php foreach ($spj as $spj): ?>
-                              <option value="<?=$spj->ID_JENIS?>"><?=$spj->NAMA_JENIS?></option>
+                            <?php foreach ($spjOtoritas as $so): ?>
+                              <option value="<?=$so->ID_JENIS?>" <?=$so->ATTRIBUT?>><?=$so->NAMA_JENIS?></option>
                             <?php endforeach ?>
+                            <!-- <?php
+                              $dlv = $this->session->userdata("DLV");
+                              $ndv = $this->session->userdata("NDV");
+                            ?> -->
+                            <!-- <option value="1" <?=$dlv == 'Y' ? '' : 'disabled'?>>Delivery</option>
+                            <option value="2" <?=$ndv == 'Y' ? '' : 'disabled'?>>Non Delivery</option>
+                            <option value="3" <?=$ndv == 'Y' ? '' : 'disabled'?>>Other</option> -->
                           </select>
                         </div>
                         <div class="col-md-12" id="afterNext">

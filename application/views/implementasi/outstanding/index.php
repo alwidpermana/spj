@@ -77,9 +77,9 @@
                       <div class="form-group">
                         <label>Jenis SPJ</label>
                         <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
-                            <option value="">ALL</option>
+                            <option value="" <?=$attribut?>>ALL</option>
                           <?php foreach ($jenis as $key): ?>
-                            <option value="<?=$key->ID_JENIS?>"><?=$key->NAMA_JENIS?></option>
+                            <option value="<?=$key->ID_JENIS?>" <?=$key->ATTRIBUT?>><?=$key->NAMA_JENIS?></option>
                           <?php endforeach ?>
                         </select>
                       </div>
@@ -796,9 +796,10 @@
     var filJenis = $('#filJenis').val();
     var filStatus = $('#filStatus').val();
     var filGroup = $('#filGroup').val();
+    var filSearch = $('#filSearch').val();
     $.ajax({
       type:'get',
-      data:{filBulan, filTahun, filPeriode, filJenis, filStatus, filGroup},
+      data:{filBulan, filTahun, filPeriode, filJenis, filStatus, filGroup, filSearch},
       url:url+'/Implementasi/getTabelOutstanding',
       cache: false,
       async: true,

@@ -2019,8 +2019,8 @@ class M_Monitoring extends CI_Model {
 					FROM
 						SPJ_BIAYA_TAMBAHAN
 					WHERE
-						STATUS_US1 = 'OUTSTANDING' AND
-						STATUS_US2 = 'OUTSTANDING' AND
+						STATUS_US1 = 'OUTSTANDING' OR
+						STATUS_US2 = 'OUTSTANDING' OR
 						STATUS_MAKAN = 'OUTSTANDING'
 				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
 				LEFT JOIN
@@ -2254,6 +2254,122 @@ class M_Monitoring extends CI_Model {
             
         }
         return $hasil;
+	}
+	public function getTabelMonitoringPemakaianKendaraan($id, $bulan, $tahun)
+	{
+		$sql = "SELECT
+					Q1.*,
+					CASE 
+						WHEN Q2.JML_SPJ IS NULL THEN 0
+						ELSE Q2.JML_SPJ
+					END AS JML_SPJ
+				FROM
+				(
+					SELECT
+						NoTNKB,
+						'Rental' AS Kendaraan,
+						Kategori AS JenisKendaraan,
+						Merk,
+						Type,
+						Tahun
+					FROM
+						SPJ_KENDARAAN_REKANAN
+					WHERE
+						REKANAN_ID = $id
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						COUNT(NO_TNKB) AS JML_SPJ,
+						NO_TNKB
+					FROM
+						SPJ_PENGAJUAN
+					WHERE
+						STATUS_DATA = 'SAVED' AND
+						MONTH(TGL_SPJ) = $bulan AND
+						YEAR(TGL_SPJ) = $tahun
+					GROUP BY NO_TNKB
+				)Q2 ON Q1.NoTNKB = Q2.NO_TNKB";
+		return $this->db->query($sql);
+	}
+	public function getTabelJumlahPemakaianKendaraanRental($bulan, $tahun)
+	{
+		$sql = "Execute SPJ_monitoringJumlahPemakaianKendaraanRental $bulan, $tahun";
+		return $this->db->query($sql);
+	}
+	public function getBreakdownKendaraanRental($id, $tglMulai, $tglSelesai, $search)
+	{
+		if ($tglMulai != '' && $tglSelesai != '') {
+			$where = " AND TGL_SPJ >= '$tglMulai' AND TGL_SPJ <='$tglSelesai'";
+		}else{
+			$where = "";
+		}
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						*
+					FROM
+					(
+						SELECT
+							TGL_INPUT,
+							'Rental' AS Kendaraan,
+							Kategori AS JenisKendaraan,
+							Merk,
+							Type,
+							NoTNKB, 
+							Tahun
+						FROM
+							SPJ_KENDARAAN_REKANAN
+						WHERE
+							REKANAN_ID = $id
+					)Q1
+					INNER JOIN
+					(
+						SELECT
+							NO_SPJ,
+							TGL_SPJ,
+							NO_TNKB,
+							NAMA_GROUP,
+							c.NIK,
+							c.NAMA
+						FROM
+							SPJ_PENGAJUAN a
+						INNER JOIN SPJ_GROUP_TUJUAN b ON
+						a.GROUP_ID = b.ID_GROUP
+						LEFT JOIN
+							SPJ_PENGAJUAN_PIC c ON
+						a.NO_SPJ = c.NO_PENGAJUAN
+						WHERE
+							STATUS_DATA = 'SAVED' AND
+							STATUS_PERJALANAN IS NOT NULL AND
+							JENIS_PIC = 'Sopir' $where
+					)Q2 ON Q1.NoTNKB = Q2.NO_TNKB
+					LEFT JOIN
+					(
+						SELECT
+							NIK AS NIK_PENDAMPING,
+							NO_PENGAJUAN,
+							NAMA AS NAMA_PENDAMPING
+						FROM
+							SPJ_PENGAJUAN_PIC
+						WHERE
+							JENIS_PIC = 'Pendamping'
+					)Q3 ON Q2.NO_SPJ = Q3.NO_PENGAJUAN
+				)Q1
+				WHERE
+					Merk LIKE '%$search%' OR
+					NoTNKB LIKE '%$search%' OR
+					NO_SPJ LIKE '%$search%'";
+		return $this->db->query($sql);
+	}
+	public function saveHistoryReloadLokasi($noSPJ, $asal, $tujuan)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$this->db->query("INSERT INTO SPJ_HISTORY_RELOAD_LOKASI(PIC_INPUT, TGL_INPUT, NO_SPJ, GROUP_ASAL, GROUP_TUJUAN)VALUES('$user','$tanggal','$noSPJ','$asal','$tujuan')");
 	}
 }
 ?>

@@ -59,7 +59,7 @@
             scrollY:        "350px",
             scrollX:        true,
             scrollCollapse: true,
-            paging:         true,
+            paging:         false,
             'searching': false,
             'ordering': true,
             order: [[0, 'asc']],

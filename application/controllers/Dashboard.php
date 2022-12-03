@@ -57,4 +57,11 @@ class Dashboard extends CI_Controller {
 
 		echo json_encode($data);
 	}
+	public function saveDeliverySetup()
+	{
+		$this->load->model('M_Serlok');
+		$data = $this->M_Serlok->saveDeliverySetup();
+		
+		echo json_encode($data);
+	}
 }

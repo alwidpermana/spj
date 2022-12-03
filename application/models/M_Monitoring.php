@@ -9,7 +9,7 @@ class M_Monitoring extends CI_Model {
 	{
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
 		$byAdjust = $adjustment == ''?'':" AND STATUS_SPJ = 'OPEN' AND ADJUSTMENT_MANAJEMEN = 'Y'";
-		$byStep1 = $implementasi == 'Y'?" AND STATUS_PERJALANAN = 'IN'":"";
+		$byStep1 = $implementasi == 'Y'?" AND STATUS_PERJALANAN = 'IN' AND STATUS_SPJ = 'OPEN'":"";
 		$filStatus = $this->input->get("filStatus");
 		if ($filStatus == '') {
 			$whereStatus = '';
@@ -58,7 +58,10 @@ class M_Monitoring extends CI_Model {
 							VOUCHER_BBM,
 							NO_GENERATE,
 							ABNORMAL,
-							LOKAL_SELESAI
+							LOKAL_SELESAI,
+							REKANAN_KENDARAAN,
+							REKANAN_ID,
+							TAMBAHAN_UANG_JALAN
 						FROM
 							SPJ_PENGAJUAN
 						WHERE
@@ -314,6 +317,15 @@ class M_Monitoring extends CI_Model {
 						GROUP BY
 							NO_PENGAJUAN		
 					)Q11 ON Q1.NO_SPJ = Q11.NO_TOTAL
+					LEFT JOIN
+					(
+						SELECT
+							ID AS ID_REKANAN,
+							NAMA
+						FROM
+							SPJ_REKANAN
+					)Q12 ON Q1.REKANAN_KENDARAAN = Q12.NAMA
+
 					WHERE 
 						NO_SPJ LIKE '%$search%' OR
 						QR_CODE LIKE '%$search%'
@@ -656,15 +668,18 @@ class M_Monitoring extends CI_Model {
 							TOTAL_UANG_BBM,
 							NO_GENERATE,
 							CASE
-								WHEN MEDIA_UANG_BBM = 'Voucher' AND TOTAL_UANG_BBM>0 THEN 'CLOSE'
-								ELSE 'OPEN'
+								WHEN STATUS_SPJ = 'OPEN' AND STATUS_PERJALANAN = 'IN' THEN 'OPEN'
+								WHEN STATUS_SPJ = 'CLOSE' THEN 'CLOSE'
+								ELSE '-'
 							END AS STATUS_VOUCHER
 						FROM
 							SPJ_PENGAJUAN
 						WHERE
 							STATUS_DATA = 'SAVED' AND
 							MEDIA_UANG_BBM = 'Voucher' AND
-							JENIS_ID LIKE '$filJenis%'
+							JENIS_ID LIKE '$filJenis%' AND
+							STATUS_PERJALANAN = 'IN' AND
+							STATUS_SPJ IN ('OPEN','CLOSE')
 					)Q1
 					LEFT JOIN
 					(
@@ -755,7 +770,7 @@ class M_Monitoring extends CI_Model {
 				WHERE
 					NO_SPJ LIKE '$filSearch%' OR
 					VOUCHER_BBM LIKE '$filSearch'
-				ORDER BY VOUCHER_BBM DESC";
+				ORDER BY TGL_INPUT DESC";
 		return $this->db->query($sql);
 	}
 	public function getPICPengajuanVersi2($noSpj)
@@ -1088,12 +1103,12 @@ class M_Monitoring extends CI_Model {
 	}
 	public function getMonitoringSPJHarian2($bulan, $tahun, $jenis)
 	{
-		$sql = $this->db->query("Execute SPJ_monitoringHarian $tahun, $bulan, $jenis");
+		$sql = $this->db->query("Execute SPJ_monitoringHarian $tahun, $bulan, '$jenis'");
     	return $sql;
 	}
 	public function getMonitoringSPJHarianSummary($bulan, $tahun, $jenis, $where)
 	{
-		$sql = $this->db->query("Execute SPJ_monitoringHarianSummary $tahun, $bulan, $jenis, '$where'");
+		$sql = $this->db->query("Execute SPJ_monitoringHarianSummary $tahun, $bulan, '$jenis', '$where'");
 		return $sql;
 	}
 	public function getUrutanTerbesar($bulan, $tahun, $jenis)
@@ -1464,7 +1479,7 @@ class M_Monitoring extends CI_Model {
 		$getBiayaAdjustmentMakan = $this->db->query("SELECT ID FROM SPJ_ADJUSTMENT WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG MAKAN' AND STATUS = 'OPEN'");
 		$getBiayaAdjustmentJalan = $this->db->query("SELECT ID FROM SPJ_ADJUSTMENT WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'UANG JALAN' AND STATUS = 'OPEN'");
 		$getBiayaAdjustmentBBM = $this->db->query("SELECT ID FROM SPJ_ADJUSTMENT WHERE NO_SPJ = '$inputNoSPJ' AND OBJEK = 'BBM' AND STATUS = 'OPEN'");
-		$getBiayaTOL = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$inputNoSPJ' AND TOTAL_UANG_TOL = 0");
+		$getBiayaTOL = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$inputNoSPJ' AND IMPLEMENTASI IS NULL");
 		$tambahan = $getBiayaTambahan->num_rows();
 		$adjustmentMakan = $getBiayaAdjustmentMakan->num_rows();
 		$adjustmentJalan = $getBiayaAdjustmentJalan->num_rows();
@@ -1474,7 +1489,7 @@ class M_Monitoring extends CI_Model {
 		if ($total == 0) {
 			$this->db->query("UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ'");
 		}
-		$sql = "UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_BBM = '$inputBiaya' WHERE NO_SPJ = '$inputNoSPJ'";
+		$sql = "UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_BBM = '$inputBiaya', VOUCHER = 'Y' WHERE NO_SPJ = '$inputNoSPJ'";
 		return $this->db->query($sql);
 	}
 	public function saveVoucherBBM($inputNoVoucher, $inputBiaya)
@@ -2370,6 +2385,164 @@ class M_Monitoring extends CI_Model {
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
 		$this->db->query("INSERT INTO SPJ_HISTORY_RELOAD_LOKASI(PIC_INPUT, TGL_INPUT, NO_SPJ, GROUP_ASAL, GROUP_TUJUAN)VALUES('$user','$tanggal','$noSPJ','$asal','$tujuan')");
+	}
+	public function getDataPrintSPJ($id)
+	{
+		$sql = "SELECT
+					Q1.*,
+					RP_SPJ,
+					RP_TOL,
+					RP_BBM
+				FROM
+				(
+					SELECT
+						NO_GENERATE,
+						TGL_GENERATE,
+						JML_SPJ,
+						TOTAL_RP,
+						NAMA_JENIS
+					FROM
+						[dbo].[SPJ_GENERATE] a
+					INNER JOIN 
+						SPJ_JENIS b 
+					ON a.JENIS_SPJ = b.ID_JENIS
+					WHERE
+						ID = $id
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						DETAIL_TRANSAKSI,
+						JUMLAH AS RP_SPJ
+					FROM
+						SPJ_PENGAJUAN_SALDO
+					WHERE
+						TRANSAKSI = 'Generate' AND
+						JENIS_KASBON = 'Kasbon SPJ'
+				)Q2 ON Q1.NO_GENERATE = Q2.DETAIL_TRANSAKSI
+				LEFT JOIN
+				(
+					SELECT
+						DETAIL_TRANSAKSI,
+						JUMLAH AS RP_TOL
+					FROM
+						SPJ_PENGAJUAN_SALDO
+					WHERE
+						TRANSAKSI = 'Generate' AND
+						JENIS_KASBON = 'Kasbon TOL'
+				)Q3 ON Q1.NO_GENERATE = Q3.DETAIL_TRANSAKSI
+				LEFT JOIN
+				(
+					SELECT
+						DETAIL_TRANSAKSI,
+						JUMLAH AS RP_BBM
+					FROM
+						SPJ_PENGAJUAN_SALDO
+					WHERE
+						TRANSAKSI = 'Generate' AND
+						JENIS_KASBON = 'Kasbon BBM'
+				)Q4 ON Q1.NO_GENERATE = Q4.DETAIL_TRANSAKSI";
+		return $this->db->query($sql);
+	}
+	public function dataSPJByGenerate($noGenerate, $where)
+	{
+		$sql = "SELECT
+					ROW_NUMBER() over (partition by 'SAMA' order by TGL_SPJ asc) AS NOMOR,
+					*
+				FROM
+				(
+					SELECT
+						ROW_NUMBER() over (partition by NO_GENERATE order by TGL_SPJ asc) AS NO_URUT,
+						TGL_SPJ,
+						NO_SPJ
+					FROM
+						SPJ_PENGAJUAN
+					WHERE
+						NO_GENERATE = '$noGenerate'
+				)Q1
+				$where
+				ORDER BY TGL_SPJ ASC";
+		return $this->db->query($sql);
+	}
+	public function getTempDataSPJ_BBM($where, $search, $periode)
+	{
+		$sql = "SELECT
+				  *
+				FROM
+				(
+					SELECT
+						a.ID_SPJ,
+						a.NO_SPJ,
+						a.VOUCHER_BBM,
+						a.TOTAL_UANG_BBM,
+						a.IMPLEMENTASI,
+						a.VOUCHER,
+						b.RP,
+						c.KODE_ROMAWI,
+						c.TAHUN 
+					FROM
+						SPJ_PENGAJUAN a
+						LEFT JOIN SPJ_TEMP_BBM b ON a.NO_SPJ  = b.NO_SPJ 
+						AND a.VOUCHER_BBM = b.NO_VOUCHER 
+						INNER JOIN SPJ_VOUCHER_BBM c ON
+						a.VOUCHER_BBM = c.NO_VOUCHER
+					WHERE
+						STATUS_PERJALANAN = 'IN' 
+						AND STATUS_SPJ = 'OPEN' 
+						AND STATUS_DATA = 'SAVED'
+						AND a.VOUCHER IS NULL 
+						$where
+						$periode
+				)Q1
+				WHERE
+					NO_SPJ LIKE '%$search%' OR
+					VOUCHER_BBM LIKE '%$search%'
+				ORDER BY
+					KODE_ROMAWI, TAHUN ASC
+				";
+		return $this->db->query($sql);
+	}
+	public function saveTempBBM_SPJ($noSPJ, $voucher, $rp)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$sql = "UPDATE SPJ_TEMP_BBM SET RP = '$rp', PIC_INPUT = '$user', TGL_INPUT = '$tanggal' WHERE NO_SPJ = '$noSPJ' AND NO_VOUCHER = '$voucher'";
+		return $this->db->query($sql);
+	}
+	public function getTotalTempBBM_SPJ()
+	{
+		$sql = "SELECT
+					SUM(b.RP) AS RP
+				FROM
+					SPJ_PENGAJUAN a
+				LEFT JOIN
+					SPJ_TEMP_BBM b
+				ON a.NO_SPJ  = b.NO_SPJ AND a.VOUCHER_BBM = b.NO_VOUCHER
+				WHERE
+					STATUS_PERJALANAN = 'IN' AND
+					STATUS_SPJ = 'OPEN' AND RP IS NOT NULL";
+		return $this->db->query($sql);
+	}
+	public function kondisiDBTemp($voucher, $kondisi, $noSPJ, $biaya)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		if ($kondisi == 'tambah') {
+			$sql = "INSERT INTO SPJ_TEMP_BBM(NO_SPJ, NO_VOUCHER, RP, PIC_INPUT, TGL_INPUT)VALUES('$noSPJ','$voucher',$biaya, '$user','$tanggal')";
+		}else{
+			$sql = "DELETE FROM SPJ_TEMP_BBM WHERE NO_SPJ = '$noSPJ' AND NO_VOUCHER = '$voucher'";
+		}
+		return $this->db->query($sql);
+	}
+	public function saveSPJLog($jenis, $noSPJ, $aktivitas)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$sql = "INSERT INTO SPJ_LOG(PIC_INPUT, TGL_INPUT, JENIS, NO_SPJ, AKTIVITAS)VALUES('$user','$tanggal','$jenis','$noSPJ', '$aktivitas')";
+		return $this->db->query($sql);
 	}
 }
 ?>

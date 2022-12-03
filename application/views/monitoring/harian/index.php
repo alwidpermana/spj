@@ -67,6 +67,15 @@
                     </select>
                   </div>
                 </div>
+                <div class="col-4"></div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn bg-success btn-block" id="exportExcel">
+                      <i class="fas fa-file-excel"></i> &nbsp; Export Excel
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -123,6 +132,12 @@
         Swal.fire("Gagal Mengambil Data!","Mohon Hubungi Staff IT","error")
       }
     });
+   });
+   $('#exportExcel').on('click', function(){
+    var filTahun = $('#filTahun').val();
+    var filBulan = $('#filBulan').val();
+    var filJenis = $('#filJenis').val() == '' ? '-':'';
+    window.location=url+'/export_file/export_harian_spj/'+filBulan+'/'+filTahun+'/'+filJenis;
    });
   })
   function getTabel() {

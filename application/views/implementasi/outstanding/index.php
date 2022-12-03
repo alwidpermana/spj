@@ -163,7 +163,7 @@
                     </tr>
                   </thead>
                   <tbody class="text-center">
-                    <tr>
+                    <tr class="adjsutmentManajemen">
                       <td class="text-left">Uang Makan</td>
                       <td>
                         <span id="inputUangMakanNormal"></span>
@@ -211,7 +211,7 @@
                       </td>
                       <td><textarea class="form-control otoritas kondisiUangMakan" id="inputUangMakanKeterangan" rows="2" ></textarea></td>
                     </tr>
-                    <tr>
+                    <tr class="adjsutmentManajemen">
                       <td class="text-left">Uang Jalan</td>
                       <td><span id="inputUangJalanNormal"></span></td>
                       <td>
@@ -255,7 +255,7 @@
                       </td>
                       <td><textarea class="form-control otoritas kondisiUangJalan" id="inputUangJalanKeterangan" rows="2"></textarea></td>
                     </tr>
-                    <tr>
+                    <tr class="adjsutmentManajemen">
                       <td class="text-left">BBM</td>
                       <td><span id="inputBBMNormal"></span></td>
                       <td>
@@ -308,6 +308,7 @@
                       <td>
                         <span id="viewUS1Diajukan"></span>
                         <input type="hidden" id="inputUS1Diajukan">
+                        <input type="hidden" id="defaultUS1Diajukan">
                       </td>
                       <td><span id="inputUS1Alasan">Otomatis</span></td>
                       <td>
@@ -350,6 +351,7 @@
                       <td>
                         <span id="viewUS2Diajukan"></span>
                         <input type="hidden" id="inputUS2Diajukan">
+                        <input type="hidden" id="defaultUS2Diajukan">
                       </td>
                       <td><span id="inputUS2Alasan">Otomatis</span></td>
                       <td>
@@ -392,6 +394,7 @@
                       <td>
                         <span id="viewUMDiajukan"></span>
                         <input type="hidden" id="inputUMDiajukan">
+                        <input type="hidden" id="defaultUMDiajukan">
                       </td>
                       <td><span id="inputUMAlasan">Otomatis</span></td>
                       <td>
@@ -490,6 +493,11 @@
     $('#inputNoSPJ').val(noSPJ);
     $('#inputJenisSPJ').val(jenisSPJ);
     $('#inputIdSPJ').val(idSPJ);
+    if (jenisSPJ == 'Delivery') {
+      $('.adjsutmentManajemen').addClass("d-none")
+    }else{
+      $('.adjsutmentManajemen').removeClass("d-none")
+    }
     $.ajax({
       dataType:'json',
       data:{noSPJ},
@@ -531,8 +539,11 @@
         $('#inputBBMAlasan').html(data.uangBBMAlasan);
         $('#inputKeputusanBBM').val(data.uangBBMKeputusan);
         $('#inputUS1Diajukan').val(data.uangSaku1);
+        $('#defaultUS1Diajukan').val(data.uangSaku1);
         $('#inputUS2Diajukan').val(data.uangSaku2);
+        $('#defaultUS2Diajukan').val(data.uangSaku2);
         $('#inputUMDiajukan').val(data.uangMakan2);
+        $('#defaultUMDiajukan').val(data.uangMakan2);
         $('#inputUMKeterangan').val(data.uangUMKeterangan);
         $('#inputUS1Keterangan').val(data.uangUS1Keterangan);
         $('#inputUS2Keterangan').val(data.uangUS2Keterangan)
@@ -708,14 +719,26 @@
    $('[name="US1"]').on('click', function(){
     var isi = $(this).val();
     $('#inputKeputusanUS1').val(isi);
+    var rp = isi == 'OK' ? $('#defaultUS1Diajukan').val() : 0;
+    $('#inputUS1Diajukan').val(rp);
+    $('#viewUS1Diajukan').html(formatRupiah(String(rp), 'Rp. '))
+    totalDiajukan()
    });
    $('[name="US2"]').on('click', function(){
     var isi = $(this).val();
     $('#inputKeputusanUS2').val(isi);
+    var rp = isi == 'OK' ? $('#defaultUS2Diajukan').val() : 0;
+    $('#inputUS2Diajukan').val(rp);
+    $('#viewUS2Diajukan').html(formatRupiah(String(rp), 'Rp. '))
+    totalDiajukan()
    });
    $('[name="UM"]').on('click', function(){
     var isi = $(this).val();
     $('#inputKeputusanUM').val(isi);
+    var rp = isi == 'OK' ? $('#defaultUMDiajukan').val() : 0;
+    $('#inputUMDiajukan').val(rp);
+    $('#viewUMDiajukan').html(formatRupiah(String(rp), 'Rp. '))
+    totalDiajukan()
    })
 
    $('.hitungAwal').on('keyup', function(){
@@ -883,6 +906,32 @@
       $('.saveOtoritas').removeAttr("disabled","disabled")
     }
   }
+  function totalDiajukan() {
+    var inputManajemen = $('#inputManajemen').val()
+    var inputKeputusanUS1 = $('#inputKeputusanUS1').val();
+    var inputKeputusanUS2 = $('#inputKeputusanUS2').val();
+    var inputKeputusanUM = $('#inputKeputusanUM').val();
+    if (inputManajemen == '') {
+      var inputUangMakanDiajukan = 0;
+      var inputUangJalanDiajukan = 0;
+      var inputBBMDiajukan = 0;
+    }else{
+      var inputKeputusanBBM = $('#inputKeputusanBBM').val();
+      var inputKeputusanUangMakan = $('#inputKeputusanUangMakan').val();
+      var inputKeputusanUangJalan = $('#inputKeputusanUangJalan').val();
+      var inputUangMakanDiajukan = inputKeputusanUangMakan == 'OK' ? parseInt($('#inputUangMakanDiajukan').val()):0 ;
+      var inputUangJalanDiajukan = inputKeputusanUangJalan == 'OK' ? parseInt($('#inputUangJalanDiajukan').val()):0 ;
+      var inputBBMDiajukan = inputKeputusanBBM == 'OK' ? parseInt($('#inputBBMDiajukan').val()): 0;
+    }
+
+    var inputUS1Diajukan = inputKeputusanUS1 == 'OK'?parseInt($('#inputUS1Diajukan').val()):0;
+    var inputUS2Diajukan = inputKeputusanUS2 == 'OK'?parseInt($('#inputUS2Diajukan').val()):0;
+    var inputUMDiajukan = inputKeputusanUM == 'OK' ? parseInt($('#inputUMDiajukan').val()):0;
+    var total = inputUangMakanDiajukan+inputUangJalanDiajukan+inputUS1Diajukan+inputUS2Diajukan+inputUMDiajukan+inputBBMDiajukan;
+    console.log(total)
+    $('.totalDiajukan').html(formatRupiah(String(total), 'Rp. '))
+
+  }
 
   function cekSaldo(inputManajemen) {
     var inputJenisSPJ = $('#inputJenisSPJ').val();
@@ -1004,6 +1053,7 @@
         async: true,
         beforeSend: function(data){
           $('.preloader-no-bg').show();
+          $('.saveOtoritas').attr("disabled","disabled")
         },
         success: function(data){
           berhasil()
@@ -1012,6 +1062,7 @@
         },
         complete: function(data){
           $('.preloader-no-bg').fadeOut("slow");
+          $('.saveOtoritas').removeAttr("disabled","disabled")
         },
         error: function(data){
           gagal();

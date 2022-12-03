@@ -16,7 +16,7 @@
 			$('#modal-profil').modal('show');
 		})
 		redirectLogin();
-		notifNGSecurity();
+		// notifNGSecurity();
 	});
 	function redirectLogin() {
 		var nik = '<?=$this->session->userdata("NIK")?>';

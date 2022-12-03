@@ -46,24 +46,33 @@ class M_Cash_Flow extends CI_Model {
 				LEFT JOIN
 				(
 					SELECT
-						CASE 
-							WHEN JENIS_KASBON = 'Kasbon BBM' THEN 'Voucher BBM'
-							WHEN JENIS_KASBON = 'Kasbon TOL' THEN 'TOL '+NAMA_JENIS
-							WHEN JENIS_KASBON = 'Kasbon TOL (Biaya Admin)' THEN 'TOL '+NAMA_JENIS
-							ELSE 'SPJ '+NAMA_JENIS
-						END AS JENIS_KASBON,
-						'SUB KAS' AS JENIS_KAS,
-						SUM(JUMLAH) AS RP
+						JENIS_KASBON,
+						JENIS_KAS,
+						SUM(RP) AS RP
 					FROM
-						SPJ_PENGAJUAN_SALDO a
-					LEFT JOIN
-						SPJ_JENIS b
-					ON a.JENIS_ID = b.ID_JENIS
-					WHERE
-						STATUS_APPROVE = 'APPROVED' AND
-						STATUS_RECEIVE IS NULL
+					(
+						SELECT
+							CASE 
+								WHEN JENIS_KASBON = 'Kasbon BBM' THEN 'Voucher BBM'
+								WHEN JENIS_KASBON = 'Kasbon TOL' THEN 'TOL '+NAMA_JENIS
+								WHEN JENIS_KASBON = 'Kasbon TOL (Biaya Admin)' THEN 'TOL '+NAMA_JENIS
+								ELSE 'SPJ '+NAMA_JENIS
+							END AS JENIS_KASBON,
+							'SUB KAS' AS JENIS_KAS,
+							SUM(JUMLAH) AS RP
+						FROM
+							SPJ_PENGAJUAN_SALDO a
+						LEFT JOIN
+							SPJ_JENIS b
+						ON a.JENIS_ID = b.ID_JENIS
+						WHERE
+							STATUS_APPROVE = 'APPROVED' AND
+							STATUS_RECEIVE IS NULL
+						GROUP BY
+							JENIS_KASBON, NAMA_JENIS
+					)Q1
 					GROUP BY
-						JENIS_KASBON, NAMA_JENIS
+						JENIS_KASBON, JENIS_KAS
 				)Q2 ON Q1.NAMA_SALDO = Q2.JENIS_KASBON AND Q1.JENIS_KAS = Q2.JENIS_KAS
 				ORDER BY ID ASC";
 		return $this->db->query($sql);
@@ -201,7 +210,7 @@ class M_Cash_Flow extends CI_Model {
 		$sql = "DELETE FROM SPJ_KAS_INDUK WHERE JENIS_FK = '$jenisFK' AND FK_ID = $fkID";
 		return $this->db->query($sql);
 	}
-	public function getPengajuanSaldoByJenisSPJ($jenis, $status, $jenisId)
+	public function getPengajuanSaldoByJenisSPJ($jenis, $status, $jenisId, $where)
 	{
 		$sql = "SELECT
 					ID,
@@ -250,7 +259,7 @@ class M_Cash_Flow extends CI_Model {
 				WHERE 
 					a.JENIS_KASBON LIKE '$jenis%'
 					AND STATUS_PENGAJUAN_SALDO LIKE '$status%' AND
-					a.JENIS_ID LIKE '$jenisId%'
+					a.JENIS_ID LIKE '$jenisId%' $where
 				ORDER BY TGL_PENGAJU DESC";
 		return $this->db->query($sql);
 	}

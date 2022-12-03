@@ -413,6 +413,7 @@
                             </div>
                           </div>
                           <br>
+                          <input type="hidden" id="inputRekanan" value="<?=$key->REKANAN_ID?>">
                           <div class="row rekanan d-none">
                             <div class="col-md-2">
                               <div class="row">
@@ -422,9 +423,10 @@
                               </div>
                             </div>
                             <div class="col-md-2">
-                              <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputRekanan">
+                              <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="pilihRekanan">
                                 
                               </select>
+
                             </div>
                           </div>
                           <br>
@@ -612,13 +614,13 @@
                                   <div id="getLokasi"></div>
                                 </div>
                               </div>
-                              <div class="row">
+                              <!-- <div class="row">
                                 <div class="col-md-12">
                                   <button type="button" class="btn btn-xs btn-kps bg-orange" data-toggle="modal" data-target="#modal-lokasi" id="tambahLokasi">
                                     <i class="fas fa-plus"></i>
                                   </button>
                                 </div>
-                              </div>
+                              </div> -->
                             </div>
                             <div class="col-md-2"></div>
                             <div class="col-md-2">
@@ -722,6 +724,21 @@
                                       <div id="manualUangJalan">
                                         <input type="number" id="inputManualUangJalan" class="form-control form-control-sm">
                                       </div>
+                                      <div class="lokalUangJalan">
+                                          <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputLokalUangJalan">
+                                            <option value="0">Rp. 0</option>
+                                            <option value="10000" selected>Rp. 10,000</option>
+                                            <option value="25000">Rp. 25,000</option>
+                                            <option value="36000">Rp. 36,000</option>
+                                          </select>
+                                      </div>
+                                      <div class="tambahUangJalanAbnormal">
+                                        <br>
+                                        <br>
+                                        <span class="text-left">Tambahan Uang Jalan</span>
+                                        <br>
+                                        <input type="number" id="inputTambahanUangJalan" class="form-control" value="<?=$key->TAMBAHAN_UANG_JALAN?>">
+                                      </div>
                                     </td>
                                     <td>
                                       <!-- <input type="text" id="inputMediaUangJalan" class="form-control form-control-sm" value="Kasbon"> -->
@@ -759,7 +776,7 @@
                                         <label for="cekVoucher" class="custom-control-label">Tanpa Voucher?</label>
                                       </div> -->
                                       <div id="voucherBBM">
-                                        <input type="text" id="inputNoVoucher" class="form-control form-control-sm" readonly>
+                                        <input type="text" id="inputNoVoucher" class="form-control form-control-sm" value="<?=$key->VOUCHER_BBM?>" readonly>
                                       </div>
                                       <div id="manualBBM">
                                         <div class="form-group">
@@ -807,6 +824,7 @@
                           <br>
                           <div class="row nextBiaya" style="padding-top: 50px">
                             <div class="col-md-4">
+                              <!-- <button class="btn btn-secondary btnStepPrevios" id="btnPrevPIC">Previous</button> -->
                               <button class="btn btn-secondary btnStepPrevios" id="btnPrevBiaya">Previous</button>
                               <button class="btn btn-secondary btnStepNext nextBiaya" id="btnNextBiaya">Next</button> 
                             </div>
@@ -1103,6 +1121,16 @@
             </div>
           </div>
           <div class="modal-body">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label>Departure Time</label>
+                  <select class="select2" id="inputDepartureTime" multiple="multiple" data-placeholder="Pilih Departure Time Dari Program Serlok" data-dropdown-css-class="select2-orange" style="width: 100%;color: white !important;">
+                    
+                  </select>
+                </div>
+              </div>
+            </div>
             <div class="row">
               <div class="col-md-12 table-responsive p-0">
                 <table class="table table-hover table-valign-middle table-striped" width="100%">

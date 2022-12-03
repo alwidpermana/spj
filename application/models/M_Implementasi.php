@@ -669,14 +669,14 @@ class M_Implementasi extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-        $cekVoucher = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ' AND MEDIA_UANG_BBM = 'Voucher' AND TOTAL_UANG_BBM <=0");
+        $cekVoucher = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ' AND MEDIA_UANG_BBM = 'Voucher' AND VOUCHER = 'Y'");
         if ($cekVoucher->num_rows()>0) {
-        	$status = 'OPEN';
-        } else {
         	$status = 'CLOSE';
+        } else {
+        	$status = 'OPEN';
         }
         
-		$sql = "UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = '$status',PIC_CLOSE= '$user', TGL_CLOSE = '$tanggal', TOTAL_UANG_SAKU=$saku, TOTAL_UANG_MAKAN=$makan, TOTAL_UANG_JALAN = $jalan, TOTAL_UANG_BBM = $bbm, TOTAL_UANG_TOL=$tol  WHERE NO_SPJ = '$noSPJ'";
+		$sql = "UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = '$status',PIC_CLOSE= '$user', TGL_CLOSE = '$tanggal', TOTAL_UANG_SAKU=$saku, TOTAL_UANG_MAKAN=$makan, TOTAL_UANG_JALAN = $jalan, TOTAL_UANG_BBM = $bbm, TOTAL_UANG_TOL=$tol, IMPLEMENTASI = 'Y' WHERE NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);
 	}
 	public function getSPJForGenerate($jenis)
@@ -1292,5 +1292,65 @@ class M_Implementasi extends CI_Model {
 				ORDER BY Q2.TGL_SPJ DESC";
 		return $this->db->query($sql);
 	}
+	public function cekPICStatusPerjalanan($scan)
+	{
+		$sql = "SELECT 
+					NIK,
+					NAMA
+				FROM
+					SPJ_PENGAJUAN a
+				INNER JOIN
+					SPJ_PENGAJUAN_PIC b ON
+				a.NO_SPJ = b.NO_PENGAJUAN
+				INNER JOIN
+					SPJ_TEMP_PIC c ON
+				b.NIK = c.PIC AND a.NO_SPJ = c.NO_SPJ
+				WHERE
+					QR_CODE = '$scan'";
+		return $this->db->query($sql);
+	}
+	public function cekPICdanKendaraanOut($noSPJ)
+	{
+		$sql = "SELECT
+					CASE 
+						WHEN JML_KENDARAAN IS NULL THEN 0
+						ELSE JML_KENDARAAN
+					END AS JML_KENDARAAN,
+					CASE 
+						WHEN JML_PIC IS NULL THEN 0
+						ELSE JML_PIC
+					END AS JML_PIC
+				FROM
+				(
+					SELECT
+						COUNT(a.NO_TNKB) AS JML_KENDARAAN,
+						'SATU' AS SATU
+					FROM
+						[dbo].[SPJ_PENGAJUAN] a
+					INNER JOIN
+						SPJ_TEMP_KENDARAAN b ON
+					a.NO_TNKB = b.NO_TNKB
+					WHERE
+						a.NO_SPJ = '$noSPJ'
+				)Q1
+				FULL JOIN
+				(
+					SELECT
+						COUNT(b.NIK) AS JML_PIC,
+						'SATU' AS SATU
+					FROM
+						SPJ_PENGAJUAN a
+					INNER JOIN
+						SPJ_PENGAJUAN_PIC b ON
+					a.NO_SPJ = b.NO_PENGAJUAN
+					INNER JOIN
+						SPJ_TEMP_PIC c ON
+					b.NIK = c.PIC
+					WHERE
+						a.NO_SPJ = '$noSPJ'
+				)Q2 ON Q1.SATU = Q2.SATU";
+		return $this->db->query($sql);
+	}
+	
 }
 ?>

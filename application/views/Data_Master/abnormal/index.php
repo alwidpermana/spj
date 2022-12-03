@@ -83,6 +83,7 @@
             </div>
             <input type="hidden" id="inputSerlokID">
             <input type="hidden" id="inputKodeSerlok">
+            <input type="hidden" id="inputDeliveryID">
             <div class="row">
               <div class="col-md-12">
                 <div class="form-group">
@@ -151,10 +152,12 @@
       var biaya = $(this).attr("biaya");
       var serlokID = $(this).attr("serlokID");
       var kodeSerlok = $(this).attr("kodeSerlok")
+      var deliveryId = $(this).attr("deliveryId");
       $('#inputNama').val(nama)
       $('#inputBiaya').val(biaya)
       $('#inputSerlokID').val(serlokID)
       $('#inputKodeSerlok').val(kodeSerlok)
+      $('#inputDeliveryID').val(deliveryId)
       $('#modal-abnormal').modal("show");
     });
     var saveAbnormal = $('.saveAbnormal').ladda();
@@ -167,10 +170,11 @@
         var inputSerlokID = $('#inputSerlokID').val();
         var inputKodeSerlok = $('#inputKodeSerlok').val();
         var inputBiaya = $('#inputBiaya').val();
+        var inputDeliveryID = $('#inputDeliveryID').val();
         var inputOffset = $('#inputOffset').val();
         $.ajax({
           type:'post',
-          data:{inputSerlokID, inputKodeSerlok, inputBiaya},
+          data:{inputSerlokID, inputKodeSerlok, inputBiaya, inputDeliveryID},
           dataType:'json',
           cache:false,
           async:true,

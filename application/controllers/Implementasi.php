@@ -846,5 +846,34 @@ class Implementasi extends CI_Controller {
 		$data = $this->M_Implementasi->scanKendaraanNotSPJ($noTNKB, $status, $keterangan);
 		echo json_encode($data);
 	}
+	public function cekStatusPerjalanan()
+	{
+		$scan = $this->input->get("scan");
+		$getPIC = $this->M_Implementasi->cekPICStatusPerjalanan($scan)->result();
+	}
+	public function cekPICdanKendaraanOut()
+	{
+		$noSPJ = $this->input->get("inputNoSPJ");
+		$data = $this->M_Implementasi->cekPICdanKendaraanOut($noSPJ);
+		$getData = $data->row();
+		if ($getData->JML_KENDARAAN == 0 && $getData->JML_PIC == 0) {
+			$message="success";
+			$status = 'success';
+		}else{
+			
+			if ($getData->JML_KENDARAAN>0 && $getData->JML_PIC > 0) {
+				$message = "Kendaraan & PIC Delivery Sedang Dalam Perjalanan!";
+				$status = 'warning';
+			}elseif ($getData->JML_KENDARAAN>0 && $getData->JML_PIC == 0) {
+				$message = "Kendaraan Sedang Dalam Perjalanan!";
+				$status = 'warning';
+			}else{
+				$message = "PIC Delivery Sedang Dalam Perjalanan!";
+				$status = 'warning';
+			}
+		}
+		$response = array('data' =>true,'message'=>$message,'status'=>$status,'jml_kendaraan'=>$getData->JML_KENDARAAN,'jml_pic'=>$getData->JML_PIC );
+		echo json_encode($response);
+	}
 }
 ?>

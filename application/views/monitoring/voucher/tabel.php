@@ -1,7 +1,6 @@
 <table class="table table-hover table-bordered table-striped" id="datatable" width="100%">
 	<thead class="text-center bg-gray">
 		<tr>
-			<th rowspan="2"></th>
 			<th rowspan="2">No</th>
 			<th rowspan="2">Tanggal Input</th>
 			<th rowspan="2">No SPJ</th>
@@ -32,7 +31,7 @@
 		$i = 1;
 		foreach ($data as $key): ?>
 			<tr>
-				<td class="text-center">
+				<!-- <td class="text-center">
 					<?php if ($key->NO_GENERATE == null): ?>
 						<a 
 							href="javascript:;" 
@@ -45,7 +44,7 @@
 							<i class="fas fa-info"></i>
 						</a>
 					<?php endif ?>
-				</td>
+				</td> -->
 				<td><?=$i++?></td>
 				<td><?=date("Y-m-d", strtotime($key->TGL_INPUT))?></td>
 				<td><?=$key->NO_SPJ?></td>
@@ -78,8 +77,8 @@
 				<td><?=$key->MERK?></td>
 				<td><?=$key->TYPE?></td>
 				<td><?=$key->NO_TNKB?></td>
-				<td>
-					<a 
+				<td class="text-center">
+					<!-- <a 
 						href="javascript:;"
 						noVoucher = "<?=$key->VOUCHER_BBM?>"
 						noSPJ = "<?=$key->NO_SPJ?>"
@@ -89,7 +88,8 @@
 						style="display: block; text-decoration: none;"
 						class="text-kps text-warning text-center getVoucher">
 						<?=str_replace(',', '.', number_format($key->TOTAL_UANG_BBM, 0))?>
-					</a>		
+					</a>		 -->
+					<?=str_replace(',', '.', number_format($key->TOTAL_UANG_BBM, 0))?>
 				</td>
 				<td><?=$key->STATUS_VOUCHER?></td>
 			</tr>
@@ -104,7 +104,7 @@
             scrollCollapse: true,
             paging:         false,
             'searching': false,
-            order: [[6, 'desc']],
+            order: [[1, 'desc']],
             info: false, 
             
           } ); 

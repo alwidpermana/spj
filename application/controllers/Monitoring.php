@@ -114,7 +114,10 @@ class Monitoring extends CI_Controller {
 		$no = $getNoSPJ;
 		$namaFile = str_replace("/","",$no);
 		$data['nama'] = $namaFile;
-		 $this->load->view('monitoring/spj/view/print', $data);
+		$getSPJ = $this->db->query("SELECT NO_SPJ FROM SPJ_PENGAJUAN WHERE ID_SPJ = $id")->row();
+		$noSPJ = $getSPJ->NO_SPJ;
+		$this->M_Monitoring->saveSPJLog('New',$noSPJ,'Masuk Ke Halaman Print SPJ');
+		$this->load->view('monitoring/spj/view/print', $data);
 	}
 	public function saveDebit()
 	{
@@ -585,6 +588,150 @@ class Monitoring extends CI_Controller {
 		$group = $data->GROUP_ID;
 		$this->M_Monitoring->saveHistoryReloadLokasi($inputNoSPJ, $groupId, $group);
 		echo json_encode($group);
+	}
+	public function print_generate($id)
+	{
+		$master = $this->M_Monitoring->getDataPrintSPJ($id)->row();
+		$data['master'] = $master;
+		$noGenerate = $master->NO_GENERATE;
+		$ganjil = " WHERE NO_URUT %2 <> 0";
+		$genap = " WHERE NO_URUT %2 = 0 ";
+		$data['ganjil'] = $this->M_Monitoring->dataSPJByGenerate($noGenerate, $ganjil)->result();
+		$data['genap'] = $this->M_Monitoring->dataSPJByGenerate($noGenerate, $genap)->result();
+		$this->load->view("monitoring/generate/print", $data);
+	}
+	public function getTempBBM_SPJ()
+	{
+		$user = $this->session->userdata("NIK");
+		$filSearch = $this->input->get("filSearch");
+		$periodeAwal = $this->input->get("periodeAwal");
+		$periodeAkhir = $this->input->get("periodeAkhir");
+		$wherePeriode = " AND a.TGL_SPJ BETWEEN '$periodeAwal' AND '$periodeAkhir'";
+		$getData = $this->M_Monitoring->getTempDataSPJ_BBM("", $filSearch, $wherePeriode);
+		$data='';
+		$jmlData = $getData->num_rows();
+		$total = 0;
+		$check = "";
+		$rp = '';
+		$read = '';
+		foreach ($getData->result() as $key) {
+			$check = $key->RP == null ? '' : 'checked';
+			$read = $check == 'checked'?'':'readonly';
+			if ($key->TOTAL_UANG_BBM != null && $key->RP != null) {
+				$rp = $key->RP == null ? round($key->TOTAL_UANG_BBM) : round($key->RP);
+			}
+			$data .= '<tr>
+						<td class="text-center">
+							<div class="icheck-orange icheck-kps d-inline">
+					          <input 
+					            type="checkbox" 
+					            id="'.$key->VOUCHER_BBM.'" 
+					            name="checkVoucher"
+					            noSPJ="'.$key->NO_SPJ.'"
+					            voucher="'.$key->VOUCHER_BBM.'"
+					            '.$check.'
+					            >
+					          <label for="'.$key->VOUCHER_BBM.'"></label>
+					        </div>
+						</td>
+						<td>'.$key->NO_SPJ.'</td>
+						<td>'.$key->VOUCHER_BBM.'</td>
+						<td><input type="number" class="form-control inputTempVoucher" id="'.$key->VOUCHER_BBM.'" noSPJ="'.$key->NO_SPJ.'" voucher="'.$key->VOUCHER_BBM.'" value="'.$rp.'" '.$read.'></td>
+					</tr>';
+			$check='';
+			$rp='';
+		}
+		$dataKosong = '<tr><td colspan="4" class="text-center">Tidak Ada Data Yang Perlu Diisi Biaya Voucher BBM</td></tr>';
+		$kosong = $jmlData==0?$dataKosong:'';
+
+
+
+		$json = array('jml'=>$jmlData ,'tabel'=>$data, 'kosong'=>$kosong);
+		echo json_encode($json);
+	}
+	public function deleteTempBBM()
+	{
+		$user = $this->session->userdata("NIK");
+		$data = $this->db->query("DELETE FROM SPJ_TEMP_BBM WHERE PIC_INPUT = '$user'");
+		echo json_encode($data);
+	}
+	public function saveTempBBM_SPJ()
+	{
+		$noSPJ = $this->input->post("noSPJ");
+		$voucher = $this->input->post("voucher");
+		$rp = $this->input->post("rp");
+		$data = $this->M_Monitoring->saveTempBBM_SPJ($noSPJ, $voucher, $rp);
+		echo json_encode($data);
+	}
+	public function getTotalAndSaldoBBM()
+	{
+		$getTotal = $this->M_Monitoring->getTotalTempBBM_SPJ()->row();
+		$total = $getTotal->RP == null ? 0 : $getTotal->RP;
+		$this->load->model('M_Cash_Flow');
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis('Kasbon Voucher BBM','SUB KAS')->row();
+		$saldoSPJ = $getSaldo->SALDO;
+		$data = array('kasbon' =>round($total),'saldo'=>round($saldoSPJ));
+		echo json_encode($data);
+	}
+	public function saveAllVoucherBBM()
+	{
+		$getData = $this->M_Monitoring->getTempDataSPJ_BBM(' AND b.RP IS NOT NULL', '', '');
+		// $data = array();
+		if ($getData->num_rows()>0) {
+			foreach ($getData->result() as $key) {
+				// $row = array();
+				$inputNoSPJ = $key->NO_SPJ;
+				$inputBiaya = $key->RP == null ? round($key->TOTAL_UANG_BBM) : round($key->RP);
+				$inputNoVoucher = $key->VOUCHER_BBM;
+				$inputId = $key->ID_SPJ;
+				$inputBiayaAwal = round($key->TOTAL_UANG_BBM);
+				// $row['noSPJ'] = $key->NO_SPJ;
+				// $row['biaya'] = $key->RP == null ? $key->TOTAL_UANG_BBM : $key->RP;
+				// $row['novoucher'] = $key->VOUCHER_BBM;
+				// $row['id'] = $key->ID_SPJ;
+				// $row['biay_awal'] = $key->TOTAL_UANG_BBM;
+
+				// $data[] = $row;
+
+				$data = $this->M_Monitoring->saveNominalVoucherBBM($inputNoSPJ, $inputBiaya);
+				$this->M_Monitoring->saveVoucherBBM($inputNoVoucher, $inputBiaya);
+				if ($inputBiaya > 0) {
+					$this->updateSaldo($inputId, $inputBiaya, $inputBiayaAwal);
+				}
+				
+			}
+		}else{
+			$data=false;
+		}
+		
+
+		echo json_encode($data);
+	}
+	public function getTotalTempVoucherBBM()
+	{
+		$total = 0 ;
+		$jml = 0;
+		$getData = $this->M_Monitoring->getTempDataSPJ_BBM(' AND b.RP IS NOT NULL', '', '');
+		if ($getData->num_rows()>0) {
+			foreach ($getData->result() as $key) {
+				$biaya = $key->RP == null ? $key->TOTAL_UANG_BBM : $key->RP;
+				$total += $biaya;	
+			}
+		}
+		$user = $this->session->userdata("NIK");
+		$jml = $this->db->query("SELECT ID FROM SPJ_TEMP_BBM WHERE PIC_INPUT = '$user'")->num_rows();
+		$data = array('total' =>$total,'jml'=>$jml );
+		echo json_encode($data);
+
+	}
+	public function kondisiDBTemp()
+	{
+		$voucher = $this->input->post("voucher");
+		$kondisi = $this->input->post('kondisi');
+		$noSPJ = $this->input->post("noSPJ");
+		$biaya = $this->input->post("biaya") == '' ? 0 :$this->input->post("biaya");
+		$data = $this->M_Monitoring->kondisiDBTemp($voucher, $kondisi, $noSPJ, $biaya);
+		echo json_encode($data);
 	}
 
 }

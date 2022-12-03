@@ -8,6 +8,7 @@
 			<th rowspan="2">No Qrcode</th>
 			<th colspan="2">Tujuan</th>
 			<th colspan="2">PIC</th>
+			<th rowspan="2">Uang TOL</th>
 			<th rowspan="2">Status</th>
 			<th rowspan="2"></th>
 		</tr>
@@ -48,6 +49,7 @@
 					<?php endforeach ?>
 					</ul>
 				</td>
+				<td class="text-center"><?=number_format($key->TOTAL_UANG_TOL)?></td>
 				<td>
 					<?php if ($key->STATUS_SPJ == 'CLOSE' && $key->NO_GENERATE == null): ?>
 						Waiting For Generate

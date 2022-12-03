@@ -997,6 +997,9 @@
 							VOUCHER_BBM
 						FROM
 							SPJ_PENGAJUAN
+						WHERE
+							STATUS_SPJ != 'CANCEL' AND
+							STATUS_DATA = 'SAVED'
 					)Q2 ON Q1.NO_VOUCHER = Q2.VOUCHER_BBM
 					$where
 					ORDER BY NO_VOUCHER ASC";
@@ -1493,15 +1496,62 @@
 					ORDER BY NamaSerlok ASC";
 			return $this->db->query($sql);
 		}
-		public function saveBiayaAbnormal($biaya, $serlokID, $kodeSerlok)
+
+		public function getBiayaAbnormalNew($search, $where)
+		{
+			$sql = "SELECT
+						*
+					FROM
+					(
+						SELECT DISTINCT
+							ROW_NUMBER() over (partition by 'SAMA' order by NamaSerlok ASC) AS NO_URUT,
+							KodeSerlok,
+							DELIVERY_SETUP_ID AS DeliveryID,
+							BIAYA,
+							NamaSerlok,
+							PlantCity AS Alamat,
+							TGL_INPUT,
+							PIC_INPUT
+						FROM
+						(
+							SELECT
+								KodeSerlok,
+								NamaSerlok,
+								DELIVERY_SETUP_ID,
+								PlantCity
+							FROM
+								ERPKPS.dbo.SLS_Customer a
+							INNER JOIN
+								SPJ_DELIVERY_SETUP_SERLOK b ON
+							a.KodeSerlok = b.SerlokId
+						)Q1
+						LEFT JOIN
+						(
+							SELECT
+								*
+							FROM
+								SPJ_UANG_ABNORMAL
+						)Q2 ON Q1.KodeSerlok = Q2.SERLOK_ID  AND Q1.DELIVERY_SETUP_ID = Q2.DELIVERY_ID
+						WHERE
+							NamaSerlok LIKE '%$search%' OR
+							PlantCity LIKE '%$search%'
+					)Q1
+					$where
+					ORDER BY NamaSerlok ASC";
+			return $this->db->query($sql);
+		}
+
+		public function saveBiayaAbnormal($biaya, $serlokID, $kodeSerlok, $deliveryID)
 		{
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
-			if ($serlokID == '') {
-				$sql = "INSERT INTO SPJ_UANG_ABNORMAL(SERLOK_ID, BIAYA, TGL_INPUT, PIC_INPUT)VALUES($kodeSerlok, $biaya, '$tanggal','$user')";
+            $getData = $this->db->query("SELECT COUNT(ID) AS JML FROM SPJ_UANG_ABNORMAL WHERE SERLOK_ID = $serlokID AND DELIVERY_ID = $deliveryID")->row();
+
+			if ($getData->JML == null || $getData->JML == '0') {
+				$sql = "INSERT INTO SPJ_UANG_ABNORMAL(SERLOK_ID, BIAYA, TGL_INPUT, PIC_INPUT, DELIVERY_ID)VALUES($kodeSerlok, $biaya, '$tanggal','$user',$deliveryID)";
 			}else{
-				$sql ="UPDATE SPJ_UANG_ABNORMAL SET BIAYA = $biaya, TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE SERLOK_ID = $serlokID";
+				$sql ="UPDATE SPJ_UANG_ABNORMAL SET BIAYA = $biaya, TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE SERLOK_ID = $serlokID AND DELIVERY_ID = $deliveryID";
 			}
 			return $this->db->query($sql);
 		}

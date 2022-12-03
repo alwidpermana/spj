@@ -249,12 +249,14 @@
                     <p>Pengajuan Baru</p>
                   </a>
                 </li>
-                <li class="nav-item list-menu-open">
-                  <a href="<?=base_url()?>pengajuan/temporary" class="nav-link <?=$side == 'spj-temporary'?'text-dark':''?>">
-                    <i class="fas fa-file-excel nav-icon <?=$side == 'spj-temporary'?'text-dark':''?>" style="font-size: 11px;"></i>
-                    <p>Temporary Pengajuan</p>
-                  </a>
-                </li>
+                <?php if ($this->session->userdata("LEVEL") == 0): ?>
+                  <li class="nav-item list-menu-open">
+                    <a href="<?=base_url()?>pengajuan/temporary" class="nav-link <?=$side == 'spj-temporary'?'text-dark':''?>">
+                      <i class="fas fa-file-excel nav-icon <?=$side == 'spj-temporary'?'text-dark':''?>" style="font-size: 11px;"></i>
+                      <p>Temporary Pengajuan</p>
+                    </a>
+                  </li>
+                <?php endif ?>
               </ul>
             </li>  
           <?php endif ?>

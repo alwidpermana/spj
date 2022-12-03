@@ -35,9 +35,15 @@
 				<td><?=$key->TGL_RECEIVE?></td>
 				<td><?=$key->STATUS_RECEIVE?></td>
 				<td class="text-center">
-					<a href="<?=base_url()?>monitoring/detail_generate/<?=$key->ID?>" class="btn btn-orange btn-kps btn-sm">
-						<i class="fas fa-ellipsis-h"></i>
-					</a>
+					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
+	                      <span class="sr-only">Toggle Dropdown</span>
+	                    </button>
+	                    <div class="dropdown-menu" role="menu">
+	                    	<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/detail_generate/<?=$key->ID?>">Detail</a>
+	                    	<?php if ($key->STATUS_RECEIVE == null): ?>
+	                    		<a href="<?=base_url()?>monitoring/print_generate/<?=$key->ID?>" class="dropdown-item dropButton">Print</a>	
+	                    	<?php endif ?>
+	                    </div>
 				</td>
 			</tr>
 		<?php endforeach ?>
@@ -45,15 +51,27 @@
 </table>
 <script type="text/javascript">
 	$(document).ready(function(){
-		var table = $('#datatable').DataTable( {
-            scrollY:        "350px",
-            scrollX:        true,
-            scrollCollapse: true,
-            paging:         true,
-            'searching': false,
-            'ordering': true,
-            order: [[0, 'asc']],
-            info: true, 	            
-          } ); 
+		var jml = '<?=count($data)?>';
+		if (jml == 1) {
+			var table = $('#datatable').DataTable( {
+	            paging:         true,
+	            'searching': false,
+	            'ordering': true,
+	            order: [[0, 'asc']],
+	            info: true, 	            
+	          } );
+		}else{
+			var table = $('#datatable').DataTable( {
+	            scrollY:        "350px",
+	            scrollX:        true,
+	            scrollCollapse: true,
+	            paging:         true,
+	            'searching': false,
+	            'ordering': true,
+	            order: [[0, 'asc']],
+	            info: true, 	            
+	          } );	
+		}
+		 
 	});
 </script>

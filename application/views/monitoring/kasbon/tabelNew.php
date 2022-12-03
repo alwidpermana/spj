@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-md-12">
-    <table class="table table-hover table-bordered table-striped" id="datatable" width="100%" style="font-size: 9px">
+    <table class="table table-hover table-bordered table-striped" id="datatable" width="100%" style="font-size: 12px">
       <thead>
         <tr class="text-center bg-gray">
           <th rowspan="2">No</th>

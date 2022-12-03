@@ -127,7 +127,8 @@ class Cash_Flow extends CI_Controller {
 		$filJenis = $this->input->get("filJenis");
 		$filStatus = $this->input->get("filStatus");
 		$filJenisSPJ = $this->input->get("filJenisSPJ");
-		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenis, $filStatus, $filJenisSPJ)->result();
+		$where = " AND TRANSAKSI != 'Generate'";
+		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenis, $filStatus, $filJenisSPJ, $where)->result();
 		$this->load->view("cash_flow/pengajuan/tabel", $data); 
 	}
 	public function savePengajuanSaldo()
@@ -304,7 +305,7 @@ class Cash_Flow extends CI_Controller {
 		$filJenisKasbon = $this->input->get("filJenisKasbon");
 		$filJenisSPJ = $this->input->get("filJenisSPJ");
 		$filStatus = $this->input->get("filStatus");
-		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenisKasbon, $filStatus, $filJenisSPJ)->result();
+		$data['data'] = $this->M_Cash_Flow->getPengajuanSaldoByJenisSPJ($filJenisKasbon, $filStatus, $filJenisSPJ, '')->result();
 		$this->load->view("cash_flow/my_cash_flow/data", $data);
 	}
 	public function getAllSaldo()

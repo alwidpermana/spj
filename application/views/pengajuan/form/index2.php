@@ -339,7 +339,7 @@
                         <!-- your steps content here -->
                         <div id="stepPengaju" class="content" role="tabpanel" aria-labelledby="stepPengaju-trigger">
                           <div class="row">
-                            <div class="col-sm-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-sm-12"> 
                                   <label>NIK</label>  
@@ -347,55 +347,55 @@
                               </div>
                               
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-md-4 col-sm-6">
                               <label>: <?=$this->session->userdata("NIK")?></label>
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-sm-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-sm-12"> 
                                   <label>Nama</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-md-4 col-sm-6">
                               <label>: <?=$this->session->userdata("NAMA")?></label>
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-sm-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-sm-12"> 
                                   <label>Jabatan</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-md-4 col-sm-6">
                               <label>: <?=$this->session->userdata("JABATAN")?></label>
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-sm-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-sm-12"> 
                                   <label>Departemen</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-md-4 col-sm-6">
                               <label>: <?=$this->session->userdata("DEPARTEMEN")?></label>
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-sm-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-sm-12"> 
                                   <label>Sub Departemen</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-md-4 col-sm-6">
                               <label>: <?=$this->session->userdata("SUB_DEPARTEMEN")?></label>
                             </div>
                           </div>
@@ -407,14 +407,14 @@
                         </div>
                         <div id="stepKendaraan" class="content" role="tabpanel" aria-labelledby="stepKendaraan-trigger">
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12"> 
                                   <label>Kendaraan</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4 col-sm-6">
                               <div class="row">
                                 <div class="col-md-12">
                                   <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputKendaraan">
@@ -429,29 +429,30 @@
                           </div>
                           <br>
                           <div class="row rekanan d-none">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12">
                                   <label>Rekanan</label>
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
-                              <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputRekanan">
+                            <div class="col-md-4 col-sm-6">
+                              <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="pilihRekanan">
                                 
                               </select>
+                              <input type="hidden" id="inputRekanan">
                             </div>
                           </div>
                           <br>
                           <div class="row rekanan d-none">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12">
                                   <label>Kendaraan</label>
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4 col-sm-6">
                               <div class="row">
                                 <div class="col-md-12">
                                   <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputKendaraanRekanan"></select>
@@ -461,14 +462,14 @@
                           </div>
                           <br>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12"> 
                                   <label>Jenis Kendaraan</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4 col-sm-6">
                               <div class="row">
                                 <div class="col-md-12">
                                   <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisKendaraan">
@@ -483,6 +484,7 @@
                           </div>
                           <br>
                           <div class="row">
+                            <div class="col-md-2"></div>
                             <div class="col-md-4">
                               <center>
                                 <button type="button" id="pilihKendaraan" class="btn bg-orange btn-kps btn-sm">
@@ -494,14 +496,14 @@
                           </div>
                           <br>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12"> 
                                   <label>No Inventaris</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4 col-sm-6">
                               <div class="row">
                                 <div class="col-md-12">
                                   <input type="text" id="inputNoInventaris" class="form-control form-control-sm" readonly>
@@ -511,14 +513,14 @@
                           </div>
                           <br>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12"> 
                                   <label>No TNKB</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4 col-sm-6">
                               <div class="row">
                                 <div class="col-md-12">
                                   <input type="text" id="inputNoTNKB" class="form-control form-control-sm inputan">
@@ -528,14 +530,14 @@
                           </div>
                           <br>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12"> 
                                   <label>Merk</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4 col-sm-6">
                               <div class="row">
                                 <div class="col-md-12">
                                   <input type="text" id="inputMerk" class="form-control form-control-sm inputan">
@@ -545,14 +547,14 @@
                           </div>
                           <br>
                           <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12"> 
                                   <label>Type</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4 col-sm-6">
                               <div class="row">
                                 <div class="col-md-12">
                                   <input type="text" id="inputType" class="form-control form-control-sm inputan">
@@ -562,14 +564,14 @@
                           </div>
                           <br>
                           <div class="row rekanan d-none">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-4">
                               <div class="row">
                                 <div class="col-md-12"> 
                                   <label>Rekanan</label>  
                                 </div>
                               </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4 col-sm-6">
                               <div class="row">
                                 <div class="col-md-12">
                                   <input type="text" id="inputRekananKendaraan" class="form-control form-control-sm inputan" value="" readonly>
@@ -734,6 +736,21 @@
                                       <div id="manualUangJalan">
                                         <input type="number" id="inputManualUangJalan" class="form-control form-control-sm">
                                       </div>
+                                      <div class="lokalUangJalan">
+                                          <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputLokalUangJalan">
+                                            <option value="0">Rp. 0</option>
+                                            <option value="10000" selected>Rp. 10,000</option>
+                                            <option value="25000">Rp. 25,000</option>
+                                            <option value="36000">Rp. 36,000</option>
+                                          </select>
+                                        </div>
+                                      <div class="tambahUangJalanAbnormal">
+                                        <br>
+                                        <br>
+                                        <span class="text-left">Tambahan Uang Jalan</span>
+                                        <br>
+                                        <input type="number" id="inputTambahanUangJalan" class="form-control" value="" max="15000">
+                                      </div>
                                     </td>
                                     <td>
                                       <!-- <input type="text" id="inputMediaUangJalan" class="form-control form-control-sm" value="Kasbon"> -->
@@ -772,6 +789,8 @@
                                       </div> -->
                                       <div id="voucherBBM">
                                         <input type="text" id="inputNoVoucher" class="form-control form-control-sm" readonly>
+                                        <br>
+                                        <button type="button" class="btn btn-kps bg-orange btn-sm" id="pilihNoVoucher">Pilih No Voucher</button>
                                       </div>
                                       <div id="manualBBM">
                                         <div class="form-group">
@@ -975,6 +994,31 @@
                 </div>
               </div>
             </div>
+            <div class="objekRekanan d-none">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Tujuan Rekanan</label>
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan2">
+                      <option value="Solokan Jeruk">Solokan Jeruk</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Group Tujuan</label>
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputGroupPerusahaan2">
+                      <option value="">Pilih Group</option>
+                      <?php foreach ($group as $gr): ?>
+                        <option value="<?=$gr->ID_GROUP?>"><?=$gr->NAMA_GROUP?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+              </div> 
+            </div>
             <div class="objekNormal">
               <div class="row">
                 <div class="col-md-12">
@@ -1145,12 +1189,23 @@
           </div>
           <div class="modal-body">
             <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label>Departure Time</label>
+                  <select class="select2" id="inputDepartureTime" multiple="multiple" data-placeholder="Pilih Departure Time Dari Program Serlok" data-dropdown-css-class="select2-orange" style="width: 100%;color: white !important;">
+                    
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
               <div class="col-md-12 table-responsive p-0">
                 <table class="table table-hover table-valign-middle table-striped" width="100%">
                   <thead>
                     <tr>
                       <th>Company Name</th>
                       <th>Plant City</th>
+                      <th>Departure Time</th>
                     </tr>
                   </thead>
                   <tbody id="getSerlok">
@@ -1163,6 +1218,48 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             <button type="button" class="btn bg-orange btn-kps saveCustomerSerlok ladda-button" data-style="expand-right">Tambah Tujuan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modal-voucher" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-1"></div>
+              <div class="col-10">
+                <form id="searchVoucher">
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <span class="fa fa-search form-control-icon"></span>
+                    <input type="search" class="form-control form-control-search" id="cariVoucher" placeholder="Cari Berdasarkan No Voucher">
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 table-responsive p-0">
+                <table class="table table-hover table-valign-middle table-striped" width="100%">
+                  <thead class="text-center">
+                    <tr>
+                      <th>No Voucher</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="getDataVoucher">
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="row">
+              <input type="hidden" id="inputOffset">
+              <div class="col-md-12 d-flex justify-content-end">
+                <div id="paging"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

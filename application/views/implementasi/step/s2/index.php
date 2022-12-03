@@ -908,7 +908,7 @@
     var inputMediaUangTOL = $('#inputMediaUangTOL').val();
     var inputRealisasiUangTol = $('#inputRealisasiUangTol').val();
     var kasbon = "Kasbon TOL "+inputJenisSPJ;
-    if (parseInt(inputRealisasiUangTol)>0) {
+    if (inputRealisasiUangTol != '') {
       $.ajax({
         type:'get',
         data:{kasbon},

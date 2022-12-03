@@ -177,6 +177,18 @@
     e.preventDefault();
     getTabel();
    })
+   // $('#getTabel').on('change', '.inputUangTol', function(){
+   //  var jenisSPJ = $(this).attr("jenisSPJ");
+   //  var media = $(this).attr("media");
+   //  var id = $(this).attr("data");
+   //  var uang = $(this).val();
+   //  if (media == 'Reimburse') {
+   //    cekSaldo(jenisSPJ, media, id, uang)
+   //  }else{
+   //    Swal.fire("Media Uang TOL Bukan Reimburse!","","info")
+   //  }
+   //  console.log(jenisSPJ+' - '+media+' - '+id+' - '+uang)
+   // })
 
   })
   function getTabel() {
@@ -207,6 +219,34 @@
       }
     });
   }
+  // function cekSaldo(inputJenisSPJ, inputMediaUangTOL,id, inputRealisasiUangTol) {
+  //   var kasbon = "Kasbon TOL "+inputJenisSPJ;
+  //   if (inputRealisasiUangTol != '') {
+  //     $.ajax({
+  //       type:'get',
+  //       data:{kasbon},
+  //       dataType: 'json',
+  //       url:url+'/Implementasi/cekSaldo',
+  //       cache: false,
+  //       async: true,
+  //       success: function(data){
+  //         console.log(data);
+  //         if (inputRealisasiUangTol>data && inputMediaUangTOL == 'Reimburse') {
+  //           Swal.fire("Saldo Tidak Mencukupi!","Hubungi PIC Terkait","warning")
+  //         }else{
+  //           saveImplementasi(inputJenisSPJ, inputMediaUangTOL,id, inputRealisasiUangTol)
+  //         }
+          
+  //       },
+  //       error: function(data){
+
+  //       }
+  //     }); 
+  //   }else{
+  //     Swal.fire("Isi Terlebih Dahulu Uang TOL","","warning")
+  //   }
+    
+  // }
   
 
 </script>

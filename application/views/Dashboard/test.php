@@ -22,16 +22,37 @@
       <?php $this->load->view('_partial/content-header');?>
       <div class="content">
         <div class="container-fluid">
-          <?php
-            $tglAwal = date("H", strtotime('2022-08-15 08:13'));
-            $tglAkhir = date("H", strtotime('2022-08-16 07:53'));
+          <button type="button" class="btn btn-kps bg-orange btn-block" id="addDelivery">
+            Add Delivery Setup
+          </button>
+          <div class="row">
+            <div class="col-md-4">
+              <select class="select2" id="inputDepartureTime" multiple="multiple" data-placeholder="Pilih Departure Time Dari Program Serlok" data-dropdown-css-class="select2-orange" style="width: 100%;color: white !important;">
+                
+              </select>
+              <br>
+              <!-- <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="test">
+                TEST
+              </button>
+              JANGAN DIHAPUS!!!
+               -->
 
-            if ($tglAwal>$tglAkhir) {
-              echo 'kurang';
-            }else{
-              echo 'tambah';
-            }
-          ?>
+
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <?php
+                $keberangkatanH = '2022-01-01';
+                $kepulanganH = '2022-01-02';
+                $berangkatH = date_create($keberangkatanH);
+                $pulangH = date_create($kepulanganH);
+                $selisihH = date_diff($berangkatH, $pulangH);
+                $selisihHari = $selisihH->d;
+                echo $selisihHari;
+              ?>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -55,6 +76,59 @@
     $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     test()
+    $('#addDelivery').on('click', function(){
+      $.ajax({
+        type:'get',
+        dataType:'json',
+        cache:false,
+        async:true,
+        url:url+'/Dashboard/saveDeliverySetup',
+        success:function(data){
+          Swal.fire("Berhasil","","success")
+        },
+        error:function(data){
+          Swal.fire("Gagal","","error")
+        }
+      })
+    })
+    $('#test').on('click', function(){
+      var data = $('#inputDepartureTime').val();
+      if (data.length >0) {
+        var whereDeparture = " AND b.departure_time  IN ("
+        var jml = data.length-1;
+        for (var i = 0; i < data.length; i++) {
+          whereDeparture+="'"+data[i]+"'";
+          if (i<jml) {
+            whereDeparture+=",";
+          }else{
+            whereDeparture+=")";
+          }
+        }
+      }else{
+        var whereDeparture = '';
+      }
+      console.log(whereDeparture);
+    })
+
+    getDepartureTime()
+    function getDepartureTime() {
+      var inputNoTNKB = 'Z 8945 AF';
+      var inputTglSPJ = '2022-11-25'
+      $.ajax({
+        type:'get',
+        data:{inputNoTNKB, inputTglSPJ},
+        dataType:'json',
+        cache:false,
+        async:true,
+        url:url+'/pengajuan/getDepartureTime',
+        success:function(data){
+          $('#inputDepartureTime').html(data);
+        },
+        error:function(data){
+
+        }
+      })
+    }
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     

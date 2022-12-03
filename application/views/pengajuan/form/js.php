@@ -15,6 +15,7 @@
      })
      $('.btnStepPrevios').on('click', function(){
       stepper.previous()
+      console.log("kontol")
      });
      $('#btnNextKendaraan').on('click', function(){
       var inputJenisKendaraan = $('#inputJenisKendaraan').val();
@@ -35,10 +36,13 @@
      $('#btnNextTujuan').on('click', function(){
       var inputGroupTujuan = $('#inputGroupTujuan').val();
       var inputNoSPJ = $('#inputNoSPJ').val(); 
+      // settingUangJalanLokal();
+      settingManualJalan();
       if (inputGroupTujuan == '') {
         Swal.fire("Pilih Terlebih dahulu Lokasi Tujuan","","warning")
       }else{
         cekPengajuanPIC();
+        cekTujuanAbnormal();
       }
       
       
@@ -93,9 +97,11 @@
         $('#tampilTotalUangJalan').addClass("d-none");
         $('#manualUangJalan').removeClass("d-none");
         $('#btnCekProgramSerlok').attr("disabled","disabled")
+        $('.lokalUangJalan').addClass("d-none");
       }else{
         $('#tampilTotalUangJalan').removeClass("d-none");
         $('#manualUangJalan').addClass("d-none");
+        $('.lokalUangJalan').addClass("d-none");
         $('#btnCekProgramSerlok').removeAttr("disabled","disabled")
       }
     })
@@ -171,6 +177,7 @@
                 $('#beforeNext').addClass("d-none");
                 $('#getNext').addClass("d-none");
                 $('input[id="inputJenisSPJ"]').val(jenisSPJ);
+                $('#inputAbnormal').attr("disabled","disabled")
                 // $('#btnSaveSPJ').removeClass("d-none");
                 $('#inputTglSPJ').attr("readonly","readonly")
                 var jenisData = '<?=$this->uri->segment("2")?>';
@@ -218,6 +225,9 @@
         
       }
     });
+    $('#inputJenisKendaraan').on('change', function(){
+      kondisiKendaraan();
+    })
     $('#pilihKendaraan').on('click', function(){
       searchKendaraan();
       $('#modal-kendaraan').modal("show");
@@ -233,6 +243,7 @@
       var inputJenisKendaraan = $('#inputJenisKendaraan').val();
       var noSPJ = $('#inputNoSPJ').val();
       var kendaraan = $('#inputKendaraan').val();
+
       $('#inputNoInventaris').val(inv);
       $('#inputMerk').val(merk);
       $('#inputType').val(tipe);
@@ -309,9 +320,16 @@
         $('.objekNormal').addClass("d-none");
         $('#btnCekProgramSerlok').attr("disabled","disabled")
         $('#inputKota').attr("disabled","disabled")
+        $('.objekRekanan').addClass("d-none");
+      }else if(objek == 'Rekanan'){
+        $('.objekLainnya').addClass("d-none");
+        $('.objekNormal').addClass("d-none");
+        $('.objekRekanan').removeClass("d-none");
       } else {
         $('.objekLainnya').addClass("d-none");
         $('.objekNormal').removeClass("d-none");
+        $('.objekRekanan').addClass("d-none");
+        
       }
     });
     $('#inputJenisSPJ').on('change', function(){
@@ -379,8 +397,17 @@
       setTimeout(function () {
         var objek = $('#inputObjek').val();
         var objekLainnya = $('#inputObjekLainnya').val();
-        var inputPerusahaan = objek == 'Lainnya'?'-':$('#inputPerusahaan').val();
-        var inputGroupTujuan = objek == 'Lainnya'?'0':$('#inputGroupPerusahaan').val();
+        if (objek == 'Lainnya') {
+          var inputPerusahaan = '-'
+          var inputGroupTujuan = '0'
+        }else if(objek == 'Rekanan'){
+          var inputPerusahaan = $('#inputPerusahaan2').val()
+          var inputGroupTujuan = $('#inputGroupPerusahaan2').val()  
+        }else{
+          var inputPerusahaan = $('#inputPerusahaan').val();
+          var inputGroupTujuan = $('#inputGroupPerusahaan').val();
+        } 
+
         var inputObjek = objek == 'Lainnya'?objekLainnya:objek;
         var inputNoSPJ = $('#inputNoSPJ').val();
         var inputKotaKabupaten = $('#inputKotaKabupaten').val();
@@ -588,9 +615,11 @@
 
     $('#getLokasi').on('click', '.hapusLokasi', function(){
       var id = $(this).attr("data");
+      var inputNoSPJ = $('#inputNoSPJ').val();
+      var nama = $(this).attr("nama");
       $.ajax({
         type:'post',
-        data:{id},
+        data:{id, inputNoSPJ, nama},
         dataType: 'json',
         url:url+'/pengajuan/hapusLokasi',
         success: function(data){
@@ -605,9 +634,11 @@
     });
     $('#getPIC').on('click', '.hapusPIC', function(){
       var id = $(this).attr("data");
+      var nama = $(this).attr("nama");
+      var inputNoSPJ = $('#inputNoSPJ').val();
       $.ajax({
         type:'post',
-        data:{id},
+        data:{id, nama, inputNoSPJ},
         dataType: 'json',
         url:url+'/pengajuan/hapusPIC',
         cache: false,
@@ -667,11 +698,12 @@
     // })
     $('#btnNextPIC').on('click', function(){
       stepper.next()
-      getNoVoucher()
+      // getNoVoucher()
       var inputAbnormal = document.getElementById("inputAbnormal");
       if (inputAbnormal.checked == true) {
         getUangAbnormalDM();
       }
+      getPilihanUangJalan();
     })
     $('#inputMediaBBM').on('change', function(){
       kondisiBBM();
@@ -719,11 +751,25 @@
         var inputNoSPJ = $('#inputNoSPJ').val();
         var inputTglSPJ = $('#inputTglSPJ').val();
         var inputNoTNKB = $('#inputNoTNKB').val();
-
+        var data = $('#inputDepartureTime').val();
+        if (data.length >0) {
+          var whereDeparture = " AND b.departure_time  IN ("
+          var jml = data.length-1;
+          for (var i = 0; i < data.length; i++) {
+            whereDeparture+="'"+data[i]+"'";
+            if (i<jml) {
+              whereDeparture+=",";
+            }else{
+              whereDeparture+=")";
+            }
+          }
+        }else{
+          var whereDeparture = '';
+        }
         $.ajax({
           type:'post',
           dataType:'json',
-          data:{inputNoSPJ, inputTglSPJ, inputNoTNKB},
+          data:{inputNoSPJ, inputTglSPJ, inputNoTNKB, whereDeparture},
           url:url+'/pengajuan/saveCustomerSerlok',
           cache: false,
           async: true,
@@ -749,6 +795,8 @@
     });
 
       $('#btnCekProgramSerlok').on('click', function(){
+        $('#modal-serlok').modal('show')
+        // getDepartureTime()
         cekOutGoingSerlok()
       })
 
@@ -777,8 +825,9 @@
       }
     });
 
-    $('#inputRekanan').on('change', function(){
+    $('#pilihRekanan').on('change', function(){
       var rekananId = $(this).val();
+      var inputRekanan = $('#inputRekanan').val(rekananId);
       $.ajax({
         type:'get',
         data:{rekananId},
@@ -823,8 +872,84 @@
       })
     })
 
+    $('#inputLokalUangJalan').on('change', function(){
+      var inputLokalUangJalan = $('#inputLokalUangJalan').val();
+      $('#inputTotalUangJalan').val(inputLokalUangJalan);
+    });
+    $('#pilihNoVoucher').on('click', function(){
+      $('#modal-voucher').modal("show");
+      pagingVoucher(1);
+    });
+    $('#getDataVoucher').on('click','.pilihVoucher', function(){
+      var voucher = $(this).attr("voucher");
+      $('#inputNoVoucher').val(voucher);
+      $('#modal-voucher').modal("hide");
+    })
+    $('#paging').on('click','.paging', function(){
+      var offset = $(this).attr("offset");
+      console.log(offset)
+      pagingVoucher(offset)
+      $('#inputOffset').val(offset);
+    });
+    $('.filter').on('change', function(){
+      pagingVoucher(1);
+    });
+    $('#searchVoucher').submit(function(e){
+      e.preventDefault();
+      pagingVoucher(1);
+    })
+    $('#cariVoucher').on('keyup', function(){
+      pagingVoucher(1);
+    })
+    $('#paging').on('click','.btnStep', function(){
+      var offset = $(this).attr("offset");
+      console.log(offset)
+      pagingVoucher(offset)
+      $('#inputOffset').val(offset);
+    })
+    $('#inputDepartureTime').on('change', function(){
+      cekOutGoingSerlok();
+      $('#modal-serlok').modal('show')
+      
+    })
 
   })
+  function pagingVoucher(offset) {
+    var cariVoucher = $('#cariVoucher').val();
+    var limit = 20;
+    $.ajax({
+      type: 'get',
+      cache:false,
+      async:true,
+      data:{cariVoucher, offset, limit},
+      url:url+'/pengajuan/pagingDataVoucher',
+      success:function(data){
+        $('#paging').html(data);
+        var endOffset = offset == ''?0:(offset-1)*limit;
+        cariDataVoucher(cariVoucher, endOffset, limit);
+      },
+      error:function(data){
+        Swal.fire("gagal mengambil data Voucher","Hubungi Staff IT","error")
+      }
+    })
+  }
+  function cariDataVoucher(cariVoucher, offset, limit) {
+    
+    $.ajax({
+      type: 'get',
+      dataType:'json',
+      cache:false,
+      async:true,
+      data:{cariVoucher, offset, limit},
+      url:url+'/pengajuan/cariDataVoucher',
+      success:function(data){
+        $('#getDataVoucher').html(data);
+      },
+      error:function(data){
+        Swal.fire("gagal mengambil data Voucher","Hubungi Staff IT","error")
+      }
+    })
+  }
   function getNoSPJ(jenis) {
     
     $.ajax({
@@ -862,7 +987,7 @@
 
   function kondisiKendaraan() {
     var kendaraan = $('#inputKendaraan').val();
-
+    var inputJenisKendaraan = $('#inputJenisKendaraan').val();
       if (kendaraan == 'Pribadi') {
         $('#pilihKendaraan').attr("disabled","disabled");
         $('.inputan').removeAttr("readonly","readonly");
@@ -871,10 +996,20 @@
         $('#pilihKendaraan').attr("disabled","disabled");
         $('.inputan').attr("readonly","readonly");
         
+      }else if(kendaraan == 'Delivery'){
+        if (inputJenisKendaraan == '') {
+          $('#pilihKendaraan').attr("disabled","disabled");
+          $('.inputan').attr("readonly","readonly");
+        }else{
+          $('#pilihKendaraan').removeAttr("disabled","disabled");
+          $('.inputan').attr("readonly","readonly");  
+        }
       }else{
         $('#pilihKendaraan').removeAttr("disabled","disabled");
-        $('.inputan').attr("readonly","readonly");
+          $('.inputan').attr("readonly","readonly");  
       }
+      console.log(kendaraan)
+      console.log(inputJenisKendaraan)
   }
 
   function getCustomerSerlok() {
@@ -958,7 +1093,7 @@
           html+="<td>"+data[i].JABATAN+"</td>";
           html+="<td>"+formatRupiah(Number(uangSaku).toFixed(0), 'Rp. ') +"</td>";
           html+="<td>"+formatRupiah(Number(uangMakan).toFixed(0), 'Rp. ')+"</td>";
-           html+="<td><a href='javascript:;' class='btn text-kps text-danger hapusPIC' data='"+data[i].ID_PIC+"'><i class='fas fa-trash-alt'></i></a></td>";
+           html+="<td><a href='javascript:;' class='btn text-kps text-danger hapusPIC' data='"+data[i].ID_PIC+"' nama='"+data[i].NAMA+"'><i class='fas fa-trash-alt'></i></a></td>";
           html+="<tr>";
 
         }
@@ -1118,7 +1253,7 @@
     }else{
       jabatanPIC = setJabatanPIC;
     }
-    var inputGroupTujuan = $('#inputGroupTujuan').val();
+    var inputGroupTujuan = $('#inputGroupTujuan').val() == '10' ? '4': $('#inputGroupTujuan').val();
     var inputJenisKendaraan = $('#inputJenisKendaraan').val();
     var inputSortir = document.getElementById('inputSortir');
     if (inputSortir.checked == true) {
@@ -1311,24 +1446,33 @@
     })
   }
   function getUangJalan() {
-    var inputNoSPJ = $('#inputNoSPJ').val();
-    $.ajax({
-      type: 'get',
-      data: {inputNoSPJ},
-      dataType: 'json',
-      url:url+'/pengajuan/getUangJalanSPJ',
-      cache: false,
-      async: true,
-      success: function(data){
-        var uangJalan = Number(data.BIAYA).toFixed(0);
-        
-        $('#tampilTotalUangJalan').html(formatRupiah(uangJalan, 'Rp.'));
-        $('#inputTotalUangJalan').val(uangJalan);
-      },
-      error: function(data){
 
-      }
-    });
+    var inputNoSPJ = $('#inputNoSPJ').val();
+    var inputKendaraan = $('#inputKendaraan').val();
+    var inputJenisKendaraan = $('#inputJenisKendaraan').val();
+    if (inputKendaraan == 'Non Delivery' && inputJenisKendaraan == 'Minibus') {
+      $('#tampilTotalUangJalan').html(formatRupiah('0', 'Rp.'));
+      $('#inputTotalUangJalan').val('0');
+    }else{
+       $.ajax({
+          type: 'get',
+          data: {inputNoSPJ, inputKendaraan, inputJenisKendaraan},
+          dataType: 'json',
+          url:url+'/pengajuan/getUangJalanSPJ',
+          cache: false,
+          async: true,
+          success: function(data){
+            var uangJalan = Number(data.BIAYA).toFixed(0);
+            
+            $('#tampilTotalUangJalan').html(formatRupiah(uangJalan, 'Rp.'));
+            $('#inputTotalUangJalan').val(uangJalan);
+          },
+          error: function(data){
+
+          }
+        }); 
+    }
+   
   }
 
   function saveSPJ(status) {
@@ -1360,7 +1504,9 @@
     var inputAneh = 'Aneh';
     var inputJenisSPJ = $('#inputJenisSPJ').val();
     var abnormal = document.getElementById("inputAbnormal");
+    var inputTambahanUangJalan = $('#inputTambahanUangJalan').val();
     var inputAbnormal = abnormal.checked == true ? 'Y' : 'N';
+    console.log(parseInt(inputTambahanUangJalan))
     if (inputNoTNKB == '') {
       Swal.fire("Lengkapi Datanya Terlebih Dahulu!","No TNKB Kendaraan Masing Kosong!", "warning")
     }else if(inputGroupTujuan == ''){
@@ -1373,7 +1519,12 @@
       Swal.fire("Lengkapi Datanya Terlebih Dahulu!","Tentukan Rencana Tanggal Pulang!", "warning")
     }else if(inputJamPulang == ''){
       Swal.fire("Lengkapi Datanya Terlebih Dahulu!","Tentukan Rencana Jam Pulan", "warning")
+    }else if(inputNoVoucher == ''){
+      Swal.fire("Pilih Terlebih Dahulu No Voucher!","Pilihan No Voucher Ada di Proses Biaya","warning")
+    }else if(parseInt(inputTambahanUangJalan)>15000 ){
+      Swal.fire("Tambahan Uang Jalan Lokal Tidak Boleh Lebih Dari Rp. 15,000","Kembali Ke Pengisian Biaya","warning")
     }else{
+
       $.ajax({
         type:'post',
         data:{
@@ -1404,7 +1555,8 @@
             inputNoVoucher,
             inputJenisSPJ,
             inputAbnormal,
-            status
+            status,
+            inputTambahanUangJalan
           },
         dataType: 'json',
         url:url+'/pengajuan/saveSPJ',
@@ -1548,9 +1700,10 @@
     var kendaraan = $('#inputKendaraan').val();
     var inputJenisSPJ = $('#inputJenisSPJ').val();
     var inputRekananKendaraan = $('#inputRekananKendaraan').val();
+    var inputRekanan = $('#inputRekanan').val();
     $.ajax({
       type: 'post',
-      data: {inv, inputJenisKendaraan, noSPJ, tnkb, merk, tipe, kendaraan, inputRekananKendaraan},
+      data: {inv, inputJenisKendaraan, noSPJ, tnkb, merk, tipe, kendaraan, inputRekananKendaraan, inputRekanan},
       dataType: 'json',
       url: url+'/pengajuan/saveKendaraanSPJ',
       cache: false,
@@ -1560,6 +1713,8 @@
         stepper.next()
         if (inputJenisSPJ == 1) {
           cekOutGoingSerlok();  
+          $('#modal-serlok').modal('show')
+          getDepartureTime()
         }
         
       },
@@ -1641,7 +1796,6 @@
           stepper.next()
           getPIC()
           getTotalUangSakuMakan()
-          getUangJalan();
         }
 
       },
@@ -1649,6 +1803,51 @@
         Swal.fire("Terjadi Error Pada Program","Mohon Hubungi Staff IT","error")
       }
     });
+  }
+  function cekTujuanAbnormal() {
+    var inputNoSPJ = $('#inputNoSPJ').val()
+    var inputGroupTujuan = $('#inputGroupTujuan').val()
+    var inputKendaraan = $('#inputKendaraan').val();
+    var inputJenisKendaraan = $('#inputJenisKendaraan').val();
+    $.ajax({
+      type:'get',
+      data:{inputNoSPJ},
+      dataType:'json',
+      cache:false,
+      async:true,
+      url:url+'/pengajuan/cekTujuanAbnormal',
+      success:function(data){
+        if(inputKendaraan == 'Non Delivery' && inputJenisKendaraan == 'Minibus'){
+          settingManualJalan()
+          $('#inputTotalUangJalan').val("0")
+          $('#tampilTotalUangJalan').html("0")
+          $('#inputManualUangJalan').val("0")
+          $('#inputTambahanUangJalan').val("0");
+          console.log("a")
+        }
+        else if (inputGroupTujuan == '4' || inputGroupTujuan == '10') {
+          settingManualJalan()
+          console.log("b")
+        }else if(data.abnormal == true) {
+          $('#inputAbnormal').attr("checked","checked");
+          $('#inputManualUangJalan').attr("readonly","readonly");
+          getUangAbnormalDM()
+          console.log("c")
+          $('#tampilTotalUangJalan').removeClass("d-none");
+          $('.lokalUangJalan').addClass("d-none");
+          $('#manualUangJalan').addClass("d-none");
+          // $('#inputTambahanUangJalan').val("0");
+          $('.tambahUangJalanAbnormal').removeClass("d-none")
+        }else{
+          console.log("d")
+          $('#inputAbnormal').removeAttr("checked","checked");
+          getUangJalan()
+        }
+      },
+      error:function(data){
+
+      }
+    })
   }
 
   function updateOtomatisUangSPJ() {
@@ -1679,7 +1878,7 @@
     if (inputMediaBBM == 'Voucher') {
       $('#voucherBBM').removeClass("d-none")
       $('#manualBBM').addClass("d-none");
-      getNoVoucher()
+      // getNoVoucher()
       $('#inputBBMManual').val("");
     }else{
       $('#voucherBBM').addClass("d-none");
@@ -1712,9 +1911,24 @@
   function cekOutGoingSerlok() {
     var inputNoTNKB = $('#inputNoTNKB').val();
     var inputTglSPJ = $('#inputTglSPJ').val();
+    var data = $('#inputDepartureTime').val();
+      if (data.length >0) {
+        var whereDeparture = " AND b.departure_time  IN ("
+        var jml = data.length-1;
+        for (var i = 0; i < data.length; i++) {
+          whereDeparture+="'"+data[i]+"'";
+          if (i<jml) {
+            whereDeparture+=",";
+          }else{
+            whereDeparture+=")";
+          }
+        }
+      }else{
+        var whereDeparture = '';
+      }
     $.ajax({
       type:'get',
-      data:{inputNoTNKB, inputTglSPJ},
+      data:{inputNoTNKB, inputTglSPJ, whereDeparture},
       dataType:'json',
       url:url+'/pengajuan/cekOutGoingSerlok',
       cache: false,
@@ -1727,11 +1941,12 @@
             html+='<tr>';
             html+='<td>'+data[i].COMPANY_NAME+'</td>';
             html+='<td>'+data[i].PLANT1_CITY+'</td>';
+            html+='<td>'+data[i].departure_time+'</td>';
             html+='</tr>';
           }
           $('#getSerlok').html(html);
-          $('#modal-serlok').modal('show')
           $('#titleTNKB').html(inputNoTNKB);
+          
         }else{
           Swal.fire(
             "Data Outgoing di Program Serlok Untuk Kendaraan Dengan No TNKB "+inputNoTNKB+" Pada Tanggal "+inputTglSPJ+" Tidak Ditemukan",
@@ -1742,6 +1957,24 @@
 
       },
       error: function(data){
+
+      }
+    })
+  }
+  function getDepartureTime() {
+    var inputNoTNKB = $('#inputNoTNKB').val();
+    var inputTglSPJ = $('#inputTglSPJ').val();
+    $.ajax({
+      type:'get',
+      data:{inputNoTNKB, inputTglSPJ},
+      dataType:'json',
+      cache:false,
+      async:true,
+      url:url+'/pengajuan/getDepartureTime',
+      success:function(data){
+        $('#inputDepartureTime').html(data);
+      },
+      error:function(data){
 
       }
     })
@@ -1857,12 +2090,43 @@
 
   function settingManualJalan() {
     var inputAbnormal = document.getElementById("inputAbnormal");
-    
+    var inputGroupTujuan = $('#inputGroupTujuan').val();
     if (inputAbnormal.checked == true) {
       $('#tampilTotalUangJalan').addClass("d-none");
+      $('.lokalUangJalan').addClass("d-none");
+      $('#manualUangJalan').removeClass("d-none");
+      // $('#inputTambahanUangJalan').val("0");
+      $('.tambahUangJalanAbnormal').removeClass("d-none")
+    }else if(inputAbnormal.checked == false && inputGroupTujuan == '4' || inputGroupTujuan == '10' && inputAbnormal.checked == false){
+      $('#tampilTotalUangJalan').addClass("d-none");
+      $('.lokalUangJalan').removeClass("d-none");
+      $('#manualUangJalan').addClass("d-none");
+      $('.tambahUangJalanAbnormal').removeClass("d-none")
+      // $('#inputTambahanUangJalan').val("15000");
+    }else{
+      $('#tampilTotalUangJalan').removeClass("d-none");
+      $('.lokalUangJalan').addClass("d-none");
+      $('#manualUangJalan').addClass("d-none");
+      $('#inputTambahanUangJalan').val("0");
+      $('.tambahUangJalanAbnormal').addClass("d-none")
+    }
+
+  }
+  function settingUangJalanLokal() {
+    var inputAbnormal = document.getElementById("inputAbnormal");
+    var inputGroupTujuan = $('#inputGroupTujuan').val();
+
+    if (inputAbnormal.checked == false && inputGroupTujuan == '4') {
+      $('#tampilTotalUangJalan').addClass("d-none");
+      $('.lokalUangJalan').removeClass("d-none");
+      $('#manualUangJalan').addClass("d-none");
+    }else if (inputAbnormal.checked == true) {
+       $('#tampilTotalUangJalan').addClass("d-none");
+      $('.lokalUangJalan').addClass("d-none");
       $('#manualUangJalan').removeClass("d-none");
     }else{
       $('#tampilTotalUangJalan').removeClass("d-none");
+      $('.lokalUangJalan').addClass("d-none");
       $('#manualUangJalan').addClass("d-none");
     }
   }
@@ -1876,10 +2140,11 @@
       async:true,
       success:function(data){
         var html ='';
+        html+='<option value="">Pilih Rekanan</option>';
         for (var i = 0; i < data.length; i++) {
           html+='<option value="'+data[i].ID+'">'+data[i].NAMA+'</option>';
         }
-        $('#inputRekanan').html(html);
+        $('#pilihRekanan').html(html);
       },
       error:function(data){
 
@@ -1897,11 +2162,30 @@
       async:true,
       success:function(data){
         $('#inputManualUangJalan').val(data)
+        $('#inputTotalUangJalan').val(data);
+        $('#tampilTotalUangJalan').html(formatRupiah(Number(data).toFixed(0), 'Rp. '));
+        
       },
       error:function(data){
         $('#inputManualUangJalan').val(0)
       }
     })
+  }
+  function getPilihanUangJalan() {
+    var inputNoSPJ = $('#inputNoSPJ').val();
+    // $.ajax({
+    //   type:'get',
+    //   dataType:'json',
+    //   cache:false,
+    //   async:true,
+    //   url:url+'/pengajuan/getPilihanUangJalan',
+    //   success:function(data){
+
+    //   },
+    //   error:function(data){
+
+    //   }
+    // })
   }
 
   function berhasil() {

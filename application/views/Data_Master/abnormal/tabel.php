@@ -14,7 +14,7 @@
 				<td><?=$key->NamaSerlok?></td>
 				<td><?=$key->Alamat?></td>
 				<td id="<?=$key->KodeSerlok?>" class="text-center">
-					<a href="javascript:;" class="btn text-dark pilihCustomer" kodeSerlok = "<?=$key->KodeSerlok?>" serlokID = "<?=$key->SERLOK_ID?>" nama = "<?=$key->NamaSerlok?>" biaya="<?=round($key->BIAYA)?>">
+					<a href="javascript:;" class="btn text-dark pilihCustomer" kodeSerlok = "<?=$key->KodeSerlok?>" serlokID = "<?=$key->KodeSerlok?>" deliveryId = "<?=$key->DeliveryID?>" nama = "<?=$key->NamaSerlok?>" biaya="<?=round($key->BIAYA)?>">
 						<?=number_format($key->BIAYA)?>
 					</a>
 				</td>

@@ -63,9 +63,10 @@
                     <label>Status</label>
                     <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
                      <option value="">ALL</option>
-                     <option value="OPEN">OPEN</option>
+                     <option value="OPEN" selected>OPEN</option>
                      <option value="CLOSE">CLOSE</option>
                      <option value="Waiting For Generate">Waiting For Generate</option>
+                     <option value="CANCEL">CANCEL</option>
                     </select>
                   </div>
                 </div>
@@ -119,6 +120,54 @@
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="modal-serlok" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <div class="modal-title">
+              <label>Program SPJ Menemukan Data Outgoing dari Program Serlok. Kendaraan Dengan No TNKB <span id="titleTNKB"></span> Berangkat Ke Customer Berikut:</label>
+            </div>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="inputNoSPJ">
+            <input type="hidden" id="inputNoTNKB">
+            <input type="hidden" id="inputTglSPJ">
+            <input type="hidden" id="groupId">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label>Departure Time</label>
+                  <select class="select2" id="inputDepartureTime" multiple="multiple" data-placeholder="Pilih Departure Time Dari Program Serlok" data-dropdown-css-class="select2-orange" style="width: 100%;color: white !important;">
+                    
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 table-responsive p-0">
+                <table class="table table-hover table-valign-middle table-striped" width="100%">
+                  <thead>
+                    <tr>
+                      <th>Company Name</th>
+                      <th>Plant City</th>
+                      <th>Departure Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="getSerlok">
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bg-orange btn-kps saveCustomerSerlok ladda-button" data-style="expand-right">Tambah Tujuan</button>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <?php $this->load->view('_partial/footer');?>
 </div>
@@ -168,34 +217,72 @@
         }
       });
     });
+     $('#inputDepartureTime').on('change', function(){
+      cekOutGoingSerlok();
+      $('#modal-serlok').modal('show')
+      
+    })
     $('#getTabel').on('click','.reloadTujuan', function(){
       var inputNoSPJ = $(this).attr("noSPJ");
       var inputNoTNKB = $(this).attr("noTNKB");
       var inputTglSPJ = $(this).attr("tglSPJ")
       var groupId = $(this).attr("groupID")
-      console.log(inputNoSPJ)
-      console.log(inputNoTNKB)
-      console.log(inputTglSPJ)
-      console.log(groupId)
-
-
-      $.ajax({
-        type:'post',
-        dataType:'json',
-        data:{inputNoSPJ, inputTglSPJ, inputNoTNKB},
-        url:url+'/pengajuan/saveCustomerSerlok',
-        cache: false,
-        async: true,
-        success: function(data){
-          berhasil();
-          getTabel();
-          cekGroupTujuanBaru(groupId, inputNoSPJ)
-        },
-        error:function(data){
-          gagal()
-        }
-      })
+      $('#inputNoSPJ').val(inputNoSPJ);
+      $('#inputNoTNKB').val(inputNoTNKB);
+      $('#inputTglSPJ').val(inputTglSPJ);
+      $('#groupId').val(groupId);
+      $('#modal-serlok').modal('show')
+      getDepartureTime()
+      cekOutGoingSerlok()
     })
+    var saveCustomerSerlok = $('.saveCustomerSerlok').ladda();
+      saveCustomerSerlok.click(function () {
+      // Start loading
+      saveCustomerSerlok.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var inputNoSPJ = $('#inputNoSPJ').val();
+        var inputTglSPJ = $('#inputTglSPJ').val();
+        var inputNoTNKB = $('#inputNoTNKB').val();
+        var groupId = $('#groupId').val();
+        var data = $('#inputDepartureTime').val();
+        if (data.length >0) {
+          var whereDeparture = " AND b.departure_time  IN ("
+          var jml = data.length-1;
+          for (var i = 0; i < data.length; i++) {
+            whereDeparture+="'"+data[i]+"'";
+            if (i<jml) {
+              whereDeparture+=",";
+            }else{
+              whereDeparture+=")";
+            }
+          }
+        }else{
+          var whereDeparture = '';
+        }
+        $.ajax({
+          type:'post',
+          dataType:'json',
+          data:{inputNoSPJ, inputTglSPJ, inputNoTNKB, whereDeparture},
+          url:url+'/pengajuan/saveCustomerSerlok',
+          cache: false,
+          async: true,
+          success: function(data){
+            berhasil();
+            $('#modal-serlok').modal("hide");
+            cekGroupTujuanBaru(groupId, inputNoSPJ)
+          },
+          error:function(data){
+            gagal()
+          }
+        });
+
+        saveCustomerSerlok.ladda('stop');
+        return false;
+          
+      }, 1000)
+    });
   })
 
   function getTabel() {
@@ -234,11 +321,100 @@
       url:'getGroupTujuan',
       success:function(data){
         if (parseInt(groupId) != parseInt(data)) {
-          updateSaldo();
+          updateSaldo(inputNoSPJ, groupId);
         }
       },
       error:function(data){
         gagal();
+      }
+    })
+  }
+  function updateSaldo(noSPJ, groupId) {
+    $.ajax({
+      type:'post',
+      data:{noSPJ, groupId},
+      dataType:'json',
+      cache:false,
+      async:true,
+      url:url+'/pengajuan/reloadGroupSaldo',
+      success:function(data){
+
+      },
+      error:function(data){
+
+      }
+    })
+  }
+
+  function cekOutGoingSerlok() {
+    var inputNoTNKB = $('#inputNoTNKB').val();
+    var inputTglSPJ = $('#inputTglSPJ').val();
+    var data = $('#inputDepartureTime').val();
+      if (data.length >0) {
+        var whereDeparture = " AND b.departure_time  IN ("
+        var jml = data.length-1;
+        for (var i = 0; i < data.length; i++) {
+          whereDeparture+="'"+data[i]+"'";
+          if (i<jml) {
+            whereDeparture+=",";
+          }else{
+            whereDeparture+=")";
+          }
+        }
+      }else{
+        var whereDeparture = '';
+      }
+    $.ajax({
+      type:'get',
+      data:{inputNoTNKB, inputTglSPJ, whereDeparture},
+      dataType:'json',
+      url:url+'/pengajuan/cekOutGoingSerlok',
+      cache: false,
+      async: true,
+      success: function(data){
+        var jmlData = data.length;
+        var html='';
+        if (jmlData>0) {
+          for (var i = 0; i < data.length; i++) {
+            html+='<tr>';
+            html+='<td>'+data[i].COMPANY_NAME+'</td>';
+            html+='<td>'+data[i].PLANT1_CITY+'</td>';
+            html+='<td>'+data[i].departure_time+'</td>';
+            html+='</tr>';
+          }
+          $('#getSerlok').html(html);
+          $('#titleTNKB').html(inputNoTNKB);
+          
+        }else{
+          Swal.fire(
+            "Data Outgoing di Program Serlok Untuk Kendaraan Dengan No TNKB "+inputNoTNKB+" Pada Tanggal "+inputTglSPJ+" Tidak Ditemukan",
+            "Hubungi PIC Terkait atau Masukan Data Secara Manual",
+            "info")
+        }
+        
+
+      },
+      error: function(data){
+
+      }
+    })
+  }
+
+  function getDepartureTime() {
+    var inputNoTNKB = $('#inputNoTNKB').val();
+    var inputTglSPJ = $('#inputTglSPJ').val();
+    $.ajax({
+      type:'get',
+      data:{inputNoTNKB, inputTglSPJ},
+      dataType:'json',
+      cache:false,
+      async:true,
+      url:url+'/pengajuan/getDepartureTime',
+      success:function(data){
+        $('#inputDepartureTime').html(data);
+      },
+      error:function(data){
+
       }
     })
   }

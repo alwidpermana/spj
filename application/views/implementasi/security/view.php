@@ -704,7 +704,12 @@ foreach ($data as $key): ?>
                         }
                       ?>
                       <center>
-                        <input type="number" id="inputKMOut" class="form-control form-control-sm" value="<?=$kmOut?>" style="width: 75px;" <?=$key->STATUS_PERJALANAN == null?'':'disabled'?>>
+                        <?php if ($key->STATUS_PERJALANAN == null): ?>
+                          <input type="number" id="inputKMOut" class="form-control form-control-sm" value="<?=$kmOut?>" style="width: 200px;" <?=$key->STATUS_PERJALANAN == null?'':'disabled'?>> 
+                        <?php else: ?>
+                          <?=number_format($kmOut)?>
+                        <?php endif ?>
+                        
                       </center>
                     </td>
                   </tr>
@@ -758,7 +763,12 @@ foreach ($data as $key): ?>
                       </td>
                       <td class="text-center">
                         <center>
-                          <input type="number" id="inputKMIn" class="form-control form-control-sm" value="<?=$kmIn?>" style="width: 75px;" <?=$key->STATUS_PERJALANAN == 'OUT'?'':'readonly'?>>
+                          <?php if ($key->STATUS_PERJALANAN == 'OUT'): ?>
+                            <input type="number" id="inputKMIn" class="form-control form-control-sm" value="<?=$kmIn?>" style="width: 200px;" <?=$key->STATUS_PERJALANAN == 'OUT'?'':'readonly'?>> 
+                          <?php else: ?>
+                            <?=number_format($kmIn)?>
+                          <?php endif ?>
+                          
                         </center>
                       </td>
                     <?php endif ?>
@@ -946,8 +956,7 @@ foreach ($data as $key): ?>
           },
           success: function(data){
             if (parseInt(inputVerifCountPIC)==parseInt(data.jumlah)) {
-              saveValidasiOut()
-              
+              cekPICdanKendaraanOut()
             } else {
               if (data.jenis_spj == '2') {
                 $('#modal-aktualPIC').modal("show")
@@ -1201,6 +1210,27 @@ foreach ($data as $key): ?>
         console.log("berhasil menyimpan history NG")
       },
       error: function(data){
+        Swal.fire("Terjadi Error Pada Program","Hubungi Segera Staff IT", "error");
+      }
+    })
+  }
+  function cekPICdanKendaraanOut() {
+    var inputNoSPJ = $('#inputNoSPJ').val();
+    $.ajax({
+      type:'get',
+      data:{inputNoSPJ},
+      dataType:'json',
+      cache:false,
+      async:true,
+      url:url+'/implementasi/cekPICdanKendaraanOut',
+      success:function(data){
+        if (data.status == 'warning') {
+          Swal.fire(data.message,'Hubungi PIC Delivery',data.status);
+        }else{
+          saveValidasiOut()
+        }
+      },
+      error:function(data){
         Swal.fire("Terjadi Error Pada Program","Hubungi Segera Staff IT", "error");
       }
     })

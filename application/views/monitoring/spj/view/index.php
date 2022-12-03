@@ -820,88 +820,110 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <?php 
-                              $kmOut = 0 ;
-                              $kmIn = 0;
-                              foreach ($validasi as $vld): 
-                                $kmOut = $vld->KM_OUT;
-                                $kmIn = $vld->KM_IN;
-                              ?>
-                                <tr>
-                                  <td class="text-left">Keberangkatan</td>
-                                  <td><?=date("d F Y", strtotime($key->RENCANA_BERANGKAT))?></td>
-                                  <td><?=date("H:i", strtotime($key->RENCANA_BERANGKAT))?></td>
-                                  <td><?=date("d F Y", strtotime($vld->KEBERANGKATAN))?></td>
-                                  <td><?=date("H:i", strtotime($vld->KEBERANGKATAN))?></td>
-                                  <td>
-                                    <?php
-                                      $aktualKeberangkatan = date("Y-m-d H:i", strtotime($vld->KEBERANGKATAN));
-                                      $aktualKepulangan = date("Y-m-d H:i", strtotime($vld->KEPULANGAN));
-                                      $aktualBerangkat = date("Y-m-d", strtotime($vld->KEBERANGKATAN));
-                                      $aktualBerangkatJam = date("H:i", strtotime($vld->KEBERANGKATAN));
-                                      $rencanaBerangkat = date("Y-m-d", strtotime($key->RENCANA_BERANGKAT));
-                                      $rencanaBerangkat2 = date('H:i', strtotime($key->RENCANA_BERANGKAT));
-                                      $rBerJam = date_create($rencanaBerangkat2);
-                                      $aBerJam = date_create($aktualBerangkatJam);
-                                      $gapBerangkatJam = date_diff($rBerJam, $aBerJam);
+                              <?php if (count($validasi)>0): ?>
+                                <?php 
+                                  $kmOut = 0 ;
+                                  $kmIn = 0;
+                                  foreach ($validasi as $vld): 
+                                    $kmOut = $vld->KM_OUT;
+                                    $kmIn = $vld->KM_IN;
+                                  ?>
+                                    <tr>
+                                      <td class="text-left">Keberangkatan</td>
+                                      <td><?=date("d F Y", strtotime($key->RENCANA_BERANGKAT))?></td>
+                                      <td><?=date("H:i", strtotime($key->RENCANA_BERANGKAT))?></td>
+                                      <td><?=date("d F Y", strtotime($vld->KEBERANGKATAN))?></td>
+                                      <td><?=date("H:i", strtotime($vld->KEBERANGKATAN))?></td>
+                                      <td>
+                                        <?php
+                                          $aktualKeberangkatan = date("Y-m-d H:i", strtotime($vld->KEBERANGKATAN));
+                                          $aktualKepulangan = date("Y-m-d H:i", strtotime($vld->KEPULANGAN));
+                                          $aktualBerangkat = date("Y-m-d", strtotime($vld->KEBERANGKATAN));
+                                          $aktualBerangkatJam = date("H:i", strtotime($vld->KEBERANGKATAN));
+                                          $rencanaBerangkat = date("Y-m-d", strtotime($key->RENCANA_BERANGKAT));
+                                          $rencanaBerangkat2 = date('H:i', strtotime($key->RENCANA_BERANGKAT));
+                                          $rBerJam = date_create($rencanaBerangkat2);
+                                          $aBerJam = date_create($aktualBerangkatJam);
+                                          $gapBerangkatJam = date_diff($rBerJam, $aBerJam);
 
-                                      $rBer = date_create($rencanaBerangkat);
-                                      $aBer = date_create($aktualBerangkat);
-                                      $gapBerangkat = date_diff($rBer, $aBer);
-                                      if ($aktualBerangkat == $rencanaBerangkat) {
-                                        
-                                        echo $gapBerangkatJam->h.' Jam '.$gapBerangkatJam->i.' Menit';
-                                      } else {
-                                        
-                                         
-                                        echo $gapBerangkat->d.' Hari '.$gapBerangkatJam->h.' Jam '.$gapBerangkatJam->i.' Menit';
-                                      }
-                                      
-                                    ?>
-                                  </td>
-                                  <td><?=str_replace(',', '.', number_format($vld->KM_OUT, 0))?></td>
-                                </tr>
-                                <tr>
-                                  <td class="text-left">Kepulangan</td>
-                                  <td><?=date("d F Y", strtotime($key->RENCANA_PULANG))?></td>
-                                  <td><?=date("H:i", strtotime($key->RENCANA_PULANG))?></td>
-                                  <?php if ($key->STATUS_PERJALANAN == 'IN'): ?>
-                                    <td><?=date("d F Y", strtotime($vld->KEPULANGAN))?></td>
-                                    <td><?=date("H:i", strtotime($vld->KEPULANGAN))?></td>
-                                    <td>
-                                      <?php
-                                          $aktualPulang = $vld->KEPULANGAN == null?date("Y-m-d"):date("Y-m-d", strtotime($vld->KEPULANGAN));
-                                          $aktualPulangJam = $vld->KEPULANGAN == null?date("H:i"):date("H:i", strtotime($vld->KEPULANGAN));
-                                          $rencanaPulang = date("Y-m-d", strtotime($key->RENCANA_PULANG));
-                                          $rencanaPulang2 = date('H:i', strtotime($key->RENCANA_PULANG));
-                                          $rBerJam = date_create($rencanaPulang2);
-                                          $aBerJam = date_create($aktualPulangJam);
-                                          $gapPulangJam = date_diff($rBerJam, $aBerJam);
-
-                                          $rBer = date_create($rencanaPulang);
-                                          $aBer = date_create($aktualPulang);
-                                          $gapPulang = date_diff($rBer, $aBer);
-                                          if ($aktualPulang == $rencanaPulang) {
+                                          $rBer = date_create($rencanaBerangkat);
+                                          $aBer = date_create($aktualBerangkat);
+                                          $gapBerangkat = date_diff($rBer, $aBer);
+                                          if ($aktualBerangkat == $rencanaBerangkat) {
                                             
-                                            echo $gapPulangJam->h.' Jam '.$gapPulangJam->i.' Menit';
+                                            echo $gapBerangkatJam->h.' Jam '.$gapBerangkatJam->i.' Menit';
                                           } else {
                                             
                                              
-                                            echo $gapPulang->d.' Hari '.$gapPulangJam->h.' Jam '.$gapPulangJam->i.' Menit';
+                                            echo $gapBerangkat->d.' Hari '.$gapBerangkatJam->h.' Jam '.$gapBerangkatJam->i.' Menit';
                                           }
-                                        
-                                      ?>
-                                    </td>
-                                    <td><?=str_replace(',', '.', number_format($vld->KM_IN, 0))?></td>  
-                                  <?php else: ?>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                  <?php endif ?>
-                                  
-                                </tr>    
-                              <?php endforeach ?>
+                                          
+                                        ?>
+                                      </td>
+                                      <td><?=str_replace(',', '.', number_format($vld->KM_OUT, 0))?></td>
+                                    </tr>
+                                    <tr>
+                                      <td class="text-left">Kepulangan</td>
+                                      <td><?=date("d F Y", strtotime($key->RENCANA_PULANG))?></td>
+                                      <td><?=date("H:i", strtotime($key->RENCANA_PULANG))?></td>
+                                      <?php if ($key->STATUS_PERJALANAN == 'IN'): ?>
+                                        <td><?=date("d F Y", strtotime($vld->KEPULANGAN))?></td>
+                                        <td><?=date("H:i", strtotime($vld->KEPULANGAN))?></td>
+                                        <td>
+                                          <?php
+                                              $aktualPulang = $vld->KEPULANGAN == null?date("Y-m-d"):date("Y-m-d", strtotime($vld->KEPULANGAN));
+                                              $aktualPulangJam = $vld->KEPULANGAN == null?date("H:i"):date("H:i", strtotime($vld->KEPULANGAN));
+                                              $rencanaPulang = date("Y-m-d", strtotime($key->RENCANA_PULANG));
+                                              $rencanaPulang2 = date('H:i', strtotime($key->RENCANA_PULANG));
+                                              $rBerJam = date_create($rencanaPulang2);
+                                              $aBerJam = date_create($aktualPulangJam);
+                                              $gapPulangJam = date_diff($rBerJam, $aBerJam);
+
+                                              $rBer = date_create($rencanaPulang);
+                                              $aBer = date_create($aktualPulang);
+                                              $gapPulang = date_diff($rBer, $aBer);
+                                              if ($aktualPulang == $rencanaPulang) {
+                                                
+                                                echo $gapPulangJam->h.' Jam '.$gapPulangJam->i.' Menit';
+                                              } else {
+                                                
+                                                 
+                                                echo $gapPulang->d.' Hari '.$gapPulangJam->h.' Jam '.$gapPulangJam->i.' Menit';
+                                              }
+                                            
+                                          ?>
+                                        </td>
+                                        <td><?=str_replace(',', '.', number_format($vld->KM_IN, 0))?></td>  
+                                      <?php else: ?>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                      <?php endif ?>
+                                      
+                                    </tr>    
+                                  <?php endforeach ?>  
+                              <?php else: ?>
+                                <tr>
+                                  <td>Keberangkatan</td>
+                                  <td><?=date("Y-m-d", strtotime($key->RENCANA_BERANGKAT))?></td>
+                                  <td><?=date("H:i", strtotime($key->RENCANA_BERANGKAT))?></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                </tr>
+                                <tr>
+                                  <td>Kepulangan</td>
+                                  <td><?=date("Y-m-d", strtotime($key->RENCANA_PULANG))?></td>
+                                  <td><?=date("H:i", strtotime($key->RENCANA_PULANG))?></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                </tr>
+                              <?php endif ?>
+                              
                             </tbody>
                             <tfoot>
                               <tr>

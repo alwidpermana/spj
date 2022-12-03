@@ -780,7 +780,7 @@ class Data_Master extends CI_Controller {
 		$offset = $this->input->get("offset")==''?0:$this->input->get("offset")+1;
 		$limit = $this->input->get("limit");
 		$where = " WHERE NO_URUT >= $offset AND NO_URUT < $offset + $limit";
-		$data['data'] = $this->M_Data_Master->getBiayaAbnormal($filSearch, $where)->result();
+		$data['data'] = $this->M_Data_Master->getBiayaAbnormalNew($filSearch, $where)->result();
 		$this->load->view("Data_Master/abnormal/tabel", $data);
 	}
 	public function getPaggingAbnormal()
@@ -790,7 +790,7 @@ class Data_Master extends CI_Controller {
 		$limit = $this->input->get("limit");
 		$data['offset'] = $offset;
 		$data['limit'] = $limit;
-		$data['data'] = $this->M_Data_Master->getBiayaAbnormal($filSearch,'')->num_rows();
+		$data['data'] = $this->M_Data_Master->getBiayaAbnormalNew($filSearch,'')->num_rows();
 		$this->load->view("_partial/paging", $data);
 	}
 	public function saveBiayaAbnormal()
@@ -798,7 +798,8 @@ class Data_Master extends CI_Controller {
 		$inputBiaya = $this->input->post("inputBiaya");
 		$inputSerlokID = $this->input->post("inputSerlokID");
 		$inputKodeSerlok = $this->input->post("inputKodeSerlok");
-		$data = $this->M_Data_Master->saveBiayaAbnormal($inputBiaya, $inputSerlokID, $inputKodeSerlok);
+		$inputDeliveryID = $this->input->post("inputDeliveryID");
+		$data = $this->M_Data_Master->saveBiayaAbnormal($inputBiaya, $inputSerlokID, $inputKodeSerlok, $inputDeliveryID);
 		echo json_encode($data);
 	}
 	public function saveOtoritasAkunSPJ()

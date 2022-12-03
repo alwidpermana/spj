@@ -14,6 +14,7 @@ class M_Serlok extends CI_Model {
 				(
 					SELECT
 						id,
+						KPS_CUSTOMER_ID,
 						ALAMAT_LENGKAP_PLANT,
 						COMPANY_NAME,
 						nama_kabkota,
@@ -104,7 +105,7 @@ class M_Serlok extends CI_Model {
 		$dbserlok = $this->load->database("dbserlok", TRUE);
 		return $dbserlok->query($sql);
 	}
-	public function getSPJByOutGoing2($noTNKB, $tglSPJ)
+	public function getSPJByOutGoing2($noTNKB, $tglSPJ, $where)
 	{
 		$sql = "SELECT DISTINCT
 					Q1.*,
@@ -116,9 +117,10 @@ class M_Serlok extends CI_Model {
 						VEHICLE_NO,
 						DELIVERY_DATE,
 						PLANT1_CITY,
-						d.KPS_CUSTOMER_ID AS ID,
+						d.kps_customer_delivery_setup AS ID,
 						d.KPS_CUSTOMER_ID,
-						ID_CITY_SETUP AS ID_KAB_KOTA
+						ID_CITY_SETUP AS ID_KAB_KOTA,
+						b.departure_time
 					FROM
 						kps_vehicle a
 					JOIN
@@ -129,6 +131,7 @@ class M_Serlok extends CI_Model {
 					WHERE
 						VEHICLE_NO = '$noTNKB' AND
 						DELIVERY_DATE = '$tglSPJ'
+						$where
 				)Q1
 				INNER JOIN
 				(
@@ -148,5 +151,62 @@ class M_Serlok extends CI_Model {
 				)Q3 ON Q1.ID_KAB_KOTA = Q3.ID_KK";
 		$dbserlok = $this->load->database("dbserlok", TRUE);
 		return $dbserlok->query($sql);
+	}
+	public function getDeparture($noTNKB, $tglSPJ)
+	{
+		$sql = "SELECT DISTINCT
+					b.departure_time
+				FROM
+					kps_vehicle a
+				JOIN
+					kps_outgoing_finished_good b
+				ON b.KPS_VEHICLE_ID = a.KPS_VEHICLE_ID
+				JOIN kps_customer_delivery_setup d 
+				ON d.KPS_CUSTOMER_DELIVERY_SETUP = b.KPS_CUSTOMER_DELIVERY_SETUP_ID 
+				WHERE
+					VEHICLE_NO = '$noTNKB' AND
+					DELIVERY_DATE = '$tglSPJ'";
+		$dbserlok = $this->load->database("dbserlok", TRUE);
+		return $dbserlok->query($sql);
+	}
+	public function saveDeliverySetup()
+	{
+		
+		$data = $this->db->query("SELECT MAX(DELIVERY_SETUP_ID) AS ID FROM SPJ_DELIVERY_SETUP_SERLOK")->row();
+		$jml= $data->ID == null ? 0 : $data->ID;
+		$getSerlok = "SELECT
+						KPS_CUSTOMER_DELIVERY_SETUP,
+						KPS_CUSTOMER_ID,
+						PLANT1_CITY
+					FROM
+						kps_customer_delivery_setup
+					WHERE
+						KPS_CUSTOMER_DELIVERY_SETUP > $jml
+					ORDER BY
+						KPS_CUSTOMER_DELIVERY_SETUP ASC";
+		$dbserlok = $this->load->database("dbserlok", TRUE);
+		$serlok = $dbserlok->query($getSerlok);
+		$id = 0 ;
+		$serlokId = 0;
+		$plant = '';
+		if ($serlok->num_rows()>0) {
+			foreach ($serlok->result() as $key) {
+				$id = $key->KPS_CUSTOMER_DELIVERY_SETUP;
+				$serlokId = $key->KPS_CUSTOMER_ID;
+				$plant = $key->PLANT1_CITY;
+				$getData = $this->db->query("SELECT DELIVERY_SETUP_ID FROM SPJ_DELIVERY_SETUP_SERLOK WHERE DELIVERY_SETUP_ID = $id  AND SerlokId = $serlokId");
+				if ($getData->num_rows()==0) {
+					$sql = "INSERT INTO SPJ_DELIVERY_SETUP_SERLOK(DELIVERY_SETUP_ID, SerlokId, PlantCity)VALUES($id, $serlokId, '$plant')";
+				}else{
+					$sql = "UPDATE SPJ_DELIVERY_SETUP_SERLOK SET PlantCity = '$plant' WHERE DELIVERY_SETUP_ID = $id AND SerlokId = $serlokId";
+				}
+				$save = $this->db->query($sql);
+
+			}
+		}else{
+			$save = true;
+		}
+
+		return $save;
 	}
 }

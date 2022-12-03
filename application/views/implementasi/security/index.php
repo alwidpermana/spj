@@ -466,6 +466,23 @@
     });
   })
   
+  function cekStatusPerjalanan(scan) {
+    $.ajax({
+      type:'get',
+      data:{scan},
+      dataType:'json',
+      url:url+'/implementasi/cekStatusPerjalanan',
+      cache:false,
+      async:true,
+      success:function(data){
+        
+      },
+      error:function(data){
+
+      }
+    })
+  }
+
   function cekSPJ(scan) {
     $.ajax({
       type:'get',

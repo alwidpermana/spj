@@ -6,9 +6,7 @@
 			<td>Nama/Perusahaan</td>
 			<td>Kota / Kabupaten</td>
 			<td>Group Tujuan</td>
-			<!-- <?php if ($jenis>1): ?> -->
-				<td></td>
-			<!-- <?php endif ?> -->
+			<td></td>
 		</tr>
 	</thead>
 	<tbody>
@@ -21,13 +19,11 @@
 			<td><?=$key->SERLOK_COMPANY?></td>
 			<td><?=$key->SERLOK_KOTA?></td>
 			<td><?=$key->NAMA_GROUP?></td>
-			<!-- <?php if ($jenis>1): ?> -->
-				<td>
-					<a href="javascript:;" class="btn text-kps text-warning hapusLokasi" data="<?=$key->ID_LOKASI?>">
-						<i class="fas fa-trash-alt"></i>
-					</a>
-				</td>
-			<!-- <?php endif ?> -->
+			<td>
+				<a href="javascript:;" class="btn bg-orange btn-kps hapusLokasi" data="<?=$key->ID_LOKASI?>" nama="<?=$key->SERLOK_COMPANY?>">
+					<i class="fas fa-trash-alt"></i>
+				</a>
+			</td>
 		</tr>
 	<?php endforeach ?>
 	</tbody>

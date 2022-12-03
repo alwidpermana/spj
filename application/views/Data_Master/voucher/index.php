@@ -161,7 +161,7 @@
                     <div class="row">
                       <div class="col-md-4">
                         <div id="form-group">
-                          <input type="text" id="inputKodePertama" class="form-control form-control-sm" readonly value="SPJ-VCH-">
+                          <input type="text" id="inputKodePertama" class="form-control form-control-sm" readonly value="KPSVC-">
                         </div>
                       </div>
                       <div class="col-md-4">

@@ -10,6 +10,7 @@ class Pengajuan extends CI_Controller {
 		$this->load->model('M_Pengajuan');
 		$this->load->model('M_Serlok');
 		$this->load->model('M_Cash_Flow');
+		$this->load->model('M_Monitoring');
 	}
 	/**
 	 * Index Page for this controller.
@@ -85,7 +86,8 @@ class Pengajuan extends CI_Controller {
         $params['size'] = 5;
         $params['savename'] = FCPATH.$config['imagedir'].$image_name; //simpan image QR CODE ke folder assets/images/
         $this->ciqrcode->generate($params); // fungsi untuk generate QR CODE
-
+        $aktivitas = "Tambah Baru SPJ Dengan Nomor ".$inputNoSPJ." Untuk SPJ Tanggal ".$inputTglSPJ;
+        $this->M_Monitoring->saveSPJLog('New',$inputNoSPJ,$aktivitas);
         
         echo json_encode($data);
 	}
@@ -116,10 +118,13 @@ class Pengajuan extends CI_Controller {
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$inputNoTNKB = $this->input->post("inputNoTNKB");
 		$inputTglSPJ = $this->input->post("inputTglSPJ");
+		$whereDeparture = $this->input->post("whereDeparture");
 		$this->db->query("DELETE FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$inputNoSPJ'");
-		$getSerlok = $this->M_Serlok->getSPJByOutGoing2($inputNoTNKB, $inputTglSPJ);
+		$getSerlok = $this->M_Serlok->getSPJByOutGoing2($inputNoTNKB, $inputTglSPJ, $whereDeparture);
+		$idGroup = 0;
 		foreach ($getSerlok->result() as $key) {
-			$serlokID = $key->ID;
+			$serlokID = $key->KPS_CUSTOMER_ID;
+			$deliveryId = $key->ID;
 			$serlokAlamat = $key->PLANT1_CITY;
 			$serlokPerusahaan = $key->COMPANY_NAME;
 			$serlokKota = $key->nama_kabkota;
@@ -133,8 +138,13 @@ class Pengajuan extends CI_Controller {
 			// }
 			$kota = substr($serlokKota, 0, 5) == 'KOTA ' ? substr($serlokKota, 5):$serlokKota;
 			$group = $this->M_Pengajuan->findGroupTujuan($kota);
-			$data = $this->M_Pengajuan->saveLokasiTujuan($group, 'Customer', $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota);
+			$data = $this->M_Pengajuan->saveLokasiTujuan($group, 'Customer', $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota, $deliveryId);
+			$idGroup = $group>=$idGroup ? $group : $idGroup;
 		}
+
+		$aktivitas = "Tambah Data Lokasi Mengambil Data Otomatis Berdasarkan Outgoing Serlok";
+        $this->M_Monitoring->saveSPJLog('New',$inputNoSPJ,$aktivitas);
+		$this->M_Pengajuan->saveGroupTujuanSPJ($inputNoSPJ, $idGroup);
 		echo json_encode($data);
 	}
 	public function getCustomerSerlok()
@@ -166,6 +176,12 @@ class Pengajuan extends CI_Controller {
 			$serlokAlamat = $this->input->post("inputAlamat");
 			$serlokPerusahaan = $this->input->post("inputNamaTempat");
 			$serlokKota = $this->input->post("inputKotaKabupaten");
+		}else if($objek == 'Rekanan'){
+			$serlokID = 0;
+			$deliveryId = 0;
+			$serlokAlamat = $inputPerusahaan;
+			$serlokPerusahaan = $inputPerusahaan;
+			$serlokKota = 'BANDUNG';
 		}else{
 			$serlok = $this->M_Serlok->getCustomerByGroup($query='', $inputPerusahaan)->result();
 			$serlokID = '';
@@ -173,7 +189,8 @@ class Pengajuan extends CI_Controller {
 			$serlokPerusahaan = '';
 			$serlokKota = '';
 			foreach ($serlok as $key) {
-				$serlokID = $key->id;
+				$serlokID = $key->KPS_CUSTOMER_ID;
+				$deliveryId = $key->id;
 				$serlokAlamat = $key->ALAMAT_LENGKAP_PLANT;
 				$serlokPerusahaan = $key->COMPANY_NAME;
 				$serlokKota = $key->nama_kabkota;
@@ -181,16 +198,32 @@ class Pengajuan extends CI_Controller {
 		}
 		
 
-		$data = $this->M_Pengajuan->saveLokasiTujuan($inputGroupTujuan, $inputObjek, $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota);
+		$data = $this->M_Pengajuan->saveLokasiTujuan($inputGroupTujuan, $inputObjek, $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota, $deliveryId);
+		$aktivitas = "Tambah Data Manual Lokasi Ke ".$inputObjek." ".$serlokPerusahaan;
+        $this->M_Monitoring->saveSPJLog('New',$inputNoSPJ,$aktivitas);
 		echo json_encode($data);
-
 	}
 	public function cekOutGoingSerlok()
 	{
 		$inputNoTNKB = $this->input->get("inputNoTNKB");
 		$inputTglSPJ = $this->input->get("inputTglSPJ");
-		$data = $this->M_Serlok->getSPJByOutGoing2($inputNoTNKB, $inputTglSPJ)->result();
+		$whereDeparture = $this->input->get("whereDeparture");
+		$data = $this->M_Serlok->getSPJByOutGoing2($inputNoTNKB, $inputTglSPJ, $whereDeparture)->result();
 		echo json_encode($data);
+	}
+	public function getDepartureTime()
+	{
+		$inputNoTNKB = $this->input->get("inputNoTNKB");
+		$inputTglSPJ = $this->input->get("inputTglSPJ");
+		$data = $this->M_Serlok->getDeparture($inputNoTNKB, $inputTglSPJ);
+		$html = '';
+		if ($data->num_rows()>0) {
+			foreach ($data->result() as $key) {
+				$html .='<option value="'.date("H:i", strtotime($key->departure_time)).'">'.date("H:i", strtotime($key->departure_time)).'</option>';	
+			}
+		}
+		echo json_encode($html);
+		
 	}
 	public function updateGroupTujuan()
 	{
@@ -224,14 +257,19 @@ class Pengajuan extends CI_Controller {
 										CASE 
 											WHEN JENIS_PIC = 'Sopir' OR JENIS_PIC = 'Pendamping' THEN JENIS_PIC
 											ELSE JABATAN
-										END AS JENIS_PIC
+										END AS JENIS_PIC,
+										TGL_SPJ
 									FROM
-										SPJ_PENGAJUAN_PIC
+										SPJ_PENGAJUAN_PIC a
+									INNER JOIN
+										SPJ_PENGAJUAN b ON
+									a.NO_PENGAJUAN = b.NO_SPJ
 									WHERE
 										NO_PENGAJUAN= '$inputNoSPJ'
 									AND UANG_SAKU > 0");
+		$save = true;
 		foreach ($getPIC->result() as $key) {
-			$objek = $key->OBJEK;
+			$objek = date('l', strtotime($key->TGL_SPJ)) == 'Saturday' ? 'Rental':$key->OBJEK;
 			$pic = $key->JENIS_PIC;
 			$id = $key->ID_PIC;
 			$uang= $this->M_Pengajuan->hitungUangSaku($inputJenisSPJ, $objek, $pic, $inputGroupTujuan, $inputJenisKendaraan);
@@ -305,12 +343,13 @@ class Pengajuan extends CI_Controller {
 	public function hitungUangSaku()
 	{
 		$anjing = $this->input->get("inputJenisSPJ"); 
-		$inputSubjek = $this->input->get("inputSubjek"); 
+		$inputTglSPJ = $this->input->get("inputTglSPJ");
+		$inputSubjek = date('l', strtotime($inputTglSPJ)) == 'Saturday' ? 'Rental' : $this->input->get("inputSubjek"); 
 		$inputPIC = $this->input->get("jabatanPIC"); 
 		$inputGroupTujuan = $this->input->get("inputGroupTujuan"); 
 		$inputJenisKendaraan = $this->input->get("inputJenisKendaraan");
 		$nik = $this->input->get("nik");
-		$inputTglSPJ = $this->input->get("inputTglSPJ");
+		
 		$inputTglBerangkat = $this->input->get("inputTglBerangkat");
         $inputJamBerangkat = $this->input->get("inputJamBerangkat");
         $inputTglPulang = $this->input->get("inputTglPulang");
@@ -324,6 +363,7 @@ class Pengajuan extends CI_Controller {
         $jam    =floor($diff / (60 * 60));
         $jam2 = 0;
         $totalJam = 0;
+
         if ($inputKendaraan == 'Rental' && $inputPIC == 'Sopir') {
         	$hasil = array('BIAYA' =>0 ,'Menggunakan Kendaraan Rental' );
         }else{
@@ -331,26 +371,6 @@ class Pengajuan extends CI_Controller {
         
 	        if ($cekPIC->num_rows()>0) {
 	        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
-
-	    //     	foreach ($cekPIC->result() as $pic) {
-	    //     		$jam2 += $pic->DIFF_HOUR;	
-	    //     	}
-
-	    //     	$totalJam = $jam+$jam2;
-	    //     	if ($totalJam<=14) {
-	    //     		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
-	    //     	}else{
-	    //     		$data = $this->M_Pengajuan->hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan);
-				
-					// if ($data->num_rows()>0) {
-					// 	foreach ($data->result() as $key) {
-					// 		$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
-					// 	}
-					// } else {
-					// 	$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-					// }
-	    //     	}
-
 	        } else {
 	        	$cekRumsu = $this->M_Pengajuan->cekOtoritasUangRumsum($nik)->row();
 	        	if ($cekRumsu->OTORITAS_UANG_SAKU == 'Y') {
@@ -396,43 +416,47 @@ class Pengajuan extends CI_Controller {
         $totalJam = 0;
 		$cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $inputPIC);
         
-        if ($cekPIC->num_rows()>0) {
-        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
-    //     	foreach ($cekPIC->result() as $pic) {
-    //     		$jam2 += $pic->DIFF_HOUR;	
-    //     	}
+        if ($inputGroupTujuan == '10') {
+        	$hasil = array('BIAYA' => '20000', 'KET'=>'Tersedia');
+        }else{
+        	if ($cekPIC->num_rows()>0) {
+	        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+	    //     	foreach ($cekPIC->result() as $pic) {
+	    //     		$jam2 += $pic->DIFF_HOUR;	
+	    //     	}
 
-    //     	$totalJam = $jam+$jam2;
-    //     	if ($totalJam<=14) {
-    //     		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
-    //     	}else{
-    //     		$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
-			
-				// if ($data->num_rows()>0) {
-				// 	foreach ($data->result() as $key) {
-				// 		$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
-				// 	}
-				// } else {
-				// 	$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-				// }
-    //     	}
-
-        } else {
-        	$cekRumsu = $this->M_Pengajuan->cekOtoritasUangRumsum($inputPIC)->row();
-        	if ($cekRumsu->OTORITAS_UANG_MAKAN == 'Y') {
-        		$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
+	    //     	$totalJam = $jam+$jam2;
+	    //     	if ($totalJam<=14) {
+	    //     		$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+	    //     	}else{
+	    //     		$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
 				
-				if ($data->num_rows()>0) {
-					foreach ($data->result() as $key) {
-						$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+					// if ($data->num_rows()>0) {
+					// 	foreach ($data->result() as $key) {
+					// 		$hasil = array('BIAYA' => $key->BIAYA,'KET'=>'Tersedia' );				
+					// 	}
+					// } else {
+					// 	$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
+					// }
+	    //     	}
+
+	        } else {
+	        	$cekRumsu = $this->M_Pengajuan->cekOtoritasUangRumsum($inputPIC)->row();
+	        	if ($cekRumsu->OTORITAS_UANG_MAKAN == 'Y') {
+	        		$data = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
+					
+					if ($data->num_rows()>0) {
+						foreach ($data->result() as $key) {
+							$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+						}
+					} else {
+						$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
 					}
-				} else {
-					$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
-				}
-        	}else{
-        		$hasil = array('BIAYA' =>0 ,'KET'=>'OTORITAS UANG MAKAN = N');
-        	}
-        	
+	        	}else{
+	        		$hasil = array('BIAYA' =>0 ,'KET'=>'OTORITAS UANG MAKAN = N');
+	        	}
+	        	
+	        }
         }
 		echo json_encode($hasil);
 	}
@@ -464,6 +488,8 @@ class Pengajuan extends CI_Controller {
         $inputJabatan = $this->input->post("inputJabatan");
         $inputNamaPIC = $this->input->post("inputNamaPIC");
 		$data= $this->M_Pengajuan->savePIC($inputJenisPIC, $inputSubjek, $inputPIC, $inputUangSaku, $inputUangMakan, $inputSortir, $inputNoSPJ, $inputGroupTujuan, $inputDepartemen, $inputSubDepartemen, $inputJabatan, $inputNamaPIC);
+		$aktivitas = "Tambah Data PIC ".$inputSubjek." Dengan NIK= ".$inputPIC." dan Nama= ".$inputNamaPIC;
+        $this->M_Monitoring->saveSPJLog('New',$inputNoSPJ,$aktivitas);
 		echo json_encode($data);
 	}
 	public function getPengajuanPIC()
@@ -499,7 +525,11 @@ class Pengajuan extends CI_Controller {
 		$tipe = $this->input->post("tipe");
 		$kendaraan = $this->input->post("kendaraan");
 		$inputRekananKendaraan = $this->input->post("inputRekananKendaraan");
-		$data = $this->M_Pengajuan->saveKendaraanSPJ($inv, $jenis, $noSPJ, $tnkb, $merk, $tipe, $kendaraan, $inputRekananKendaraan);
+		$inputRekanan = $this->input->post("inputRekanan");
+		$data = $this->M_Pengajuan->saveKendaraanSPJ($inv, $jenis, $noSPJ, $tnkb, $merk, $tipe, $kendaraan, $inputRekananKendaraan, $inputRekanan);
+		$ketRekanan = $kendaraan =='Rental' ? " Rekanan = ".$inputRekananKendaraan:"";
+		$aktivitas = "Tambah Data Kendaraan ".$kendaraan."".$ketRekanan." Dengan No TNKB = ".$tnkb ;
+        $this->M_Monitoring->saveSPJLog('New',$noSPJ,$aktivitas);
 		echo json_encode($data);
 	}
 	public function saveGroupTujuanSPJ()
@@ -512,6 +542,10 @@ class Pengajuan extends CI_Controller {
 	public function getUangJalanSPJ()
 	{
 		$inputNoSPJ = $this->input->get("inputNoSPJ");
+		$inputKendaraan = $this->input->get("inputKendaraan");
+		$inputJenisKendaraan = $this->input->get("inputJenisKendaraan");
+		
+		
 		$data = $this->M_Pengajuan->getUangJalanSPJ($inputNoSPJ)->row();
 		echo json_encode($data);
 	}
@@ -536,13 +570,21 @@ class Pengajuan extends CI_Controller {
 	public function hapusLokasi()
 	{
 		$id = $this->input->post("id");
+		$inputNoSPJ = $this->input->post("inputNoSPJ");
+		$nama = $this->input->post("nama");
 		$data = $this->M_Pengajuan->hapusLokasi($id);
+		$aktivitas = "Hapus Data Lokasi ".$nama;
+        $this->M_Monitoring->saveSPJLog('New',$inputNoSPJ,$aktivitas);
 		echo json_encode($data);
 	}
 	public function hapusPIC()
 	{
 		$id = $this->input->post("id");
+		$nama = $this->input->post("nama");
+		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$data = $this->M_Pengajuan->hapusPIC($id);
+		$aktivitas = "Hapus Data PIC ".$nama;
+        $this->M_Monitoring->saveSPJLog('New',$inputNoSPJ,$aktivitas);
 		echo json_encode($data);
 	}
 	public function saveSPJ()
@@ -558,29 +600,35 @@ class Pengajuan extends CI_Controller {
 			$oldKasbon = $kb->TOTAL;
 		}
 
-
-		$data= $this->M_Pengajuan->saveSPJ();
+		$getVoucher = $this->M_Data_Master->getNoVoucherNew()->row();
+		$newVoucher = $getVoucher->NO_VOUCHER;
+		$data= $this->M_Pengajuan->saveSPJ($newVoucher);
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$cek = $this->db->query("SELECT ID_PIC FROM SPJ_PENGAJUAN_PIC WHERE NO_PENGAJUAN = '$inputNoSPJ' AND JENIS_PIC = 'Manajemen'");
 		if ($cek->num_rows()>0) {
 			$this->M_Pengajuan->savePICManajemen($inputNoSPJ);	
 		}
 		// $this->M_Pengajuan->saveKasbon();
+		$this->M_Pengajuan->updateFlagTrip($inputNoSPJ);
+		$inputGroupTujuan = $this->input->post("inputGroupTujuan");
 		$inputTotalUangSaku = $this->input->post("inputTotalUangSaku");
         $inputTotalUangMakan = $this->input->post("inputTotalUangMakan");
         $inputTotalUangJalan = $this->input->post("inputTotalUangJalan");
+        $inputTambahanUangJalan = $this->input->post("inputTambahanUangJalan");
         $inputBBM = $this->input->post("inputBBM");
         $inputTOL = $this->input->post("inputTOL");
         $inputMediaBBM = $this->input->post("inputMediaBBM");
         $inputMediaTOL = $this->input->post("inputMediaTOL");
-        if ($inputTotalUangSaku != 0 && $inputTotalUangMakan != 0 && $inputTotalUangJalan != 0) {
-        	$bbmSPJ = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
-	        $tolSPJ = $inputMediaTOL == 'Kasbon' ? $inputTol : 0;
-	        $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $inputTotalUangJalan + $bbmSPJ + $tolSPJ;
-	        $status = $this->input->post("status");
-			$this->updateSaldo($inputNoSPJ, $totalSPJ, $oldKasbon, $status);
+        $bbmSPJ = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
+        $tolSPJ = $inputMediaTOL == 'Kasbon' ? $inputTol : 0;
+        $totalUangJalan = $inputGroupTujuan == '4' ? $inputTotalUangJalan + $inputTambahanUangJalan : $inputTotalUangJalan;
+        $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $totalUangJalan + $bbmSPJ + $tolSPJ;
+        $status = $this->input->post("status");
+        if ($totalSPJ > 0) {
+        	$this->updateSaldo($inputNoSPJ, $totalSPJ, $oldKasbon, $status);
         }
-        
+        $aktivitas = "Saved Data SPJ Dengan Kasbon Sebesar = Rp.".number_format($oldKasbon);
+        $this->M_Monitoring->saveSPJLog('New',$inputNoSPJ,$aktivitas);
 		echo json_encode($data);
 	}
 	public function cekAdaDriver()
@@ -597,6 +645,8 @@ class Pengajuan extends CI_Controller {
 		$inputTglPulang= $this->input->post("inputTglPulang"); 
 		$inputJamPulang= $this->input->post("inputJamPulang");
 		$data= $this->M_Pengajuan->saveRencanaBerangkat($inputNoSPJ, $inputTglBerangkat, $inputJamBerangkat, $inputTglPulang, $inputJamPulang);
+		$aktivitas = "Tambah Rencana Keberangkatan Jam ".$inputJamBerangkat." dan Kepulangan Jam ".$inputJamPulang;
+        $this->M_Monitoring->saveSPJLog('New',$inputNoSPJ,$aktivitas);
 		echo json_encode($data);
 	}
 	public function hapusPICDriverCzMarketing()
@@ -743,6 +793,8 @@ class Pengajuan extends CI_Controller {
 	{
 		$noSPJ = $this->input->post("noSPJ");
 		$data = $this->M_Pengajuan->hapusPengajuan($noSPJ);
+		$aktivitas = "Hapus Data SPJ";
+        $this->M_Monitoring->saveSPJLog('New',$noSPJ,$aktivitas);
 		echo json_encode($data);
 	}
 	public function getKotaAPI()
@@ -780,6 +832,105 @@ class Pengajuan extends CI_Controller {
 		$biaya = 0;
 		$biaya += $data->BIAYA;
 		echo json_encode(round($biaya));
+	}
+	public function reloadGroupSaldo()
+	{
+		$noSPJ = $this->input->post("noSPJ");
+		$groupId = $this->input->post("groupId");
+		$getKasbon = $this->db->query("SELECT SUM(TOTAL_UANG_SAKU + TOTAL_UANG_MAKAN + TOTAL_UANG_JALAN) AS BIAYA, JENIS_KENDARAAN, JENIS_ID, NO_SPJ, TOTAL_UANG_JALAN, ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ' GROUP BY JENIS_KENDARAAN, JENIS_ID, NO_SPJ, TOTAL_UANG_JALAN, ID_SPJ")->row();
+		$oldKasbon = $getKasbon->BIAYA;
+		$jenisSPJ = $getKasbon->JENIS_ID;
+		$jenisKendaraan = $getKasbon->JENIS_KENDARAAN;
+		$totalUangJalan = $getKasbon->TOTAL_UANG_JALAN;
+		$idSPJ = $getKasbon->ID_SPJ;
+		$this->updateOtomatisUangSPJReload($noSPJ, $groupId, $jenisSPJ, $jenisKendaraan, $totalUangJalan, $oldKasbon, $idSPJ);
+		$aktivitas = "Reload Data SPJ";
+        $this->M_Monitoring->saveSPJLog('New',$noSPJ,$aktivitas);
+
+		// $this->updateSaldo($inputNoSPJ, $totalSPJ, $oldKasbon, $status);
+	}
+	public function updateOtomatisUangSPJReload($noSPJ, $groupId, $jenisSPJ, $jenisKendaraan, $totalUangJalan, $oldKasbon, $idSPJ)
+	{
+		$getPIC = $this->db->query("SELECT
+										ID_PIC,
+										OBJEK,
+										CASE 
+											WHEN JENIS_PIC = 'Sopir' OR JENIS_PIC = 'Pendamping' THEN JENIS_PIC
+											ELSE JABATAN
+										END AS JENIS_PIC,
+											TGL_SPJ
+										FROM
+											SPJ_PENGAJUAN_PIC a
+										INNER JOIN
+											SPJ_PENGAJUAN b ON
+										a.NO_PENGAJUAN = b.NO_SPJ
+									WHERE
+										NO_PENGAJUAN= '$noSPJ'
+									AND UANG_SAKU > 0");
+		$save = true;
+		$totalBiayaRumsum = 0;
+		foreach ($getPIC->result() as $key) {
+			$objek = date('l', strtotime($key->TGL_SPJ)) == 'Saturday' ? 'Rental' : $key->OBJEK;
+			$pic = $key->JENIS_PIC;
+			$id = $key->ID_PIC;
+			$uang= $this->M_Pengajuan->hitungUangSaku($jenisSPJ, $objek, $pic, $groupId, $jenisKendaraan);
+			
+			foreach ($uang->result() as $key) {
+				$biaya = $key->BIAYA;
+				$save = $this->M_Pengajuan->saveOtomatisUangSPJ($id, $groupId, $biaya);
+				$totalBiayaRumsum += $biaya;
+			}
+		}
+		
+		$getTotal = $this->db->query("SELECT SUM(UANG_SAKU) + SUM(UANG_MAKAN) AS BIAYA FROM SPJ_PENGAJUAN_PIC WHERE NO_PENGAJUAN = '$noSPJ'")->row();
+		$cekKasbon = $this->db->query("SELECT ID FROM SPJ_KAS_SUB WHERE JENIS_FK = 'KASBON' AND DETAIL_KASBON = 'TRANSAKSI AWAL' AND JENIS_KASBON = 'Kasbon SPJ Delivery' AND FK_ID = $idSPJ");
+		$status = $cekKasbon->num_rows() == 0 ? 'NEW' : 'UPDATE';
+		$totalSPJ = $getTotal->BIAYA + $totalUangJalan;
+		$this->db->query("UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_SAKU = $totalBiayaRumsum WHERE NO_SPJ = '$noSPJ'");
+		$this->updateSaldo($noSPJ, $totalSPJ, $oldKasbon, $status);
+	}
+	public function pagingDataVoucher()
+	{
+		$cariVoucher = $this->input->get("cariVoucher");
+		$offset = $this->input->get("offset");
+		$limit = $this->input->get("limit");
+		$data['offset'] = $offset;
+		$data['limit'] = $limit;
+		$data['data'] = $this->M_Pengajuan->cariDataVoucher($cariVoucher,'')->num_rows();
+		$this->load->view("_partial/paging", $data);
+	}
+	public function cariDataVoucher()
+	{
+		$cariVoucher = $this->input->get("cariVoucher");
+		$offset = $this->input->get("offset")==''?0:$this->input->get("offset")+1;
+		$limit = $this->input->get("limit");
+		$where = " WHERE NO_URUT >= $offset AND NO_URUT < $offset + $limit";
+		$data = $this->M_Pengajuan->cariDataVoucher($cariVoucher,$where);
+		$html='';
+		if ($data->num_rows()>0) {
+			foreach ($data->result() as $key) {
+				$html.='<tr class="text-center">
+							<td>'.$key->NO_VOUCHER.'</td>
+							<td><a href="javascript:;" class="btn bg-orange btn-kps btn-sm pilihVoucher" voucher="'.$key->NO_VOUCHER.'"><i class="fas fa-check-circle"></i></a></td>
+						</tr>';
+			}
+		}else{
+			$html.="<tr><td colspan='2' class='text-center'>Data Tidak Tersedia<br>Hubungi PIC Terkait</td></tr>";
+		}
+		echo json_encode($html);
+	}
+	public function cekTujuanAbnormal()
+	{
+		$inputNoSPJ = $this->input->get('inputNoSPJ');
+		$data = $this->M_Pengajuan->getJmlLokasiBySPJ($inputNoSPJ)->row();
+		if ($data->JML_LOKASI >4) {
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET ABNORMAL= 'N' WHERE NO_SPJ = '$inputNoSPJ'");
+			$response = array('data' =>true,'abnormal'=>false);
+		}else{
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET ABNORMAL= 'Y' WHERE NO_SPJ = '$inputNoSPJ'");
+			$response = array('data' =>true,'abnormal'=>true);
+		}
+		echo json_encode($response);
 	}
 
 

@@ -64,12 +64,12 @@ class M_Pengajuan extends CI_Model {
         $this->db->query("DELETE FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$no' AND STATUS_DATA = 'TEMPORARY'");
         $this->db->query("DELETE FROM SPJ_PENGAJUAN_PIC WHERE NO_PENGAJUAN = '$no'");
         $this->db->query("DELETE FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$no'");
-        
+        $jenisOther = $jenis == 3 ? $inputJenisOther : "";
         $link = './assets/image/qrcode/'.$namaFile.'.png';
 		if(file_exists($link)){
 			unlink($link);
 		}
-		$sql = "INSERT INTO SPJ_PENGAJUAN(TGL_INPUT, PIC_INPUT, STATUS_DATA, JENIS_ID, NO_SPJ, QR_CODE, TGL_SPJ, TUJUAN_OTHER)VALUES('$tanggal','$user','TEMPORARY','$jenis','$no','$namaFile','$inputTglSPJ','$inputJenisOther')";
+		$sql = "INSERT INTO SPJ_PENGAJUAN(TGL_INPUT, PIC_INPUT, STATUS_DATA, JENIS_ID, NO_SPJ, QR_CODE, TGL_SPJ, TUJUAN_OTHER)VALUES('$tanggal','$user','TEMPORARY','$jenis','$no','$namaFile','$inputTglSPJ','$jenisOther')";
 		return $this->db->query($sql);
 	}
 
@@ -105,21 +105,6 @@ class M_Pengajuan extends CI_Model {
 					WHERE
 						STAR = 'Y'
 				)Q2 ON Q1.NoTNKB = Q2.NO_TNBK
-				LEFT JOIN
-				(
-					SELECT
-						NO_TNKB
-					FROM
-						SPJ_PENGAJUAN
-					WHERE 
-						STATUS_DATA = 'SAVED' AND
-						TGL_SPJ = '$tgl'
-					UNION
-					SELECT
-						NO_TNKB
-					FROM
-						SPJ_TEMP_KENDARAAN
-				)Q3 ON Q1.NoTNKB = Q3.NO_TNKB
 				INNER JOIN
 				(
 					SELECT
@@ -130,7 +115,6 @@ class M_Pengajuan extends CI_Model {
 						STATUS = 'VERIFIED'
 				)Q4 ON Q1.NoTNKB = Q4.NO_TNKB
 				WHERE
-					Q3.NO_TNKB IS NULL AND
 					Q1.NoTNKB LIKE '%$search%'";
 		return $this->db->query($sql);
 	}
@@ -164,16 +148,16 @@ class M_Pengajuan extends CI_Model {
 		}
 		return $group;
 	}
-	public function saveLokasiTujuan($inputGroupTujuan, $inputObjek, $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota)
+	public function saveLokasiTujuan($inputGroupTujuan, $inputObjek, $inputNoSPJ, $serlokID, $serlokAlamat, $serlokPerusahaan, $serlokKota, $deliveryId)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-        $getData = $this->db->query("SELECT ID_LOKASI FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$inputNoSPJ' AND SERLOK_ID = $serlokID");
+        $getData = $this->db->query("SELECT ID_LOKASI FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$inputNoSPJ' AND SERLOK_ID = $serlokID AND DELIVERY_ID = $deliveryId");
         if ($getData->num_rows()==0) {
-        	$sql = "INSERT INTO SPJ_PENGAJUAN_LOKASI VALUES($serlokID, '$serlokAlamat','$serlokPerusahaan','$serlokKota','$inputNoSPJ','$inputGroupTujuan','$inputObjek','$tanggal','$user')";	
+        	$sql = "INSERT INTO SPJ_PENGAJUAN_LOKASI VALUES($serlokID, '$serlokAlamat','$serlokPerusahaan','$serlokKota','$inputNoSPJ','$inputGroupTujuan','$inputObjek','$tanggal','$user',null, $deliveryId)";	
         }else{
-        	$sql = "UPDATE SPJ_PENGAJUAN_LOKASI SET SERLOK_ALAMAT = '$serlokAlamat', SERLOK_COMPANY = '$serlokPerusahaan', SERLOK_KOTA = '$serlokKota', GROUP_ID = '$inputGroupTujuan', OBJEK = '$inputObjek', TGL_INPUT = '$tanggal', PIC_INPUT = '$user' WHERE NO_SPJ = '$inputNoSPJ' AND SERLOK_ID = $serlokID";
+        	$sql = "UPDATE SPJ_PENGAJUAN_LOKASI SET SERLOK_ALAMAT = '$serlokAlamat', SERLOK_COMPANY = '$serlokPerusahaan', SERLOK_KOTA = '$serlokKota', GROUP_ID = '$inputGroupTujuan', OBJEK = '$inputObjek', TGL_INPUT = '$tanggal', PIC_INPUT = '$user', DELIVERY_ID = $deliveryId WHERE NO_SPJ = '$inputNoSPJ' AND SERLOK_ID = $serlokID";
         }
 		
 		return $this->db->query($sql);
@@ -182,7 +166,7 @@ class M_Pengajuan extends CI_Model {
 	{
 		$sql = $this->db->query("SELECT TOP 1
 									CASE 
-									WHEN Q1.ID IS NULL THEN Q2.ID
+									WHEN Q1.ID IS NULL OR Q1.ID = 0 THEN Q2.ID
 									ELSE Q1.ID
 								END AS ID
 								FROM
@@ -209,6 +193,7 @@ class M_Pengajuan extends CI_Model {
 										GROUP_ID = 4
 									GROUP BY NO_SPJ
 								)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ");
+		$id = 0;
 		foreach ($sql->result() as $key) {
 			$id = $key->ID;
 		}
@@ -295,17 +280,16 @@ class M_Pengajuan extends CI_Model {
 					SELECT
 						NIK
 					FROM
-						SPJ_PENGAJUAN_PIC
+						SPJ_PENGAJUAN a
+					INNER JOIN SPJ_PENGAJUAN_PIC b ON
+						a.NO_SPJ = b.NO_PENGAJUAN
 					WHERE
-						NO_PENGAJUAN = '$noPengajuan'
+						TGL_SPJ = '$inputTglSPJ' AND
+						STATUS_DATA = 'SAVED' AND
+						STATUS_SPJ = 'OPEN'
 				)Q2 ON Q1.NIK = Q2.NIK
-				LEFT JOIN
-				(
-					SELECT PIC FROM SPJ_TEMP_PIC
-				)Q3 ON Q1.NIK = Q3.PIC
 				WHERE
-					Q2.NIK IS NULL AND 
-					Q3.PIC IS NULL";
+					Q2.NIK IS NULL";
 		// LEFT JOIN
 		// (
 		// 	SELECT
@@ -560,9 +544,12 @@ class M_Pengajuan extends CI_Model {
 				)Q2 ON Q1.NO_SPJ= Q2.NO_PENGAJUAN";
 		return $this->db->query($sql);
 	}
-	public function saveKendaraanSPJ($inv, $jenis, $noSPJ, $tnkb, $merk, $tipe, $kendaraan, $rental)
+	public function saveKendaraanSPJ($inv, $jenis, $noSPJ, $tnkb, $merk, $tipe, $kendaraan, $rental, $rekananId)
 	{
-		$sql = "UPDATE SPJ_PENGAJUAN SET NO_INVENTARIS = '$inv', JENIS_KENDARAAN = '$jenis', NO_TNKB = '$tnkb', MERK = '$merk', TYPE = '$tipe', KENDARAAN = '$kendaraan', REKANAN_KENDARAAN = '$rental' WHERE NO_SPJ = '$noSPJ'";
+		$sql = "UPDATE SPJ_PENGAJUAN SET NO_INVENTARIS = '$inv', JENIS_KENDARAAN = '$jenis', NO_TNKB = '$tnkb', MERK = '$merk', TYPE = '$tipe', KENDARAAN = '$kendaraan' WHERE NO_SPJ = '$noSPJ'";
+		if ($kendaraan == 'Rental') {
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET REKANAN_KENDARAAN = '$rental', REKANAN_ID='$rekananId' WHERE NO_SPJ = '$noSPJ'");
+		}
 		return $this->db->query($sql);
 	}
 	public function saveGroupTujuanSPJ($inputNoSPJ, $inputGroupTujuan)
@@ -658,7 +645,7 @@ class M_Pengajuan extends CI_Model {
 		$sql = "DELETE FROM SPJ_PENGAJUAN_PIC WHERE ID_PIC = $id";
 		return $this->db->query($sql);
 	}
-	public function saveSPJ()
+	public function saveSPJ($voucher)
 	{
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
         $inputTglSPJ = $this->input->post("inputTglSPJ");
@@ -671,9 +658,10 @@ class M_Pengajuan extends CI_Model {
         $inputGroupTujuan = $this->input->post("inputGroupTujuan");
         $inputTotalUangSaku = $this->input->post("inputTotalUangSaku");
         $inputTotalUangMakan = $this->input->post("inputTotalUangMakan");
-        $inputTotalUangJalan = $this->input->post("inputTotalUangJalan");
+        
         $inputBBM = $this->input->post("inputBBM");
-        $inputNoVoucher = $this->input->post("inputNoVoucher");
+        $inputJenisSPJ = $this->input->post("inputJenisSPJ");
+        
         $inputTOL = $this->input->post("inputTOL");
         $inputMediaUangSaku = $this->input->post("inputMediaUangSaku");
         $inputMediaUangMakan = $this->input->post("inputMediaUangMakan");
@@ -684,14 +672,16 @@ class M_Pengajuan extends CI_Model {
         $inputJamBerangkat = $this->input->post("inputJamBerangkat");
         $inputTglPulang = $this->input->post("inputTglPulang");
         $inputJamPulang = $this->input->post("inputJamPulang");
-        $inputJenisSPJ = $this->input->post("inputJenisSPJ");
+        $inputNoVoucher = $inputMediaBBM == 'Voucher'?$this->input->post("inputNoVoucher"):'';
         $rencanaBerangkat = $inputTglBerangkat.' '.$inputJamBerangkat;
         $rencanaPulang = $inputTglPulang.' '.$inputJamPulang;
+        $inputTambahanUangJalan = $this->input->post("inputTambahanUangJalan") == '' ? 0 :  $this->input->post("inputTambahanUangJalan");
         date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
         $inputAbnormal = $this->input->post("inputAbnormal");
-        $sql = "UPDATE SPJ_PENGAJUAN SET
+        $inputTotalUangJalan = $inputGroupTujuan == '4'|| $inputAbnormal == 'Y' ? $this->input->post("inputTotalUangJalan")+$this->input->post("inputTambahanUangJalan"): $this->input->post("inputTotalUangJalan");
+        $sql = $this->db->query("UPDATE SPJ_PENGAJUAN SET
         					TGL_INPUT = '$tanggal',
         					PIC_INPUT = '$user',
         					STATUS_DATA = 'SAVED',
@@ -715,9 +705,10 @@ class M_Pengajuan extends CI_Model {
         					MEDIA_UANG_TOL = '$inputMediaTOL',
         					VOUCHER_BBM = '$inputNoVoucher',
         					STATUS_SPJ = 'OPEN',
-        					ABNORMAL = '$inputAbnormal'
+        					ABNORMAL = '$inputAbnormal',
+        					TAMBAHAN_UANG_JALAN = '$inputTambahanUangJalan'
         		WHERE
-        			NO_SPJ = '$inputNoSPJ'";
+        			NO_SPJ = '$inputNoSPJ'");
         // $biayaBBM = $inputIdVoucher == 0 ? $inputBBM : 0;
         // $kasbonSPJ = $inputTotalUangSaku + $inputTotalUangJalan + $inputTotalUangMakan + $biayaBBM;
         // $jenisSPJ = $inputJenisSPJ == 1 ? 'Delivery' : 'Non Delivery';
@@ -733,7 +724,7 @@ class M_Pengajuan extends CI_Model {
        	// 	$this->db->query("Execute SPJ_tambahBiayaKasbon 'TOL','spj','$inputTOL','$inputNoSPJ','$detail','$user','$tanggal'");
        	// }
        	$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'USED' WHERE NO_VOUCHER = '$inputNoVoucher'");
-        return $this->db->query($sql);
+        return $sql;
 	}
 	public function saveKasbon()
 	{
@@ -819,6 +810,7 @@ class M_Pengajuan extends CI_Model {
 						SPJ_PENGAJUAN
 					WHERE 
 						STATUS_DATA = 'SAVED' AND
+						STATUS_SPJ != 'CANCEL' AND
 						JENIS_ID != '3'
 				)Q1
 				LEFT JOIN
@@ -1222,7 +1214,58 @@ class M_Pengajuan extends CI_Model {
 					SPJ_PENGAJUAN_LOKASI a
 				INNER JOIN
 					SPJ_UANG_ABNORMAL b ON
-				a.SERLOK_ID = b.SERLOK_ID
+				a.SERLOK_ID = b.SERLOK_ID AND a.DELIVERY_ID = b.DELIVERY_ID
+				WHERE
+					NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function cariDataVoucher($search, $where)
+	{
+		$sql = "SELECT
+					NO_VOUCHER
+				FROM
+				(
+					SELECT
+						ROW_NUMBER() over (partition by 'SAMA' order by NO_VOUCHER ASC) AS NO_URUT,
+						NO_VOUCHER,
+						KODE_ROMAWI,
+						TAHUN
+					FROM
+						[dbo].[SPJ_VOUCHER_BBM]
+					WHERE
+						STATUS = 'NOT' AND
+						NO_VOUCHER LIKE '%$search%'
+				)Q1
+				$where
+				ORDER BY TAHUN, KODE_ROMAWI, NO_VOUCHER ASC";
+		return $this->db->query($sql);
+	}
+	public function updateFlagTrip($noSPJ)
+	{
+		$flag = 0;
+		$getFlag = $this->db->query("SELECT
+										MAX(FLAG_TRIP) AS FLAG
+									FROM
+										SPJ_PENGAJUAN_LOKASI
+									WHERE
+										NO_SPJ = '$noSPJ'");
+		if ($getFlag->num_rows()>0) {
+			$data = $getFlag->row();
+			$flag = $data->FLAG+1;
+		} else {
+			$flag = 1;
+		}
+
+		$this->db->query("UPDATE SPJ_PENGAJUAN_LOKASI SET FLAG_TRIP = $flag WHERE NO_SPJ = '$noSPJ'");
+
+		
+	}
+	public function getJmlLokasiBySPJ($noSPJ)
+	{
+		$sql = "SELECT
+					COUNT(ID_LOKASI) AS JML_LOKASI
+				FROM
+					SPJ_PENGAJUAN_LOKASI 
 				WHERE
 					NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);

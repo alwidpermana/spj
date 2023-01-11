@@ -52,7 +52,7 @@
         $i = 1;
         foreach ($data as $key): ?>
           <tr class="<?=$key->DETAIL_KASBON == 'BIAYA TAMBAHAN'?'text-kps':''?>" style="font-size: 9px;">
-            <td><?=$i++?></td>
+            <td><?=$key->NO_URUT?></td>
             <td><?=date("d F Y", strtotime($key->TGL_INPUT))?></td>
             <td>
               <?php

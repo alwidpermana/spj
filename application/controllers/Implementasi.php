@@ -73,10 +73,10 @@ class Implementasi extends CI_Controller {
 			$group = $key->GROUP_ID;
 		}
 		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id, $adjustment='','')->result();
-		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
-		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id, '')->result();
+		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id, '')->result();
 		$data['pic2'] = $this->M_Pengajuan->getPengajuanPIC($group, $noSPJ)->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id, '')->result();
 		$data['validasiPIC'] = $this->M_Implementasi->getValidasiPIC($noSPJ, '')->result();
 		$data['km'] = $this->M_Implementasi->getKM($noTNKB)->result();
 		$data['validasi'] = $this->M_Implementasi->getValidasiSPJ($noSPJ)->result();
@@ -162,117 +162,125 @@ class Implementasi extends CI_Controller {
 		$where = "WHERE ID_JENIS = $inputJenisId";
 		$tambahan = $this->M_Data_Master->viewTambahanUangSaku($where)->result();
 		$uang_makan = $this->M_Data_Master->getUangMakan()->result();
-		$keberangkatanJ = '';
-        $kepulanganJ = '';
-        $keberangkatanH = '';
-        $kepulanganH = '';
-        $jam1 = 0;
-        $jam2 = 0;
-        $tambahanUangSaku1=0;
-        $tambahanUangSaku2 = 0;
-        foreach ($validasi as $vld) {
-          $jamPulang = date("H:i");
-          $keberangkatanJ = date("Y-m-d H:i", strtotime($vld->KEBERANGKATAN));
-          $kepulanganJ = date("Y-m-d H:i");
-          $keberangkatanH = date("Y-m-d", strtotime($vld->KEBERANGKATAN));
-          $kepulanganH = date("Y-m-d");
-          $tengahBerangkat = date("Y-m-d", strtotime($vld->KEBERANGKATAN)). ' 24:00';
-          $tengahPulang = date("Y-m-d"). ' 00:00';
-        }
+		if ($inputGroupTujuan == 4 || $inputGroupTujuan == 5) {
+			$uangSaku1 = 0;
+			$uangSaku2 = 0;
+			$uangMakan = 0;
+		} else {
+			$keberangkatanJ = '';
+      $kepulanganJ = '';
+      $keberangkatanH = '';
+      $kepulanganH = '';
+      $jam1 = 0;
+      $jam2 = 0;
+      $tambahanUangSaku1=0;
+      $tambahanUangSaku2 = 0;
+      foreach ($validasi as $vld) {
+        $jamPulang = date("H:i");
+        $keberangkatanJ = date("Y-m-d H:i", strtotime($vld->KEBERANGKATAN));
+        $kepulanganJ = date("Y-m-d H:i");
+        $keberangkatanH = date("Y-m-d", strtotime($vld->KEBERANGKATAN));
+        $kepulanganH = date("Y-m-d");
+        $tengahBerangkat = date("Y-m-d", strtotime($vld->KEBERANGKATAN)). ' 24:00';
+        $tengahPulang = date("Y-m-d"). ' 00:00';
+      }
 
-        foreach ($jam_tambahan as $jt) {
-          $jam1 = $jt->JAM1;
-          $jam2 = $jt->JAM2;
-        }
-        foreach ($tambahan as $tm) {
-          $tambahanUangSaku1 = $tm->QTY1;
-          $tambahanUangSaku2 = $tm->QTY2;
-        }
-        $berangkatJ = date_create($keberangkatanJ);
-        $pulangJ = date_create($kepulanganJ);
-        $selisihJ = date_diff($berangkatJ, $pulangJ);
-        $selisihJam = $selisihJ->h;
+      foreach ($jam_tambahan as $jt) {
+        $jam1 = $jt->JAM1;
+        $jam2 = $jt->JAM2;
+      }
+      foreach ($tambahan as $tm) {
+        $tambahanUangSaku1 = $tm->QTY1;
+        $tambahanUangSaku2 = $tm->QTY2;
+      }
+      $berangkatJ = date_create($keberangkatanJ);
+      $pulangJ = date_create($kepulanganJ);
+      $selisihJ = date_diff($berangkatJ, $pulangJ);
+      $selisihJam = $selisihJ->h;
 
-        $berangkatH = date_create($keberangkatanH);
-        $pulangH = date_create($kepulanganH);
-        $selisihH = date_diff($berangkatH, $pulangH);
-        $selisihHari = $selisihH->d;
-        if ($selisihJam >= $jam1 && $selisihHari==0) {
-          $jm = $selisihJam - $jam1;
-          
-          // $uangSaku1 = $tambahanUangSaku1;
-          // $uangSaku2 = $tambahanUangSaku2; 
-          if ($jm>=0) {
-          	// && $jm<=3
-            $uangSaku1 = $tambahanUangSaku1;
-          }else{
-            $uangSaku1 = 0;
-          }
-
-          if ($jm>=4) {
-            $uangSaku2 = $tambahanUangSaku2;
-          } else {
-            $uangSaku2 = 0;
-          }
-          
-
-        }elseif($selisihHari>0){
-        	$tengah1 = date_create($tengahBerangkat);
-        	$tengah2 = date_create($tengahPulang);
-        	$selisih1 = date_diff($berangkatJ, $tengah1);
-        	$selisihJamTengah1 = $selisih1->h;
-
-        	$selisih2 = date_diff($pulangJ, $tengah2);
-        	$selisihJamTengah2 = $selisih2->h;
-        	$selisihTengahFinal = $selisihJamTengah1 + $selisihJamTengah2;
-        	$jm = $selisihHari>1?($selisihJam+($selisihHari*24)) - $jam2: ($selisihTengahFinal - $jam2);
-          if ($jm>=0) {
-            $uangSaku1 = $tambahanUangSaku1;
-          }else{
-            $uangSaku1 = 0;
-          }
-
-          if ($jm>=4) {
-            $uangSaku2 = $tambahanUangSaku2;
-          } else {
-            $uangSaku2 = 0;
-          }
+      $berangkatH = date_create($keberangkatanH);
+      $pulangH = date_create($kepulanganH);
+      $selisihH = date_diff($berangkatH, $pulangH);
+      $selisihHari = $selisihH->d;
+      if ($selisihJam >= $jam1 && $selisihHari==0) {
+        $jm = $selisihJam - $jam1;
+        
+        // $uangSaku1 = $tambahanUangSaku1;
+        // $uangSaku2 = $tambahanUangSaku2; 
+        if ($jm>=0) {
+        	// && $jm<=3
+          $uangSaku1 = $tambahanUangSaku1;
         }else{
           $uangSaku1 = 0;
+        }
+
+        if ($jm>=4) {
+          $uangSaku2 = $tambahanUangSaku2;
+        } else {
           $uangSaku2 = 0;
-
         }
-
-        $jenisId = $inputJenisId ;
-        $uangMakan = 0;
         
-        if ($jamPulang >= date("H:i",strtotime("19:00")) && $selisihHari == 0 || $selisihHari>0) {
-          foreach ($uang_makan as $um) {
-          	if ($inputGroupTujuan == '4') {
-          		if ($um->JENIS_GROUP == 'Lokal') {
-          			if ($jenisId == 1) {
-		              $uangMakan = $um->BIAYA2;
-		            }elseif ($jenisId == 2) {
-		              $uangMakan = $um->BIAYA4;
-		            }else{
-		              $uangMakan = 0;
-		            }
-          		}
-          	}else{
-          		if ($um->JENIS_GROUP == 'Luar Kota') {
-        				if ($jenisId == 1) {
-		              $uangMakan = $um->BIAYA2;
-		            }elseif ($jenisId == 2) {
-		              $uangMakan = $um->BIAYA4;
-		            }else{
-		              $uangMakan = 0;
-		            }
-          		}	
-          	}
-          }
+
+      }elseif($selisihHari>0){
+      	$tengah1 = date_create($tengahBerangkat);
+      	$tengah2 = date_create($tengahPulang);
+      	$selisih1 = date_diff($berangkatJ, $tengah1);
+      	$selisihJamTengah1 = $selisih1->h;
+
+      	$selisih2 = date_diff($pulangJ, $tengah2);
+      	$selisihJamTengah2 = $selisih2->h;
+      	$selisihTengahFinal = $selisihJamTengah1 + $selisihJamTengah2;
+      	$jm = $selisihHari>1?($selisihJam+($selisihHari*24)) - $jam2: ($selisihTengahFinal - $jam2);
+        if ($jm>=0) {
+          $uangSaku1 = $tambahanUangSaku1;
         }else{
-          $uangMakan = 0;
+          $uangSaku1 = 0;
         }
+
+        if ($jm>=4) {
+          $uangSaku2 = $tambahanUangSaku2;
+        } else {
+          $uangSaku2 = 0;
+        }
+      }else{
+        $uangSaku1 = 0;
+        $uangSaku2 = 0;
+
+      }
+
+      $jenisId = $inputJenisId ;
+      $uangMakan = 0;
+      
+      if ($jamPulang >= date("H:i",strtotime("19:00")) && $selisihHari == 0 || $selisihHari>0) {
+        foreach ($uang_makan as $um) {
+        	if ($inputGroupTujuan == '4') {
+        		if ($um->JENIS_GROUP == 'Lokal') {
+        			if ($jenisId == 1) {
+	              $uangMakan = $um->BIAYA2;
+	            }elseif ($jenisId == 2) {
+	              $uangMakan = $um->BIAYA4;
+	            }else{
+	              $uangMakan = 0;
+	            }
+        		}
+        	}else{
+        		if ($um->JENIS_GROUP == 'Luar Kota') {
+      				if ($jenisId == 1) {
+	              $uangMakan = $um->BIAYA2;
+	            }elseif ($jenisId == 2) {
+	              $uangMakan = $um->BIAYA4;
+	            }else{
+	              $uangMakan = 0;
+	            }
+        		}	
+        	}
+        }
+      }else{
+        $uangMakan = 0;
+      }
+		}
+		
+				
 
         // $getSPJ = $this->db->query("SELECT NO_TNKB FROM SPJ_PENGAJUAN WHERE NO_SPJ='$inputNoSPJ'")->row();
         // $cekKendaraanRental = $this->M_Implementasi->cekKendaraanRental($getSPJ->NO_TNKB)->num_rows();
@@ -311,9 +319,9 @@ class Implementasi extends CI_Controller {
 		$filPeriode = $this->input->get("filPeriode");
 
 		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='','Y')->result();
-		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
-		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
+		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
 		
 		$this->load->view("implementasi/step/s1/tabel", $data);
 	}
@@ -327,8 +335,8 @@ class Implementasi extends CI_Controller {
 			$jenisId = $key->JENIS_ID;
 		}
 		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id = $id, $adjustment='', '')->result();
-		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id, '')->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id, '')->result();
 		$data['pic'] = $this->M_Monitoring->getPICPengajuanVersi2($no_spj)->result();
 		$data['validasi'] = $this->M_Implementasi->getValidasiSPJ($no_spj)->result();
 		$data['jam_tambahan'] = $this->M_Data_Master->getJamTambahan()->result();
@@ -359,9 +367,9 @@ class Implementasi extends CI_Controller {
 
 		// $data['data'] = $this->M_Implementasi->getTabelAdjustment($filTahun, $filBulan, $filJenis, $filSearch, $filGroup, $filPeriode)->result();
 		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='Y','')->result();
-		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
-		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
+		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
 		$this->load->view("implementasi/adjustment/tabel", $data);
 	}
 	public function getBiayaNormal()
@@ -588,9 +596,9 @@ class Implementasi extends CI_Controller {
 		$filPeriode = $this->input->get("filPeriode");
 
 		$data['data']= $this->M_Implementasi->getListSPJForOutstanding($filBulan, $filTahun, $filJenis, $filSearch, $filGroup)->result();
-		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
-		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='')->result();
+		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
 		$this->load->view("implementasi/outstanding/tabel", $data);
 	}
 	public function saveKeputusanAdjustment()
@@ -628,7 +636,7 @@ class Implementasi extends CI_Controller {
   	$data = $this->M_Implementasi->saveKeputusanAdjustment2($value2, $inputNoSPJ);
   	$kasbon = 'Kasbon SPJ '.$inputJenisSPJ;
   	if ($totalBiaya>0) {
-  		$this->updateSaldo($inputIdSPJ, $kasbon, $totalBiaya,'BIAYA TAMBAHAN');
+  		$this->updateSaldo($inputIdSPJ, $kasbon, $totalBiaya,'BIAYA TAMBAHAN',0);
   	}
   	
   	// $data = $this->M_Implementasi->updateKasbonOtomatis($inputNoSPJ, $inputUangMakanDiajukan, $inputUangJalanDiajukan, $inputBBMDiajukan);
@@ -645,10 +653,11 @@ class Implementasi extends CI_Controller {
 		$inputId = $this->input->post("inputId");
 		$inputJenisSPJ = $this->input->post("inputJenisSPJ");
 		$inputMediaUangTOL = $this->input->post("inputMediaUangTOL");
+		$before = $this->input->post("inputBeforeTOL") == '' ? 0 : $this->input->post("inputBeforeTOL");
 		$data = $this->M_Implementasi->saveCloseSPJ($inputNoSPJ, $saku, $makan, $jalan, $bbm, $tol);
 		if ($inputMediaUangTOL == 'Reimburse') {
 			$kasbon = "Kasbon TOL ".$inputJenisSPJ;
-			$this->updateSaldo($inputId, $kasbon, $tol,'REIMBURSE TOL');
+			$this->updateSaldo($inputId, $kasbon, $tol,'REIMBURSE TOL', $before);
 		}
 		echo json_encode($data);
 		
@@ -710,7 +719,7 @@ class Implementasi extends CI_Controller {
 		$kasbonBBM = 0;
 		$kasbonTOL = 0;
 		for ($i=0; $i <$jmlNoSPJ ; $i++) { 
-			$getBiaya = $this->M_Implementasi->getBiayaTotalPerNoSPJ($noSPJ[$i]);
+			$getBiaya = $this->M_Implementasi->getBiayaTotalPerNoSPJNEW($noSPJ[$i]);
 			foreach ($getBiaya->result() as $key) {
 				$kasbonSPJ += $key->KASBON_SPJ;
 				$kasbonBBM += $key->KASBON_BBM;
@@ -722,8 +731,8 @@ class Implementasi extends CI_Controller {
 		for ($ba=0; $ba <$jmlBA ; $ba++) { 
 			$this->db->query("UPDATE SPJ_BIAYA_ADMIN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_BIAYA_ADMIN='$noBA[$ba]'");
 		}
-
-		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis, $jmlBA, $inputTotalBA);
+		$totalBiayaRP = $inputTotalRP + $inputTotalBA; 
+		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $totalBiayaRP, $filJenis, $jmlBA, $inputTotalBA);
 		
 
 		// $data = array('KASBON SPJ' =>$kasbonSPJ ,'KASBON BBM' =>$kasbonBBM, 'KASBON TOL' =>$kasbonTOL,'total'=>$kasbonSPJ+$kasbonBBM+$kasbonTOL,'jmlBiayaAdmin'=>$jmlBA, 'totalBiayaAdmin'=>$inputTotalBA );
@@ -743,7 +752,7 @@ class Implementasi extends CI_Controller {
 		}
 		echo json_encode(round($saldoSPJ));
 	}
-	public function updateSaldo($inputIdSPJ, $kasbon, $totalBiaya, $keterangan)
+	public function updateSaldo($inputIdSPJ, $kasbon, $totalBiaya, $keterangan, $before)
 	{
 		$id = $inputIdSPJ;
 		$jenis = $kasbon;
@@ -752,7 +761,8 @@ class Implementasi extends CI_Controller {
 		foreach ($getSaldo->result() as $key) {
 			$saldo  = $key->SALDO;
 		}
-		$totalSaldo = $saldo - $totalBiaya;
+		$totalSaldo = ($saldo+$before) - $totalBiaya;
+
 		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
 		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalBiaya, 'KASBON', $id,$keterangan);
 	}

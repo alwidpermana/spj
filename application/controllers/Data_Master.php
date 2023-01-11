@@ -355,6 +355,7 @@ class Data_Master extends CI_Controller {
 		$data['group'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
 		$data['provinsi'] = $this->M_Data_Master->getProvinsi()->result();
 		$data['tambahan'] = $this->M_Data_Master->viewTambahanUangSaku($where='')->result();
+		$data['limit'] = $this->M_Data_Master->getLimitSaldo('')->result();
 		$this->load->view("Data_Master/Konfigurasi/index", $data);
 	}
 	public function getJenisSPJ()
@@ -809,6 +810,14 @@ class Data_Master extends CI_Controller {
 		$nik = $this->input->post("nik");
 		$field = $jenis == 'DLV' ? 'OTORITAS_DLV' : 'OTORITAS_NDV';
 		$data = $this->M_Data_Master->saveOtoritasAkunSPJ($isi, $nik, $field);
+		echo json_encode($data);
+	}
+	public function saveLimitSaldo()
+	{
+		$isi = $this->input->post("isi");
+		$jenis = $this->input->post("jenis");
+		$field = $this->input->post("field");
+		$data = $this->M_Data_Master->saveLimitSaldo($isi, $jenis, $field);
 		echo json_encode($data);
 	}
 

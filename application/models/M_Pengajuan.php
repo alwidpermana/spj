@@ -274,22 +274,7 @@ class M_Pengajuan extends CI_Model {
 						status_aktif = 'AKTIF' 
 					) Q2 on q1.NIK = q2.nik
 					$where2
-				)Q1
-				LEFT JOIN
-				(
-					SELECT
-						NIK
-					FROM
-						SPJ_PENGAJUAN a
-					INNER JOIN SPJ_PENGAJUAN_PIC b ON
-						a.NO_SPJ = b.NO_PENGAJUAN
-					WHERE
-						TGL_SPJ = '$inputTglSPJ' AND
-						STATUS_DATA = 'SAVED' AND
-						STATUS_SPJ = 'OPEN'
-				)Q2 ON Q1.NIK = Q2.NIK
-				WHERE
-					Q2.NIK IS NULL";
+				)Q1";
 		// LEFT JOIN
 		// (
 		// 	SELECT
@@ -559,8 +544,8 @@ class M_Pengajuan extends CI_Model {
 	}
 	public function getUangJalanSPJ($noSPJ)
 	{
-		$sql = "SELECT
-					MAX(BIAYA) AS BIAYA
+		$sql = "SELECT TOP 1
+					BIAYA
 				FROM
 				(
 					SELECT
@@ -575,12 +560,13 @@ class M_Pengajuan extends CI_Model {
 				LEFT JOIN
 				(
 					SELECT
-						NO_SPJ,
-						GROUP_ID,
-						SERLOK_KOTA
+						COUNT(SERLOK_KOTA) AS JML_KOTA,
+						REPLACE(SERLOK_KOTA, 'KOTA ', '') AS SERLOK_KOTA,
+						NO_SPJ
 					FROM
 						SPJ_PENGAJUAN_LOKASI
-				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ AND Q1.GROUP_ID = Q2.GROUP_ID
+					GROUP BY NO_SPJ, SERLOK_KOTA
+				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
 				LEFT JOIN
 				(
 					SELECT
@@ -594,7 +580,8 @@ class M_Pengajuan extends CI_Model {
 					LEFT JOIN
 						SPJ_KOTA b ON
 					a.ID_KOTA = b.ID_KOTA
-				)Q3 ON Q2.SERLOK_KOTA = Q3.NAMA_KOTA";
+				)Q3 ON Q2.SERLOK_KOTA = Q3.NAMA_KOTA
+				ORDER BY JML_KOTA DESC";
 		return $this->db->query($sql);
 	}
 	public function cekKelengkapanDataSPJ($noSPJ)
@@ -681,6 +668,15 @@ class M_Pengajuan extends CI_Model {
         $user = $this->session->userdata("NIK");
         $inputAbnormal = $this->input->post("inputAbnormal");
         $inputTotalUangJalan = $inputGroupTujuan == '4'|| $inputAbnormal == 'Y' ? $this->input->post("inputTotalUangJalan")+$this->input->post("inputTambahanUangJalan"): $this->input->post("inputTotalUangJalan");
+        if ($inputMediaBBM == 'Voucher') {
+       		$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'USED' WHERE NO_VOUCHER = '$inputNoVoucher'");
+       	}else{
+       		$voucherAsal='';
+       		$getVoucherSPJ = $this->db->query("SELECT VOUCHER_BBM FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ'")->row();
+       		$voucherAsal = $getVoucherSPJ->VOUCHER_BBM;
+       		$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'NOT' WHERE NO_VOUCHER = '$voucherAsal'");
+       		// $this->db->query()
+       	}
         $sql = $this->db->query("UPDATE SPJ_PENGAJUAN SET
         					TGL_INPUT = '$tanggal',
         					PIC_INPUT = '$user',
@@ -723,7 +719,8 @@ class M_Pengajuan extends CI_Model {
        	// if ($inputTOL>0 || $inputTOL != '') {
        	// 	$this->db->query("Execute SPJ_tambahBiayaKasbon 'TOL','spj','$inputTOL','$inputNoSPJ','$detail','$user','$tanggal'");
        	// }
-       	$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'USED' WHERE NO_VOUCHER = '$inputNoVoucher'");
+
+       	
         return $sql;
 	}
 	public function saveKasbon()

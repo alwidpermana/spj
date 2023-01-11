@@ -154,7 +154,7 @@
             <tbody class="text-center">
               <?php foreach ($ganjil as $gj): ?>
                 <tr>
-                  <td><?=$gj->NOMOR?></td>
+                  <td><?=$gj->NO_URUT?></td>
                   <td><?=date("d F Y", strtotime($gj->TGL_SPJ))?></td>
                   <td><?=$gj->NO_SPJ?></td>
                 </tr>
@@ -176,7 +176,7 @@
             <tbody class="text-center">
               <?php foreach ($genap as $gp): ?>
                 <tr>
-                  <td><?=$gp->NOMOR?></td>
+                  <td><?=$gp->NO_URUT?></td>
                   <td><?=date("d F Y", strtotime($gp->TGL_SPJ))?></td>
                   <td><?=$gp->NO_SPJ?></td>
                 </tr>

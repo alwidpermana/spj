@@ -15,7 +15,6 @@
      })
      $('.btnStepPrevios').on('click', function(){
       stepper.previous()
-      console.log("kontol")
      });
      $('#btnNextKendaraan').on('click', function(){
       var inputJenisKendaraan = $('#inputJenisKendaraan').val();
@@ -1297,7 +1296,11 @@
             }else{
               $('#inputUangSaku').val(data.BIAYA);  
               $('#showUangSaku').val(formatRupiah(Number(data.BIAYA).toFixed(0), 'Rp. '));
+
             }
+
+            $('#keteranganUS').html(data.KET);
+            
             
           },
           error: function(data){
@@ -1323,6 +1326,7 @@
       success: function(data){
         $('#inputUangMakan').val(data.BIAYA);
         $('#showUangMakan').val(formatRupiah(Number(data.BIAYA).toFixed(0), 'Rp. '));
+        $('#keteranganUM').html(data.KET);
       },
       error: function(data){
         $('#inputUangMakan').val("0");
@@ -1519,7 +1523,7 @@
       Swal.fire("Lengkapi Datanya Terlebih Dahulu!","Tentukan Rencana Tanggal Pulang!", "warning")
     }else if(inputJamPulang == ''){
       Swal.fire("Lengkapi Datanya Terlebih Dahulu!","Tentukan Rencana Jam Pulan", "warning")
-    }else if(inputNoVoucher == ''){
+    }else if(inputNoVoucher == '' && inputMediaBBM == 'Voucher'){
       Swal.fire("Pilih Terlebih Dahulu No Voucher!","Pilihan No Voucher Ada di Proses Biaya","warning")
     }else if(parseInt(inputTambahanUangJalan)>15000 ){
       Swal.fire("Tambahan Uang Jalan Lokal Tidak Boleh Lebih Dari Rp. 15,000","Kembali Ke Pengisian Biaya","warning")
@@ -1594,14 +1598,15 @@
       async: true,
       cache: false,
       success: function(data){
-        if (inputKendaraan == 'Rental') {
+        // if (inputKendaraan == 'Rental') {
+        //   cekSaldo(status);
+        // } else {
+            
+        // }
+        if (parseInt(data)>0) {
           cekSaldo(status);
         } else {
-          if (parseInt(data)>0) {
-            cekSaldo(status);
-          } else {
-            Swal.fire("Tidak Terdapat Driver Pada SPJ Ini!","PIC yang di daftarkan Tidak ada yang memiliki otoritas Driver!","warning")
-          }  
+          Swal.fire("Tidak Terdapat Driver Pada SPJ Ini!","PIC yang di daftarkan Tidak ada yang memiliki otoritas Driver!","warning")
         }
         
       },
@@ -1809,6 +1814,7 @@
     var inputGroupTujuan = $('#inputGroupTujuan').val()
     var inputKendaraan = $('#inputKendaraan').val();
     var inputJenisKendaraan = $('#inputJenisKendaraan').val();
+    var biayaTambahanUangJalan = $('#biayaTambahanUangJalan').val();
     $.ajax({
       type:'get',
       data:{inputNoSPJ},
@@ -1822,7 +1828,7 @@
           $('#inputTotalUangJalan').val("0")
           $('#tampilTotalUangJalan').html("0")
           $('#inputManualUangJalan').val("0")
-          $('#inputTambahanUangJalan').val("0");
+          $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
           console.log("a")
         }
         else if (inputGroupTujuan == '4' || inputGroupTujuan == '10') {
@@ -1836,7 +1842,7 @@
           $('#tampilTotalUangJalan').removeClass("d-none");
           $('.lokalUangJalan').addClass("d-none");
           $('#manualUangJalan').addClass("d-none");
-          // $('#inputTambahanUangJalan').val("0");
+          $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
           $('.tambahUangJalanAbnormal').removeClass("d-none")
         }else{
           console.log("d")
@@ -2091,25 +2097,27 @@
   function settingManualJalan() {
     var inputAbnormal = document.getElementById("inputAbnormal");
     var inputGroupTujuan = $('#inputGroupTujuan').val();
+    var biayaTambahanUangJalan = $('#biayaTambahanUangJalan').val();
     if (inputAbnormal.checked == true) {
       $('#tampilTotalUangJalan').addClass("d-none");
       $('.lokalUangJalan').addClass("d-none");
       $('#manualUangJalan').removeClass("d-none");
-      // $('#inputTambahanUangJalan').val("0");
+      $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
       $('.tambahUangJalanAbnormal').removeClass("d-none")
     }else if(inputAbnormal.checked == false && inputGroupTujuan == '4' || inputGroupTujuan == '10' && inputAbnormal.checked == false){
       $('#tampilTotalUangJalan').addClass("d-none");
       $('.lokalUangJalan').removeClass("d-none");
       $('#manualUangJalan').addClass("d-none");
       $('.tambahUangJalanAbnormal').removeClass("d-none")
-      // $('#inputTambahanUangJalan').val("15000");
+      $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
     }else{
       $('#tampilTotalUangJalan').removeClass("d-none");
       $('.lokalUangJalan').addClass("d-none");
       $('#manualUangJalan').addClass("d-none");
-      $('#inputTambahanUangJalan').val("0");
+      $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
       $('.tambahUangJalanAbnormal').addClass("d-none")
     }
+    console.log(biayaTambahanUangJalan)
 
   }
   function settingUangJalanLokal() {
@@ -2153,6 +2161,7 @@
   }
   function getUangAbnormalDM() {
     var inputNoSPJ = $('#inputNoSPJ').val();
+    var biayaTambahanUangJalan = $('#biayaTambahanUangJalan').val();
     $.ajax({
       type:'get',
       data:{inputNoSPJ},
@@ -2164,7 +2173,7 @@
         $('#inputManualUangJalan').val(data)
         $('#inputTotalUangJalan').val(data);
         $('#tampilTotalUangJalan').html(formatRupiah(Number(data).toFixed(0), 'Rp. '));
-        
+        $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
       },
       error:function(data){
         $('#inputManualUangJalan').val(0)

@@ -16,6 +16,7 @@
 			$('#modal-profil').modal('show');
 		})
 		redirectLogin();
+		getLimitSaldo();
 		// notifNGSecurity();
 	});
 	function redirectLogin() {
@@ -57,5 +58,22 @@
 			}
 			
 		}
+	}
+	function getLimitSaldo() {
+		$.ajax({
+			type:'get',
+			dataType:'json',
+			cache:false,
+			async:true,
+			url:url+'/dashboard/getWarningLimitSaldo',
+			success:function(data){
+				if (data.status == 'warning') {
+					Swal.fire(data.keterangan,'','warning')	
+				}
+			},
+			error:function(data){
+
+			}
+		})
 	}
 </script>

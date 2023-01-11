@@ -55,7 +55,7 @@ class M_Cash_Flow extends CI_Model {
 							CASE 
 								WHEN JENIS_KASBON = 'Kasbon BBM' THEN 'Voucher BBM'
 								WHEN JENIS_KASBON = 'Kasbon TOL' THEN 'TOL '+NAMA_JENIS
-								WHEN JENIS_KASBON = 'Kasbon TOL (Biaya Admin)' THEN 'TOL '+NAMA_JENIS
+								WHEN JENIS_KASBON = 'Biaya Admin TOL' THEN 'TOL '+NAMA_JENIS
 								ELSE 'SPJ '+NAMA_JENIS
 							END AS JENIS_KASBON,
 							'SUB KAS' AS JENIS_KAS,
@@ -457,5 +457,40 @@ class M_Cash_Flow extends CI_Model {
 				GROUP BY
 					JENIS_KASBON, NAMA_JENIS";
 		return $this->db->query($sql);;
+	}
+	public function adjustmentUbahSaldo($jenis, $kas, $rp)
+	{
+		$sql = "UPDATE SPJ_SALDO SET JUMLAH = $rp WHERE JENIS_SALDO = '$jenis' AND JENIS_KAS = '$kas'";
+		return $this->db->query($sql);
+	}
+	public function adjustmentUbahRekapSaldo($jenis, $kas, $rp)
+	{
+		switch ($jenis) {
+			case 'Kasbon SPJ Delivery':
+				$field = "SUB_KAS_SPJ_DLV";
+				break;
+			
+			case 'Kasbon TOL Delivery':
+				$field = "SUB_KAS_TOL_DLV";
+				break;
+			
+			case 'Kasbon SPJ Non Delivery':
+				$field = "SUB_KAS_SPJ_NDV";
+				break;
+			
+			case 'Kasbon TOL Non Delivery':
+				$field = "SUB_KAS_TOL_NDV";
+				break;
+			
+			case 'Kasbon Voucher BBM':
+				$field = "SUB_KAS_BBM";
+				break;
+			default:
+				$field = "SUB_KAS_TOTAL";
+				break;
+		}
+		$tanggal = date("Y-m-d");
+		$sql = "UPDATE SPJ_REKAP_SALDO SET $field = $rp WHERE TGL_REKAP = '$tanggal'";
+		return $this->db->query($sql);
 	}
 }

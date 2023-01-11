@@ -45,6 +45,7 @@
                   <a class="cek nav-link uangMakan" id="vert-tabs-uangMakan-tab" data-toggle="pill" href="#vert-tabs-uangMakan" role="tab" aria-controls="vert-tabs-uangMakan" aria-selected="false">Uang Makan</a>
                   <a class="cek nav-link uangTambahan" id="vert-tabs-uangTambahan-tab" data-toggle="pill" href="#vert-tabs-uangTambahan" role="tab" aria-controls="vert-tabs-uangTambahan" aria-selected="false">Uang Tambahan</a>
                   <a class="cek nav-link kota" id="vert-tabs-kota-tab" data-toggle="pill" href="#vert-tabs-kota" role="tab" aria-controls="vert-tabs-kota" aria-selected="false">Kota</a>
+                  <a class="cek nav-link limitSaldo" id="vert-tabs-limitSaldo-tab" data-toggle="pill" href="#vert-tabs-limitSaldo" role="tab" aria-controls="vert-tabs-limitSaldo" aria-selected="false">Limit Saldo</a>
                 </div>
               </div>
               <div class="col-8 col-sm-10">
@@ -147,6 +148,35 @@
                     </div>
                     <br>
                      <div id="getKota"></div>
+                  </div>
+                  <div class="tab-pane fade" id="vert-tabs-limitSaldo" role="tabpanel" aria-labelledby="vert-tabs-limitSaldo-tab">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="table-responsive">
+                          <table class="table table-hover table-striped" width="100%">
+                            <thead class="text-center">
+                              <tr>
+                                <th>Jenis</th>
+                                <th>Limit Saldo</th>
+                                <th>Deskripsi</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <?php foreach ($limit as $lm): ?>
+                                <tr>
+                                  <th><?=$lm->JENIS?></th>
+                                  <td><input type="number" class="form-control inputLimitSaldo" jenis="<?=$lm->JENIS?>" field="LIMIT_SALDO" value="<?=$lm->LIMIT_SALDO?>"></td>
+                                  <td>
+
+                                    <textarea class="form-control inputLimitSaldo" jenis="<?=$lm->JENIS?>" field="DESKRIPSI"><?=$lm->DESKRIPSI?></textarea>
+                                  </td>
+                                </tr>
+                              <?php endforeach ?>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -970,6 +1000,33 @@
           
       }, 1000)
     });
+
+    $('.inputLimitSaldo').on('change', function(){
+      var isi = $(this).val();
+      var jenis = $(this).attr("jenis")
+      var field = $(this).attr("field")
+      
+      var keterangan = field == 'DESKRIPSI' ? 'Deskripsi' : 'Limit Saldo';
+      if (isi == '') {
+        Swal.fire("Isi "+keterangan+" Tidak Boleh Kosong!","","warning")
+      }else{
+        $.ajax({
+          type:'post',
+          data:{isi, jenis, field},
+          dataType:'json',
+          url:'saveLimitSaldo',
+          cache:false,
+          async:true,
+          success:function(data){
+            berhasil()
+          },
+          error:function(data){
+            gagal()
+          }
+        })  
+      }
+      
+    })
 
   })
   function confUangSakuRental() {

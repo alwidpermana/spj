@@ -64,4 +64,16 @@ class Dashboard extends CI_Controller {
 		
 		echo json_encode($data);
 	}
+	public function getWarningLimitSaldo()
+	{
+		$this->load->model('M_Data_Master');
+		$data = $this->M_Data_Master->getLimitSaldo(" AND LIMIT_SALDO >= JUMLAH AND JENIS NOT LIKE '%Non Delivery%'");
+		if ($data->num_rows()>0) {
+			$get = $data->row();
+			$response = array('status' =>'warning','keterangan'=>$get->DESKRIPSI);
+		}else{
+			$response = array('status' =>'success','keterangan'=>'');
+		}
+		echo json_encode($response);
+	}
 }

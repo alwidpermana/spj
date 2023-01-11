@@ -43,7 +43,7 @@ class Pengajuan extends CI_Controller {
 	{
 		$this->load->model('M_Monitoring');
 		$data['data']= $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='',$id, $adjustment='','')->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id,'')->result();
 		$data['side'] = 'spj-pengajuan';
 		$data['page'] = 'Form Pengajuan';
 		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();
@@ -365,12 +365,12 @@ class Pengajuan extends CI_Controller {
         $totalJam = 0;
 
         if ($inputKendaraan == 'Rental' && $inputPIC == 'Sopir') {
-        	$hasil = array('BIAYA' =>0 ,'Menggunakan Kendaraan Rental' );
+        	$hasil = array('BIAYA' =>0 ,'Menggunakan Kendaraan Rental','tc'=>'warning');
         }else{
         	$cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $nik);
         
 	        if ($cekPIC->num_rows()>0) {
-	        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+	        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini','tc'=>'danger');
 	        } else {
 	        	$cekRumsu = $this->M_Pengajuan->cekOtoritasUangRumsum($nik)->row();
 	        	if ($cekRumsu->OTORITAS_UANG_SAKU == 'Y') {
@@ -378,13 +378,13 @@ class Pengajuan extends CI_Controller {
 					
 					if ($data->num_rows()>0) {
 						foreach ($data->result() as $key) {
-							$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+							$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'PIC Mendapatkan Uang Saku','tc'=>'success');				
 						}
 					} else {
-						$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
+						$hasil = array('BIAYA' => 0, 'KET'=>'Biaya Belum Terdaftar Di Data Master','tc'=>'danger');
 					}
 	        	}else{
-	        		$hasil = array('BIAYA' =>0 ,'KET'=>'OTORITAS UANG SAKU = N');
+	        		$hasil = array('BIAYA' =>0 ,'KET'=>'OTORITAS UANG SAKU = N','tc'=>'danger');
 	        	}
 	        	
 	        }
@@ -420,7 +420,7 @@ class Pengajuan extends CI_Controller {
         	$hasil = array('BIAYA' => '20000', 'KET'=>'Tersedia');
         }else{
         	if ($cekPIC->num_rows()>0) {
-	        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini');
+	        	$hasil = array('BIAYA' => 0,'KET'=>'PIC Telah Melakukan Perjalanan Dinas Di Hari Ini','tc'=>'danger');
 	    //     	foreach ($cekPIC->result() as $pic) {
 	    //     		$jam2 += $pic->DIFF_HOUR;	
 	    //     	}
@@ -447,13 +447,13 @@ class Pengajuan extends CI_Controller {
 					
 					if ($data->num_rows()>0) {
 						foreach ($data->result() as $key) {
-							$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'Tersedia');				
+							$hasil = array('BIAYA' => $key->BIAYA, 'KET'=>'PIC Mendapatkan Uang Makan','tc'=>'danger');				
 						}
 					} else {
-						$hasil = array('BIAYA' => 0, 'KET'=>'Belum Terdaftar Di Data Master');
+						$hasil = array('BIAYA' => 0, 'KET'=>'Biaya Belum Terdaftar Di Data Master','tc'=>'danger');
 					}
 	        	}else{
-	        		$hasil = array('BIAYA' =>0 ,'KET'=>'OTORITAS UANG MAKAN = N');
+	        		$hasil = array('BIAYA' =>0 ,'KET'=>'OTORITAS UANG MAKAN = N','tc'=>'danger');
 	        	}
 	        	
 	        }
@@ -591,13 +591,22 @@ class Pengajuan extends CI_Controller {
 	{
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$getKasbon = $this->db->query("SELECT
-											TOTAL_UANG_SAKU + TOTAL_UANG_MAKAN + TOTAL_UANG_JALAN + TOTAL_UANG_BBM + TOTAL_UANG_TOL AS TOTAL 
+											TOTAL_UANG_SAKU,
+											TOTAL_UANG_MAKAN,
+											TOTAL_UANG_JALAN,
+											TOTAL_UANG_BBM,
+											TOTAL_UANG_TOL,
+											CASE 
+												WHEN TAMBAHAN_UANG_JALAN IS NULL THEN 0
+												ELSE TAMBAHAN_UANG_JALAN
+											END AS TAMBAHAN_UANG_JALAN
+										 
 										FROM
 											SPJ_PENGAJUAN 
 										WHERE
 											NO_SPJ = '$inputNoSPJ'");
 		foreach ($getKasbon->result() as $kb) {
-			$oldKasbon = $kb->TOTAL;
+			$oldKasbon = $kb->TOTAL_UANG_SAKU + $kb->TOTAL_UANG_MAKAN + $kb->TOTAL_UANG_JALAN + $kb->TOTAL_UANG_BBM + $kb->TOTAL_UANG_TOL + $kb->TAMBAHAN_UANG_JALAN;
 		}
 
 		$getVoucher = $this->M_Data_Master->getNoVoucherNew()->row();
@@ -613,7 +622,7 @@ class Pengajuan extends CI_Controller {
 		$inputGroupTujuan = $this->input->post("inputGroupTujuan");
 		$inputTotalUangSaku = $this->input->post("inputTotalUangSaku");
         $inputTotalUangMakan = $this->input->post("inputTotalUangMakan");
-        $inputTotalUangJalan = $this->input->post("inputTotalUangJalan");
+        $inputTotalUangJalan = $this->input->post("inputTotalUangJalan") == '' ?0:$this->input->post("inputTotalUangJalan");
         $inputTambahanUangJalan = $this->input->post("inputTambahanUangJalan");
         $inputBBM = $this->input->post("inputBBM");
         $inputTOL = $this->input->post("inputTOL");
@@ -621,7 +630,8 @@ class Pengajuan extends CI_Controller {
         $inputMediaTOL = $this->input->post("inputMediaTOL");
         $bbmSPJ = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
         $tolSPJ = $inputMediaTOL == 'Kasbon' ? $inputTol : 0;
-        $totalUangJalan = $inputGroupTujuan == '4' ? $inputTotalUangJalan + $inputTambahanUangJalan : $inputTotalUangJalan;
+        $inputAbnormal = $this->input->post("inputAbnormal");
+        $totalUangJalan = $inputGroupTujuan == '4'|| $inputAbnormal == 'Y' ? $inputTotalUangJalan + $inputTambahanUangJalan : $inputTotalUangJalan;
         $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $totalUangJalan + $bbmSPJ + $tolSPJ;
         $status = $this->input->post("status");
         if ($totalSPJ > 0) {
@@ -779,7 +789,7 @@ class Pengajuan extends CI_Controller {
 	{
 		$this->load->model('M_Monitoring');
 		$data['data']= $this->M_Pengajuan->getSPJTemporary($id)->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id)->result();
+		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id,'')->result();
 		$data['side'] = 'spj-temporary';
 		$data['page'] = 'Form SPJ Temporary';
 		$data['spj'] = $this->M_Data_Master->getJenisSPJ()->result();

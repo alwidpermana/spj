@@ -323,6 +323,12 @@
                 </a>
               </li>
               <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>monitoring/weekly" class="nav-link ">
+                  <i class="fas fa-calendar-week nav-icon <?=substr($side, 11) == 'weekly'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Biaya Weekly SPJ</p>
+                </a>
+              </li>
+              <li class="nav-item list-menu-open">
                 <a href="<?=base_url()?>monitoring/in_out_kendaraan" class="nav-link ">
                   <i class="fas fa-truck nav-icon <?=substr($side, 11) == 'kendaraan'?'text-dark':''?>" style="font-size: 11px;"></i>
                   <p>In Out Kendaraan</p>
@@ -431,8 +437,8 @@
     <!-- /.sidebar-menu -->
   </div>
   <!-- /.sidebar -->
-  <!-- <div class="sidebar-custom">
+  <div class="sidebar-custom">
     <a href="#" class="btn btn-link text-light"><i class="fas fa-cogs"></i></a>
-  </div> -->
+  </div>
   <!-- /.sidebar-custom -->
 </aside>

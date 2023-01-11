@@ -1560,4 +1560,24 @@
 			$sql = "UPDATE SPJ_USER SET $field ='$isi' WHERE NIK = 'SPJ-$nik'";
 			return $this->db->query($sql);
 		}
+		public function saveLimitSaldo($isi, $jenis, $field)
+		{
+			$sql = "UPDATE SPJ_LIMIT_SALDO SET $field = '$isi' WHERE JENIS = '$jenis'";
+			return $this->db->query($sql);
+		}
+		public function getLimitSaldo($where)
+		{
+			$sql = "SELECT
+						a.*,
+						b.JUMLAH
+					FROM
+						[dbo].[SPJ_LIMIT_SALDO] a
+					INNER JOIN
+						SPJ_SALDO b ON
+					a.JENIS = b.JENIS_SALDO
+					WHERE
+						JENIS_KAS = 'SUB KAS'
+					$where";
+			return $this->db->query($sql);
+		}
 	}

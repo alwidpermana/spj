@@ -131,6 +131,13 @@
             </div>
           </div>
         </div>
+        <div class="col-sm-3"></div>
+        <div class="col-sm-4">
+          <div class="row">
+            <div class="col-sm-5">No Voucher</div>
+            <div class="col-sm-7">:<?=$key->VOUCHER_BBM?></div>
+          </div>
+        </div>
       </div>
       <div class="row invoice-info">
         <div class="col-8">

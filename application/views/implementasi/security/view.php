@@ -633,7 +633,7 @@ foreach ($data as $key): ?>
                     <th colspan="2">Rencana</th>
                     <th colspan="2">Aktual</th>
                     <th rowspan="2">GAP</th>
-                    <th rowspan="2">KM</th>
+                    <th rowspan="2" width="100px">KM</th>
                   </tr>
                   <tr>
                     <th>Tanggal</th>
@@ -707,7 +707,8 @@ foreach ($data as $key): ?>
                         <?php if ($key->STATUS_PERJALANAN == null): ?>
                           <input type="number" id="inputKMOut" class="form-control form-control-sm" value="<?=$kmOut?>" style="width: 200px;" <?=$key->STATUS_PERJALANAN == null?'':'disabled'?>> 
                         <?php else: ?>
-                          <?=number_format($kmOut)?>
+                          <!-- <?=number_format($kmOut)?> -->
+                          <input type="number" id="inputKMOut" class="form-control form-control-sm" value="<?=$kmOut?>" style="width: 200px;">
                         <?php endif ?>
                         
                       </center>
@@ -1224,11 +1225,11 @@ foreach ($data as $key): ?>
       async:true,
       url:url+'/implementasi/cekPICdanKendaraanOut',
       success:function(data){
-        if (data.status == 'warning') {
-          Swal.fire(data.message,'Hubungi PIC Delivery',data.status);
-        }else{
+        // if (data.status == 'warning') {
+          // Swal.fire(data.message,'Hubungi PIC Delivery',data.status);
+        // }else{
           saveValidasiOut()
-        }
+        // }
       },
       error:function(data){
         Swal.fire("Terjadi Error Pada Program","Hubungi Segera Staff IT", "error");

@@ -613,7 +613,13 @@
                                   </tr>
                                   <tr>
                                     <td>Uang Jalan</td>
-                                    <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?></td>
+                                    <td>
+                                      <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK") == '04607'): ?>
+                                        <a href="javascript:;" class="btn text-kps gantiUangJalan" noSPJ="<?=$key->NO_SPJ?>" biaya="<?=$kasbonUangSaku+$kasbonUangMakan+$kasbonUangJalan?>" before="<?=$kasbonUangJalan?>" data="<?=$key->ID_SPJ?>"><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?></a>
+                                      <?php else: ?>
+                                        <?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?>
+                                      <?php endif ?>
+                                    </td>
                                     <td><?=$rl->MEDIA_UANG_JALAN?></td>
                                     <td>
                                       <?=str_replace(',', '.', number_format($rl->REALISASI_UANG_JALAN, 0))?>
@@ -743,8 +749,14 @@
                                   </tr>
                                   <tr>
                                     <td>Uang Jalan</td>
-                                    <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?></td>
-                                    <td><?=$rl->MEDIA_UANG_JALAN?></td>
+                                    <td>
+                                      <?php if ($this->session->userdata("LEVEL")==0 || $this->session->userdata("NIK") == '04607'): ?>
+                                        <a href="javascript:;" class="btn text-kps gantiUangJalan" noSPJ="<?=$key->NO_SPJ?>" biaya="<?=$kasbonUangSaku+$kasbonUangMakan+$kasbonUangJalan?>" before="<?=$kasbonUangJalan?>" data="<?=$key->ID_SPJ?>"><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?></a>
+                                      <?php else: ?>
+                                        <?=str_replace(',', '.', number_format($rl->TOTAL_UANG_JALAN, 0))?>
+                                      <?php endif ?>
+                                    </td>
+                                    <td></td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -783,6 +795,13 @@
                                   </tr>
                                 <?php endforeach ?>
                               </tbody>
+                              <tfoot>
+                                <tr>
+                                  <th>Total</th>
+                                  <th><?=str_replace(',', '.', number_format($kasbonUangSaku+$kasbonUangMakan+$kasbonUangJalan, 0))?></th>
+                                  <th colspan="7"></th>
+                                </tr>
+                              </tfoot>
                             <?php endif ?>
                             
                           </table>
@@ -1021,6 +1040,35 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="modal-biaya" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <div class="modal-title">
+              <label>Adjustment Ubah Biaya Uang Jalan:</label>
+            </div>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="inputIdSPJ">
+            <input type="hidden" id="inputNoSPJ">
+            <input type="hidden" id="inputBiayaKasbon">
+            <input type="hidden" id="inputUangJalanBefore">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Uang Jalan</label>
+                  <input type="number" class="form-control inputUang" id="inputUangJalanAfter">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bg-orange btn-kps saveBiaya ladda-button" data-style="expand-right">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <?php $this->load->view('_partial/footer');?>
 </div>
 <?php $this->load->view("_partial/js");?>
@@ -1030,6 +1078,8 @@
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/spin.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.jquery.min.js"></script>
+<!-- <script src="<?= base_url()?>assets/plugins/moment/moment.min.js"></script> -->
+<script src="<?= base_url()?>assets/plugins/jquery-input-mask/dist/jquery.mask.min.js"></script>
 <script type="text/javascript">
   $(document).ready(function(){
     $('.select2').select2({
@@ -1037,7 +1087,7 @@
     });
     $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
-    
+    $( '.inputUang' ).mask('000.000.000.000', {reverse: true});
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     
@@ -1048,6 +1098,60 @@
       var ngambilFoto = url+'/assets/image/foto-wajah/'+foto;
       $('#getFoto').html('<img src="'+ngambilFoto+'" class="rounded mx-auto d-block" width="75%">');
       $('#modal-foto').modal("show");
+    });
+    $('.gantiUangJalan').on('click', function(){
+      var idSPJ = $(this).attr("data")
+      var noSPJ = $(this).attr("noSPJ")
+      var biaya = $(this).attr("biaya")
+      var before = $(this).attr("before")
+      $('#inputIdSPJ').val(idSPJ)
+      $('#inputNoSPJ').val(noSPJ)
+      $('#inputBiayaKasbon').val(biaya)
+      $('#inputUangJalanBefore').val(before)
+      $('#inputUangJalanAfter').val(parseInt(before))
+      $('#modal-biaya').modal("show")
+    })
+
+    var saveBiaya = $('.saveBiaya').ladda();
+      saveBiaya.click(function () {
+      // Start loading
+      saveBiaya.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var kasbon = 'Kasbon SPJ Delivery';
+        var inputUangJalanBefore = parseInt($('#inputUangJalanBefore').val());
+        var inputNoSPJ= $('#inputNoSPJ').val();
+        var inputIdSPJ = $('#inputIdSPJ').val();
+        var inputBiayaBefore = parseInt($('#inputBiayaKasbon').val());
+        var after = parseInt($('#inputUangJalanAfter').val());
+        var inputBiayaAfter = (inputBiayaBefore - inputUangJalanBefore)+after;
+        $.ajax({
+          type:'get',
+          data:{kasbon},
+          dataType: 'json',
+          url:url+'/Implementasi/cekSaldo',
+          cache: false,
+          async: true,
+          success: function(data){
+            if (inputBiayaAfter > data) {
+              Swal.fire("Saldo Tidak Mencukupi!","Hubungi PIC Terkait","warning")
+            }else{
+              ubahBiaya(inputIdSPJ, inputNoSPJ, inputBiayaBefore, inputBiayaAfter, after);
+            }
+          },
+          complete:function(data){
+            saveBiaya.ladda('stop');
+          },
+          error: function(data){
+            gagal();
+          }
+        });     
+
+        
+        return false;
+          
+      }, 1000)
     });
   })
 
@@ -1065,6 +1169,50 @@
       error: function(data){
         Swal.fire("Tidak Bisa Meng-Generate Qr Code","Refresh Halaman Ini Atau Hubungi Staff IT", "error");
       }
+    })
+  }
+  function ubahBiaya(idSPJ, noSPJ, biayaBefore, biayaAfter, after) {
+    $.ajax({
+      type:'post',
+      data:{idSPJ, noSPJ, biayaBefore, biayaAfter, after},
+      dataType:'json',
+      cache:false,
+      async:true,
+      url:url+'/Monitoring/adjustmentUbahBiaya',
+      beforeSend:function(data){
+        $('.saveBiaya').attr("disabled","disabled");
+      },
+      success:function(data){
+        berhasil();
+        location.reload();
+      },
+      complete:function(data){
+        $('.saveBiaya').removeAttr("disabled","disabled");
+      },
+      error:function(data){
+        gagal();
+      }
+    })
+  }
+  function berhasil() {
+      Swal.fire({
+        position: 'top-end',
+        toast : true,
+        icon: 'success',
+        title: 'Berhasil Menyimpan Data!',
+        showConfirmButton: false,
+        timer: 3000
+      })
+    }
+
+  function gagal() {
+    Swal.fire({
+      position: 'top-end',
+      toast : true,
+      icon: 'error',
+      title: 'Gagal Menyimpan Data! Hubungi Staff IT',
+      showConfirmButton: false,
+      timer: 3000
     })
   }
 

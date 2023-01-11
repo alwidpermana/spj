@@ -750,6 +750,10 @@
                                         <span class="text-left">Tambahan Uang Jalan</span>
                                         <br>
                                         <input type="number" id="inputTambahanUangJalan" class="form-control" value="" max="15000">
+                                        <?php
+                                          $biayaTambahanUangJalan = 0;
+                                        ?>
+                                        <input type="hidden" id="biayaTambahanUangJalan" value="<?=$biayaTambahanUangJalan?>">
                                       </div>
                                     </td>
                                     <td>
@@ -1103,6 +1107,7 @@
                           <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPIC">
                             <option value="">Pilih Jenis PIC dan Subjek Terlebih Dahulu!</option>
                           </select>
+                          
                         </div>
                       </div>
                     </div>
@@ -1128,13 +1133,18 @@
                           <label>Departemen</label>
                           <input type="text" id="setDepartemenPIC" class="form-control" readonly>
                         </div>
+                        <br>
+                        &nbsp;
                       </div>
                     </div>
+
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>Sub Departemen</label>
                           <input type="text" id="setSubDepartemenPIC" class="form-control" readonly>
+                          <br>
+                          &nbsp;
                         </div>
                       </div>
                     </div>
@@ -1154,6 +1164,8 @@
                           <label>Uang Saku</label>
                           <input type="hidden" id="inputUangSaku" class="form-control" readonly>
                           <input type="text" id="showUangSaku" class="form-control" readonly>
+                          <br>
+                          <span id="keteranganUS"></span>
                         </div>
                       </div>
                     </div>
@@ -1163,6 +1175,8 @@
                           <label>Uang Makan</label>
                           <input type="hidden" id="inputUangMakan" class="form-control" readonly>
                           <input type="text" id="showUangMakan" class="form-control" readonly>
+                          <br>
+                          <span id="keteranganUM"></span>
                         </div>
                       </div>
                     </div>    

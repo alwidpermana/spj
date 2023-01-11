@@ -383,10 +383,10 @@ class Cash_Flow extends CI_Controller {
 		$jumlah = $this->input->post("jumlah");
 		if ($jenisKasbon == 'Kasbon BBM') {
 			$kasbon = 'Kasbon Voucher BBM';
-		}elseif ($jenisKasbon == 'Kasbon TOL (Biaya Admin)') {
+		}elseif ($jenisKasbon == 'Biaya Admin TOL') {
 			$kasbon = 'Kasbon TOL '.$jenisSPJ;
 		}else{
-			$jenisKasbon.' '.$jenisSPJ;
+			$kasbon = $jenisKasbon.' '.$jenisSPJ;
 		}
 		// $kasbon = $jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':$jenisKasbon.' '.$jenisSPJ;
 
@@ -408,6 +408,17 @@ class Cash_Flow extends CI_Controller {
 		$data = $this->db->query("SELECT ID FROM SPJ_PENGAJUAN_SALDO WHERE ID = $id AND PASSWORD_RECEIVE = '$inputPassword'");
 		$jumlah = $data->num_rows();
 		echo json_encode($jumlah);
+	}
+	public function adjusmentUbahSaldo()
+	{
+		$jenis = $this->input->post("jenis");
+		$kas = $this->input->post("kas");
+		$rp = $this->input->post("rp");
+		$data = $this->M_Cash_Flow->adjustmentUbahSaldo($jenis, $kas, $rp);
+		if ($data == true) {
+			$this->M_Cash_Flow->adjustmentUbahRekapSaldo($jenis, $kas, $rp);
+		}
+		echo json_encode($data);
 	}
 	
 }

@@ -682,77 +682,128 @@ class M_Implementasi extends CI_Model {
 	public function getSPJForGenerate($jenis)
 	{
 		$sql = "SELECT
-					TGL_INPUT,
-					Q1.NO_SPJ,
-					TGL_SPJ,
-					QR_CODE,
-					TOTAL_UANG_JALAN + TOTAL_UANG_BBM + TOTAL_UANG_TOL+Q2.UANG_SAKU + Q2.UANG_MAKAN + (JML_PIC*Q3.UANG_MAKAN)+(JML_PIC_US * UANG_SAKU1)+(JML_PIC_US * UANG_SAKU2) AS TOTAL_RP,
-					TOTAL_UANG_JALAN + Q2.UANG_SAKU + Q2.UANG_MAKAN + (JML_PIC*Q3.UANG_MAKAN)+(JML_PIC_US * UANG_SAKU1)+(JML_PIC_US * UANG_SAKU2) AS TOTAL_SPJ,
-					TOTAL_UANG_BBM AS TOTAL_BBM,
-					TOTAL_UANG_TOL AS TOTAL_TOL
+					*
 				FROM
 				(
 					SELECT
-						TGL_INPUT,
-						NO_SPJ,
 						TGL_SPJ,
+						NO_SPJ,
+						TGL_INPUT,
 						QR_CODE,
-						SUM(TOTAL_UANG_JALAN) AS TOTAL_UANG_JALAN,
-						SUM(TOTAL_UANG_BBM) AS TOTAL_UANG_BBM,
-						SUM(TOTAL_UANG_TOL) AS TOTAL_UANG_TOL
-					FROM
-						SPJ_PENGAJUAN
-					WHERE
-						STATUS_SPJ = 'CLOSE' AND
-						NO_GENERATE IS NULL AND
-						JENIS_ID = $jenis
-					GROUP BY TGL_INPUT, NO_SPJ, TGL_SPJ, QR_CODE
-				)Q1
-				LEFT JOIN
-				(
-					SELECT
-						NO_PENGAJUAN,
-						COUNT(NO_PENGAJUAN) AS JML_PIC,
-						SUM(UANG_SAKU) AS UANG_SAKU,
-						SUM(UANG_MAKAN) AS UANG_MAKAN
-					FROM
-						SPJ_PENGAJUAN_PIC
-					GROUP BY
-						NO_PENGAJUAN		
-				)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
-				LEFT JOIN
-				(
-					SELECT
-						NO_SPJ,
-						UANG_SAKU1,
-						UANG_SAKU2,
-						UANG_MAKAN
-					FROM
-						SPJ_BIAYA_TAMBAHAN
-				)Q3 ON Q1.NO_SPJ = Q3.NO_SPJ
-				LEFT JOIN
-				(
-					SELECT
-						NO_SPJ,
-						SUM(JML_PIC) AS JML_PIC_US
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_SPJ,
+						TOTAL_UANG_TOL AS TOTAL_TOL,
+						TOTAL_UANG_BBM AS TOTAL_BBM,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM AS TOTAL_RP
 					FROM
 					(
 						SELECT
-							NIK,
-							NO_SPJ,
+							Q1.TGL_SPJ,
+							Q1.TGL_INPUT,
+							Q1.QR_CODE,
+							Q1.NO_SPJ,
+							TOTAL_UANG_SAKU,
+							TOTAL_UANG_MAKAN,
+							TOTAL_UANG_JALAN,
+							TOTAL_UANG_TOL,
+							TOTAL_UANG_BBM,
+							JML_PIC AS JML_PIC_UM,
 							CASE 
-								WHEN Kendaraan = 'Rental' AND JENIS_PIC = 'Sopir' THEN 0
-								ELSE 1
-							END AS JML_PIC
+								WHEN UANG_SAKU1 IS NULL THEN 0
+								ELSE UANG_SAKU1
+							END AS TAMBAHAN_UANG_SAKU1,
+							CASE 
+								WHEN UANG_SAKU2 IS NULL THEN 0
+								ELSE UANG_SAKU2
+							END AS TAMBAHAN_UANG_SAKU2,
+							CASE 
+								WHEN UANG_MAKAN IS NULL THEN 0
+								ELSE UANG_MAKAN
+							END AS TAMBAHAN_UANG_MAKAN,
+							CASE 
+								WHEN Q6.NO_SPJ IS NULL THEN JML_PIC
+								ELSE JML_PIC - 1
+							END AS JML_PIC_US,
+							CASE 
+								WHEN Q6.NO_SPJ IS NULL THEN 'N'
+								ELSE 'Y'
+							END AS JML_PIC_RENTAL
 						FROM
-							SPJ_PENGAJUAN_PIC a
+						(
+							SELECT
+								TGL_SPJ,
+								TGL_INPUT,
+								ID_SPJ,
+								QR_CODE,
+								NO_SPJ,
+								TOTAL_UANG_JALAN,
+								TOTAL_UANG_BBM,
+								TOTAL_UANG_TOL
+							FROM
+								[dbo].[SPJ_PENGAJUAN]
+							WHERE
+								STATUS_DATA = 'SAVED' AND
+								STATUS_PERJALANAN = 'IN' AND
+								STATUS_SPJ = 'CLOSE' AND
+								NO_GENERATE IS NULL AND
+								JENIS_ID = $jenis
+						)Q1
 						INNER JOIN
-							SPJ_PENGAJUAN b
-						ON a.NO_PENGAJUAN = b.NO_SPJ
+						(
+							SELECT
+								NO_PENGAJUAN,
+								COUNT(NIK) AS JML_PIC,
+								SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+								SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
+							FROM 
+								SPJ_PENGAJUAN_PIC
+							GROUP BY NO_PENGAJUAN	
+						)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_SAKU1
+							FROM
+								SPJ_BIAYA_TAMBAHAN a
+							WHERE
+								KEPUTUSAN_US1 = 'OK'
+						)Q3 ON Q1.NO_SPJ = Q3.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_SAKU2
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+							WHERE
+								KEPUTUSAN_US2 = 'OK'
+						)Q4 ON Q1.NO_SPJ = Q4.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_MAKAN
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+							WHERE
+								KEPUTUSAN_MAKAN = 'OK'
+						)Q5 ON Q1.NO_SPJ = Q5.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ
+							FROM
+								SPJ_PENGAJUAN a
+							INNER JOIN
+								SPJ_PENGAJUAN_PIC b ON
+							a.NO_SPJ = b.NO_PENGAJUAN
+							WHERE
+								KENDARAAN = 'Rental' AND
+								OBJEK = 'Rental' AND
+								JENIS_PIC = 'Sopir'
+						)Q6 ON Q1.NO_SPJ =Q6.NO_SPJ
 					)Q1
-					GROUP BY NO_SPJ
-				)Q4 ON Q1.NO_SPJ = Q4.NO_SPJ
-				ORDER BY TGL_INPUT ASC";
+				)Q1";
 		return $this->db->query($sql);
 	}
 	public function getDataBiayaAdmin($jenisId)
@@ -775,40 +826,123 @@ class M_Implementasi extends CI_Model {
 	public function getTotalSPJ($jenis)
 	{
 		$sql = "SELECT
-					JUMLAH_SPJ,
-					TOTAL_RP,
-					TOTAL_SPJ,
-					TOTAL_BBM,
-					TOTAL_TOL
+					COUNT(NO_SPJ) AS JUMLAH_SPJ,
+					SUM(TOTAL_SPJ) + SUM(TOTAL_UANG_TOL) + SUM(TOTAL_UANG_BBM) AS TOTAL_RP,
+					SUM(TOTAL_SPJ) AS TOTAL_SPJ,
+					SUM(TOTAL_UANG_TOL) AS TOTAL_TOL,
+					SUM(TOTAL_UANG_BBM) AS TOTAL_BBM
 				FROM
 				(
 					SELECT
-						COUNT(ID_SPJ) AS JUMLAH_SPJ,
-						'-' AS LINK
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_SPJ,
+						TOTAL_UANG_TOL,
+						TOTAL_UANG_BBM,
+						NO_SPJ
 					FROM
-						SPJ_PENGAJUAN
-					WHERE
-						STATUS_DATA = 'SAVED' AND
-						STATUS_SPJ = 'CLOSE' AND
-						NO_GENERATE IS NULL AND
-						JENIS_ID = $jenis
-				)Q1
-				FULL JOIN
-				(
-					SELECT
-						SUM(TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+TOTAL_UANG_BBM + TOTAL_UANG_TOL) AS TOTAL_RP,
-						SUM(TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN) AS TOTAL_SPJ,
-						SUM(TOTAL_UANG_BBM) AS TOTAL_BBM,
-						SUM(TOTAL_UANG_TOL) AS TOTAL_TOL,
-						'-' AS LINK
-					FROM
-						SPJ_PENGAJUAN
-					WHERE
-						STATUS_DATA = 'SAVED' AND
-						STATUS_SPJ = 'CLOSE' AND
-						NO_GENERATE IS NULL AND
-						JENIS_ID = $jenis
-				)Q2 ON Q1.LINK = Q2.LINK";
+					(
+						SELECT
+							Q1.TGL_SPJ,
+							Q1.NO_SPJ,
+							TOTAL_UANG_SAKU,
+							TOTAL_UANG_MAKAN,
+							TOTAL_UANG_JALAN,
+							TOTAL_UANG_TOL,
+							TOTAL_UANG_BBM,
+							JML_PIC AS JML_PIC_UM,
+							CASE 
+								WHEN UANG_SAKU1 IS NULL THEN 0
+								ELSE UANG_SAKU1
+							END AS TAMBAHAN_UANG_SAKU1,
+							CASE 
+								WHEN UANG_SAKU2 IS NULL THEN 0
+								ELSE UANG_SAKU2
+							END AS TAMBAHAN_UANG_SAKU2,
+							CASE 
+								WHEN UANG_MAKAN IS NULL THEN 0
+								ELSE UANG_MAKAN
+							END AS TAMBAHAN_UANG_MAKAN,
+							CASE 
+								WHEN Q6.NO_SPJ IS NULL THEN JML_PIC
+								ELSE JML_PIC - 1
+							END AS JML_PIC_US,
+							CASE 
+								WHEN Q6.NO_SPJ IS NULL THEN 'N'
+								ELSE 'Y'
+							END AS JML_PIC_RENTAL
+						FROM
+						(
+							SELECT
+								TGL_SPJ,
+								NO_SPJ,
+								TOTAL_UANG_JALAN,
+								TOTAL_UANG_BBM,
+								TOTAL_UANG_TOL
+							FROM
+								[dbo].[SPJ_PENGAJUAN]
+							WHERE
+								STATUS_DATA = 'SAVED' AND
+								STATUS_PERJALANAN = 'IN' AND
+								STATUS_SPJ = 'CLOSE' AND
+								NO_GENERATE IS NULL AND
+								JENIS_ID = $jenis
+						)Q1
+						INNER JOIN
+						(
+							SELECT
+								NO_PENGAJUAN,
+								COUNT(NIK) AS JML_PIC,
+								SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+								SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
+							FROM 
+								SPJ_PENGAJUAN_PIC
+							GROUP BY NO_PENGAJUAN	
+						)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_SAKU1
+							FROM
+								SPJ_BIAYA_TAMBAHAN a
+							WHERE
+								KEPUTUSAN_US1 = 'OK'
+						)Q3 ON Q1.NO_SPJ = Q3.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_SAKU2
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+							WHERE
+								KEPUTUSAN_US2 = 'OK'
+						)Q4 ON Q1.NO_SPJ = Q4.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_MAKAN
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+							WHERE
+								KEPUTUSAN_MAKAN = 'OK'
+						)Q5 ON Q1.NO_SPJ = Q5.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ
+							FROM
+								SPJ_PENGAJUAN a
+							INNER JOIN
+								SPJ_PENGAJUAN_PIC b ON
+							a.NO_SPJ = b.NO_PENGAJUAN
+							WHERE
+								KENDARAAN = 'Rental' AND
+								OBJEK = 'Rental' AND
+								JENIS_PIC = 'Sopir'
+						)Q6 ON Q1.NO_SPJ =Q6.NO_SPJ
+					)Q1
+				)Q1";
 		return $this->db->query($sql);
 	}
 	public function getTotalBiayaAdmin()
@@ -879,6 +1013,129 @@ class M_Implementasi extends CI_Model {
         $tanggal2 = date("Y-m-d");
         $user = $this->session->userdata("NIK");
 		$sql = "INSERT INTO SPJ_GENERATE(NO_GENERATE, TGL_GENERATE, JML_SPJ, TOTAL_RP, PIC_INPUT, JENIS_SPJ, TGL_INPUT, JML_BA, TOTAL_BA) VALUES('$inputNoGenerate','$tanggal2',$inputJumlahSPJ, $inputTotalRP, '$user',$filJenis,'$tanggal',$jmlBA, $inputTotalBA)";
+		return $this->db->query($sql);
+	}
+	public function getBiayaTotalPerNoSPJNEW($noSPJ)
+	{
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						NO_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS KASBON_SPJ,
+						TOTAL_UANG_TOL AS KASBON_TOL,
+						TOTAL_UANG_BBM AS KASBON_BBM
+					FROM
+					(
+						SELECT
+							Q1.TGL_SPJ,
+							Q1.TGL_INPUT,
+							Q1.QR_CODE,
+							Q1.NO_SPJ,
+							TOTAL_UANG_SAKU,
+							TOTAL_UANG_MAKAN,
+							TOTAL_UANG_JALAN,
+							TOTAL_UANG_TOL,
+							TOTAL_UANG_BBM,
+							JML_PIC AS JML_PIC_UM,
+							CASE 
+								WHEN UANG_SAKU1 IS NULL THEN 0
+								ELSE UANG_SAKU1
+							END AS TAMBAHAN_UANG_SAKU1,
+							CASE 
+								WHEN UANG_SAKU2 IS NULL THEN 0
+								ELSE UANG_SAKU2
+							END AS TAMBAHAN_UANG_SAKU2,
+							CASE 
+								WHEN UANG_MAKAN IS NULL THEN 0
+								ELSE UANG_MAKAN
+							END AS TAMBAHAN_UANG_MAKAN,
+							CASE 
+								WHEN Q6.NO_SPJ IS NULL THEN JML_PIC
+								ELSE JML_PIC - 1
+							END AS JML_PIC_US,
+							CASE 
+								WHEN Q6.NO_SPJ IS NULL THEN 'N'
+								ELSE 'Y'
+							END AS JML_PIC_RENTAL
+						FROM
+						(
+							SELECT
+								TGL_SPJ,
+								TGL_INPUT,
+								ID_SPJ,
+								QR_CODE,
+								NO_SPJ,
+								TOTAL_UANG_JALAN,
+								TOTAL_UANG_BBM,
+								TOTAL_UANG_TOL
+							FROM
+								[dbo].[SPJ_PENGAJUAN]
+							WHERE
+								STATUS_DATA = 'SAVED' AND
+								STATUS_PERJALANAN = 'IN' AND
+								STATUS_SPJ = 'CLOSE' AND
+								NO_GENERATE IS NULL AND
+								NO_SPJ = '$noSPJ'
+						)Q1
+						INNER JOIN
+						(
+							SELECT
+								NO_PENGAJUAN,
+								COUNT(NIK) AS JML_PIC,
+								SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+								SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
+							FROM 
+								SPJ_PENGAJUAN_PIC
+							GROUP BY NO_PENGAJUAN	
+						)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_SAKU1
+							FROM
+								SPJ_BIAYA_TAMBAHAN a
+							WHERE
+								KEPUTUSAN_US1 = 'OK'
+						)Q3 ON Q1.NO_SPJ = Q3.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_SAKU2
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+							WHERE
+								KEPUTUSAN_US2 = 'OK'
+						)Q4 ON Q1.NO_SPJ = Q4.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_MAKAN
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+							WHERE
+								KEPUTUSAN_MAKAN = 'OK'
+						)Q5 ON Q1.NO_SPJ = Q5.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ
+							FROM
+								SPJ_PENGAJUAN a
+							INNER JOIN
+								SPJ_PENGAJUAN_PIC b ON
+							a.NO_SPJ = b.NO_PENGAJUAN
+							WHERE
+								KENDARAAN = 'Rental' AND
+								OBJEK = 'Rental' AND
+								JENIS_PIC = 'Sopir'
+						)Q6 ON Q1.NO_SPJ =Q6.NO_SPJ
+					)Q1
+				)Q1";
 		return $this->db->query($sql);
 	}
 	public function getBiayaTotalPerNoSPJ($noSPJ)
@@ -987,7 +1244,7 @@ class M_Implementasi extends CI_Model {
 		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonBBM, 'Kasbon BBM','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
 		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonTOL, 'Kasbon TOL','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
 		if ($jmlBA>0) {
-			$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO)VALUES('$user','$tanggal','Generate',$inputTotalBA, 'Kasbon TOL (Biaya Admin)','Kas Induk','$inputNoGenerate',$jenisID,'OPEN')");
+			$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$inputTotalBA, 'Biaya Admin TOL','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','9-1101')");
 		}
 		
 		return $sql;

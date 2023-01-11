@@ -614,13 +614,13 @@
                                   <div id="getLokasi"></div>
                                 </div>
                               </div>
-                              <!-- <div class="row">
+                              <div class="row">
                                 <div class="col-md-12">
                                   <button type="button" class="btn btn-xs btn-kps bg-orange" data-toggle="modal" data-target="#modal-lokasi" id="tambahLokasi">
                                     <i class="fas fa-plus"></i>
                                   </button>
                                 </div>
-                              </div> -->
+                              </div>
                             </div>
                             <div class="col-md-2"></div>
                             <div class="col-md-2">
@@ -738,6 +738,10 @@
                                         <span class="text-left">Tambahan Uang Jalan</span>
                                         <br>
                                         <input type="number" id="inputTambahanUangJalan" class="form-control" value="<?=$key->TAMBAHAN_UANG_JALAN?>">
+                                        <?php
+                                          $biayaTambahanUangJalan = $key->TAMBAHAN_UANG_JALAN;
+                                        ?>
+                                        <input type="hidden" id="biayaTambahanUangJalan" value="<?=$biayaTambahanUangJalan?>">
                                       </div>
                                     </td>
                                     <td>
@@ -1060,6 +1064,8 @@
                         <div class="form-group">
                           <label>Departemen</label>
                           <input type="text" id="setDepartemenPIC" class="form-control" readonly>
+                          <br>
+                          &nbsp;
                         </div>
                       </div>
                     </div>
@@ -1068,6 +1074,8 @@
                         <div class="form-group">
                           <label>Sub Departemen</label>
                           <input type="text" id="setSubDepartemenPIC" class="form-control" readonly>
+                          <br>
+                          &nbsp;
                         </div>
                       </div>
                     </div>
@@ -1087,6 +1095,8 @@
                           <label>Uang Saku</label>
                           <input type="hidden" id="inputUangSaku" class="form-control" readonly>
                           <input type="text" id="showUangSaku" class="form-control" readonly>
+                          <br>
+                          <span id="keteranganUS"></span>
                         </div>
                       </div>
                     </div>
@@ -1096,6 +1106,8 @@
                           <label>Uang Makan</label>
                           <input type="hidden" id="inputUangMakan" class="form-control" readonly>
                           <input type="text" id="showUangMakan" class="form-control" readonly>
+                          <br>
+                          <span id="keteranganUM"></span>
                         </div>
                       </div>
                     </div>    

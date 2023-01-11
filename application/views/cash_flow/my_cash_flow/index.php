@@ -129,6 +129,26 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="modal-editSaldo" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <input type="hidden" id="inputJenisSaldo">
+            <input type="hidden" id="inputJenisKas">
+            <div class="row">
+              <div class="col-md-12">
+                <label id="textSaldo"></label>
+                <input type="number" id="inputRPSaldo" class="form-control form-control-sm">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bg-orange btn-kps saveSaldo ladda-button" data-style="expand-right">Save Saldo</button>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <?php $this->load->view('_partial/footer');?>
 </div>
@@ -153,6 +173,9 @@
     // make_skeleton().fadeOut();
    getTabel()
    getDataSaldo();
+   $('.filter').on('change', function(){
+      getTabel();
+   })
    $('#getTabel').on('click','.approvePengajuan', function(){
     var id = $(this).attr("data");
     var status = $(this).attr("status");
@@ -171,6 +194,53 @@
     //   approvePengajuan('', '', id, status, '')
     // }
    })
+   $('#getSaldo').on('click','.ubahSaldo', function(){
+    var jenis = $(this).attr("jenis");
+    var jenis_saldo = 'Kasbon '+jenis;
+    var kas = $(this).attr("kas");
+    var rp = $(this).attr("rp");
+    console.log(jenis)
+    $('#inputJenisSaldo').val(jenis_saldo)
+    $('#inputJenisKas').val(kas)
+    $('#inputRPSaldo').val(rp)
+    $('#textSaldo').html(kas+' '+jenis)
+    $('#modal-editSaldo').modal("show")
+   })
+   var saveSaldo = $('.saveSaldo').ladda();
+      saveSaldo.click(function () {
+      // Start loading
+      saveSaldo.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        
+        var jenis = $('#inputJenisSaldo').val()
+        var kas = $('#inputJenisKas').val()
+        var rp = $('#inputRPSaldo').val()
+        $.ajax({
+          type:'post',
+          data:{jenis, kas, rp},
+          dataType:'json',
+          cache:false,
+          async:true,
+          url:'adjusmentUbahSaldo',
+          success:function(data){
+            berhasil()
+            getDataSaldo()
+            $('#modal-editSaldo').modal("hide")
+          },
+          complete:function(data){
+            saveSaldo.ladda('stop');
+          },
+          error:function(data){
+            gagal()
+          }
+        })
+        
+        return false;
+          
+      }, 1000)
+    });
    var saveApprove = $('.saveApprove').ladda();
       saveApprove.click(function () {
       // Start loading

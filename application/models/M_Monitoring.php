@@ -7,6 +7,9 @@ class M_Monitoring extends CI_Model {
 
 	public function getSPJ($bulan, $tahun, $jenis, $search, $id, $adjustment, $implementasi)
 	{
+		$filPeriode = $this->input->get("filPeriode");
+		$periodeAwal = $this->input->get("periodeAwal");
+		$periodeAkhir = $this->input->get("periodeAkhir");
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
 		$byAdjust = $adjustment == ''?'':" AND STATUS_SPJ = 'OPEN' AND ADJUSTMENT_MANAJEMEN = 'Y'";
 		$byStep1 = $implementasi == 'Y'?" AND STATUS_PERJALANAN = 'IN' AND STATUS_SPJ = 'OPEN'":"";
@@ -20,6 +23,14 @@ class M_Monitoring extends CI_Model {
 		}else{
 			$whereStatus =" AND STATUS_SPJ = '$filStatus'";
 		}
+
+		if ($filPeriode == '') {
+			$wherePeriode = "";
+			
+		}else{
+			$wherePeriode = " AND TGL_SPJ BETWEEN '$periodeAwal' AND '$periodeAkhir'";
+		}
+
 		$sql = "SELECT
 				  *
 				FROM
@@ -66,9 +77,7 @@ class M_Monitoring extends CI_Model {
 							SPJ_PENGAJUAN
 						WHERE
 							STATUS_DATA = 'SAVED' AND
-							DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
-							YEAR(TGL_SPJ) LIKE '$tahun%' AND
-							JENIS_ID LIKE '$jenis%' $byAdjust $byStep1 $whereStatus
+							JENIS_ID LIKE '$jenis%' $byAdjust $byStep1 $whereStatus $wherePeriode
 					)Q1
 					LEFT JOIN
 					(
@@ -461,9 +470,10 @@ class M_Monitoring extends CI_Model {
 		}
 		return $no;
 	}
-	public function getLokasiByNoSPJ($bulan, $tahun, $jenis, $search, $id)
+	public function getLokasiByNoSPJ($bulan, $tahun, $jenis, $search, $id, $status)
 	{
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
+		$whereStatus = $status == '' ? '' : " AND STATUS_SPJ LIKE '$status%'";
 		$sql = "SELECT
 					Q1.SERLOK_KOTA,
 					Q1.NO_SPJ,
@@ -493,15 +503,16 @@ class M_Monitoring extends CI_Model {
 						STATUS_DATA = 'SAVED' AND
 						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
-						JENIS_ID LIKE '$jenis%'
+						JENIS_ID LIKE '$jenis%' $whereStatus
 				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
 				$byId
 				ORDER BY SERLOK_KOTA ASC";
 		return $this->db->query($sql);
 	}
-	public function getTujuanByNoSPJ($bulan, $tahun, $jenis, $search, $id)
+	public function getTujuanByNoSPJ($bulan, $tahun, $jenis, $search, $id, $status)
 	{
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
+		$whereStatus = $status == '' ? '' : " AND STATUS_SPJ LIKE '$status%'";
 		$sql = "SELECT DISTINCT
 					Q1.SERLOK_KOTA,
 					Q2.NO_SPJ
@@ -528,15 +539,16 @@ class M_Monitoring extends CI_Model {
 						STATUS_DATA = 'SAVED' AND
 						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
-						JENIS_ID LIKE '$jenis%'
+						JENIS_ID LIKE '$jenis%' $whereStatus
 				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
 				$byId
 				ORDER BY SERLOK_KOTA ASC";
 		return $this->db->query($sql);
 	}
-	public function getPICPendampingByNoSPJ($bulan, $tahun, $jenis, $search, $id)
+	public function getPICPendampingByNoSPJ($bulan, $tahun, $jenis, $search, $id, $status)
 	{
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
+		$whereStatus = $status == '' ? '' : " AND STATUS_SPJ LIKE '$status%'";
 		$sql = "SELECT
 					Q1.NIK + ' - ' + namapeg AS PIC,
 					NO_PENGAJUAN,
@@ -613,7 +625,7 @@ class M_Monitoring extends CI_Model {
 						STATUS_DATA = 'SAVED' AND
 						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
-						JENIS_ID LIKE '$jenis%'
+						JENIS_ID LIKE '$jenis%' $whereStatus
 				)Q3 ON Q1.NO_PENGAJUAN = Q3.NO_SPJ
 				LEFT JOIN
 				(
@@ -976,7 +988,8 @@ class M_Monitoring extends CI_Model {
 						TOTAL_RP,
 						TGL_RECEIVE,
 						STATUS_RECEIVE,
-						PIC_INPUT
+						PIC_INPUT,
+						TOTAL_BA
 					FROM
 						SPJ_GENERATE
 					WHERE
@@ -2542,6 +2555,188 @@ class M_Monitoring extends CI_Model {
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
 		$sql = "INSERT INTO SPJ_LOG(PIC_INPUT, TGL_INPUT, JENIS, NO_SPJ, AKTIVITAS)VALUES('$user','$tanggal','$jenis','$noSPJ', '$aktivitas')";
+		return $this->db->query($sql);
+	}
+	public function updateBiaya($id, $after)
+	{
+		$sql = "UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_JALAN = $after WHERE ID_SPJ = $id";
+		return $this->db->query($sql);
+	}
+	public function updateSubKas($id, $after)
+	{
+		$sql = "UPDATE SPJ_KAS_SUB SET CREDIT = $after WHERE FK_ID = $id AND JENIS_FK = 'KASBON' AND DETAIL_KASBON = 'TRANSAKSI AWAL'";
+		return $this->db->query($sql);
+	}
+	public function updateSaldo($id, $after, $before)
+	{
+		$data = $this->db->query("SELECT JUMLAH FROM SPJ_SALDO WHERE JENIS_SALDO = 'Kasbon SPJ Delivery' AND JENIS_KAS = 'SUB KAS'")->row();
+		$saldo = $data->JUMLAH;
+		$rekap = $this->db->query("SELECT TOP 1 ID FROM SPJ_REKAP_SALDO ORDER BY TGL_REKAP DESC")->row();
+		$idRekap = $rekap->ID;
+		$total = ($saldo+$before)-$after;
+		$sql = $this->db->query("UPDATE SPJ_SALDO SET JUMLAH = '$total' WHERE JENIS_SALDO = 'Kasbon SPJ Delivery' AND JENIS_KAS = 'SUB KAS'");
+		$sql = $this->db->query("UPDATE SPJ_REKAP_SALDO SET SUB_KAS_SPJ_DLV = '$total' WHERE ID= $idRekap");
+
+		return $sql;
+	}
+	public function getTabelWeekly($mulai, $akhir, $jenis, $status, $search)
+	{
+		if ($mulai == '' && $akhir == '') {
+			$periode = "";
+		}else{
+			$periode = " AND TGL_SPJ BETWEEN '$mulai' AND '$akhir'";
+		}
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						ID_SPJ,
+						TGL_SPJ,
+						NO_SPJ,
+						TGL_INPUT,
+						QR_CODE,
+						STATUS_SPJ,
+						NAMA_GROUP,
+						VOUCHER_BBM,
+						NO_GENERATE,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN AS TOTAL_KASBON,
+						((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_TAMBAHAN_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN + ((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_SPJ,
+						TOTAL_UANG_TOL AS TOTAL_TOL,
+						TOTAL_UANG_BBM AS TOTAL_BBM,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM AS TOTAL_RP
+					FROM
+					(
+						SELECT
+							Q1.ID_SPJ,
+							Q1.TGL_SPJ,
+							Q1.TGL_INPUT,
+							Q1.QR_CODE,
+							Q1.NO_SPJ,
+							CASE 
+								WHEN Q1.STATUS_SPJ = 'CLOSE' AND NO_GENERATE IS NULL THEN 'Waiting For Generate'
+								ELSE Q1.STATUS_SPJ
+							END AS STATUS_SPJ,
+							Q1.NAMA_GROUP,
+							Q1.VOUCHER_BBM,
+							Q1.NO_GENERATE,
+							TOTAL_UANG_SAKU,
+							TOTAL_UANG_MAKAN,
+							TOTAL_UANG_JALAN,
+							TOTAL_UANG_TOL,
+							TOTAL_UANG_BBM,
+							JML_PIC AS JML_PIC_UM,
+							CASE 
+								WHEN UANG_SAKU1 IS NULL THEN 0
+								ELSE UANG_SAKU1
+							END AS TAMBAHAN_UANG_SAKU1,
+							CASE 
+								WHEN UANG_SAKU2 IS NULL THEN 0
+								ELSE UANG_SAKU2
+							END AS TAMBAHAN_UANG_SAKU2,
+							CASE 
+								WHEN UANG_MAKAN IS NULL THEN 0
+								ELSE UANG_MAKAN
+							END AS TAMBAHAN_UANG_MAKAN,
+							CASE 
+								WHEN Q6.NO_SPJ IS NULL THEN JML_PIC
+								ELSE JML_PIC - 1
+							END AS JML_PIC_US,
+							CASE 
+								WHEN Q6.NO_SPJ IS NULL THEN 'N'
+								ELSE 'Y'
+							END AS JML_PIC_RENTAL
+						FROM
+						(
+							SELECT
+								a.TGL_SPJ,
+								a.TGL_INPUT,
+								a.ID_SPJ,
+								a.QR_CODE,
+								a.NO_SPJ,
+								a.STATUS_SPJ,
+								b.NAMA_GROUP,
+								a.VOUCHER_BBM,
+								a.TOTAL_UANG_JALAN,
+								a.TOTAL_UANG_BBM,
+								a.TOTAL_UANG_TOL,
+								a.NO_GENERATE
+							FROM
+								[dbo].[SPJ_PENGAJUAN] a
+							LEFT JOIN SPJ_GROUP_TUJUAN b ON
+							a.GROUP_ID = b.ID_GROUP
+							WHERE
+								STATUS_DATA = 'SAVED' AND
+								JENIS_ID LIKE '$jenis%' AND
+								STATUS_SPJ NOT IN ('CANCEL')
+						)Q1
+						INNER JOIN
+						(
+							SELECT
+								NO_PENGAJUAN,
+								COUNT(NIK) AS JML_PIC,
+								SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+								SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
+							FROM 
+								SPJ_PENGAJUAN_PIC
+							GROUP BY NO_PENGAJUAN	
+						)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_SAKU1
+							FROM
+								SPJ_BIAYA_TAMBAHAN a
+							WHERE
+								KEPUTUSAN_US1 = 'OK'
+						)Q3 ON Q1.NO_SPJ = Q3.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_SAKU2
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+							WHERE
+								KEPUTUSAN_US2 = 'OK'
+						)Q4 ON Q1.NO_SPJ = Q4.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ,
+								UANG_MAKAN
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+							WHERE
+								KEPUTUSAN_MAKAN = 'OK'
+						)Q5 ON Q1.NO_SPJ = Q5.NO_SPJ
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ
+							FROM
+								SPJ_PENGAJUAN a
+							INNER JOIN
+								SPJ_PENGAJUAN_PIC b ON
+							a.NO_SPJ = b.NO_PENGAJUAN
+							WHERE
+								KENDARAAN = 'Rental' AND
+								OBJEK = 'Rental' AND
+								JENIS_PIC = 'Sopir'
+						)Q6 ON Q1.NO_SPJ =Q6.NO_SPJ
+						WHERE
+							STATUS_SPJ LIKE '%$status%' 
+							$periode
+							
+					)Q1
+					WHERE
+						NO_SPJ LIKE '%$search%' OR
+						QR_CODE LIKE '%$search%' OR
+						VOUCHER_BBM LIKE '%$search%'
+				)Q1
+				ORDER BY TGL_SPJ, NO_SPJ ASC";
 		return $this->db->query($sql);
 	}
 }

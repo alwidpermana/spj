@@ -12,6 +12,9 @@
   }
   $dlv = $this->session->userdata("DLV");
   $ndv = $this->session->userdata("NDV");
+  $tglAkhir = date("Y-m-d");
+  $akhirPeriode = date('m-d-Y', strtotime('+1 days', strtotime($tglAkhir)));
+  $mulaiPeriode = date('m-d-Y', strtotime('-7 days', strtotime($tglAkhir)));
 ?>
 <html lang="en">
 <head>
@@ -19,6 +22,7 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/jquery-ui-1.12.1.custom/jquery-ui.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/ladda-buttons/css/ladda-themeless.min.css">
+  <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/daterangepicker/daterangepicker.css">
   <?php $this->load->view("_partial/head")?>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse layout-navbar-fixed layout-footer-fixed">
@@ -38,7 +42,7 @@
           <div class="card">
             <div class="card-body">
               <div class="row">
-                <div class="col-md-1">
+                <!-- <div class="col-md-1">
                   <div class="form-group">
                     <label>Tahun</label>
                     <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filTahun">
@@ -56,6 +60,19 @@
                         <option value="<?=$bulan?>" <?=$angka == date("n")?'selected':''?>><?=$bulan?></option>
                       <?php endforeach ?>
                     </select>
+                  </div>
+                </div> -->
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>Periode</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          <i class="far fa-calendar-alt"></i>
+                        </span>
+                      </div>
+                      <input type="text" class="form-control float-right filter" id="filPeriode">
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-2">
@@ -178,12 +195,18 @@
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/spin.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.min.js"></script>
 <script src="<?= base_url()?>assets/plugins/ladda-buttons/js/ladda.jquery.min.js"></script>
+<script src="<?= base_url()?>assets/plugins/moment/moment.min.js"></script>
+<script src="<?= base_url()?>assets/plugins/daterangepicker/daterangepicker.js"></script>
 <script type="text/javascript">
   $(document).ready(function(){
     $('.select2').select2({
         'width': '100%',
     });
-    
+    var mulaiPeriode = '<?=$mulaiPeriode?>';
+    var akhirPeriode = '<?=$akhirPeriode?>';
+    console.log(akhirPeriode)
+    $('#filPeriode').val(mulaiPeriode+" - "+akhirPeriode)
+    $('#filPeriode').daterangepicker()
     $('.ladda-button').ladda('bind', {timeout: 1000});
     getTabel();
     var status = '<?=$status?>';
@@ -291,9 +314,13 @@
     var filStatus = $('#filStatus').val();
     var filJenis = $('#filJenis').val();
     var filSearch = $('#filSearch').val();
+    var filPeriode = $('#filPeriode').val();
+    var periode = filPeriode.split(' - ');
+    var periodeAwal = periode[0]
+    var periodeAkhir = periode[1]
     $.ajax({
       type:'get',
-      data:{filTahun, filBulan, filStatus, filJenis, filSearch},
+      data:{filTahun, filBulan, filStatus, filJenis, filSearch, filPeriode, periodeAwal, periodeAkhir},
       url:'getTabelSPJ',
       cache: false,
       async: true,

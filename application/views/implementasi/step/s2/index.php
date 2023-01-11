@@ -654,7 +654,7 @@
                                   <td>
                                     <center>
                                       <?php if ($key->MEDIA_UANG_TOL == 'Reimburse'):?>
-                                          
+                                          <input type="hidden" id="inputBeforeTOL" value="<?=$rl->TOTAL_UANG_TOL?>">
                                           <input type="number" id="inputRealisasiUangTol" class="form-control form-control-sm" style="width: 120px" value="<?=round($rl->TOTAL_UANG_TOL)?>" awal="<?=$key->STATUS_SPJ == 'CLOSE'?0:$key->TOTAL_UANG_TOL?>" <?=$key->STATUS_SPJ == 'CLOSE'?'readonly':''?>>
                                       <?php else: ?>
                                           <input type="number" id="inputRealisasiUangTol" class="form-control form-control-sm" style="width: 120px" value="<?=round($rl->TOTAL_UANG_TOL)?>" awal="<?=$key->STATUS_SPJ == 'CLOSE'?0:$key->TOTAL_UANG_TOL?>" readonly>
@@ -946,7 +946,8 @@
     var inputMediaUangBBM = $('#inputMediaUangBBM').val();
     var inputMediaUangTOL = $('#inputMediaUangTOL').val();
     var inputNoSPJ = $('#inputNoSPJ').val(); 
-    var inputId = $('#inputId').val();    
+    var inputId = $('#inputId').val();
+    var inputBeforeTOL = $('#inputBeforeTOL').val();    
     if (inputStatusUS1 != 'CLOSE') {
       Swal.fire("Status Uang Saku Ke 2 Masih Belum Close!","Hubungi PIC Terkait","warning")
       $('html, body').animate({
@@ -996,7 +997,7 @@
     }else{
       $.ajax({
         type:'post',
-        data:{inputNoSPJ, inputRealisasiUangSaku, inputRealisasiUangMakan, inputRealisasiUangJalan, inputRealisasiUangBBM, inputRealisasiUangTol, inputJenisSPJ, inputId, inputMediaUangTOL},
+        data:{inputNoSPJ, inputRealisasiUangSaku, inputRealisasiUangMakan, inputRealisasiUangJalan, inputRealisasiUangBBM, inputRealisasiUangTol, inputJenisSPJ, inputId, inputMediaUangTOL, inputBeforeTOL},
         url:url+'/implementasi/closeSPJ',
         cache: false,
         async: true,

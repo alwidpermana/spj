@@ -23,7 +23,8 @@
 	</thead>
 	<tbody>
 		<?php
-		foreach ($data as $key): ?>
+		foreach ($data as $key): 
+		?>
 			<tr>
 				<td><?=$key->NO_URUT?></td>
 				<?php
@@ -49,6 +50,12 @@
 			<td class="text-right"><b>Total:</b></td>
 			<?php foreach ($summaryOK as $so): ?>
 				<td colspan="3" class="text-center"><?=number_format($so->RP)?></td>
+			<?php endforeach ?>
+		</tr>
+		<tr>
+			<td class="text-right"><b>Jumlah SPJ:</b></td>
+			<?php foreach ($summaryOK as $so): ?>
+				<td colspan="3" class="text-center"><?=number_format($so->JML)?></td>
 			<?php endforeach ?>
 		</tr>
 	</tfoot>

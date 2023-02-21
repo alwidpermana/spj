@@ -25,34 +25,45 @@
 				<td class="text-center"><span class="badge <?=$key->BERBADAN_HUKUM == 'Y'?'bg-kps':'bg-danger'?>"><?=$key->BERBADAN_HUKUM == 'Y'?'Ya':'Tidak'?></span></td>
 				<td><?=$key->NPWP_NIK?></td>
 				<td class="text-center">
-					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
-                   		<span class="sr-only">Toggle Dropdown</span>
-                  	</button>
-                  	<div class="dropdown-menu" role="menu">
-                    	<?php if ($jenis == 'master'): ?>
-                    		<a 
-	                    		class="dropdown-item dropButton editRekanan" 
-	                    		data="<?=$key->ID?>"
-	                    		kode = "<?=$key->KODE?>"
-	                    		nama="<?=$key->NAMA?>"
-	                    		alamat="<?=$key->ALAMAT?>" 
-	                    		hukum="<?=$key->BERBADAN_HUKUM?>"
-	                    		npwp = "<?=$key->NPWP_NIK?>"
-	                    		href="javascript:;">
-	                    		Edit
-	                    	</a>
-                    	<?php endif ?>
-                    	<?php if ($jenis == 'kendaraan'): ?>
-                    		<a 
-	                    		class="dropdown-item dropButton dataKendaraan" 
-	                    		data="<?=$key->ID?>" 
-	                    		nama="<?=$key->NAMA?>"
-	                    		href="javascript:;">
-	                    		Data Kendaraan
-	                    	</a>
-                    	<?php endif ?>
-                    	
-                  	</div>
+					<?php if ($jenis == 'master'): ?>
+						<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
+	                   		<span class="sr-only">Toggle Dropdown</span>
+	                  	</button>
+	                  	<div class="dropdown-menu" role="menu">
+	                    	<?php if ($jenis == 'master'): ?>
+	                    		<a 
+		                    		class="dropdown-item dropButton editRekanan" 
+		                    		data="<?=$key->ID?>"
+		                    		kode = "<?=$key->KODE?>"
+		                    		nama="<?=$key->NAMA?>"
+		                    		alamat="<?=$key->ALAMAT?>" 
+		                    		hukum="<?=$key->BERBADAN_HUKUM?>"
+		                    		npwp = "<?=$key->NPWP_NIK?>"
+		                    		href="javascript:;">
+		                    		Edit
+		                    	</a>
+	                    	<?php endif ?>
+	                    	<?php if ($jenis == 'kendaraan'): ?>
+	                    		<a 
+		                    		class="dropdown-item dropButton dataKendaraan" 
+		                    		data="<?=$key->ID?>" 
+		                    		nama="<?=$key->NAMA?>"
+		                    		href="javascript:;">
+		                    		Data Kendaraan
+		                    	</a>
+	                    	<?php endif ?>
+	                    	
+	                  	</div>	
+					<?php else: ?>
+						<a 
+                    		class="btn bg-orange btn-kps btn-sm dataKendaraan" 
+                    		data="<?=$key->ID?>" 
+                    		nama="<?=$key->NAMA?>"
+                    		href="javascript:;">
+                    		<i class="fas fa-arrow-down"></i>
+                    	</a>
+					<?php endif ?>
+					
 				</td>
 			</tr>
 		<?php endforeach ?>

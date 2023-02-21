@@ -4,6 +4,7 @@
             <th rowspan="2">No</th>
             <th colspan="7">PIC</th>
             <th colspan="31">Tanggal</th>
+            <th rowspan="2">Total</th>
         </tr>
         <tr class="bg-gray">
             <th>Subjek</th>
@@ -24,6 +25,7 @@
 		<?php 
 		$no = 1;
 		$spj = '';
+        $totalPerPIC = 0;
 		foreach ($data as $key): ?>
 			<tr>
 				<td><?=$no++?></td>
@@ -39,16 +41,23 @@
                 	$spj .='<ul style="padding-left: 10px">'; 
                     foreach ($pic as $pc) {
                     	if ($i == $pc->TGL && $key->NIK == $pc->NIK) {
-                    		$spj .='<li><a href="'.base_url().'monitoring/view_spj/'.$pc->ID_SPJ.'" class="text-dark" style="font-size:12px">'.$pc->NO_SPJ.'</a></li>';
+                            if ($pc->NO_SPJ != NULL) {
+                                $totalPerPIC += 1;
+                            }
+                    		$spj .='<li><a href="'.base_url().'monitoring/view_spj/'.$pc->ID_SPJ.'" class="text-dark" style="font-size:12px" target="_blank">'.$pc->NO_SPJ.'</a></li>';
                     	}
                     }
                     $spj.="</ul>";
                     echo "<td>".$spj."</td>";
                     $spj = '';
                 }
+                echo "<td class='text-center'>".$totalPerPIC."</td>";
             ?>
+
 			</tr>
-		<?php endforeach ?>
+		<?php 
+            $totalPerPIC = 0;
+        endforeach ?>
 	</tbody>
 </table>
 <script type="text/javascript">
@@ -57,8 +66,8 @@
             scrollY:        "350px",
             scrollX:        true,
             scrollCollapse: true,
-            paging:         true,
-            'searching': false,
+            paging:         false,
+            'searching': true,
             'ordering': true,
             order: [[0, 'asc']],
             fixedColumns:   {

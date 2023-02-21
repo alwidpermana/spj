@@ -669,7 +669,7 @@ class M_Implementasi extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-        $cekVoucher = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ' AND MEDIA_UANG_BBM = 'Voucher' AND VOUCHER = 'Y'");
+        $cekVoucher = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ' AND  VOUCHER = 'Y'");
         if ($cekVoucher->num_rows()>0) {
         	$status = 'CLOSE';
         } else {
@@ -1375,7 +1375,10 @@ class M_Implementasi extends CI_Model {
 					CASE 
 						WHEN NAMA_FILE IS NULL THEN 'car.png'
 						ELSE 'foto-kendaraan/'+NAMA_FILE
-					END AS NAMA_FILE
+					END AS NAMA_FILE,
+					ISNULL(KM, 0) AS KM,
+					ISNULL(KM_OUT, 0) AS KM_OUT,
+					KETERANGAN
 				FROM
 				(
 					SELECT
@@ -1387,8 +1390,8 @@ class M_Implementasi extends CI_Model {
 						CASE 
 							WHEN NO_TNKB IS NULL THEN 'OUT'
 							ELSE 'IN'
-						END AS STATUS
-					FROM
+						END AS STATUS	
+						FROM
 						GA.dbo.GA_TKendaraan a
 					LEFT JOIN
 						SPJ_TEMP_KENDARAAN b
@@ -1404,22 +1407,51 @@ class M_Implementasi extends CI_Model {
 					WHERE
 						STAR = 'Y'
 				)Q2 ON Q1.NoTNKB = Q2.NO_TNBK
+				LEFT JOIN
+				(
+					SELECT
+						NO_TNKB,
+						KM
+					FROM
+						SPJ_CHECK_KENDARAAN
+				)Q3 ON Q1.NoTNKB = Q3.NO_TNKB
+				LEFT JOIN
+				(
+					SELECT
+						NO_TNKB,
+						KM_OUT,
+						KETERANGAN
+					FROM
+						SPJ_SCAN_KENDARAAN
+					WHERE
+						KM_IN IS NULL
+				)Q4 ON Q1.NoTNKB = Q4.NO_TNKB
 				WHERE
 					NoTNKB = '$no'";
 		return $this->db->query($sql);
 	}
-	public function scanKendaraanNotSPJ($no, $status, $keterangan)
+	public function scanKendaraanNotSPJ($no, $status, $keterangan, $km)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-		$save = $this->db->query("INSERT INTO SPJ_SCAN_KENDARAAN(NO_TNKB, TGL_SCAN, PIC_SCAN, STATUS, KETERANGAN)VALUES('$no','$tanggal','$user','$status','$keterangan')");
+
 		if ($status == 'OUT') {
+			$save = $this->db->query("INSERT INTO SPJ_SCAN_KENDARAAN(NO_TNKB, TGL_SCAN, PIC_SCAN, STATUS, KETERANGAN, KM_OUT)VALUES('$no','$tanggal','$user','$status','$keterangan','$km')");
 			$this->db->query("INSERT INTO SPJ_TEMP_KENDARAAN(NO_TNKB, NO_SPJ)VALUES('$no','-')");
 		}else{
+			$save = $this->db->query("UPDATE SPJ_SCAN_KENDARAAN SET KM_IN = $km, STATUS = '$status', TGL_SCAN_IN = '$tanggal', KETERANGAN='$keterangan' WHERE NO_TNKB = '$no' AND KM_IN IS NULL");
 			$this->db->query("DELETE FROM SPJ_TEMP_KENDARAAN WHERE NO_TNKB = '$no'");
 		}
 
+		if ($save == true) {
+			$get = $this->db->query("SELECT ID FROM SPJ_CHECK_KENDARAAN WHERE NO_TNKB = '$no'");
+			if ($get->num_rows() == 0) {
+				$this->db->query("INSERT INTO SPJ_CHECK_KENDARAAN(NO_TNKB, KM, PIC_LAST, TGL_LAST)VALUES('$no','$km','$user','$tanggal')");
+			}else{
+				$this->db->query("UPDATE SPJ_CHECK_KENDARAAN SET KM = '$km' WHERE NO_TNKB = '$no'");
+			}
+		}
 		return $save;
 		
 	}

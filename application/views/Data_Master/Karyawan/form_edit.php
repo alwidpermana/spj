@@ -61,6 +61,18 @@
                             <input type="text" id="inputSubDepartemen" class="form-control form-control-sm" readonly value="<?=$key->Subdepartemen1?>">
                           </div>
                         </div>
+                        <?php if ($this->uri->segment("4")=='rental'): ?>
+                          <br>
+                          <div class="row">
+                            <div class="col-md-4">
+                              <label class="text-left labJudul">Alamat</label>
+                            </div>
+                            <div class="col-md-7">
+                              <textarea class="form-control editRental" field="AlamatSopir" id="inputAlamat" nik="<?=$key->nik?>" rows="3"><?=$key->AlamatSopir?></textarea>
+                            </div>
+                          </div>  
+                        <?php endif ?>
+                        
                       </div>
                       <div class="col-md-6">
                         
@@ -69,7 +81,7 @@
                             <label class="text-left labJudul">Nama</label>
                           </div>
                           <div class="col-md-7">
-                            <input type="text" id="inputNama" class="form-control form-control-sm" readonly value="<?=$key->namapeg?>">
+                            <input type="text" id="inputNama" class="form-control form-control-sm editRental" field="NamaSopir" value="<?=$key->namapeg?>" <?=$this->uri->segment("4")=='rental'?'':'readonly'?>>
                           </div>
                         </div>
                         <br>
@@ -91,6 +103,29 @@
                             <input type="text" id="inputJabatan" class="form-control form-control-sm" readonly value="<?=$key->jabatan?>">
                           </div>
                         </div>
+                        <?php if ($this->uri->segment("4")=='rental'): ?> 
+                        <br>
+                        <div class="row">
+                          <div class="col-md-4">
+                            <label class="text-left labJudul">No Telepon</label>
+                          </div>
+                          <div class="col-md-7">
+                            <input type="text" id="inputNoTlp" class="form-control form-control-sm editRental" field="NoTelp" value="<?=$key->NoTelp?>">
+                          </div>
+                        </div>
+                        <br>
+                          <div class="row">
+                            <div class="col-md-4">
+                              <label class="text-left labJudul">Status</label>
+                            </div>
+                            <div class="col-md-7">
+                              <select class="select2 form-control editRental select2-orange" data-dropdown-css-class="select2-orange" id="inputStatus" field="StatusAktif">
+                                <option value="Aktif" <?=$key->StatusAktif == 'Aktif'?'selected':''?>>Aktif</option>
+                                <option value="Tidak Aktif" <?=$key->StatusAktif == 'Tidak Aktif'?'selected':''?>>Tidak Aktif</option>
+                              </select>
+                            </div>
+                          </div>
+                        <?php endif ?>
                       </div>
                     </div>
                   </div>
@@ -651,6 +686,22 @@
       }
 
       // alert(isiDriver);
+    });
+    $('.editRental').on('change', function(){
+      var isi = $(this).val();
+      var field = $(this).attr("field");
+      var nik = $('#inputNIK').val();
+      $.ajax({
+        type:'post',
+        data:{isi, field, nik},
+        dataType:'json',
+        url:url+'/data_master/editDataRental',
+        cache:false,
+        async:true,
+        success:function(data){
+
+        }
+      })
     });
 
   })

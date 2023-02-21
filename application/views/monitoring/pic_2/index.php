@@ -56,6 +56,15 @@
                   </select>
                 </div>
               </div>
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label>Tambahan</label>
+                  <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filTambahan">
+                    <option value="US2">Uang Saku ke-2</option>
+                    <option value="UM2">Uang Makan ke-2</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -114,9 +123,10 @@
   function getTabel() {
     var filTahun = $('#filTahun').val();
     var filBulan = $('#filBulan').val();
+    var filTambahan = $('#filTambahan').val();
     $.ajax({
       type:'get',
-      data:{filTahun, filBulan},
+      data:{filTahun, filBulan, filTambahan},
       url:'getMonitoringPICKe2',
       cache: false,
       async: true,

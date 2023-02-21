@@ -558,22 +558,29 @@
                                     <td><?=$statusUS1?></td>
                                     <td>
                                       <?php
-                                        if ($rl->KEPUTUSAN_US1 == 'OK') {
-                                          echo "Mendapatkan Uang Saku Tambahan Pertama";
-                                        }elseif ($rl->KEPUTUSAN_US1 == 'NG') {
-                                          echo "Tidak Mendapatkan Uang Saku Tambahan Pertama!";
+                                        if ($rl->US1_TAMBAHAN > 0) {
+                                          if ($rl->KEPUTUSAN_US1 == 'OK') {
+                                            echo "Mendapatkan Uang Saku Tambahan Pertama";
+                                          }elseif ($rl->KEPUTUSAN_US1 == 'NG') {
+                                            echo "Uang Saku Tambahan Pertama Ditolak!";
+                                          }else{
+                                            echo "Tidak Mendapatkan Tambahan Uang Saku Pertama";
+                                          }
                                         }else{
-                                          echo "";
+                                          echo "Tidak Mendapatkan Tambahan Uang Saku Pertama";
                                         }
-
-                                        if ($rl->KEPUTUSAN_US2 == 'OK') {
-                                          echo "<br>Mendapatkan Uang Saku Tambahan Kedua";
-                                        }elseif ($rl->KEPUTUSAN_US2 == 'NG') {
-                                          echo "<br>Tidak Mendapatkan Uang Saku Tambahan Kedua!";
+                                        echo "<br>";
+                                        if ($rl->US2_TAMBAHAN > 0) {
+                                          if ($rl->KEPUTUSAN_US2 == 'OK') {
+                                            echo "<br>Mendapatkan Uang Saku Tambahan Kedua";
+                                          }elseif ($rl->KEPUTUSAN_US2 == 'NG') {
+                                            echo "<br>Tidak Mendapatkan Uang Saku Tambahan Kedua!";
+                                          }else{
+                                            echo "Tidak Mendapatkan Tambahan Uang Saku Kedua";
+                                          }
                                         }else{
-                                          echo "";
+                                          echo "Tidak Mendapatkan Tambahan Uang Saku Kedua";
                                         }
-
                                       ?>
                                       
                                     </td>
@@ -1087,7 +1094,7 @@
     });
     $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
-    $( '.inputUang' ).mask('000.000.000.000', {reverse: true});
+    // $( '.inputUang' ).mask('000.000.000.000', {reverse: true});
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     

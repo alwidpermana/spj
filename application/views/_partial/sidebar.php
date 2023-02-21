@@ -393,6 +393,23 @@
                   </li>
                 </ul>
               </li>
+              <?php 
+              $nik = $this->session->userdata("NIK");
+              $level = $this->session->userdata("LEVEL");
+              if ($level == '0' || $nik =='04035' || $nik == '00099' || $nik == '04607'): ?>
+                <li class="nav-item list-menu-open">
+                  <a href="<?=base_url()?>monitoring/cost_reduction" class="nav-link ">
+                    <i class="fas fa-donate nav-icon <?=substr($side, 11) == 'cr'?'text-dark':''?>" style="font-size: 11px;"></i>
+                    <p>Cost Reduction Delivery</p>
+                  </a>
+                </li>  
+              <?php endif ?>
+              <li class="nav-item list-menu-open">
+                  <a href="<?=base_url()?>monitoring/keberangkatan" class="nav-link ">
+                    <i class="fas fa-clock nav-icon <?=substr($side, 11) == 'keberangkatan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                    <p>Keberangkatan</p>
+                  </a>
+                </li>
             </ul>
           </li>
           <?php if ($this->session->userdata("LEVEL")<=2 || $this->session->userdata("LEVEL")==5): ?>

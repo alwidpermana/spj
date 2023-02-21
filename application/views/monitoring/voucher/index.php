@@ -31,6 +31,19 @@
           <div class="card">
             <div class="card-body">
               <div class="row">
+                <div class="col-md-1">
+                  <div class="form-group">
+                    <label>Tampil</label>
+                    <select class="form-control filter" id="filLimit">
+                      <option value="10" selected>10</option>
+                      <option value="100">100</option>
+                      <option value="250">250</option>
+                      <option value="500">500</option>
+                      <option value="750">750</option>
+                      <option value="1000">1000</option>
+                    </select>
+                  </div>
+                </div>
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Status Pengisian</label>
@@ -52,7 +65,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="col-md-3"></div>
+                <div class="col-md-2"></div>
                 <div class="col-md-5">
                   <form id="search">
                     <div class="form-group">
@@ -72,7 +85,20 @@
               </div>
               <div class="row">
                 <div class="col-md-12">
+                  <div class="preloader-no-bg">
+                    <div class="loader">
+                        <div class="spinner"></div>
+                        <div class="spinner-2"></div>
+                    </div>
+                  </div>
                   <div id="getTabel"></div>
+                </div>
+              </div>
+              <br>
+              <div class="row">
+                <input type="hidden" id="inputOffset">
+                <div class="col-md-12 d-flex justify-content-end">
+                  <div id="paging"></div>
                 </div>
               </div>
             </div>
@@ -222,15 +248,27 @@
     var akhirPeriode = '<?=date('m/t/Y')?>';
     $('#filPeriode').val(mulaiPeriode+" - "+akhirPeriode)
     $('#filPeriode').daterangepicker()
-    // $('.preloader').fadeOut('slow');
-    getTabel();
+    $('.preloader').fadeOut('slow');
+    paging(1);
+    $('#paging').on('click','.paging', function(){
+      var offset = $(this).attr("offset");
+      console.log(offset)
+      paging(offset)
+      $('#inputOffset').val(offset);
+    });
     $('.filter').on('change', function(){
-      getTabel();
+      paging(1);
     });
     $('#search').submit(function(e){
-      e.preventDefault()
-      getTabel()
-    });
+      e.preventDefault();
+      paging(1);
+    })
+    $('#paging').on('click','.btnStep', function(){
+      var offset = $(this).attr("offset");
+      console.log(offset)
+      paging(offset)
+      $('#inputOffset').val(offset);
+    })
     $('#searchVoucher').submit(function(e){
       e.preventDefault()
       getTabel()
@@ -386,27 +424,45 @@
     })
 
   })
-    function getTabel() {
-      var filStatus = $('#filStatus').val();
-      var filJenis = $('#filJenis').val();
-      var filSearch = $('#filSearch').val();
+    function getTabel(offset, limit, filStatus, filSearch, filJenis) {
       $.ajax({
         type: 'get',
         url:'getMonVoucherBBM',
-        data:{filStatus, filJenis, filSearch},
+        data:{filStatus, filJenis, filSearch, offset, limit},
         cache: false,
         async: true,
         beforeSend: function(data){
-          $('.preloader').show();
+          $('.preloader-no-bg').show();
         },
         success: function(data){
           $('#getTabel').html(data);
         },
         complete: function(data){
-          $('.preloader').fadeOut('slow');
+          $('.preloader-no-bg').fadeOut('slow');
         },
         error: function(data){
           $('#getTabel').html(data);
+        }
+      })
+    }
+    function paging(offset) {
+      var filStatus = $('#filStatus').val();
+      var filJenis = $('#filJenis').val();
+      var filSearch = $('#filSearch').val();
+      var limit = $('#filLimit').val();
+      $.ajax({
+        type:'get',
+        data:{filStatus, filSearch, filJenis, limit, offset},
+        url:'getPagingVoucherBBM',
+        cache:false,
+        async:true,
+        success: function(data){
+          $('#paging').html(data);
+          var endOffset = offset == ''?0:(offset-1)*limit;
+          getTabel(endOffset, limit, filStatus, filSearch, filJenis)
+        },
+        error: function(data){
+
         }
       })
     }

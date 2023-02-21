@@ -101,10 +101,10 @@ class Data_Master extends CI_Controller {
 			$data['data'] = $this->M_Data_Master->getKaryawan($filDepartemen='', $filJabatan='', $filSearch='', $nik, $top = 1)->result();
 			$data['side'] = 'data_master-karyawan_internal';
 		}elseif ($jenis == 'logistik') {
-			$data['data'] = $this->M_Data_Master->getSupirLogistik($filStatus='', $filSearch='', $nik, $top = 1, $table = 'TrTs_SopirLogistik')->result();
+			$data['data'] = $this->M_Data_Master->getSupirLogistik('Aktif',$filStatus='', $filSearch='', $nik, $top = 1, $table = 'TrTs_SopirLogistik')->result();
 			$data['side'] = 'data_master-karyawan_logistik';
 		}else{
-			$data['data'] = $this->M_Data_Master->getSupirLogistik($filStatus='', $filSearch='', $nik, $top = 1, $table = 'TrTs_SopirRental')->result();
+			$data['data'] = $this->M_Data_Master->getSupirLogistik('Aktif',$filStatus='', $filSearch='', $nik, $top = 1, $table = 'TrTs_SopirRental')->result();
 			$data['side'] = 'data_master-karyawan_rental';
 		}
 		
@@ -176,7 +176,7 @@ class Data_Master extends CI_Controller {
 	{
 		$filStatus = $this->input->get("filStatus");
 		$filSearch = $this->input->get("filSearch");
-		$data['data'] = $this->M_Data_Master->getSupirLogistik($filStatus, $filSearch, $nik = '', $top = 1000, $table = 'TrTs_SopirLogistik')->result();
+		$data['data'] = $this->M_Data_Master->getSupirLogistik('Aktif',$filStatus, $filSearch, $nik = '', $top = 1000, $table = 'TrTs_SopirLogistik')->result();
 		$jenis = $this->input->get("jenis");
 		$data['jenis'] = $jenis;
 		$this->load->view("Data_Master/Karyawan/tabel", $data);
@@ -193,7 +193,7 @@ class Data_Master extends CI_Controller {
 		$filSearch = $this->input->get("filSearch");
 		$jenis = $this->input->get("jenis");
 		$data['jenis'] = $jenis;
-		$data['data'] = $this->M_Data_Master->getSupirLogistik($filStatus, $filSearch, $nik = '', $top = 1000, $table = 'TrTs_SopirRental')->result();
+		$data['data'] = $this->M_Data_Master->getSupirLogistik('Aktif',$filStatus, $filSearch, $nik = '', $top = 1000, $table = 'TrTs_SopirRental')->result();
 		$this->load->view("Data_Master/Karyawan/tabel", $data);
 	}
 	public function Kendaraan()
@@ -818,6 +818,38 @@ class Data_Master extends CI_Controller {
 		$jenis = $this->input->post("jenis");
 		$field = $this->input->post("field");
 		$data = $this->M_Data_Master->saveLimitSaldo($isi, $jenis, $field);
+		echo json_encode($data);
+	}
+	public function tambahPIC()
+	{
+		$data['side'] = 'data_master-karyawan_rental';
+		$data['page'] = 'Data Master - Tambah Data PIC Rental';
+		$this->load->view("data_master/karyawan/form_tambah", $data);
+	}
+	public function getNIK_Rental()
+	{
+		$data = $this->M_Data_Master->getNIK_Rental();
+		echo json_encode($data);
+	}
+	public function savePIC_Rental()
+	{
+		$inputNama = $this->input->post("inputNama");
+		$inputAlamat = $this->input->post("inputAlamat");
+		$inputTlp = $this->input->post("inputTlp");
+		$inputKTP = $this->input->post("inputKTP");
+		$inputJabatan = $this->input->post("inputJabatan");
+		$inputNIK = $this->M_Data_Master->getNIK_Rental();
+		$data = $this->M_Data_Master->savePIC_Rental($inputNama, $inputAlamat, $inputTlp, $inputKTP, $inputJabatan, $inputNIK);
+		$url="Data_Master/Edit_Karyawan/".$inputNIK."/rental";
+		$response = array('data' =>$data, 'url'=>$url);
+		echo json_encode($response);
+	}
+	public function editDataRental()
+	{
+		$field = $this->input->post("field");
+		$isi = $this->input->post("isi");
+		$nik = $this->input->post("nik");
+		$data = $this->M_Data_Master->editDataRental($field, $isi, $nik);
 		echo json_encode($data);
 	}
 

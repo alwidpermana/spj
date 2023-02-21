@@ -119,8 +119,7 @@ class M_Serlok extends CI_Model {
 						PLANT1_CITY,
 						d.kps_customer_delivery_setup AS ID,
 						d.KPS_CUSTOMER_ID,
-						ID_CITY_SETUP AS ID_KAB_KOTA,
-						b.departure_time
+						ID_CITY_SETUP AS ID_KAB_KOTA
 					FROM
 						kps_vehicle a
 					JOIN
@@ -130,7 +129,8 @@ class M_Serlok extends CI_Model {
 					ON d.KPS_CUSTOMER_DELIVERY_SETUP = b.KPS_CUSTOMER_DELIVERY_SETUP_ID 
 					WHERE
 						VEHICLE_NO = '$noTNKB' AND
-						DELIVERY_DATE = '$tglSPJ'
+						DELIVERY_DATE = '$tglSPJ' AND
+						kps_customer_delivery_setup IS NOT NULL
 						$where
 				)Q1
 				INNER JOIN

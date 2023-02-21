@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/ladda-buttons/css/ladda-themeless.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/daterangepicker/daterangepicker.css">
+  <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <?php $this->load->view("_partial/head")?>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse layout-navbar-fixed layout-footer-fixed">
@@ -121,7 +122,7 @@
                   </button>
                   <div class="dropdown-menu dropdown-menu-right" role="menu">
                     <!-- <a href="#" class="dropdown-item dropButton">Export To PDF</a> -->
-                    <a href="<?=base_url()?>export_file/excel_spj" class="dropdown-item dropButton">Export To Excel</a>
+                    <a href="javascript:;" class="dropdown-item dropButton" id="btnExport">Export To Excel</a>
                   </div>
                 </div>
               </div>
@@ -185,6 +186,82 @@
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <div class="modal-title">
+              Edit Data <label><span id="keteranganNoSPJ"></span></label>
+            </div>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="inputDataIdSPJ">
+            <input type="hidden" id="inputDataNoSPJ">
+            <div class="row">
+              <div class="col-md-12">
+                <a href="javascript:;" class="btn btn-kps bg-orange btn-sm btn-block editData" jenis="kendaraan">Kendaraan</a>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-md-12">
+                <a href="javascript:;" class="btn btn-kps bg-orange btn-sm btn-block editData" jenis="tujuan">Tujuan</a>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-md-12">
+                <a href="javascript:;" class="btn btn-kps bg-orange btn-sm btn-block editData" jenis="pic">PIC</a>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-md-12">
+                <a href="javascript:;" class="btn btn-kps bg-orange btn-sm btn-block editData" jenis="biaya">Biaya</a>
+              </div>
+            </div>
+            <br>
+            <div class="row">
+              <div class="col-md-12">
+                <a href="javascript:;" class="btn btn-kps bg-orange btn-sm btn-block editData" jenis="rencana">Rencana Keberangkatan</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modal-form-edit" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div id="getForm"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal-kendaraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-2"></div>
+              <div class="col-md-8">
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <span class="fa fa-search form-control-icon"></span>
+                  <input type="search" class="form-control form-control-search" id="searchKendaraan" placeholder="Cari Berdasarkan No SPJ">
+                </div>
+              </div>
+            </div>
+            <br>
+            <br>
+            <div id="getKendaraan"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <?php $this->load->view('_partial/footer');?>
 </div>
@@ -208,6 +285,17 @@
     $('#filPeriode').val(mulaiPeriode+" - "+akhirPeriode)
     $('#filPeriode').daterangepicker()
     $('.ladda-button').ladda('bind', {timeout: 1000});
+    $('#btnExport').on('click', function(){
+      var filStatus = $('#filStatus').val();
+      var filJenis = $('#filJenis').val();
+      var filSearch = $('#filSearch').val();
+      var filPeriode = $('#filPeriode').val();
+      var periode = filPeriode.split(' - ');
+      var periodeAwal = periode[0];
+      var periodeAkhir = periode[1];
+
+      window.location.href = url+'/export_file/excel_spj?filStatus='+filStatus+'&jenis='+filJenis+'&periodeAwal='+periodeAwal+'&periodeAkhir='+periodeAkhir+'&search='+filSearch+'&filPeriode='+filPeriode;
+    })
     getTabel();
     var status = '<?=$status?>';
     if (status == 'berhasil') {
@@ -306,7 +394,49 @@
           
       }, 1000)
     });
+    $('#getTabel').on('click', '.btnEdit', function(){
+      var id = $(this).attr("data");
+      var noSPJ = $(this).attr("noSPJ");
+      $('#modal-edit').modal("show");
+      $('#keteranganNoSPJ').html(noSPJ)
+      $('#inputDataIdSPJ').val(id);
+      $('#inputDataNoSPJ').val(noSPJ);
+    })
+    $('.editData').on('click', function(){
+      var id = $('#inputDataIdSPJ').val();
+      var noSPJ = $('#inputDataNoSPJ').val();
+      var tipe = $(this).attr("jenis"); 
+      console.log(tipe)
+      $.ajax({
+        type:'get',
+        data:{id, noSPJ, tipe},
+        url:url+'/pengajuan/editSPJ_v2',
+        cache:false,
+        async:true,
+        success:function(data){
+          $('#modal-edit').modal("hide")
+          $('#modal-form-edit').modal("show");
+          $('#getForm').html(data);
+        },
+        error:function(data){
+          Swal.fire("Gagal Mengambil Data!","Hubungi Staff IT!","error")
+        }
+      })
+    })
+
+    
   })
+  
+  function printSPJ(id) {
+    var url2 = url+"/monitoring/print_spj/"+id;
+    window.open(url2,'_blank');
+    
+    var url1 = url+"/monitoring/print_voucher/"+id;
+    window.open(url1,'_blank');
+    
+    console.log(url2)
+    console.log(url1)
+  }
 
   function getTabel() {
     var filTahun = $('#filTahun').val();

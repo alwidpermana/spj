@@ -193,6 +193,7 @@
           </div>
           <div class="modal-body">
             <input type="hidden" id="scanStatusKendaraan">
+            <input type="hidden" id="scanKMOutNoSPJ">
             <div class="row">
               <div class="col-md-12">
                 <div id="setImage"></div>
@@ -257,6 +258,16 @@
                 </div>
               </div>
             </div>
+            <div class="row">
+              <div class="col-md-4"></div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label id="textKMNonSPJ"></label>
+                  <input type="number" class="form-control" id="inputKMNonSPJ">
+                </div>
+              </div>
+            </div>
+            
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -436,29 +447,46 @@
         var noTNKB = $('#inputScan').val();
         var status = $('#scanStatusKendaraan').val();
         var keterangan = $('#inputKeteranganScanKendaraan').val();
-        $.ajax({
-          type:'post',
-          data:{noTNKB, status, keterangan},
-          dataType:'json',
-          cache: false,
-          async: true,
-          url:url+'/Implementasi/scanKendaraanNotSPJ',
-          beforeSend: function(data){
-            $('.scanKendaraan').attr("disabled","disabled")
-          },
-          success: function(data){
-            berhasil();
-            $('#modal-kendaraan').modal("hide")
-          },
-          complete: function(data){
-            
-            $('.scanKendaraan').removeAttr("disabled","disabled")
-            scanKendaraan.ladda('stop');    
-          },
-          error: function(data){
-            gagal();
-          }
-        })
+        var inputKMNonSPJ = $('#inputKMNonSPJ').val();
+        var scanKMOutNoSPJ = $('#scanKMOutNoSPJ').val();
+        if (keterangan == '') {
+          Swal.fire("Lengkapi Datanya Terlebih Dahulu!","Keterangan Belum Diisi","info")
+          scanKendaraan.ladda('stop');   
+        }else if(inputKMNonSPJ == ''){
+          Swal.fire("Lengkapi Datanya Terlebih Dahulu!","KM Belum Diisi","info");
+          scanKendaraan.ladda('stop');
+        }else if(parseInt(scanKMOutNoSPJ)>parseInt(inputKMNonSPJ)){
+          Swal.fire("Km IN Lebih Kecil dibanding KM Out!","","warning");
+          scanKendaraan.ladda('stop');
+        }else{
+          $.ajax({
+            type:'post',
+            data:{noTNKB, status, keterangan, inputKMNonSPJ},
+            dataType:'json',
+            cache: false,
+            async: true,
+            url:url+'/Implementasi/scanKendaraanNotSPJ',
+            beforeSend: function(data){
+              $('.scanKendaraan').attr("disabled","disabled")
+            },
+            success: function(data){
+              if (data.status == 'warning') {
+                Swal.fire("Kendaraan Masih diluar KPS!","Mohon Check In Terlebih Dahulu!","warning");
+              }
+              berhasil();
+              $('#modal-kendaraan').modal("hide")
+            },
+            complete: function(data){
+              
+              $('.scanKendaraan').removeAttr("disabled","disabled")
+              scanKendaraan.ladda('stop');    
+            },
+            error: function(data){
+              gagal();
+            }
+          }) 
+        }
+        
         
         return false;
           
@@ -578,6 +606,18 @@
           $('#scanKendaraan').html(': '+data.Jenis)
           $('#scanJenis').html(': '+data.Kategori)
           $('#scanStatusKendaraan').val(data.STATUS)
+          $('#scanKMOutNoSPJ').val(data.KM_OUT);
+          $('#inputKeteranganScanKendaraan').val(data.KETERANGAN)
+          if (data.STATUS == 'OUT') {
+            var textKM = 'KM OUT';
+            $('#inputKMNonSPJ').attr("readonly","readonly");
+            $('#inputKMNonSPJ').val(data.KM);
+          }else{
+            var textKM = 'KM IN';
+            $('#inputKMNonSPJ').removeAttr("readonly","readonly");
+            $('#inputKMNonSPJ').val(data.KM_OUT);
+          }
+          $('#textKMNonSPJ').html(textKM)
         }
         
       },

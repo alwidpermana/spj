@@ -9,6 +9,9 @@
     $('.ladda-button').ladda('bind', {timeout: 1000});
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
+    $('#tambahLokasi').on('click', function(){
+      getCustomerSerlok();
+    })
     $('.btnStepNext').on('click', function(){
       // stepper.next()
 
@@ -442,7 +445,6 @@
             },
           });
         }
-        
         return false;
           
       }, 1000)
@@ -747,29 +749,21 @@
       // Timeout example
       // Do something in backend and then stop ladda
       setTimeout(function () {
+        var idDelivery=[];
         var inputNoSPJ = $('#inputNoSPJ').val();
         var inputTglSPJ = $('#inputTglSPJ').val();
         var inputNoTNKB = $('#inputNoTNKB').val();
         var data = $('#inputDepartureTime').val();
-        if (data.length >0) {
-          var whereDeparture = " AND b.departure_time  IN ("
-          var jml = data.length-1;
-          for (var i = 0; i < data.length; i++) {
-            whereDeparture+="'"+data[i]+"'";
-            if (i<jml) {
-              whereDeparture+=",";
-            }else{
-              whereDeparture+=")";
-            }
-          }
-        }else{
-          var whereDeparture = '';
-        }
+        var proses = 'New';
+        $.each($('[name="pilihCustomer"]:checked'), function(){
+          idDelivery.push($(this).val());
+        })
+        
         $.ajax({
           type:'post',
           dataType:'json',
-          data:{inputNoSPJ, inputTglSPJ, inputNoTNKB, whereDeparture},
-          url:url+'/pengajuan/saveCustomerSerlok',
+          data:{idDelivery, inputNoSPJ, inputTglSPJ, inputNoTNKB, proses},
+          url:url+'/pengajuan/saveCustomerSerlokNewPola',
           cache: false,
           async: true,
           success: function(data){
@@ -910,6 +904,23 @@
       cekOutGoingSerlok();
       $('#modal-serlok').modal('show')
       
+    })
+    $('#btnGenerateVoucher').on('click', function(){
+      var inputNoSPJ = $('#inputNoSPJ').val();
+      $.ajax({
+        type:'get',
+        dataType:'json',
+        data:{inputNoSPJ},
+        url:url+'/pengajuan/generateVoucherBBM',
+        cache:false,
+        async:true,
+        success:function(data){
+          $('#inputNoVoucher').val(data.no);
+        },
+        error:function(data){
+          Swal.fire("Terdapat Error Pada Program","Mohon Hubungi Staff IT","error");
+        }
+      })
     })
 
   })
@@ -1885,7 +1896,7 @@
       $('#voucherBBM').removeClass("d-none")
       $('#manualBBM').addClass("d-none");
       // getNoVoucher()
-      $('#inputBBMManual').val("");
+      $('#inputBBMManual').val("0");
     }else{
       $('#voucherBBM').addClass("d-none");
       $('#manualBBM').removeClass("d-none");
@@ -1894,7 +1905,7 @@
         $('#inputBBMManual').removeAttr("readonly","readonly");
       }else{
         $('#inputBBMManual').attr("readonly","readonly");
-        $('#inputBBMManual').val("");
+        $('#inputBBMManual').val("0");
       }
     }
   }
@@ -1918,20 +1929,21 @@
     var inputNoTNKB = $('#inputNoTNKB').val();
     var inputTglSPJ = $('#inputTglSPJ').val();
     var data = $('#inputDepartureTime').val();
-      if (data.length >0) {
-        var whereDeparture = " AND b.departure_time  IN ("
-        var jml = data.length-1;
-        for (var i = 0; i < data.length; i++) {
-          whereDeparture+="'"+data[i]+"'";
-          if (i<jml) {
-            whereDeparture+=",";
-          }else{
-            whereDeparture+=")";
-          }
-        }
-      }else{
-        var whereDeparture = '';
-      }
+      // if (data.length >0) {
+      //   var whereDeparture = " AND b.departure_time  IN ("
+      //   var jml = data.length-1;
+      //   for (var i = 0; i < data.length; i++) {
+      //     whereDeparture+="'"+data[i]+"'";
+      //     if (i<jml) {
+      //       whereDeparture+=",";
+      //     }else{
+      //       whereDeparture+=")";
+      //     }
+      //   }
+      // }else{
+        
+      // }
+      var whereDeparture = '';
     $.ajax({
       type:'get',
       data:{inputNoTNKB, inputTglSPJ, whereDeparture},
@@ -1942,12 +1954,13 @@
       success: function(data){
         var jmlData = data.length;
         var html='';
+        var check = 'checked';
         if (jmlData>0) {
           for (var i = 0; i < data.length; i++) {
             html+='<tr>';
             html+='<td>'+data[i].COMPANY_NAME+'</td>';
             html+='<td>'+data[i].PLANT1_CITY+'</td>';
-            html+='<td>'+data[i].departure_time+'</td>';
+            html+='<td><div class="icheck-orange icheck-kps d-inline"><input type="checkbox" id="'+data[i].ID+'" name="pilihCustomer" value="'+data[i].ID+'" '+check+'><label for="'+data[i].ID+'"></label></div></td>';
             html+='</tr>';
           }
           $('#getSerlok').html(html);
@@ -2195,6 +2208,19 @@
 
     //   }
     // })
+  }
+  function getNoVoucherAuto_V1() {
+    $.ajax({
+      type:'get',
+      dataType:'json',
+      url:url+'/pengajuan/getNoVoucherAuto_V1',
+      success:function(data){
+        $('#inputNoVoucher').html(data);
+      },
+      error:function(data){
+        Swal.fire("Terdapat Error Pada Program","Mohon Hubungi Staff IT","error")
+      }
+    })
   }
 
   function berhasil() {

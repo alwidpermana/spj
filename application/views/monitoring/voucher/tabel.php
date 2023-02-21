@@ -45,7 +45,7 @@
 						</a>
 					<?php endif ?>
 				</td> -->
-				<td><?=$i++?></td>
+				<td><?=$key->NO_URUT?></td>
 				<td><?=date("Y-m-d", strtotime($key->TGL_INPUT))?></td>
 				<td><?=$key->NO_SPJ?></td>
 				<td><?=$key->TGL_SPJ?></td>
@@ -53,23 +53,11 @@
 				<td><?=$key->VOUCHER_BBM?></td>
 				<td><?=$key->NAMA_GROUP?></td>
 				<td>
-					<ul style="padding-left: 10px">
-					<?php foreach ($tujuan as $lok): ?>
-						<?php if ($lok->NO_SPJ == $key->NO_SPJ): ?>
-							<li><?=$lok->SERLOK_KOTA?></li>
-						<?php endif ?>
-					<?php endforeach ?>
-					</ul>
+					<?=$key->LOKASI?>
 				</td>
 				<td><?=$key->PIC_DRIVER?></td>
 				<td>
-					<ul style="padding-left: 10px">
-					<?php foreach ($pic as $pc): ?>
-						<?php if ($pc->NO_PENGAJUAN == $key->NO_SPJ): ?>
-							<li><?=$pc->PIC?></li>
-						<?php endif ?>
-					<?php endforeach ?>
-					</ul>
+					<?=$key->PENDAMPING?>
 				</td>
 				<td><?=$key->KENDARAAN?></td>
 				<td><?=$key->JENIS_KENDARAAN?></td>
@@ -102,9 +90,9 @@
             scrollY:        "350px",
             scrollX:        true,
             scrollCollapse: true,
+            'ordering':false,
             paging:         false,
             'searching': false,
-            order: [[1, 'desc']],
             info: false, 
             
           } ); 

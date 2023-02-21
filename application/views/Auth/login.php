@@ -93,16 +93,22 @@
 	<script src="<?= base_url()?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			$('#btn_login').on('click', function(){
-				var nik = $('#inputNIK').val();
-				var password = $('#inputPassword').val();
-				login(nik, password);
-			})
+			// $('#btn_login').on('click', function(){
+			// 	var nik = $('#inputNIK').val();
+			// 	var password = $('#inputPassword').val();
+			// 	login(nik, password);
+			// })
 			$('#login').submit(function(e){
 				e.preventDefault();
 				var nik = $('#inputNIK').val();
 				var password = $('#inputPassword').val();
-				login(nik, password);
+				if (nik == '') {
+					Swal.fire("Masukan Terlebih dahulu NIK nya","","warning")
+				}else if(password == ''){
+					Swal.fire("Masukan Terlebih Dahulu Passwordnya","","warning")
+				}else{
+					login(nik, password);
+				}
 			})
 
 
@@ -110,7 +116,7 @@
 		function login(nik, password) {
 			$.ajax({
 				type: 'POST',
-				url: '<?=base_url("Auth/proses_login")?>',
+				url: '<?=base_url("index.php/Auth/proses_login")?>',
 				dataType: 'json',
 				data: {nik,password},
 				success:function(response){
@@ -120,9 +126,9 @@
 						Swal.fire('Login Gagal!','Nomor NIK atau Password Salah!', 'error')
 					}
 					else{
-						Swal.fire('Login Berhasil','','success')
+						Swal.fire('Login Berhasil','Mohon tunggu','success')
 						setTimeout(function(){
-							location.href = '<?=base_url()?>Dashboard';
+							location.href = '<?=strtolower(base_url())?>Dashboard';
 						}, 500);
 					}
 				},

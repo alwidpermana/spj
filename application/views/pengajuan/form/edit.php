@@ -760,6 +760,7 @@
                                       <span class="text-right text-kps" style="font-size: 9px">*Boleh Tidak Diisi</span>
                                     </td>
                                     <td>
+
                                       <!-- <div id="voucherBBM">
                                         <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputBBMVoucher" style="width: 100%">
                                           <option value="">Pilih Voucher</option>
@@ -781,6 +782,11 @@
                                       </div> -->
                                       <div id="voucherBBM">
                                         <input type="text" id="inputNoVoucher" class="form-control form-control-sm" value="<?=$key->VOUCHER_BBM?>" readonly>
+                                        <br>
+                                        <!-- <button type="button" class="btn btn-kps bg-orange btn-sm" id="pilihNoVoucher">Pilih No Voucher</button> -->
+                                        <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="btnGenerateVoucher">
+                                          Generate Voucher BBM
+                                        </button>
                                       </div>
                                       <div id="manualBBM">
                                         <div class="form-group">
@@ -796,6 +802,7 @@
                                         <option value="Voucher" <?=$key->MEDIA_UANG_BBM == 'Voucher'?'selected':''?>>Voucher</option>
                                         <option value="Kasbon" <?=$key->MEDIA_UANG_BBM == 'Kasbon'?'selected':''?>>Kasbon</option>
                                         <option value="Reimburse" <?=$key->MEDIA_UANG_BBM == 'Reimburse' ? 'selected':''?>>Reimburse</option>
+                                        <option value="Tanpa BBM" <?=$key->MEDIA_UANG_BBM == 'Tanpa BBM' ? 'selected':''?>>Tanpa BBM</option>
                                       </select>
                                     </td>
                                   </tr>
@@ -1133,7 +1140,7 @@
             </div>
           </div>
           <div class="modal-body">
-            <div class="row">
+            <!-- <div class="row">
               <div class="col-md-4 col-sm-6">
                 <div class="form-group">
                   <label>Departure Time</label>
@@ -1142,7 +1149,7 @@
                   </select>
                 </div>
               </div>
-            </div>
+            </div> -->
             <div class="row">
               <div class="col-md-12 table-responsive p-0">
                 <table class="table table-hover table-valign-middle table-striped" width="100%">
@@ -1163,6 +1170,47 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             <button type="button" class="btn bg-orange btn-kps saveCustomerSerlok ladda-button" data-style="expand-right">Tambah Tujuan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal-voucher" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-1"></div>
+              <div class="col-10">
+                <form id="searchVoucher">
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <span class="fa fa-search form-control-icon"></span>
+                    <input type="search" class="form-control form-control-search" id="cariVoucher" placeholder="Cari Berdasarkan No Voucher">
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 table-responsive p-0">
+                <table class="table table-hover table-valign-middle table-striped" width="100%">
+                  <thead class="text-center">
+                    <tr>
+                      <th>No Voucher</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="getDataVoucher">
+                    
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="row">
+              <input type="hidden" id="inputOffset">
+              <div class="col-md-12 d-flex justify-content-end">
+                <div id="paging"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

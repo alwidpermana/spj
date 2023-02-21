@@ -89,7 +89,8 @@
 	                    <div class="dropdown-menu" role="menu">
 	                    	<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/view_spj/<?=$key->ID_SPJ?>">Lihat Data</a>
 	                    	<?php if ($key->STATUS_SPJ != 'CANCEL'): ?>
-	                    		<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/print_spj/<?=$key->ID_SPJ?>" target="_blank">Print</a>
+	                    		<!-- <a class="dropdown-item dropButton printSPJ printVoucher" href="javascript:;" data="<?=$key->ID_SPJ?>">Print</a> -->
+	                    		<button type="button" class="dropdown-item dropButton" onclick="printSPJ(<?=$key->ID_SPJ?>)">Print</button>
 	                    		<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/export_spj/<?=$key->ID_SPJ?>" target="_blank">Export PDF</a>
 	                    	<?php endif ?>
 	                    	<?php if ($key->STATUS_PERJALANAN == null && $this->session->userdata("LEVEL")<=4): ?>
@@ -107,6 +108,13 @@
 	                    				data="<?=$key->ID_SPJ?>">
 	                    				Edit SPJ
 	                    			</a>
+	                    			<!-- <a 
+	                    				class="dropdown-item dropButton btnEdit" 
+	                    				href="javascript:;" 
+	                    				data="<?=$key->ID_SPJ?>"
+	                    				noSPJ = "<?=$key->NO_SPJ?>">
+	                    				Edit SPJ
+	                    			</a> -->
 	                    			<!-- <a 
 	                    				class="dropdown-item dropButton" 
 	                    				href="javascript:;" 

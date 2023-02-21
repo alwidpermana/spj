@@ -791,10 +791,16 @@
                                         <input class="custom-control-input custom-control-input-danger" type="checkbox" id="cekVoucher">
                                         <label for="cekVoucher" class="custom-control-label">Tanpa Voucher?</label>
                                       </div> -->
+                                      
+                                      
+
                                       <div id="voucherBBM">
                                         <input type="text" id="inputNoVoucher" class="form-control form-control-sm" readonly>
                                         <br>
-                                        <button type="button" class="btn btn-kps bg-orange btn-sm" id="pilihNoVoucher">Pilih No Voucher</button>
+                                        <!-- <button type="button" class="btn btn-kps bg-orange btn-sm" id="pilihNoVoucher">Pilih No Voucher</button> -->
+                                        <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="btnGenerateVoucher">
+                                          Generate Voucher BBM
+                                        </button>
                                       </div>
                                       <div id="manualBBM">
                                         <div class="form-group">
@@ -810,6 +816,7 @@
                                         <option value="Kasbon">Kasbon</option>
                                         <option value="Voucher" selected>Voucher</option>
                                         <option value="Reimburse">Reimburse</option>
+                                        <option value="Tanpa BBM">Tanpa BBM</option>
                                       </select>
                                     </td>
                                   </tr>
@@ -1202,7 +1209,7 @@
             </div>
           </div>
           <div class="modal-body">
-            <div class="row">
+           <!--  <div class="row">
               <div class="col-md-4 col-sm-6">
                 <div class="form-group">
                   <label>Departure Time</label>
@@ -1211,7 +1218,7 @@
                   </select>
                 </div>
               </div>
-            </div>
+            </div> -->
             <div class="row">
               <div class="col-md-12 table-responsive p-0">
                 <table class="table table-hover table-valign-middle table-striped" width="100%">
@@ -1219,7 +1226,7 @@
                     <tr>
                       <th>Company Name</th>
                       <th>Plant City</th>
-                      <th>Departure Time</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody id="getSerlok">

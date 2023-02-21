@@ -204,7 +204,7 @@
 						TGL_INPUT DESC, Q1.NIK ASC";
 			return $this->db->query($sql);
 		}
-		public function getSupirLogistik($status, $search, $nik, $top, $table)
+		public function getSupirLogistik($aktif, $status, $search, $nik, $top, $table)
 		{
 			$sql = "SELECT TOp $top
 						*
@@ -218,11 +218,13 @@
 								Status AS jabatan,
 								'-' AS departemen,
 								'-' AS Subdepartemen1,
-								null AS Subdepartemen2
+								null AS Subdepartemen2,
+								NoTelp,
+								StatusAktif
 							FROM
 								$table
 							WHERE
-								StatusAktif = 'Aktif' AND
+								StatusAktif LIKE '$aktif%' AND
 								Status LIKE '%$status%'	AND
 								KdSopir LIKE '%$nik%'	
 						)Q1
@@ -1578,6 +1580,52 @@
 					WHERE
 						JENIS_KAS = 'SUB KAS'
 					$where";
+			return $this->db->query($sql);
+		}
+		public function getNIK_Rental()
+		{
+			
+		$tahun = date('Y');
+        $bulan = date('m');
+		$gabung = "S-";
+		$cekNoDoc=$this->db->query("SELECT MAX
+										( RIGHT ( KdSopir, 3 ) ) AS SETNODOC 
+									FROM
+										TrTS_SopirRental
+									WHERE
+										KdSopir LIKE '$gabung%'");
+		foreach ($cekNoDoc->result() as $data) {
+            if ($data->SETNODOC =="") {
+                $kode = $gabung."0001";
+            }else{
+                $zero='';
+                $length= 3;
+                $index=$data->SETNODOC;
+
+                for ($i=0; $i <$length-strlen($index+1) ; $i++) { 
+                    $zero = $zero.'0';
+                }
+                $kode = $gabung.$zero.($index+1);
+            }
+            
+        }
+        	return $kode;
+		}
+
+		public function savePIC_Rental($inputNama, $inputAlamat, $inputTlp, $inputKTP, $inputJabatan, $inputNIK)
+		{
+			date_default_timezone_set('Asia/Jakarta');
+            $tanggal = date('Y-m-d H:i:s');
+            $user = $this->session->userdata("NAMA");
+            $nik = $this->session->userdata("NIK");
+            $splitUser = explode(" ", $user);
+			$nama = $splitUser[0].' ('.$nik.')';
+			$sql = "INSERT INTO TrTS_SopirRental(KdSopir, NamaSopir, AlamatSopir, NoTelp, NoKTP, Status, InputBy, InputOn, StatusAktif) VALUES('$inputNIK','$inputNama','$inputAlamat','$inputTlp','$inputKTP','$inputJabatan','$nama','$tanggal','Aktif')";
+			return $this->db->query($sql);
+		}
+		public function editDataRental($field, $isi, $nik)
+		{
+			$sql = "UPDATE TrTS_SopirRental SET $field = '$isi' WHERE KdSopir = '$nik'";
 			return $this->db->query($sql);
 		}
 	}

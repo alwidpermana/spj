@@ -35,6 +35,8 @@ class Monitoring extends CI_Controller {
 		$data['side'] = 'monitoring-spj';
 		$data['status'] = $status;
 		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$data['jenis'] = $this->M_Data_Master->getJenisKendaraan()->result();
+		$data['kendaraan'] = $this->M_Data_Master->getKategoriKendaraan()->result();
 		$this->load->view('monitoring/spj/index', $data);
 	}
 	public function getTabelSPJ()
@@ -119,6 +121,11 @@ class Monitoring extends CI_Controller {
 		$this->M_Monitoring->saveSPJLog('New',$noSPJ,'Masuk Ke Halaman Print SPJ');
 		$this->load->view('monitoring/spj/view/print', $data);
 	}
+	public function print_voucher($id)
+	{
+		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id = $id, $adjustment='','')->row();
+		$this->load->view('monitoring/spj/view/print_voucher', $data);
+	}
 	public function saveDebit()
 	{
 		$inputDebit = $this->input->post("inputDebit");
@@ -185,10 +192,25 @@ class Monitoring extends CI_Controller {
 		$filSearch = $this->input->get("filSearch");
 		$filStatus = $this->input->get("filStatus");
 		$filJenis = $this->input->get("filJenis");
-		$data['data'] = $this->M_Monitoring->monitoring_voucher($filStatus, $filSearch, $filJenis)->result();
-		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $jenisID='', $filSearch='', $id='', '')->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $jenisID='', $filSearch='', $id='', '')->result();
+		$offset = $this->input->get("offset")==''?0:$this->input->get("offset")+1;
+		$limit = $this->input->get("limit");
+		// $data['data'] = $this->M_Monitoring->monitoring_voucher($filStatus, $filSearch, $filJenis)->result();
+		// $data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan='', $filTahun='', $filJenis, $filSearch='', $id='', '')->result();
+		// $data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis, $filSearch='', $id='', '')->result();
+		$data['data'] = $this->M_Monitoring->monitoring_voucher_v2($filStatus, $filSearch, $filJenis, $offset, $limit, '2')->result();
 		$this->load->view("monitoring/voucher/tabel", $data);
+	}
+	public function getPagingVoucherBBM()
+	{
+		$filSearch = $this->input->get("filSearch");
+		$filStatus = $this->input->get("filStatus");
+		$filJenis = $this->input->get("filJenis");
+		$offset = $this->input->get("offset");
+		$limit = $this->input->get("limit");
+		$data['offset'] = $offset;
+		$data['limit'] = $limit;
+		$data['data'] = $this->M_Monitoring->monitoring_voucher_v2($filStatus, $filSearch, $filJenis, '','','1')->num_rows();
+		$this->load->view("_partial/paging", $data);
 	}
 	public function saveNominalVoucherBBM()
 	{
@@ -280,7 +302,7 @@ class Monitoring extends CI_Controller {
 	{
 		$filTahun = $this->input->get("filTahun");
 		$filBulan = $this->input->get("filBulan");
-		$data['data'] = $this->M_Monitoring->getInOutKendaraan2($filBulan, $filTahun)->result();
+		$data['data'] = $this->M_Monitoring->getInOutKendaraan2($filBulan, $filTahun, '')->result();
 		$data['tgl'] = $this->M_Monitoring->getInOutKendaraanDetail($filBulan, $filTahun)->result();
 		$this->load->view("monitoring/kendaraan_in_out/tabel", $data);
 	}
@@ -308,8 +330,13 @@ class Monitoring extends CI_Controller {
 	{
 		$filTahun = $this->input->get("filTahun");
 		$filBulan = $this->input->get("filBulan");
-		$data['data'] = $this->M_Monitoring->getInOutKendaraan2($filBulan, $filTahun)->result();
-		$data['tgl'] = $this->M_Monitoring->getMonitoringKMKendaraan($filBulan, $filTahun)->result();
+		$filAritmatika = $this->input->get("filAritmatika"); 
+		$filPengaturan = $this->input->get("filPengaturan");
+		$inputKMAwal = $this->input->get("inputKMAwal") == '' ? 0 : $this->input->get("inputKMAwal");
+		$inputKMAkhir = $this->input->get("inputKMAkhir") == '' ? 0 : $this->input->get("inputKMAkhir");
+		$where = $filPengaturan = 'filter'?" WHERE TOTAL_KM BETWEEN $inputKMAwal AND $inputKMAkhir":"";
+		$data['data'] = $this->M_Monitoring->getInOutKendaraan2($filBulan, $filTahun, $where)->result();
+		$data['tgl'] = $this->M_Monitoring->getMonitoringKMKendaraan($filBulan, $filTahun, $where)->result();
 		$this->load->view("monitoring/km_kendaraan/tabel", $data);
 	}
 	public function kendaraan_jam_ke_2()
@@ -340,8 +367,33 @@ class Monitoring extends CI_Controller {
 	{
 		$filTahun = $this->input->get("filTahun");
 		$filBulan = $this->input->get("filBulan");
-		$data['data'] = $this->M_Monitoring->getMonitoringPICKe2($filBulan, $filTahun)->result();
-		$data['pic'] = $this->M_Monitoring->getMonitoringPICKe2Detail($filBulan, $filTahun)->result();
+		$filTambahan = $this->input->get("filTambahan");
+		if ($filTambahan == 'US2') {
+			$queryTambahan = "SELECT
+							UANG_SAKU1 AS UANG_TAMBAHAN,
+							NO_SPJ,
+							'UANG SAKU 1' AS JENIS
+						FROM
+							SPJ_BIAYA_TAMBAHAN
+						WHERE
+							STATUS_US1 = 'CLOSE' AND
+							KEPUTUSAN_US1 = 'OK' AND
+							UANG_SAKU1>0";
+		}else{
+			$queryTambahan = "SELECT
+							UANG_MAKAN AS UANG_TAMBAHAN,
+							NO_SPJ,
+							'UANG MAKAN' AS JENIS
+						FROM
+							SPJ_BIAYA_TAMBAHAN
+						WHERE
+							STATUS_US1 = 'CLOSE' AND
+							KEPUTUSAN_MAKAN = 'OK' AND
+							UANG_MAKAN>0";
+		}
+		
+		$data['data'] = $this->M_Monitoring->getMonitoringPICKe2_v2($filBulan, $filTahun, $queryTambahan)->result();
+		$data['pic'] = $this->M_Monitoring->getMonitoringPICKe2Detail_v2($filBulan, $filTahun, $queryTambahan)->result();
 		$this->load->view("monitoring/pic_2/tabel", $data);
 	}
 	public function cancelSPJ()
@@ -762,5 +814,156 @@ class Monitoring extends CI_Controller {
 		$data['data'] = $this->M_Monitoring->getTabelWeekly($periodeAwal, $periodeAkhir, $filJenis, $filStatus, $filSearch)->result();
 		$this->load->view("monitoring/weekly/tabel", $data);
 	}
+	public function cost_reduction()
+	{
+		$data['side'] = 'monitoring-cr';
+		$data['page'] = 'Cost Reduction Delivery';
+		$this->load->view("monitoring/cost_reduction/index", $data);
+	}
+	public function getTabelCostReduction()
+	{
+		$filSearch= $this->input->get("filSearch"); 
+		$periodeAwal= $this->input->get("periodeAwal"); 
+		$periodeAkhir= $this->input->get("periodeAkhir");
+		$data['data'] = $this->M_Monitoring->getTabelCostReduction($filSearch, $periodeAwal, $periodeAkhir)->result();
+		$this->load->view("monitoring/cost_reduction/tabel", $data);
+	}
+	public function getTabelTargetCRDelivery_UangJalan()
+	{
+		$data = $this->M_Monitoring->getTabelTargetCR('1','UANG JALAN','');
+		$html='';
+		if ($data->num_rows()>0) {
+			foreach ($data->result() as $key) {
+				$html .= '<tr>
+							<td>'.$key->NAMA_BULAN.'</td>
+							<td>'.$key->TAHUN.'</td>
+							<td>'.number_format($key->JUMLAH).'</td>
+							<td>
+								<div class="btn-group">
+			                        <button type="button" class="btn btn-kps bg-orange btnEdit" data="'.$key->ID.'" bulan="'.$key->BULAN.'" tahun="'.$key->TAHUN.'" jumlah="'.round($key->JUMLAH).'">
+			                          <i class="fas fa-edit"></i>
+			                        </button>
+			                        <button type="button" class="btn btn-kps bg-orange btnHapus" data="'.$key->ID.'">
+			                          <i class="fas fa-trash-alt"></i>
+			                        </button>
+		                      	</div>
+							</td>
+						 </tr>';
+			}
+		}else{
+			$html="<tr><td colspan='3'>Data Tidak Tersedia</td></tr>";
+		}
+
+		echo json_encode($html);
+	}
+	public function saveTargetCRDelivery($value='')
+	{
+		$inputBulan = $this->input->post("inputBulan");
+		$inputTahun = $this->input->post("inputTahun");
+		$inputJumlah = $this->input->post("inputJumlah");
+		$cekData = $this->db->query("SELECT ID FROM SPJ_TARGET_CR WHERE BULAN = '$inputBulan' AND TAHUN = '$inputTahun' AND JENIS_ID = '1' AND TIPE_CR = 'UANG JALAN'");
+		if ($cekData->num_rows()>0) {
+			$response = array('data' =>true,'hasil'=>'','message'=>'Bulan dan Tahun Tersebut sudah memiliki target','status'=>'warning');
+		}else{
+			$data = $this->M_Monitoring->saveTargetCRDelivery($inputBulan, $inputTahun, $inputJumlah);
+			if ($data == true) {
+				$where = " AND BULAN = '$inputBulan' AND TAHUN = '$inputTahun'";
+				$getData = $this->M_Monitoring->getTabelTargetCR('1','UANG JALAN',$where)->row();
+				$html='<tr>
+						<td>'.$getData->NAMA_BULAN.'</td>
+						<td>'.$getData->TAHUN.'</td>
+						<td>'.number_format($getData->JUMLAH).'</td>
+						<td>
+							<div class="btn-group">
+		                        <button type="button" class="btn btn-kps bg-orange btnEdit" data="'.$getData->ID.'" bulan="'.$getData->BULAN.'" tahun="'.$getData->TAHUN.'" jumlah="'.round($getData->JUMLAH).'">
+		                          <i class="fas fa-edit"></i>
+		                        </button>
+		                        <button type="button" class="btn btn-kps bg-orange btnHapus" data="'.$getData->ID.'">
+		                          <i class="fas fa-trash-alt"></i>
+		                        </button>
+	                      	</div>
+						</td>';
+			}else{
+				$html="Gagal Mengambil Data!";
+			}
+			$response = array('data' =>$data ,'hasil'=>$html,'message'=>'berhasil menyimpan data','status'=>'success');	
+		}
+		
+		echo json_encode($response);
+	}
+	public function updateTargetCRDelivery($value='')
+	{
+		$inputBulan = $this->input->post("inputBulan");
+		$inputTahun = $this->input->post("inputTahun");
+		$inputJumlah = $this->input->post("inputJumlah");
+		$inputId = $this->input->post("inputId");
+		$where = " AND ID = $inputId";
+		$getData = $this->M_Monitoring->getTabelTargetCR('1','UANG JALAN',$where)->row();
+		if ($inputBulan == $getData->BULAN && $inputTahun == $getData->TAHUN) {
+			$data = $this->M_Monitoring->updateTargetCRDelivery($inputBulan, $inputTahun, $inputJumlah, $inputId);
+			if ($data == true) {
+				$where = " AND BULAN = '$inputBulan' AND TAHUN = '$inputTahun'";
+				$getData = $this->M_Monitoring->getTabelTargetCR('1','UANG JALAN',$where)->row();
+				$html='<tr>
+						<td>'.$getData->NAMA_BULAN.'</td>
+						<td>'.$getData->TAHUN.'</td>
+						<td>'.number_format($getData->JUMLAH).'</td>
+						<td>
+							<div class="btn-group">
+		                        <button type="button" class="btn btn-kps bg-orange btnEdit" data="'.$getData->ID.'" bulan="'.$getData->BULAN.'" tahun="'.$getData->TAHUN.'" jumlah="'.round($getData->JUMLAH).'">
+		                          <i class="fas fa-edit"></i>
+		                        </button>
+		                        <button type="button" class="btn btn-kps bg-orange btnHapus" data="'.$getData->ID.'">
+		                          <i class="fas fa-trash-alt"></i>
+		                        </button>
+	                      	</div>
+						</td>';
+			}else{
+				$html="Gagal Mengambil Data!";
+			}
+			$response = array('data' =>$data ,'hasil'=>$html,'message'=>'berhasil menyimpan data','status'=>'success');
+		}else{
+			$cekData = $this->db->query("SELECT ID FROM SPJ_TARGET_CR WHERE BULAN = '$inputBulan' AND TAHUN = '$inputTahun' AND JENIS_ID = '1' AND TIPE_CR = 'UANG JALAN'");
+			if ($cekData->num_rows()>0) {
+				$response = array('data' =>true,'hasil'=>'','message'=>'Bulan dan Tahun Tersebut sudah memiliki target','status'=>'warning');
+			}else{
+				$data = $this->M_Monitoring->updateTargetCRDelivery($inputBulan, $inputTahun, $inputJumlah, $inputId);
+				$response = array('data' =>$data ,'hasil'=>$html,'message'=>'berhasil menyimpan data','status'=>'success');
+			}
+		}
+		echo json_encode($response);
+	}
+	public function hapusTargetBulananCR()
+	{
+		$id = $this->input->post("id");
+		$data = $this->M_Monitoring->hapusTargetBulananCR($id);
+		echo json_encode($data);
+	}
+	public function grapikCRDelivery()
+	{
+		$tahun = $this->input->get("filTahunGrapik");
+		$data = $this->M_Monitoring->grapikCRDelivery($tahun)->result();
+		echo json_encode($data);
+	}
+	public function keberangkatan()
+	{
+		$data['side'] = 'monitoring-keberangkatan';
+		$data['page'] = 'Monitoring Keberangkatan';
+		$data['spj'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
+		$this->load->view("monitoring/keberangkatan/index", $data);
+	}
+	public function getMonitoringKeberangakatan()
+	{
+		$jenisId = $this->input->get("filJenis");
+		$periodeAwal = $this->input->get("periodeAwal");
+		$periodeAkhir = $this->input->get("periodeAkhir");
+		$filSearch = $this->input->get("filSearch");
+		$inputJamAwal = $this->input->get("inputJamAwal") == '' ? 0: $this->input->get("inputJamAwal");
+		$inputJamAkhir = $this->input->get("inputJamAkhir") == '' ? 0: $this->input->get("inputJamAkhir");
+		$filInterval = $this->input->get("filInterval");
+		$data['data'] = $this->M_Monitoring->getMonitoringKeberangakatan($jenisId, $periodeAwal, $periodeAkhir, $filSearch, $inputJamAwal, $inputJamAkhir, $filInterval)->result();
+		$this->load->view("monitoring/keberangkatan/tabel", $data);
+	}
+
 
 }

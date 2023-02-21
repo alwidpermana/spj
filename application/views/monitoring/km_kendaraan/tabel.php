@@ -3,7 +3,8 @@
         <tr class="bg-gray">
             <th rowspan="2">No</th>
             <th colspan="6">Kendaraan</th>
-            <th colspan="62">Tanggal</th>
+            <th colspan="31">Tanggal</th>
+            <th rowspan="2">Total KM</th>
         </tr>
         <tr class="bg-gray">
             <th>Kendaraan</th>
@@ -23,7 +24,11 @@
         <?php 
         $no = 1;
         $km = '';
-        foreach ($data as $key): ?>
+        $kmPerSPJ = 0;
+        
+        foreach ($data as $key): 
+            $totalKM = 0;
+        ?>
             <tr>
                 <td><?=$no++?></td>
                 <td><?=$key->KENDARAAN?></td>
@@ -39,13 +44,16 @@
                         foreach ($tgl as $t) {
                             if ($i == $t->JALAN && $key->NO_TNKB == $t->NO_TNKB) {
                                 $km .= '<li style="padding-top: 5px">';
-                                $km.='<a href="'.base_url().'monitoring/view_spj/'.$t->ID_SPJ.'" class="text-dark" style="font-size:12px">'.$t->NO_SPJ.'</a>';
+                                $km.='<a href="'.base_url().'monitoring/view_spj/'.$t->ID_SPJ.'" class="text-dark" style="font-size:12px" target="_blank">'.$t->NO_SPJ.'</a>';
                                 $km .="<br>";
                                 $km .='KM&nbsp;Out= '.str_replace(',', '.', number_format($t->KM_OUT));
                                 $km .="<br>";
                                 $km .='KM&nbsp;In= '.str_replace(',', '.', number_format($t->KM_IN));
                                 $km .="<br>";
                                 $km .="<b>Selisih&nbsp;=&nbsp;".str_replace(',', '.', number_format($t->KM_IN - $t->KM_OUT))."&nbsp;KM</b>";
+                                $kmPerSPJ = $t->KM_IN - $t->KM_OUT;
+                                $totalKM += $kmPerSPJ;
+                                $kmPerSPJ = 0;
                             }
                         }
                         echo "<td>".$km."</td>";
@@ -53,6 +61,7 @@
                         $km = '';
                     }
                 ?>
+                <td><?=number_format($totalKM)?></td>
             </tr>
         <?php endforeach ?>
     </tbody>
@@ -63,8 +72,8 @@
             scrollY:        "350px",
             scrollX:        true,
             scrollCollapse: true,
-            paging:         true,
-            'searching': false,
+            paging:         false,
+            'searching': true,
             'ordering': true,
             order: [[0, 'asc']],
             fixedColumns:   {

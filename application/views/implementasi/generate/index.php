@@ -322,12 +322,17 @@
         $('#inputBBMRP').val(data.totalBBM);
         $('#inputSPJRP').val(data.totalSPJ);
         $('#inputTOLRP').val(data.totalTOL);
+        $('#inputTotalBiayaAdmin').val(data.totalBA)
+        $('#inputJumlahBiayaAdmin').val(data.jumlahBA)
         $('#showJumlahSPJ').html(data.jumlahSPJ);
         $('#showNoGenerate').html(data.noGenerate);
+        $('#showJumlahBiayaAdmin').html(data.jumlahBA);
         $('#showTotalRP').html(formatRupiah(Number(data.totalRP).toFixed(0), 'Rp. '));
         $('#showBBMRP').html(formatRupiah(Number(data.totalBBM).toFixed(0), 'Rp. '));
         $('#showSPJRP').html(formatRupiah(Number(data.totalSPJ).toFixed(0), 'Rp. '));
         $('#showTOLRP').html(formatRupiah(Number(data.totalTOL).toFixed(0), 'Rp. '));
+        $('#showTotalBiayaAdmin').html(formatRupiah(Number(data.totalBA).toFixed(0), 'Rp. '));
+        
       },
       error: function(data){
 

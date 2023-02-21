@@ -3,7 +3,8 @@
 		<tr class="bg-gray">
 			<th rowspan="2">No</th>
 			<th colspan="6">Kendaraan</th>
-			<th colspan="62">Tanggal</th>
+			<th colspan="31">Tanggal</th>
+			<th rowspan="2">Jumlah</th>
 		</tr>
 		<tr class="bg-gray">
 			<th>Kendaraan</th>
@@ -24,7 +25,9 @@
 		$no = 1;
 		$noSPJ = '';
 		$jam = '';
-		foreach ($data as $key): ?>
+		foreach ($data as $key): 
+			$jumlahSPJ = 0;
+		?>
 			<tr>
 				<td><?=$no++?></td>
 				<td><?=$key->KENDARAAN?></td>
@@ -46,12 +49,17 @@
 								$gap = date_diff($start, $end);
 // '<a href="'.base_url().'monitoring/view_spj/'.$t->NO_SPJ.'" class="btn text-dark>'.$t->NO_SPJ.'</a>'
 								$noSPJ .= '<li style="padding-top: 5px">';
-								$noSPJ.='<a href="'.base_url().'monitoring/view_spj/'.$t->ID_SPJ.'" class="text-dark" style="font-size:12px">'.$t->NO_SPJ.'</a>';
+								if ($t->ID_SPJ==0) {
+									
+									$noSPJ .="Tanpa SPJ";
+								}else{
+									$noSPJ.='<a href="'.base_url().'monitoring/view_spj/'.$t->ID_SPJ.'" class="text-dark" style="font-size:12px" target="_blank">'.$t->NO_SPJ.'</a>';
+								}
 								$noSPJ .="<br>";
 								$noSPJ .=date("H:i", strtotime($t->KEBERANGKATAN)).'&nbsp;-&nbsp;'.date("H:i", strtotime($t->KEPULANGAN));
 								$noSPJ .="<br>";
 								$noSPJ .='&nbsp;('.$gap->h.'&nbsp;Jam&nbsp;'.$gap->i.'&nbsp;Menit)';
-								
+								$jumlahSPJ += 1;
 							}
 						}
 						echo "<td class='text-center'>".$noSPJ."</td>";
@@ -59,6 +67,7 @@
 						$noSPJ = '';
 					}
 				?>
+				<td><?=$jumlahSPJ?></td>
 			</tr>
 		<?php endforeach ?>
 	</tbody>
@@ -69,8 +78,8 @@
             scrollY:        "350px",
             scrollX:        true,
             scrollCollapse: true,
-            paging:         true,
-            'searching': false,
+            paging:         false,
+            'searching': true,
             'ordering': true,
             order: [[0, 'asc']],
             fixedColumns:   {

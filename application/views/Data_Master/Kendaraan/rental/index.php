@@ -32,13 +32,13 @@
             <div class="col-md-12">
               <div class="card">
                 <div class="card-body">
-                  <div class="row">
+                  <!-- <div class="row">
                     <div class="col-md-2 col-sm-4">
                       <button type="button" class="btn btn-kps bg-orange btn-block" id="btnTambahRekanan">
                         Tambah Rekanan
                       </button>
                     </div>
-                  </div>
+                  </div> -->
                   <br>
                   <div class="row">
                     <div class="col-md-12">

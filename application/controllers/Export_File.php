@@ -345,8 +345,10 @@ class Export_File extends CI_Controller {
 		$excel->getActiveSheet()->getColumnDimension('AZ')->setWidth(15);
 		$excel->getActiveSheet()->getColumnDimension('BA')->setWidth(15);
 		$excel->getActiveSheet()->getColumnDimension('BB')->setWidth(20);
-
-		$data = $this->M_Monitoring->getSPJ('', '', '', '', '', '','')->result();
+		$jenis = $this->input->get("jenis");
+		$search = $this->input->get("search");
+		$status = $this->input->get("filStatus");
+		$data = $this->M_Monitoring->getSPJ('', '', $jenis, $search, '', '','')->result();
 		$numrow = 3;
 		$nomor = 1;
 		foreach ($data as $key) {
@@ -367,8 +369,8 @@ class Export_File extends CI_Controller {
 			$excel->setActiveSheetIndex(0)->setCellValue('O'.$numrow, $key->TYPE);
 			$excel->setActiveSheetIndex(0)->setCellValue('P'.$numrow, $key->NO_TNKB);
 			$excel->setActiveSheetIndex(0)->setCellValue('Q'.$numrow, $key->NAMA_GROUP);
-			$pic = $this->M_Monitoring->getPICPendampingByNoSPJ('','','', '','', '');
-			$tujuan = $this->M_Monitoring->getTujuanByNoSPJ('','','', '','', '');
+			$pic = $this->M_Monitoring->getPICPendampingByNoSPJ('','',$jenis, $search,'', $status);
+			$tujuan = $this->M_Monitoring->getTujuanByNoSPJ('','',$jenis, $search,'', $status);
 			$jmlPIC = $pic->num_rows();
 			$isiPIC = '';
 			$noPIC = 1;
@@ -1495,6 +1497,198 @@ class Export_File extends CI_Controller {
 	    header('Cache-Control: max-age=0');
 	    $write = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
 	    $write->save('php://output');
+	}
+	public function cost_reduction_delivery()
+	{
+		$awal = $this->input->get("awal");
+		$akhir = $this->input->get("akhir");
+		$data = $this->M_Monitoring->getTabelCostReduction('', $awal, $akhir)->result();
+
+		include APPPATH.'third_party/PHPExcel.php';
+     	$excel = new PHPExcel();
+     	$excel->getProperties()->setCreator('SPJ By Alwi')
+                 ->setLastModifiedBy('SPJ By Alwi')
+                 ->setTitle("SPJ Cost Reduction Delivery")
+                 ->setSubject("spj Cost Reduction Delivery")
+                 ->setDescription("export Data SPJ Cost Reduction Delivery")
+                 ->setKeywords("spj Cost Reduction Delivery");
+        $style_col = array(
+	      'font' => array('bold' => true), // Set font nya jadi bold
+	      'alignment' => array(
+	        'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, // Set text jadi ditengah secara horizontal (center)
+	        'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+	      ),
+	      'borders' => array(
+	        'top' => array('style'  => PHPExcel_Style_Border::BORDER_THIN), // Set border top dengan garis tipis
+	        'right' => array('style'  => PHPExcel_Style_Border::BORDER_THIN),  // Set border right dengan garis tipis
+	        'bottom' => array('style'  => PHPExcel_Style_Border::BORDER_THIN), // Set border bottom dengan garis tipis
+	        'left' => array('style'  => PHPExcel_Style_Border::BORDER_THIN) // Set border left dengan garis tipis
+	      ),'fill' => array(
+	            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+	            'color' => array('rgb' => 'e5e5e5')
+	        )
+	    );
+	    $style_row = array(
+	      'alignment' => array(
+	        'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+	      ),
+	      'borders' => array(
+	        'top' => array('style'  => PHPExcel_Style_Border::BORDER_THIN), // Set border top dengan garis tipis
+	        'right' => array('style'  => PHPExcel_Style_Border::BORDER_THIN),  // Set border right dengan garis tipis
+	        'bottom' => array('style'  => PHPExcel_Style_Border::BORDER_THIN), // Set border bottom dengan garis tipis
+	        'left' => array('style'  => PHPExcel_Style_Border::BORDER_THIN) // Set border left dengan garis tipis
+	      )
+	    );
+
+	    $excel->setActiveSheetIndex(0)->setCellValue('A1', "No");
+	    $excel->setActiveSheetIndex(0)->mergeCells('A1:A2');
+	    $excel->setActiveSheetIndex(0)->setCellValue('B1', "Tanggal SPJ");
+	    $excel->setActiveSheetIndex(0)->mergeCells('B1:B2');
+	    $excel->setActiveSheetIndex(0)->setCellValue('C1', "No SPJ");
+	    $excel->setActiveSheetIndex(0)->mergeCells('C1:C2');
+	    $excel->setActiveSheetIndex(0)->setCellValue('D1', "Status SPJ");
+	    $excel->setActiveSheetIndex(0)->mergeCells('D1:D2');
+	    $excel->setActiveSheetIndex(0)->setCellValue('E1', "Kendaraan");
+	    $excel->setActiveSheetIndex(0)->mergeCells('E1:H1');
+	    $excel->setActiveSheetIndex(0)->setCellValue('E2', "Kendaraan");
+	    $excel->setActiveSheetIndex(0)->setCellValue('F2', "No TNKB");
+	    $excel->setActiveSheetIndex(0)->setCellValue('G2', "Merk");
+	    $excel->setActiveSheetIndex(0)->setCellValue('H2', "Type");
+	    $excel->setActiveSheetIndex(0)->setCellValue('I1', "Group Tujuan");
+	    $excel->setActiveSheetIndex(0)->mergeCells('I1:J1');
+	    $excel->setActiveSheetIndex(0)->setCellValue('I2', "Nama Group");
+	    $excel->setActiveSheetIndex(0)->setCellValue('J2', "Tujuan");
+	    $excel->setActiveSheetIndex(0)->setCellValue('K1', "PIC");
+	    $excel->setActiveSheetIndex(0)->mergeCells('K1:L1');
+	    $excel->setActiveSheetIndex(0)->setCellValue('K2', "Driver");
+	    $excel->setActiveSheetIndex(0)->setCellValue('L2', "Pendamping");
+	    $excel->setActiveSheetIndex(0)->setCellValue('M1', "Abnormal");
+	    $excel->setActiveSheetIndex(0)->mergeCells('M1:M2');
+	    $excel->setActiveSheetIndex(0)->setCellValue('N1', "Biaya Uang Jalan");
+	    $excel->setActiveSheetIndex(0)->mergeCells('N1:P1');
+	    $excel->setActiveSheetIndex(0)->setCellValue('N2', "Normal");
+	    $excel->setActiveSheetIndex(0)->setCellValue('O2', "Aktual");
+	    $excel->setActiveSheetIndex(0)->setCellValue('P2', "GAP");
+
+	    $excel->getActiveSheet()->getStyle('A1')->applyFromArray($style_col); // Set width kolom A
+		$excel->getActiveSheet()->getStyle('B1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('C1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('D1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('E1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('F1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('G1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('H1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('I1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('J1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('K1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('L1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('M1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('N1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('O1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('P1')->applyFromArray($style_col);
+	    $excel->getActiveSheet()->getStyle('A2')->applyFromArray($style_col); // Set width kolom A
+		$excel->getActiveSheet()->getStyle('B2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('C2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('D2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('E2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('F2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('G2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('H2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('I2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('J2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('K2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('L2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('M2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('N2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('O2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('P2')->applyFromArray($style_col);
+	    
+
+	    $excel->getActiveSheet()->getColumnDimension('A')->setWidth(5); // Set width kolom A
+		$excel->getActiveSheet()->getColumnDimension('B')->setWidth(15);
+		$excel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('D')->setWidth(10);
+		$excel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('J')->setWidth(35);
+		$excel->getActiveSheet()->getColumnDimension('K')->setWidth(25);
+		$excel->getActiveSheet()->getColumnDimension('L')->setWidth(25);
+		$excel->getActiveSheet()->getColumnDimension('M')->setWidth(10);
+		$excel->getActiveSheet()->getColumnDimension('N')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('O')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+
+		$numrow = 3;
+		$nomor = 1;
+		$lokasi1 = '';
+		$lokasi2 = '';
+		$lokasi3 = '';
+		$lokasi4 = '';
+		$lfcr = chr(10).chr(10);
+ // Lakukan looping pada variabel siswa
+      // $excel->setActiveSheetIndex(1)->setCellValue('A'.$numrow1, $codeitemm.$lfcr.$partname);
+      // $excel->getActiveSheet()->getStyle('A'.$numrow1)->applyFromArray($style_row)->getAlignment()->setWrapText(true);
+		foreach ($data as $key) {
+			$lokasi1 = str_replace('<li>', '', $key->LOKASI);
+			$lokasi2 = str_replace('</li>', $lfcr, $lokasi1);
+			$lokasi3 = str_replace('<ul>', '', $lokasi2);
+			$lokasi4= str_replace('</ul>', '', $lokasi3);
+			$excel->setActiveSheetIndex(0)->setCellValue('A'.$numrow, $nomor);
+			$excel->setActiveSheetIndex(0)->setCellValue('B'.$numrow, $key->TGL_SPJ);
+			$excel->setActiveSheetIndex(0)->setCellValue('C'.$numrow, $key->NO_SPJ);
+			$excel->setActiveSheetIndex(0)->setCellValue('D'.$numrow, $key->STATUS_SPJ);
+			$excel->setActiveSheetIndex(0)->setCellValue('E'.$numrow, $key->KENDARAAN);
+			$excel->setActiveSheetIndex(0)->setCellValue('F'.$numrow, $key->NO_TNKB);
+			$excel->setActiveSheetIndex(0)->setCellValue('G'.$numrow, $key->MERK);
+			$excel->setActiveSheetIndex(0)->setCellValue('H'.$numrow, $key->TYPE);
+			$excel->setActiveSheetIndex(0)->setCellValue('I'.$numrow, $key->NAMA_GROUP);
+			$excel->setActiveSheetIndex(0)->setCellValue('J'.$numrow, '-'.$lokasi4);
+			$excel->setActiveSheetIndex(0)->setCellValue('K'.$numrow, $key->NIK_DRIVER.'-'.$key->NAMA_DRIVER);
+			$excel->setActiveSheetIndex(0)->setCellValue('L'.$numrow, $key->NIK_PENDAMPING.'-'.$key->NAMA_PENDAMPING);
+			$excel->setActiveSheetIndex(0)->setCellValue('M'.$numrow, $key->ABNORMAL == 'Y' ? 'YES':'NO');
+			$excel->setActiveSheetIndex(0)->setCellValue('O'.$numrow, $key->NORMAL_UANG_JALAN);
+			$excel->setActiveSheetIndex(0)->setCellValue('N'.$numrow, $key->AKTUAL_UANG_JALAN);
+			$excel->setActiveSheetIndex(0)->setCellValue('P'.$numrow, $key->GAP);
+
+			$excel->getActiveSheet()->getStyle('A'.$numrow)->applyFromArray($style_row); // Set width kolom A
+			$excel->getActiveSheet()->getStyle('B'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('C'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('D'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('E'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('F'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('G'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('H'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('I'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('J'.$numrow)->applyFromArray($style_row)->getAlignment()->setWrapText(true);
+			$excel->getActiveSheet()->getStyle('K'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('L'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('M'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('N'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('O'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('P'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+
+			$numrow++;
+            $nomor++;
+		}
+		// Set height semua kolom menjadi auto (mengikuti height isi dari kolommnya, jadi otomatis)
+	    $excel->getActiveSheet()->getDefaultRowDimension()->setRowHeight(-1);
+	    // Set orientasi kertas jadi LANDSCAPE
+	    $excel->getActiveSheet()->getPageSetup()->setOrientation(PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
+	    // Set judul file excel nya
+	    $excel->getActiveSheet(0)->setTitle("SPJ");
+	    $excel->setActiveSheetIndex(0);
+	    // Proses file excel
+
+
+	    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+	    header('Content-Disposition: attachment; filename=Data-Cost_Reduction_Delivery-SPJ.xlsx'); // Set nama file excel nya
+	    header('Cache-Control: max-age=0');
+	    $write = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+	    $write->save('php://output');	
+
 	}
 
 }

@@ -56,6 +56,50 @@
                     </select>
                   </div>
                 </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <label>Filter KM</label>
+                    <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filPengaturan">
+                      <option value="">ALL</option>
+                      <option value="filter">Filter</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4 filterPengaturanKM">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <label style="padding-top: 30px">Total KM</label>
+                    </div>
+                    <!-- <div class="col-md-2">
+                      <div class="form-group">
+                        <label>&nbsp;</label>
+                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filAritmatika">
+                          <option value=">">&#62;</option>
+                          <option value="<">&#60;</option>
+                          <option value=">=">&#8805;</option>
+                          <option value="<=">&#8804;</option>
+                        </select>
+                      </div>
+                    </div> -->
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label>&nbsp;</label>
+                        <input type="number" id="inputKMAwal" class="form-control filter" value="0">
+                      </div>
+                    </div>
+                    <div class="col-md-1 text-center">
+                      <div class="form-group">
+                        <label style="padding-top: 30px">s/d</label>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label>&nbsp;</label>
+                        <input type="number" id="inputKMAkhir" class="form-control filter" value="1000">
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>  
@@ -86,20 +130,28 @@
     $('.select2').select2({
         'width': '100%',
     });
-    $('.preloader').fadeOut('slow');
+    // $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     getTabel()
     $('.filter').on('change', function(){
       getTabel();
     });
+    pengaturanFilterKM();
+    $('#filPengaturan').on('change', function(){
+      pengaturanFilterKM();
+    })
   })
 
   function getTabel() {
     var filTahun = $('#filTahun').val();
     var filBulan = $('#filBulan').val();
+    var filPengaturan = $('#filPengaturan').val();
+    var filAritmatika = $('#filAritmatika').val();
+    var inputKMAwal = $('#inputKMAwal').val();
+    var inputKMAkhir = $('#inputKMAkhir').val();
     $.ajax({
       type:'get',
-      data:{filTahun, filBulan},
+      data:{filTahun, filBulan, filAritmatika, filPengaturan, inputKMAwal, inputKMAkhir},
       url:'getTabelKmKendaraan',
       cache: false,
       async: true,
@@ -116,6 +168,14 @@
         $('#getTabel').html("error");
       }
     });
+  }
+  function pengaturanFilterKM() {
+    var filPengaturan = $('#filPengaturan').val();
+    if (filPengaturan == '') {
+      $('.filterPengaturanKM').addClass("d-none");
+    }else{
+      $('.filterPengaturanKM').removeClass("d-none");
+    }
   }
 
 </script>

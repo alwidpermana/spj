@@ -540,6 +540,7 @@ class M_Pengajuan extends CI_Model {
 	public function saveGroupTujuanSPJ($inputNoSPJ, $inputGroupTujuan)
 	{
 		$sql = "UPDATE SPJ_PENGAJUAN SET GROUP_ID ='$inputGroupTujuan' WHERE NO_SPJ = '$inputNoSPJ'";
+		$this->db->query("UPDATE SPJ_PENGAJUAN_PIC SET GROUP_TUJUAN_ID = $inputGroupTujuan WHERE NO_PENGAJUAN = '$inputNoSPJ'");
 		return $this->db->query($sql);
 	}
 	public function getUangJalanSPJ($noSPJ)
@@ -669,12 +670,26 @@ class M_Pengajuan extends CI_Model {
         $inputAbnormal = $this->input->post("inputAbnormal");
         $inputTotalUangJalan = $inputGroupTujuan == '4'|| $inputAbnormal == 'Y' ? $this->input->post("inputTotalUangJalan")+$this->input->post("inputTambahanUangJalan"): $this->input->post("inputTotalUangJalan");
         if ($inputMediaBBM == 'Voucher') {
-       		$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'USED' WHERE NO_VOUCHER = '$inputNoVoucher'");
+        	$user = $this->session->userdata("NIK");
+			$bulan = date("m");
+			$tahun = date("Y");
+       		// $this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'USED' WHERE NO_VOUCHER = '$inputNoVoucher'");
+       		$getVoucher = $this->db->query("SELECT ID FROM SPJ_VOUCHER_BBM WHERE NO_VOUCHER = '$inputNoVoucher'");
+       		if ($getVoucher->num_rows()==0) {
+       			$this->db->query("INSERT INTO SPJ_VOUCHER_BBM(NO_VOUCHER, STATUS, TGL_INPUT, PIC_INPUT, KODE_ROMAWI, TAHUN)VALUES('$inputNoVoucher','USED','$tanggal','$user','$bulan','$tahun')");
+       		}
+       		
        	}else{
        		$voucherAsal='';
-       		$getVoucherSPJ = $this->db->query("SELECT VOUCHER_BBM FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ'")->row();
-       		$voucherAsal = $getVoucherSPJ->VOUCHER_BBM;
-       		$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'NOT' WHERE NO_VOUCHER = '$voucherAsal'");
+       		$getVoucherSPJ = $this->db->query("SELECT VOUCHER_BBM FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$inputNoSPJ'");
+       		$JmlVoucherAsal = $getVoucherSPJ->num_rows();
+       		if ($JmlVoucherAsal > 0) {
+       			$dataVoucherAsal = $getVoucherSPJ->row();
+	       		$voucherAsal = $dataVoucherAsal->VOUCHER_BBM;
+	       		$this->db->query("UPDATE SPJ_VOUCHER_BBM SET STATUS = 'NOT' WHERE NO_VOUCHER = '$voucherAsal'");
+       		
+       		}
+       		
        		// $this->db->query()
        	}
         $sql = $this->db->query("UPDATE SPJ_PENGAJUAN SET
@@ -705,6 +720,9 @@ class M_Pengajuan extends CI_Model {
         					TAMBAHAN_UANG_JALAN = '$inputTambahanUangJalan'
         		WHERE
         			NO_SPJ = '$inputNoSPJ'");
+       	if ($inputMediaBBM == 'Tanpa BBM' || $inputMediaBBM == 'Kasbon') {
+       		$this->db->query("UPDATE SPJ_PENGAJUAN SET VOUCHER = 'Y' WHERE NO_SPJ = '$inputNoSPJ'");
+       	}
         // $biayaBBM = $inputIdVoucher == 0 ? $inputBBM : 0;
         // $kasbonSPJ = $inputTotalUangSaku + $inputTotalUangJalan + $inputTotalUangMakan + $biayaBBM;
         // $jenisSPJ = $inputJenisSPJ == 1 ? 'Delivery' : 'Non Delivery';
@@ -1266,5 +1284,59 @@ class M_Pengajuan extends CI_Model {
 				WHERE
 					NO_SPJ = '$noSPJ'";
 		return $this->db->query($sql);
+	}
+	public function getSUMUangRumsum($noSPJ)
+	{
+		$sql = "SELECT
+					SUM ( UANG_SAKU ) AS TOTAL_UANG_SAKU,
+					SUM ( UANG_MAKAN ) AS TOTAL_UANG_MAKAN 
+				FROM
+					SPJ_PENGAJUAN_PIC 
+				WHERE
+					NO_PENGAJUAN = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function getDataSPJ_test($noSPJ)
+	{
+		$sql = "SELECT TGL_SPJ, JENIS_ID, JENIS_KENDARAAN FROM SPJ_PENGAJUAN WHERE NO_SPJ='$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function getNoVoucherAuto_V1()
+	{
+		$bulan = date("m");
+		$tahun = date("y");
+		$getRomawi = $this->db->query("SELECT ROMAWI FROM SPJ_ROMAWI WHERE KODE = '$bulan'")->row();
+		$bulanRomawi = $getRomawi->ROMAWI;
+		$gabung = "KPSVC-".$bulanRomawi.''.$tahun."-";
+		$cekNoDoc=$this->db->query("SELECT MAX
+											( RIGHT ( VOUCHER_BBM, 4 ) ) AS SETNODOC
+										FROM
+											SPJ_PENGAJUAN
+										WHERE
+											VOUCHER_BBM LIKE '$gabung%'");
+		foreach ($cekNoDoc->result() as $data) {
+            if ($data->SETNODOC =="") {
+                $URUTZERO = $gabung."0001";
+
+                $hasil= $URUTZERO;
+            }else{
+                $zero='';
+                $length= 4;
+                $index=$data->SETNODOC;
+
+                for ($i=0; $i <$length-strlen($index+1) ; $i++) { 
+                    $zero = $zero.'0';
+                }
+                $URUTDOCNO = $gabung.$zero.($index+1);
+                $hasil = $URUTDOCNO;
+            }   
+        }
+        return $hasil;
+	}
+	public function generateVoucherBBM($noVoucher, $noSPJ)
+	{
+		$save = $this->db->query("UPDATE SPJ_PENGAJUAN SET VOUCHER_BBM = '$noVoucher' WHERE NO_SPJ='$noSPJ'");
+		$this->db->query("UPDATE SPJ_PENGAJUAN SET MEDIA_UANG_BBM = 'Voucher' WHERE NO_SPJ = '$noSPJ'");
+		return $save;
 	}
 }

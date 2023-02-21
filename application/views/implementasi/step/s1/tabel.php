@@ -42,11 +42,10 @@
 				<td><?=$key->PIC_DRIVER?></td>
 				<td>
 					<ul style="padding-left: 10px">
-					<?php foreach ($pic as $pc): ?>
-						<?php if ($pc->NO_PENGAJUAN == $key->NO_SPJ): ?>
-							<li><?=$pc->PIC?></li>
-						<?php endif ?>
-					<?php endforeach ?>
+					<?php
+						$picPendamping = $this->M_Monitoring->getPICPendampingByNoSPJ_v2($key->NO_SPJ);
+						echo $picPendamping;
+					?>
 					</ul>
 				</td>
 				<td class="text-center"><?=number_format($key->TOTAL_UANG_TOL)?></td>

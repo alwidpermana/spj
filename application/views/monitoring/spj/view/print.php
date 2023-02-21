@@ -23,7 +23,7 @@
     }
   </style>
 </head>
-<body>
+<body onload="printOut()">
 <div class="wrapper">
   <!-- Main content -->
   <section class="invoice">
@@ -347,6 +347,18 @@
   $(document).ready(function(){
     window.print();
   })
+  var lama = 500;
+  t = null;
+  function printOut(){
+      window.print();
+      t = setTimeout("self.close()",lama);
+      // setTimeout(printVoucher(), 1000)
+  }
+  function printVoucher() {
+    var id = '<?=$this->uri->segment("3")?>'
+    var url1 = url+"/monitoring/print_voucher/"+id;
+    window.open(url1,'_blank');
+  }
   
 </script>
 <script>

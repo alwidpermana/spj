@@ -126,7 +126,8 @@
       cache: false,
       async: true,
       success: function(data){
-        window.location.href = url+'/monitoring/view_spj/'+data.ID_SPJ;
+        window.open(url+'/monitoring/view_spj/'+data.ID_SPJ,'_target');
+        // window.location.href = ;
       },
       error: function(data){
         Swal.fire("Gagal Mengambil Data!","Mohon Hubungi Staff IT","error")

@@ -53,6 +53,37 @@
               ?>
             </div>
           </div>
+          <br>
+          <div class="row">
+            <div class="col-md-12">
+              <?php
+                $data= ['1','2','3','4'];
+                for ($i=0; $i <count($data) ; $i++) { 
+                  echo $data[$i].'<br>';
+                }
+              ?>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              awawww
+              <br>
+              <?php
+                $keberangkatan = "2023-02-01 11:15:00";
+                $jamKeberangkatan = date("H", strtotime($keberangkatan));
+                $menitKeberangkatan = date("i", strtotime($keberangkatan)); 
+                echo $jamKeberangkatan;
+                echo $menitKeberangkatan;
+                if ($jamKeberangkatan<11) {
+                  echo"Dapat Uang Makan Tambahan";
+                }elseif($jamKeberangkatan == 11 && $menitKeberangkatan<=15){
+                  echo"Dapat Uang Makan Tambahan";
+                }else{
+                  echo "NOT";
+                }
+              ?>
+            </div>
+          </div>
         </div>
       </div>
     </div>

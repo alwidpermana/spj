@@ -71,14 +71,6 @@
                     </div>
                     <div class="col-md-2">
                       <div class="form-group">
-                        <label>Periode</label>
-                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filPeriode">
-                          
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-md-2">
-                      <div class="form-group">
                         <label>Jenis SPJ</label>
                         <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filJenis">
                             <option value="" <?=$attribut?>>ALL</option>
@@ -90,22 +82,11 @@
                     </div>
                     <div class="col-md-2">
                       <div class="form-group">
-                        <label>Status</label>
-                        <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filStatus">
-                          <option value="">ALL</option>
-                          <option value="OPEN">OPEN</option>
-                          <option value="Waiting For Generate">Waiting For Generate</option>
-                          <option value="CLOSE">CLOSE</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-md-2">
-                      <div class="form-group">
                         <label>Group Tujuan</label>
                         <select class="select2 form-control filter select2-orange" data-dropdown-css-class="select2-orange" id="filGroup">
                           <option value="">ALL</option>
                           <?php foreach ($group as $key): ?>
-                            <option value="<?=$key->ID_GROUP?>"><?=$key->NAMA_GROUP?></option>
+                            <option value="<?=$key->NAMA_GROUP?>"><?=$key->NAMA_GROUP?></option>
                           <?php endforeach ?>
                         </select>
                       </div>

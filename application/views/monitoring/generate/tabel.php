@@ -5,7 +5,7 @@
 			<th colspan="2">Generate</th>
 			<th rowspan="2">Jumlah SPJ</th>
 			<th rowspan="2">Total Rp.</th>
-			<th colspan="3">Rincian</th>
+			<th colspan="4">Rincian</th>
 			<th colspan="2">Receive / Approve Finance</th>
 			<th rowspan="2"></th>
 		</tr>
@@ -15,6 +15,7 @@
 			<th>SPJ</th>
 			<th>BBM</th>
 			<th>TOL</th>
+			<th>Biaya Admin</th>
 			<th>Tanggal</th>
 			<th>Status</th>
 		</tr>
@@ -32,6 +33,7 @@
 				<td class="text-center"><?=str_replace(',', '.', number_format($key->TOTAL_SPJ))?></td>
 				<td class="text-center"><?=str_replace(',', '.', number_format($key->TOTAL_BBM))?></td>
 				<td class="text-center"><?=str_replace(',', '.', number_format($key->TOTAL_TOL))?></td>
+				<td class="text-center"><?=str_replace(',', '.', number_format($key->TOTAL_BA))?></td>
 				<td><?=$key->TGL_RECEIVE?></td>
 				<td><?=$key->STATUS_RECEIVE?></td>
 				<td class="text-center">

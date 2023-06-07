@@ -73,8 +73,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-$db['default']['hostname'] = 'Driver={SQL Server};Server=192.168.0.212;Database=New_GL; Uid=spjweb;Pwd=it@kps0k;';
-$db['default']['username'] = 'spjweb';
+$db['default']['hostname'] = 'Driver={SQL Server};Server=192.168.0.212;Database=New_GL; Uid=spjweb_new;Pwd=it@kps0k;';
+$db['default']['username'] = 'spjweb_new';
 $db['default']['password'] = 'it@kps0k';
 $db['default']['database'] = 'New_GL';
 $db['default']['dbdriver'] = 'odbc';
@@ -106,9 +106,9 @@ $db['default']['stricton'] = FALSE;
 // $db['dbserlok']['autoinit'] = TRUE;
 // $db['dbserlok']['stricton'] = FALSE;
 
-$db['dbserlok']['hostname'] = '192.168.0.210';
-$db['dbserlok']['username'] = 'root';
-$db['dbserlok']['password'] = 'root';
+$db['dbserlok']['hostname'] = '192.168.0.215';
+$db['dbserlok']['username'] = 'spj';
+$db['dbserlok']['password'] = 'spj@kps';
 $db['dbserlok']['database'] = 'db_kps_mirror_06_03_2017_revq';
 $db['dbserlok']['dbdriver'] = 'mysqli';
 $db['dbserlok']['dbprefix'] = '';

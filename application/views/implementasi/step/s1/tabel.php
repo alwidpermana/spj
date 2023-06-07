@@ -32,20 +32,19 @@
 				<td><?=$key->NAMA_GROUP?></td>
 				<td>
 					<ul style="padding-left: 10px">
-					<?php foreach ($tujuan as $lok): ?>
-						<?php if ($lok->NO_SPJ == $key->NO_SPJ): ?>
-							<li><?=$lok->SERLOK_KOTA?></li>
-						<?php endif ?>
-					<?php endforeach ?>
+						<?php
+							$lokasi = $this->M_Monitoring->getLokasiPerNoSPJ_v2($key->NO_SPJ);
+							echo $lokasi;
+						?>
 					</ul>
 				</td>
 				<td><?=$key->PIC_DRIVER?></td>
 				<td>
 					<ul style="padding-left: 10px">
-					<?php
-						$picPendamping = $this->M_Monitoring->getPICPendampingByNoSPJ_v2($key->NO_SPJ);
-						echo $picPendamping;
-					?>
+						<?php
+							$pic = $this->M_Monitoring->getPICPerSPJ_v2($key->NO_SPJ);
+							echo $pic;
+						?>
 					</ul>
 				</td>
 				<td class="text-center"><?=number_format($key->TOTAL_UANG_TOL)?></td>

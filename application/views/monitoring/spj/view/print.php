@@ -205,6 +205,15 @@
             <div class="col-sm-3 text-center"><?=str_replace(',', '.', number_format($key->TOTAL_UANG_TOL, 0))?></div>
             <div class="col-sm-3 text-center"><?=$key->MEDIA_UANG_TOL?></div>
           </div>
+          <?php if ($key->KENDARAAN == 'Gojek/Grab'): ?>
+            <div class="row">
+              <div class="col-sm-6">
+                Uang Kendaraan
+              </div>
+              <div class="col-sm-3 text-center"><?=str_replace(',', '.', number_format($key->TOTAL_UANG_KENDARAAN, 0))?></div>
+              <div class="col-sm-3 text-center"><?=$key->MEDIA_UANG_KENDARAAN?></div>
+            </div>
+          <?php endif ?>
           <?php if ($key->STATUS_PERJALANAN == 'IN'): ?>
             <div class="row">
               <div class="col-sm-6">
@@ -226,7 +235,7 @@
               <strong>Total</strong>
             </div>
             <?php
-              $total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN + $key->TOTAL_UANG_BBM + $key->TOTAL_UANG_TOL;
+              $total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN + $key->TOTAL_UANG_BBM + $key->TOTAL_UANG_TOL + $key->TOTAL_UANG_KENDARAAN;
               $totalTambahan = $key->US1 + $key->US2 + $key->UM;
               $totalAll = $total+$totalTambahan;
             ?>

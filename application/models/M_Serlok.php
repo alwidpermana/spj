@@ -6,7 +6,7 @@ class M_Serlok extends CI_Model {
 		
 	}
 
-	public function getCustomerByGroup($query, $id)
+	public function getCustomerByGroup($query, $id, $search)
 	{
 		$sql = "SELECT
 					*
@@ -44,7 +44,8 @@ class M_Serlok extends CI_Model {
 							nama_kabkota
 						FROM
 							tref_kabkota
-					)Q2 ON Q1.ID_KAB_KOTA = Q2.ID_KK ";
+					)Q2 ON Q1.ID_KAB_KOTA = Q2.ID_KK 
+				WHERE COMPANY_NAME LIKE '%$search%' OR nama_kabkota LIKE '%$search%' OR ALAMAT_LENGKAP_PLANT LIKE '%$search%'";
 		$sql .=" )Q1 ";
 		if ($query != '' && $id == '') {
 			$sql.=$query;

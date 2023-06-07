@@ -532,8 +532,10 @@
           // }
           // var statusPerjalan = data.STATUS_PERJALANAN == null ? 'OUT':'IN';
           if (data.STATUS_SPJ == 'CANCEL') {
-            Swal.fire("SPJ Sudah Di Cancel!","Tidak Bisa Scan Qr Code","warning")
-          } else {
+            Swal.fire("SPJ Sudah Di Cancel!","Tidak Bisa Scan Qr Code","warning");
+          } else if(data.STATUS_SPJ == 'DRAFT' && data.STATUS_PERJALANAN == null && data.kerja==true){
+            Swal.fire("SPJ Masih Draft!","Lengkapi Datanya Terlebih dahulu dan kordinasi dengan bagian Finance untuk melakukan approve","warning");
+          }else {
             var statusPerjalan = '';
             if (data.STATUS_PERJALANAN == null) {
               statusPerjalan = 'OUT';
@@ -546,7 +548,7 @@
             // console.log(statusPerjalan)
 
             var noSPJ = data.NO_SPJ;
-            verfikasiDataPICOutIn(scan, statusPerjalan, noSPJ)
+            verfikasiDataPICOutIn(scan, statusPerjalan, noSPJ, data.STATUS_SPJ)
           }
           
           
@@ -630,10 +632,10 @@
     })
   }
 
-  function getSPJ(scan) {
+  function getSPJ(scan, filStatus) {
     $.ajax({
       type:'get',
-      data:{scan},
+      data:{scan, filStatus},
       url:url+'/Implementasi/getSPJ',
       cache:false,
       async: true,
@@ -655,9 +657,9 @@
       }
     })
   }
-  function verfikasiDataPICOutIn(scan, status, noSPJ) {
+  function verfikasiDataPICOutIn(scan, status, noSPJ, statusSPJ) {
     if (status == '-') {
-      getSPJ(scan)
+      getSPJ(scan, statusSPJ)
     }else{
       $.ajax({
         type:'post',
@@ -667,7 +669,7 @@
         cache: false,
         async: true,
         success: function(data){
-          getSPJ(scan)
+          getSPJ(scan, statusSPJ)
           if (status == 'OUT') {
             $('#keteranganSecurity').html("CHECK OUT KENDARAAN")
           } else if(status == 'IN') {

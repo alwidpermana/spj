@@ -13,7 +13,7 @@
             <td>No TNKB</td>
             <td>Tahun Kendaraan</td>
             <td>Jenis BBM</td>
-            <td>Konsumsi BBM</td>
+            <td>Km/Liter</td>
             <td>Status</td>
             <td>Foto Kendaraan</td>
         </tr>

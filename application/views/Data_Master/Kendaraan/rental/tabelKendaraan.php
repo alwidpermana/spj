@@ -7,7 +7,7 @@
 			<th>Jenis</th>
 			<th>Warna</th>
 			<th>Bahan Bakar</th>
-			<th>BBM Per Liter</th>
+			<th>KM/Liter</th>
 			<th>Tahun</th>
 			<th></th>
 		</tr>

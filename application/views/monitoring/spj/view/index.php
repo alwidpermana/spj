@@ -541,6 +541,7 @@
                                   $kasbonUangJalan = $rl->TOTAL_UANG_JALAN;
                                   $realisasiUangJalan = $rl->REALISASI_UANG_JALAN;
                                   $realisasiTOL = $rl->TOTAL_UANG_TOL;
+                                  $biayaKendaraan = $rl->TOTAL_UANG_KENDARAAN;
                                 ?>
                                   <tr>
                                     <td>Uang Saku</td>
@@ -694,6 +695,19 @@
                                     <td><?=$rl->PIC_CLOSE == null ? 'OPEN':'CLOSE'?></td>
                                     <td><?='Uang TOL Menggunakan Media '.$rl->MEDIA_UANG_TOL?></td>
                                   </tr>
+                                  <?php if ($key->KENDARAAN == 'Gojek/Grab'): ?>
+                                    <tr>
+                                      <td>Uang Kendaraan</td>
+                                      <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_KENDARAAN, 0))?></td>
+                                      <td><?=$rl->MEDIA_UANG_KENDARAAN?></td>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                    </tr>
+                                  <?php endif ?>
                                 <?php endforeach ?>
                               </tbody>
                               <tfoot>
@@ -703,7 +717,7 @@
                                 ?>
                                 <tr>
                                   <th>TOTAL:</th>
-                                  <th>Rp. <?=str_replace(',', '.', number_format($key->TOTAL_UANG_SAKU+$key->TOTAL_UANG_MAKAN+$key->TOTAL_UANG_JALAN+$kasbonBBM+$kasbonTOL, 0))?></th>
+                                  <th>Rp. <?=str_replace(',', '.', number_format($key->TOTAL_UANG_SAKU+$key->TOTAL_UANG_MAKAN+$key->TOTAL_UANG_JALAN+$kasbonBBM+$kasbonTOL+$key->TOTAL_UANG_KENDARAAN, 0))?></th>
                                   <th></th>
                                   <th>Rp. 
                                     <?php
@@ -714,7 +728,7 @@
                                   </th>
                                   <th>Rp. 
                                     <?php
-                                      $totalKB = ($realisasiUangSaku - $kasbonUangSaku) + ($realisasiUangMakan - $kasbonUangMakan) + ($realisasiUangJalan - $kasbonUangJalan)+($valUangBBM-$kasbonBBM)+($realisasiTOL-$kasbonTOL);
+                                      $totalKB = ($realisasiUangSaku - $kasbonUangSaku) + ($realisasiUangMakan - $kasbonUangMakan) + ($realisasiUangJalan - $kasbonUangJalan)+($valUangBBM-$kasbonBBM)+($realisasiTOL-$kasbonTOL) + $key->TOTAL_UANG_KENDARAAN;
                                       echo str_replace(',', '.', number_format($totalKB));
                                     ?>
                                   </th>
@@ -730,7 +744,7 @@
                                   $realisasiUangMakan = $rl->REALISASI_UANG_MAKAN;
                                   $kasbonUangJalan = $rl->TOTAL_UANG_JALAN;
                                   $realisasiUangJalan = $rl->REALISASI_UANG_JALAN;
-                                  $realisasiTOL = $rl->TOTAL_UANG_TOL;
+                                  $realisasiTOL = $key->MEDIA_UANG_TOL == 'Kasbon' ? $rl->TOTAL_UANG_TOL : 0;
                                 ?>
                                   <tr>
                                     <td>Uang Saku</td>
@@ -800,12 +814,25 @@
                                     <td></td>
                                     <td></td>
                                   </tr>
+                                  <?php if ($key->KENDARAAN == 'Gojek/Grab'): ?>
+                                    <tr>
+                                      <td>Uang Kendaraan</td>
+                                      <td><?=str_replace(',', '.', number_format($rl->TOTAL_UANG_KENDARAAN, 0))?></td>
+                                      <td><?=$rl->MEDIA_UANG_KENDARAAN?></td>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                      <td></td>
+                                    </tr>
+                                  <?php endif ?>
                                 <?php endforeach ?>
                               </tbody>
                               <tfoot>
                                 <tr>
                                   <th>Total</th>
-                                  <th><?=str_replace(',', '.', number_format($kasbonUangSaku+$kasbonUangMakan+$kasbonUangJalan, 0))?></th>
+                                  <th><?=str_replace(',', '.', number_format($kasbonUangSaku+$kasbonUangMakan+$kasbonUangJalan+$realisasiTOL + $kasbonBBM + $key->TOTAL_UANG_KENDARAAN, 0))?></th>
                                   <th colspan="7"></th>
                                 </tr>
                               </tfoot>

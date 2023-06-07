@@ -6,7 +6,8 @@
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/sweetalert2_ori/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="<?= base_url() ?>assets/plugins/ladda-buttons/css/ladda-themeless.min.css">
   <?php $this->load->view("_partial/head")?>
-  
+  <link href="https://fonts.cdnfonts.com/css/sacred-valley" rel="stylesheet">
+                
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse layout-navbar-fixed layout-footer-fixed">
 <div class="preloader">
@@ -22,68 +23,9 @@
       <?php $this->load->view('_partial/content-header');?>
       <div class="content">
         <div class="container-fluid">
-          <button type="button" class="btn btn-kps bg-orange btn-block" id="addDelivery">
-            Add Delivery Setup
-          </button>
-          <div class="row">
-            <div class="col-md-4">
-              <select class="select2" id="inputDepartureTime" multiple="multiple" data-placeholder="Pilih Departure Time Dari Program Serlok" data-dropdown-css-class="select2-orange" style="width: 100%;color: white !important;">
-                
-              </select>
-              <br>
-              <!-- <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="test">
-                TEST
-              </button>
-              JANGAN DIHAPUS!!!
-               -->
-
-
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <?php
-                $keberangkatanH = '2022-01-01';
-                $kepulanganH = '2022-01-02';
-                $berangkatH = date_create($keberangkatanH);
-                $pulangH = date_create($kepulanganH);
-                $selisihH = date_diff($berangkatH, $pulangH);
-                $selisihHari = $selisihH->d;
-                echo $selisihHari;
-              ?>
-            </div>
-          </div>
-          <br>
-          <div class="row">
-            <div class="col-md-12">
-              <?php
-                $data= ['1','2','3','4'];
-                for ($i=0; $i <count($data) ; $i++) { 
-                  echo $data[$i].'<br>';
-                }
-              ?>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              awawww
-              <br>
-              <?php
-                $keberangkatan = "2023-02-01 11:15:00";
-                $jamKeberangkatan = date("H", strtotime($keberangkatan));
-                $menitKeberangkatan = date("i", strtotime($keberangkatan)); 
-                echo $jamKeberangkatan;
-                echo $menitKeberangkatan;
-                if ($jamKeberangkatan<11) {
-                  echo"Dapat Uang Makan Tambahan";
-                }elseif($jamKeberangkatan == 11 && $menitKeberangkatan<=15){
-                  echo"Dapat Uang Makan Tambahan";
-                }else{
-                  echo "NOT";
-                }
-              ?>
-            </div>
-          </div>
+          <div id="testFont">
+            <?=$this->session->userdata("marketing")?>
+          </div> 
         </div>
       </div>
     </div>
@@ -107,6 +49,7 @@
     $('.preloader').fadeOut('slow');
     $('.ladda-button').ladda('bind', {timeout: 1000});
     test()
+    getApi()
     $('#addDelivery').on('click', function(){
       $.ajax({
         type:'get',
@@ -215,6 +158,24 @@
       }
     });
     
+  }
+
+  function getApi() {
+    var inptToken = "2023-05-23/IT-KPS/alwidpermana|Staff-IT()nice1*ImpotDataPTK";
+    $.ajax({
+      type:'post',
+      data:{inptToken},
+      dataType:'json',
+      cache:false,
+      async:true,
+      url:'http://localhost:8080/reqruitment/api/getTokern',
+      success:function(data){
+
+      },
+      error:function(data){
+
+      }
+    })
   }
   
   

@@ -47,9 +47,9 @@ class Monitoring extends CI_Controller {
 		$filJenis = $this->input->get("filJenis");
 		$filSearch = $this->input->get("filSearch");
 		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='','')->result();
-		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', $filStatus)->result();
-		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', $filStatus)->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', $filStatus)->result();
+		// $data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', $filStatus)->result();
+		// $data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', $filStatus)->result();
+		// $data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', $filStatus)->result();
 		$this->load->view("monitoring/spj/tabel", $data);
 	}
 	public function view_spj($id)
@@ -73,6 +73,7 @@ class Monitoring extends CI_Controller {
 		$data['realisasi'] = $this->M_Implementasi->realisasiBiayaSPJ($no_spj)->result();
 		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id,'')->result();
 		$data['history'] = $this->M_Implementasi->getHistoryInOutLokal($no_spj)->result();
+		
 		if ($id=='') {
 			redirect("Monitoring/spj");
 		}else{
@@ -123,8 +124,16 @@ class Monitoring extends CI_Controller {
 	}
 	public function print_voucher($id)
 	{
-		$data['data'] = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id = $id, $adjustment='','')->row();
-		$this->load->view('monitoring/spj/view/print_voucher', $data);
+
+		$getData = $this->M_Monitoring->getSPJ($filBulan='', $filTahun='', $filJenis='', $filSearch='', $id = $id, $adjustment='','')->row();
+		$data['data'] = $getData;
+		if ($getData->JENIS_ID == '1') {
+			$this->load->view('monitoring/spj/view/print_voucher', $data);
+		} else {
+			$this->load->view('monitoring/spj/view/print_voucher_non', $data);
+		}
+		
+		
 	}
 	public function saveDebit()
 	{
@@ -963,6 +972,47 @@ class Monitoring extends CI_Controller {
 		$filInterval = $this->input->get("filInterval");
 		$data['data'] = $this->M_Monitoring->getMonitoringKeberangakatan($jenisId, $periodeAwal, $periodeAkhir, $filSearch, $inputJamAwal, $inputJamAkhir, $filInterval)->result();
 		$this->load->view("monitoring/keberangkatan/tabel", $data);
+	}
+	public function konfigurasi()
+	{
+		$data['side'] = 'monitoring-konfigurasi';
+		$data['page'] = 'Monitoring Konfigurasi';
+		$this->load->view("monitoring/konfigurasi/index", $data);
+	}
+	public function konfigUangSaku()
+	{
+		$filJenisSPJ = $this->input->get("filJenisSPJ");
+		$data['group'] = $this->M_Data_Master->getOnlyGroup($group='')->result();
+		if ($filJenisSPJ == '1') {
+			$data['new'] = $this->M_Data_Master->uangSakuDelivery()->result();
+		}else{
+			$data['non'] = $this->M_Monitoring->getPICNonDelivery()->result();
+		}
+		$data['jenis'] = $filJenisSPJ;
+		
+		$this->load->view("monitoring/konfigurasi/uang_saku", $data);
+	}
+	public function konfigUangJalan()
+	{
+		$filJenisSPJ = $this->input->get("filJenisSPJ");
+		$data['data'] = $this->M_Monitoring->getDataJenis($filJenisSPJ)->result();
+		$data['jenis'] = $filJenisSPJ == '1' ? 'Delivery':'Non Delivery';
+		$this->load->view("monitoring/konfigurasi/uang_jalan", $data);
+	}
+	public function konfigUangMakan()
+	{
+		$filJenisSPJ = $this->input->get("filJenisSPJ");
+		$data['jenis'] = $filJenisSPJ == '1' ? 'Delivery':'Non Delivery';
+		$data['data'] = $this->M_Data_Master->getUangMakan()->result();
+		$this->load->view("monitoring/konfigurasi/uang_makan", $data);
+	}
+	public function konfigUangTambahan()
+	{
+		$filJenisSPJ = $this->input->get("filJenisSPJ");
+		$data['data'] = $this->M_Data_Master->getJamTambahan()->result();
+		$data['tambahan'] = $this->M_Data_Master->viewTambahanUangSaku(" WHERE JENIS_ID = $filJenisSPJ")->result();
+		$data['jenis'] = $filJenisSPJ;
+		$this->load->view("monitoring/konfigurasi/biaya_tambahan", $data);
 	}
 
 

@@ -23,6 +23,8 @@ class M_Monitoring extends CI_Model {
 		}else{
 			$whereStatus =" AND STATUS_SPJ = '$filStatus'";
 		}
+		$statusData = $filStatus == 'DRAFT' ? 'DRAFT' : 'SAVED';
+
 
 		if ($filPeriode == '') {
 			$wherePeriode = "";
@@ -56,6 +58,7 @@ class M_Monitoring extends CI_Model {
 							TOTAL_UANG_JALAN,
 							TOTAL_UANG_BBM,
 							TOTAL_UANG_TOL,
+							TOTAL_UANG_KENDARAAN,
 							STATUS_SPJ,
 							RENCANA_BERANGKAT,
 							RENCANA_PULANG,
@@ -65,6 +68,7 @@ class M_Monitoring extends CI_Model {
 							MEDIA_UANG_JALAN,
 							MEDIA_UANG_BBM,
 							MEDIA_UANG_TOL,
+							MEDIA_UANG_KENDARAAN,
 							STATUS_PERJALANAN,
 							VOUCHER_BBM,
 							NO_GENERATE,
@@ -78,7 +82,7 @@ class M_Monitoring extends CI_Model {
 						FROM
 							SPJ_PENGAJUAN
 						WHERE
-							STATUS_DATA = 'SAVED' AND
+							STATUS_DATA = '$statusData' AND
 							JENIS_ID LIKE '$jenis%' $byAdjust $byStep1 $whereStatus $wherePeriode
 					)Q1
 					LEFT JOIN
@@ -114,69 +118,21 @@ class M_Monitoring extends CI_Model {
 					LEFT JOIN
 					(
 						SELECT
-							Q1.NIK + ' - ' + namapeg AS PIC_DRIVER,
 							NO_PENGAJUAN,
-							Q1.NIK AS NIK_DRIVER,
-							namapeg AS NAMA_DRIVER,
-							jabatan AS JABATAN_DRIVER,
-							departemen AS DEPARTEMEN_DRIVER,
-							Subdepartemen AS SUB_DEPARTEMEN_DRIVER,
+							NIK+ ' - ' +NAMA AS PIC_DRIVER,
 							UANG_SAKU,
 							UANG_MAKAN,
 							SORTIR,
-							OBJEK
+							OBJEK,
+							NIK AS NIK_DRIVER,
+							NAMA AS NAMA_DRIVER,
+							JABATAN AS JABATAN_DRIVER,
+							DEPARTEMEN AS DEPARTEMEN_DRIVER,
+							SUB_DEPARTEMEN AS SUB_DEPARTEMEN_DRIVER
 						FROM
-						(
-							SELECT
-								NO_PENGAJUAN,
-								NIK,
-								UANG_SAKU,
-								UANG_MAKAN,
-								SORTIR,
-								OBJEK
-							FROM
-								SPJ_PENGAJUAN_PIC
-							WHERE
-								JENIS_PIC ='Sopir'
-						)Q1
-						LEFT JOIN
-						(
-							SELECT
-								KdSopir AS nik,
-								NamaSopir AS namapeg,
-								'-' AS jabatan,
-								'-' AS departemen,
-								'-' AS Subdepartemen
-							FROM
-								TrTs_SopirLogistik 
-							WHERE
-								StatusAktif = 'Aktif' 
-							UNION
-							SELECT
-								KdSopir AS nik,
-								NamaSopir AS namapeg,
-								'-' AS jabatan,
-								'-' AS departemen,
-								'-' AS Subdepartemen
-							FROM
-								TrTs_SopirRental 
-							WHERE
-								StatusAktif = 'Aktif' 
-							UNION
-							SELECT
-								nik,
-								namapeg,
-								jabatan,
-								departemen,
-								CASE
-									WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
-									ELSE Subdepartemen1 + ', ' + Subdepartemen2
-								END AS Subdepartemen
-							FROM
-								dbhrm.dbo.tbPegawai 
-							WHERE
-								status_aktif = 'AKTIF' 
-						)Q2 ON Q1.NIK = Q2.NIK
+							SPJ_PENGAJUAN_PIC
+						WHERE
+							JENIS_PIC ='Sopir'
 					)Q5 ON Q1.NO_SPJ = Q5.NO_PENGAJUAN
 					LEFT JOIN
 					(
@@ -336,7 +292,20 @@ class M_Monitoring extends CI_Model {
 						FROM
 							SPJ_REKANAN
 					)Q12 ON Q1.REKANAN_KENDARAAN = Q12.NAMA
-
+					LEFT JOIN
+					(
+						SELECT
+							NoTNKB,
+							BBMPerLiter
+						FROM
+							[dbo].[SPJ_KENDARAAN_REKANAN]
+						UNION
+						SELECT
+							NoTNKB,
+							BBMPerLiter
+						FROM
+							GA.[dbo].[GA_TKendaraan]
+					)Q13 ON Q1.NO_TNKB = Q13.NoTNKB
 					WHERE 
 						NO_SPJ LIKE '%$search%' OR
 						QR_CODE LIKE '%$search%'
@@ -476,6 +445,16 @@ class M_Monitoring extends CI_Model {
 	{
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
 		$whereStatus = $status == '' ? '' : " AND STATUS_SPJ LIKE '$status%'";
+		$filStatus = $this->input->get("filStatus");
+		$statusData = $filStatus == 'DRAFT'?'DRAFT':'SAVED';
+		// $getStatus = $this->db->query("SELECT STATUS_DATA FROM SPJ_PENGAJUAN WHERE ID_SPJ = $id")->row();
+		// $statusData = $getStatus->STATUS_DATA;
+		// if ($statusData == 'DRAFT') {
+		// 	$statusData = 'DRAFT';
+		// }else{
+		// 	$statusData = "SAVED";
+		// }
+
 		$sql = "SELECT
 					Q1.SERLOK_KOTA,
 					Q1.NO_SPJ,
@@ -502,7 +481,7 @@ class M_Monitoring extends CI_Model {
 					FROM
 						SPJ_PENGAJUAN
 					WHERE
-						STATUS_DATA = 'SAVED' AND
+						STATUS_DATA = '$statusData' AND
 						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
 						JENIS_ID LIKE '$jenis%' $whereStatus
@@ -515,6 +494,8 @@ class M_Monitoring extends CI_Model {
 	{
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
 		$whereStatus = $status == '' ? '' : " AND STATUS_SPJ LIKE '$status%'";
+		$filStatus = $this->input->get("filStatus");
+		$statusData = $filStatus == 'DRAFT'?'DRAFT':'SAVED';
 		$sql = "SELECT DISTINCT
 					Q1.SERLOK_KOTA,
 					Q2.NO_SPJ
@@ -538,7 +519,7 @@ class M_Monitoring extends CI_Model {
 					FROM
 						SPJ_PENGAJUAN
 					WHERE
-						STATUS_DATA = 'SAVED' AND
+						STATUS_DATA = '$statusData' AND
 						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
 						JENIS_ID LIKE '$jenis%' $whereStatus
@@ -574,14 +555,16 @@ class M_Monitoring extends CI_Model {
 	{
 		$byId = $id == ''?'':" WHERE ID_SPJ = '$id'";
 		$whereStatus = $status == '' ? '' : " AND STATUS_SPJ LIKE '$status%'";
+		$filStatus = $this->input->get("filStatus");
+		$statusData = $filStatus == 'DRAFT'?'DRAFT':'SAVED';
 		$sql = "SELECT
-					Q1.NIK + ' - ' + namapeg AS PIC,
+					Q1.NIK + ' - ' + NAMA AS PIC,
 					NO_PENGAJUAN,
 					Q1.NIK AS NIK_DRIVER,
-					namapeg AS NAMA_DRIVER,
-					jabatan AS JABATAN_DRIVER,
-					departemen AS DEPARTEMEN_DRIVER,
-					Subdepartemen AS SUB_DEPARTEMEN_DRIVER,
+					NAMA AS NAMA_DRIVER,
+					JABATAN AS JABATAN_DRIVER,
+					DEPARTEMEN AS DEPARTEMEN_DRIVER,
+					SUB_DEPARTEMEN AS SUB_DEPARTEMEN_DRIVER,
 					UANG_SAKU,
 					UANG_MAKAN,
 					SORTIR,
@@ -592,6 +575,10 @@ class M_Monitoring extends CI_Model {
 					SELECT
 						NO_PENGAJUAN,
 						NIK,
+						NAMA,
+						JABATAN,
+						DEPARTEMEN,
+						SUB_DEPARTEMEN,
 						UANG_SAKU,
 						UANG_MAKAN,
 						SORTIR,
@@ -601,44 +588,6 @@ class M_Monitoring extends CI_Model {
 					WHERE
 						JENIS_PIC !='Sopir'
 				)Q1
-				LEFT JOIN
-				(
-					SELECT
-						KdSopir AS nik,
-						NamaSopir AS namapeg,
-						'-' AS jabatan,
-						'-' AS departemen,
-						'-' AS Subdepartemen
-					FROM
-						TrTs_SopirLogistik 
-					WHERE
-						StatusAktif = 'Aktif' 
-					UNION
-					SELECT
-						KdSopir AS nik,
-						NamaSopir AS namapeg,
-						'-' AS jabatan,
-						'-' AS departemen,
-						'-' AS Subdepartemen
-					FROM
-						TrTs_SopirRental 
-					WHERE
-						StatusAktif = 'Aktif' 
-					UNION
-					SELECT
-						nik,
-						namapeg,
-						jabatan,
-						departemen,
-						CASE
-							WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
-							ELSE Subdepartemen1 + ', ' + Subdepartemen2
-						END AS Subdepartemen
-					FROM
-						dbhrm.dbo.tbPegawai 
-					WHERE
-						status_aktif = 'AKTIF' 
-				)Q2 ON Q1.NIK = Q2.NIK
 				INNER JOIN
 				(
 					SELECT
@@ -647,7 +596,7 @@ class M_Monitoring extends CI_Model {
 					FROM
 						SPJ_PENGAJUAN
 					WHERE
-						STATUS_DATA = 'SAVED' AND
+						STATUS_DATA = '$statusData' AND
 						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
 						YEAR(TGL_SPJ) LIKE '$tahun%' AND
 						JENIS_ID LIKE '$jenis%' $whereStatus
@@ -860,13 +809,13 @@ class M_Monitoring extends CI_Model {
 				FROM
 				(
 					SELECT
-						Q1.NIK + ' - ' + namapeg AS PIC,
+						Q1.NIK + ' - ' + NAMA AS PIC,
 						NO_PENGAJUAN,
-						Q1.NIK AS NIK,
-						namapeg AS NAMA,
-						jabatan AS JABATAN,
-						departemen AS DEPARTEMEN,
-						Subdepartemen AS SUB_DEPARTEMEN,
+						NIK,
+						NAMA,
+						JABATAN,
+						DEPARTEMEN,
+						SUB_DEPARTEMEN,
 						UANG_SAKU,
 						UANG_MAKAN,
 						SORTIR,
@@ -877,6 +826,10 @@ class M_Monitoring extends CI_Model {
 						SELECT
 							NO_PENGAJUAN,
 							NIK,
+							NAMA,
+							JABATAN,
+							DEPARTEMEN,
+							SUB_DEPARTEMEN,
 							UANG_SAKU,
 							UANG_MAKAN,
 							SORTIR,
@@ -890,44 +843,6 @@ class M_Monitoring extends CI_Model {
 						WHERE
 							NO_PENGAJUAN = '$noSpj'
 					)Q1
-					LEFT JOIN
-					(
-						SELECT
-							KdSopir AS nik,
-							NamaSopir AS namapeg,
-							'-' AS jabatan,
-							'-' AS departemen,
-							'-' AS Subdepartemen
-						FROM
-							TrTs_SopirLogistik 
-						WHERE
-							StatusAktif = 'Aktif' 
-						UNION
-						SELECT
-							KdSopir AS nik,
-							NamaSopir AS namapeg,
-							'-' AS jabatan,
-							'-' AS departemen,
-							'-' AS Subdepartemen
-						FROM
-							TrTs_SopirRental 
-						WHERE
-							StatusAktif = 'Aktif' 
-						UNION
-						SELECT
-							nik,
-							namapeg,
-							jabatan,
-							departemen,
-							CASE
-								WHEN Subdepartemen2 IS NULL OR Subdepartemen2 = '' THEN Subdepartemen1
-								ELSE Subdepartemen1 + ', ' + Subdepartemen2
-							END AS Subdepartemen
-						FROM
-							dbhrm.dbo.tbPegawai 
-						WHERE
-							status_aktif = 'AKTIF' 
-					)Q2 ON Q1.NIK = Q2.NIK
 				)Q1
 				LEFT JOIN
 				(
@@ -1851,6 +1766,7 @@ class M_Monitoring extends CI_Model {
 							TOTAL_UANG_JALAN,
 							TOTAL_UANG_BBM,
 							TOTAL_UANG_TOL,
+							TOTAL_UANG_KENDARAAN,
 							STATUS_SPJ,
 							RENCANA_BERANGKAT,
 							RENCANA_PULANG,
@@ -2703,7 +2619,8 @@ class M_Monitoring extends CI_Model {
 						TGL_GENERATE,
 						JML_SPJ,
 						TOTAL_RP,
-						NAMA_JENIS
+						NAMA_JENIS,
+						TOTAL_BA
 					FROM
 						[dbo].[SPJ_GENERATE] a
 					INNER JOIN 
@@ -2890,12 +2807,12 @@ class M_Monitoring extends CI_Model {
 						NAMA_GROUP,
 						VOUCHER_BBM,
 						NO_GENERATE,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN AS TOTAL_KASBON,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+TOTAL_UANG_KENDARAAN AS TOTAL_KASBON,
 						((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_TAMBAHAN_SPJ,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN + ((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN + ((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) + TOTAL_UANG_KENDARAAN AS TOTAL_SPJ,
 						TOTAL_UANG_TOL AS TOTAL_TOL,
 						TOTAL_UANG_BBM AS TOTAL_BBM,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM AS TOTAL_RP
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM+TOTAL_UANG_KENDARAAN AS TOTAL_RP
 					FROM
 					(
 						SELECT
@@ -2916,6 +2833,7 @@ class M_Monitoring extends CI_Model {
 							TOTAL_UANG_JALAN,
 							TOTAL_UANG_TOL,
 							TOTAL_UANG_BBM,
+							TOTAL_UANG_KENDARAAN,
 							JML_PIC AS JML_PIC_UM,
 							CASE 
 								WHEN UANG_SAKU1 IS NULL THEN 0
@@ -2951,6 +2869,10 @@ class M_Monitoring extends CI_Model {
 								a.TOTAL_UANG_JALAN,
 								a.TOTAL_UANG_BBM,
 								a.TOTAL_UANG_TOL,
+								CASE 
+									WHEN KENDARAAN = 'Gojek/Grab' THEN a.TOTAL_UANG_KENDARAAN
+									ELSE 0
+								END AS TOTAL_UANG_KENDARAAN,
 								a.NO_GENERATE
 							FROM
 								[dbo].[SPJ_PENGAJUAN] a
@@ -3086,6 +3008,116 @@ class M_Monitoring extends CI_Model {
 	public function getMonitoringKeberangakatan($jenis, $awal, $akhir, $search, $jamMulai, $jamAkhir, $interval)
 	{
 		$sql = "Execute SPJ_monitoringKeberangkatan '$jenis','$awal','$akhir','$search','$interval','$jamMulai','$jamAkhir'";
+		return $this->db->query($sql);
+	}
+	public function listKotaGroup($id)
+	{
+		$sql ="SELECT DISTINCT
+					c.NAMA_KOTA
+				FROM
+				SPJ_GROUP_TUJUAN a
+				INNER JOIN
+					SPJ_GT_DETAIL b
+				ON a.ID_GROUP = b.ID_GROUP
+				INNER JOIN
+					SPJ_KOTA c
+				ON b.ID_KOTA = c.ID_KOTA
+				WHERE
+					a.ID_GROUP = $id
+				ORDER BY NAMA_KOTA ASC";
+		return $this->db->query($sql);
+	}
+	public function getLokasiPerNoSPJ($noSPJ)
+	{
+		$sql = "SELECT DISTINCT SERLOK_KOTA FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$noSPJ' ORDER BY SERLOK_KOTA ASC";
+		return $this->db->query($sql);
+	}
+	public function getLokasiPerNoSPJ_v2($noSPJ)
+	{
+		$sql = $this->db->query("SELECT DISTINCT REPLACE(SERLOK_KOTA, 'KOTA ', '') AS SERLOK_KOTA FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$noSPJ' ORDER BY SERLOK_KOTA ASC");
+		$html='';
+		if ($sql->num_rows()>0) {
+			foreach ($sql->result() as $key) {
+				$html.='<li>'.$key->SERLOK_KOTA.'</li>';	
+			}
+		}
+		return $html;
+	}
+	public function getPICPerSPJ($noSPJ)
+	{
+		$sql = "SELECT DISTINCT NIK, NAMA FROM SPJ_PENGAJUAN_PIC WHERE NO_PENGAJUAN = '$noSPJ' AND JENIS_PIC != 'Sopir' ORDER BY NIK ASC";
+		return $this->db->query($sql);
+	}
+	public function getPICPerSPJ_v2($noSPJ)
+	{
+		$sql = $this->db->query("SELECT DISTINCT NIK, NAMA FROM SPJ_PENGAJUAN_PIC WHERE NO_PENGAJUAN = '$noSPJ' AND JENIS_PIC != 'Sopir' ORDER BY NIK ASC");
+		$html='';
+		if ($sql->num_rows()>0) {
+			foreach ($sql->result() as $key) {
+				$html.= '<li>'.$key->NIK.' - '.$key->NAMA.'</li>';
+			}
+		}
+		
+		return $html;
+	}
+	public function uangSakuNonDelivery($idGroup, $pic)
+	{
+		$sql = "SELECT
+					BIAYA_INTERNAL,
+					BIAYA_RENTAL
+				FROM
+					SPJ_UANG_SAKU
+				WHERE
+					ID_JENIS_SPJ = 2 AND
+					ID_GROUP = $idGroup AND
+					JENIS_PIC = '$pic'";
+		return $this->db->query($sql);
+	}
+	public function getPICNonDelivery()
+	{
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						DISTINCT
+						CASE 
+							WHEN JENIS_PIC = 'Driver' THEN 1
+							WHEN JENIS_PIC = 'Manager' THEN 2
+							WHEN JENIS_PIC = 'Kepala Bagian' THEN 3
+							WHEN JENIS_PIC = 'Kepala Seksi' THEN 4
+							WHEN JENIS_PIC = 'Kepala Regu' THEN 5
+							WHEN JENIS_PIC = 'Staff' THEN 6
+							WHEN JENIS_PIC = 'Inspector' THEN 7
+							WHEN JENIS_PIC = 'Administrasi' THEN 8
+							WHEN JENIS_PIC = 'Operator' THEN 9
+							ELSE 0
+						END AS no_urut,
+						CASE 
+							WHEN JENIS_PIC = 'Driver' THEN 'Driver'
+							ELSE 'Pendamping'
+						END AS PIC,
+						JENIS_PIC
+					FROM
+						SPJ_UANG_SAKU
+					WHERE
+						ID_JENIS_SPJ = 2
+				)Q1
+				ORDER BY
+					no_urut ASC";
+		return $this->db->query($sql);
+	}
+	public function getDataJenis($id)
+	{
+		$sql = "SELECT DISTINCT
+					NAMA_KOTA,
+					BIAYA
+				FROM
+					[dbo].[SPJ_UANG_JALAN] a
+				INNER JOIN SPJ_KOTA b ON
+				a.ID_KOTA = b.ID_KOTA
+				WHERE
+					ID_JENIS_SPJ = $id";
 		return $this->db->query($sql);
 	}
 }

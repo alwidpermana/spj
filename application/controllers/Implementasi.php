@@ -59,8 +59,16 @@ class Implementasi extends CI_Controller {
 	{
 		$scan = $this->input->get("scan");
 		$data = $this->db->query("SELECT ID_SPJ, STATUS_PERJALANAN, NO_SPJ, STATUS_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$scan'")->row();
-		
-		echo json_encode($data);
+		date_default_timezone_set('Asia/Jakarta');
+    $jam = date('G');
+    if ($jam >= 7 && $jam <= 17) {
+    	$kerja = true;
+    } else {
+    	$kerja= false;
+    }
+
+    $response = array('kerja' =>$kerja, 'ID_SPJ'=>$data->ID_SPJ, 'STATUS_PERJALANAN'=>$data->STATUS_PERJALANAN, 'NO_SPJ'=>$data->NO_SPJ, 'STATUS_SPJ'=>$data->STATUS_SPJ);
+		echo json_encode($response);
 	}
 	public function getSPJ()
 	{
@@ -157,186 +165,79 @@ class Implementasi extends CI_Controller {
 		$inputGroupTujuan = $this->input->post("inputGroupTujuan");
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$inputJenisId = $this->input->post("inputJenisId");
-		$validasi = $this->M_Implementasi->getValidasiSPJ($inputNoSPJ)->result();
+		$validasi = $this->M_Implementasi->getValidasiSPJ($inputNoSPJ)->row();
 		$jam_tambahan = $this->M_Data_Master->getJamTambahan()->result();
 		$where = "WHERE ID_JENIS = $inputJenisId";
 		$tambahan = $this->M_Data_Master->viewTambahanUangSaku($where)->result();
-		$uang_makan = $this->M_Data_Master->getUangMakan()->result();
-		foreach ($uang_makan as $um) {
-			$uangMakan1 = $um->BIAYA2;
-			$uangMakan2 = $um->BIAYA4;
-		}
-		
+		$uang_makan = $this->M_Data_Master->getUangMakan()->row();
+		$difHari = $validasi->DIF_HARI;
+		$difJam = $validasi->DIF_JAM;
 		if ($inputGroupTujuan == 4 || $inputGroupTujuan == 10) {
-			$uangSaku1 = 0;
-			$uangSaku2 = 0;
-			$uangMakan = 0;
-		} else {
-			$keberangkatanJ = '';
-      $kepulanganJ = '';
-      $keberangkatanH = '';
-      $kepulanganH = '';
-      $jam1 = 0;
-      $jam2 = 0;
-      $tambahanUangSaku1=0;
-      $tambahanUangSaku2 = 0;
-      $jamKeberangkatan=0;
-      $menitKeberangkatan = 0;
-      foreach ($validasi as $vld) {
-        $jamPulang = date("H:i");
-        $jamKeberangkatan = date("H", strtotime($vld->KEBERANGKATAN));
-        $menitKeberangkatan = date("i", strtotime($vld->KEBERANGKATAN));
-        $keberangkatanJ = date("Y-m-d H:i", strtotime($vld->KEBERANGKATAN));
-        $kepulanganJ = date("Y-m-d H:i");
-        $keberangkatanH = date("Y-m-d", strtotime($vld->KEBERANGKATAN));
-        $kepulanganH = date("Y-m-d");
-        $tengahBerangkat = date("Y-m-d", strtotime($vld->KEBERANGKATAN)). ' 24:00';
-        $tengahPulang = date("Y-m-d"). ' 00:00';
-      }
+				$uangSaku1 = 0;
+				$uangSaku2 = 0;
+				$uangMakan = 0;
+		}else{
+			foreach ($tambahan as $tm) {
+		      $biayaUangSaku1 = $tm->QTY1;
+		      $biayaUangSaku2 = $tm->QTY2;
+		    }
+		    if ($difHari==0) {
+		    	if ($difJam >= 18 && $difJam <22) {
+		    		$uangSaku1 = $biayaUangSaku1;
+		    		$uangSaku2 = 0;
+		    	}elseif($difJam>=22){
+		    		$uangSaku1 = $biayaUangSaku1;
+		    		$uangSaku2 = $biayaUangSaku2;
+		    	}else{
+		    		$uangSaku1 = 0;
+		    		$uangSaku2 = 0;
+		    	}
+		    }else{
+		    	if ($difJam>=14 && $difJam<18) {
+		    		$uangSaku1 = $biayaUangSaku1;
+		    		$uangSaku2 = 0;
+		    	}elseif ($difJam>=18) {
+		    		$uangSaku1 = $biayaUangSaku1;
+		    		$uangSaku2 = $biayaUangSaku2;
+		    	}else{
+		    		$uangSaku1 = 0;
+		    		$uangSaku2 = 0;
+		    	}
+		    }
+		    $jamKeberangkatan = date("H", strtotime($validasi->KEBERANGKATAN));
+	    	$jamPulang = date("H:i");
 
-      foreach ($jam_tambahan as $jt) {
-        $jam1 = $jt->JAM1;
-        $jam2 = $jt->JAM2;
-      }
-      foreach ($tambahan as $tm) {
-        $tambahanUangSaku1 = $tm->QTY1;
-        $tambahanUangSaku2 = $tm->QTY2;
-      }
-      $berangkatJ = date_create($keberangkatanJ);
-      $pulangJ = date_create($kepulanganJ);
-      $selisihJ = date_diff($berangkatJ, $pulangJ);
-      $selisihJam = $selisihJ->h;
-
-      $berangkatH = date_create($keberangkatanH);
-      $pulangH = date_create($kepulanganH);
-      $selisihH = date_diff($berangkatH, $pulangH);
-      $selisihHari = $selisihH->d;
-
-      if ($selisihJam >= $jam1 && $selisihHari==0) {
-        $jm = $selisihJam - $jam1;
-        
-        // $uangSaku1 = $tambahanUangSaku1;
-        // $uangSaku2 = $tambahanUangSaku2; 
-        if ($jm>=0) {
-        	// && $jm<=3
-          $uangSaku1 = $tambahanUangSaku1;
-          // $uangMakan += $uangMakan1;
-        }else{
-          $uangSaku1 = 0;
-          // $uangMakan += 0;
-        }
-
-        if ($jm>=4) {
-          $uangSaku2 = $tambahanUangSaku2;
-        	// $uangMakan += $uangMakan2;
-        } else {
-          $uangSaku2 = 0;
-          // $uangMakan +=0;
-        }
-        
-
-      }elseif($selisihHari>0){
-      	$tengah1 = date_create($tengahBerangkat);
-      	$tengah2 = date_create($tengahPulang);
-      	$selisih1 = date_diff($berangkatJ, $tengah1);
-      	$selisihJamTengah1 = $selisih1->h;
-
-      	$selisih2 = date_diff($pulangJ, $tengah2);
-      	$selisihJamTengah2 = $selisih2->h;
-      	$selisihTengahFinal = $selisihJamTengah1 + $selisihJamTengah2;
-      	$jm = $selisihHari>1?($selisihJam+($selisihHari*24)) - $jam2: ($selisihTengahFinal - $jam2);
-        if ($jm>=0) {
-          $uangSaku1 = $tambahanUangSaku1;
-          // $uangMakan += $uangMakan1;
-        }else{
-          $uangSaku1 = 0;
-          // $uangMakan+=0;
-        }
-
-        if ($jm>=4) {
-          $uangSaku2 = $tambahanUangSaku2;
-          // $uangMakan += $uangMakan2;
-        } else {
-          $uangSaku2 = 0;
-          // $uangMakan +=0;
-        }
-      }else{
-        $uangSaku1 = 0;
-        $uangSaku2 = 0;
-        // $uangMakan = 0;
-      }
-      // if ($inputJenisId == 1) {
-      // 	$uangMakan = $selisihJam>=13?20000:0;
-      // }elseif ($inputJenisId == 2) {
-      // 	$uangMakan = $selisihJam>=12?20000:0;
-      // }else{
-      // 	$uangMakan = 0;
-      // }
-      
-
-      $jenisId = $inputJenisId ;
-      $uangMakan = 0;
-      if ($keberangkatanH == $kepulanganH) {
-      	if ($jamKeberangkatan<11 && $jamPulang >= date("H:i",strtotime("19:00"))) {
-        	$uangMakan = $um->BIAYA2;
-	      }elseif($jamKeberangkatan == 11 && $menitKeberangkatan<=15 && $jamPulang >= date("H:i",strtotime("19:00"))){
-	        $uangMakan = $um->BIAYA2;
-	      }elseif($jamKeberangkatan >=11 && $selisihJam>=13){
-	        $uangMakan = $um->BIAYA2;
-	      }else{
-	        $uangMakan = 0;
-	      }
-      }else{
-      	if ($selisihJam >= 13) {
-      		$uangMakan = 20000;
-      	}else{
-      		$uangMakan = 0;
-      	}
-      }
-      
-
-      // if ($jamPulang >= date("H:i",strtotime("19:00")) && $selisihHari == 0 || $selisihHari>0) {
-      //   foreach ($uang_makan as $um) {
-      //   	if ($inputGroupTujuan == '4') {
-      //   		if ($um->JENIS_GROUP == 'Lokal') {
-      //   			if ($jenisId == 1) {
-	    //           $uangMakan = $um->BIAYA2;
-	    //         }elseif ($jenisId == 2) {
-	    //           $uangMakan = $um->BIAYA4;
-	    //         }else{
-	    //           $uangMakan = 0;
-	    //         }
-      //   		}
-      //   	}else{
-      //   		if ($um->JENIS_GROUP == 'Luar Kota') {
-      // 				if ($jenisId == 1) {
-	    //           $uangMakan = $um->BIAYA2;
-	    //         }elseif ($jenisId == 2) {
-	    //           $uangMakan = $um->BIAYA4;
-	    //         }else{
-	    //           $uangMakan = 0;
-	    //         }
-      //   		}	
-      //   	}
-      //   }
-      // }else{
-      //   $uangMakan = 0;
-      // }
-		}
-		
+			if ($inputJenisId == 1) {
 				
+				
+		    	if ($jamKeberangkatan<=11 && $jamPulang >= date("H:i",strtotime("19:00"))) {
+		    		$uangMakan = $uang_makan->BIAYA2;
+		    	}elseif ($difJam >= 13) {
+		    		$uangMakan = $uang_makan->BIAYA2;
+		    	}else{
+		    		$uangMakan = 0;
+		    	}
+			    
+			}elseif ($inputJenisId == 2) {
+				if ($difJam>=12 && $jamPulang>= date("H:i", strtotime("19:00")) ) {
+					$uangMakan = $uang_makan->BIAYA4;
+				} else {
+					$uangMakan = 0;
+				}
+				
+			}else{
+				$uangSaku1 = 0;
+				$uangSaku2 = 0;
+				$uangMakan = 0;
+			}
+		  		
+		}
 
-        // $getSPJ = $this->db->query("SELECT NO_TNKB FROM SPJ_PENGAJUAN WHERE NO_SPJ='$inputNoSPJ'")->row();
-        // $cekKendaraanRental = $this->M_Implementasi->cekKendaraanRental($getSPJ->NO_TNKB)->num_rows();
+		
 
-        // if ($cekKendaraanRental>0) {
-        // 	$uangSaku1 = 0;
-        // 	$uangSaku2 = 0;
-        // }
 
-        $data = $this->M_Implementasi->saveUangTambahan($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
-        // $test = array('uang saku1' =>$uangSaku1 ,'uang saku 2'=> $uangSaku2, 'uangMakan'=>$uangMakan, 'selisih jam'=>$selisihJam, 'selisih Hari'=>$selisihHari, 'jam 2'=>$jam2, 'jm'=>$jm,'selisih jam tengah 1 '=>$selisihJamTengah1, 'selsiih jam tengah 2'=>$selisihJamTengah2);
-        // $this->M_Implementasi->saveAdjustmentUangTambah($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
+		$data = $this->M_Implementasi->saveUangTambahan($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
+		
         echo json_encode($data);
 
 	}
@@ -362,10 +263,10 @@ class Implementasi extends CI_Controller {
 		$filGroup = $this->input->get("filGroup");
 		$filPeriode = $this->input->get("filPeriode");
 
-		$data['data'] = $this->M_Monitoring->getSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id = '', $adjustment='','Y')->result();
-		$data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
-		$data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
-		$data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		$data['data'] = $this->M_Implementasi->getSPJStep1($filTahun, $filBulan, $filJenis, $filGroup, $filSearch)->result();
+		// $data['lokasi'] = $this->M_Monitoring->getLokasiByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		// $data['pic'] = $this->M_Monitoring->getPICPendampingByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
+		// $data['tujuan'] = $this->M_Monitoring->getTujuanByNoSPJ($filBulan, $filTahun, $filJenis, $filSearch, $id='', '')->result();
 		
 		$this->load->view("implementasi/step/s1/tabel", $data);
 	}
@@ -389,6 +290,19 @@ class Implementasi extends CI_Controller {
 		$data['uang_makan'] = $this->M_Data_Master->getUangMakan()->result();
 		$data['adjustment'] = $this->M_Implementasi->getDataAdjustment($no_spj)->result();
 		$data['realisasi'] = $this->M_Implementasi->realisasiBiayaSPJ($no_spj)->result();
+		$data['harga_bbm'] = $this->M_Data_Master->getHargaBBM()->result();
+		$getStatusBBM = $this->M_Implementasi->getAksesManualBBM($no_spj);
+		if ($getStatusBBM->num_rows()==0) {
+			$statusBBM = '';
+			$bbm_pengajuan = 0;
+		} else {
+			$dataStatusBBM = $getStatusBBM->row();
+			$statusBBM = $dataStatusBBM->STATUS;
+			$bbm_pengajuan = $dataStatusBBM->BBM;
+		}
+		$data['status_bbm'] = $statusBBM;
+		$data['bbm_pengajuan'] = $bbm_pengajuan;
+		
 		$this->load->view("implementasi/step/s2/index", $data);
 	}
 	public function adjustment()
@@ -697,18 +611,35 @@ class Implementasi extends CI_Controller {
 		$inputId = $this->input->post("inputId");
 		$inputJenisSPJ = $this->input->post("inputJenisSPJ");
 		$inputMediaUangTOL = $this->input->post("inputMediaUangTOL");
+		$inputMediaUangBBM = $this->input->post("inputMediaUangBBM");
+		$inputJenisBBM = $this->input->post("inputJenisBBM");
+		$inputHargaBBM = $this->input->post("inputHargaBBM");
+		$inputBeforeBBM = $this->input->post("inputBeforeBBM") == '' ? 0 :$this->input->post("inputBeforeBBM");
 		$before = $this->input->post("inputBeforeTOL") == '' ? 0 : $this->input->post("inputBeforeTOL");
+		$inputGroupId = $this->input->post("inputGroupId");
+		$inputBeforeJalan = $this->input->post("inputBeforeJalan") == '' ? 0 : $this->input->post("inputBeforeJalan");
 		$data = $this->M_Implementasi->saveCloseSPJ($inputNoSPJ, $saku, $makan, $jalan, $bbm, $tol);
-		if ($inputMediaUangTOL == 'Reimburse') {
+		if ($inputMediaUangTOL == 'Reimburse' && $data == true) {
 			$kasbon = "Kasbon TOL ".$inputJenisSPJ;
 			$this->updateSaldo($inputId, $kasbon, $tol,'REIMBURSE TOL', $before);
+		}
+
+		if ($inputMediaUangBBM == 'Reimburse' && $data == true) {
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET JENIS_BBM = '$inputJenisBBM', HARGA_BBM='$inputHargaBBM', VOUCHER = 'Y', STATUS_SPJ = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ'");
+			$kasbon= "Kasbon SPJ ".$inputJenisSPJ;
+			$this->updateSaldo($inputId,$kasbon,$bbm,'REIMBURSE BBM',$inputBeforeBBM);
+		}
+		if ($inputJenisSPJ == 'Non Delivery' && $inputGroupId =='4' || $inputGroupId == '10' && $inputJenisSPJ == 'Non Delivery') {
+			$kasbon = "Kasbon SPJ ".$inputJenisSPJ;
+			$this->updateSaldo($inputId, $kasbon, $jalan,'REIMBURSE UANG JALAN', $inputBeforeJalan);
 		}
 		echo json_encode($data);
 		
 	}
+
 	public function generate()
 	{
-		$data['side']= 'implementasi-generate';
+		$data['side']= 'implementasi-generate_spj';
 		$data['page']= 'Generate SPJ';
 		$data['jenis'] = $this->M_Data_Master->getJenisSPJByOtoritas()->result();
 		$this->load->view("implementasi/generate/index", $data);
@@ -774,9 +705,9 @@ class Implementasi extends CI_Controller {
 
 		for ($ba=0; $ba <$jmlBA ; $ba++) { 
 			$this->db->query("UPDATE SPJ_BIAYA_ADMIN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_BIAYA_ADMIN='$noBA[$ba]'");
-		}
+		} 
 		$totalBiayaRP = $inputTotalRP + $inputTotalBA; 
-		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $totalBiayaRP, $filJenis, $jmlBA, $inputTotalBA);
+		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $totalBiayaRP, $filJenis, $jmlBA, $inputTotalBA,0);
 		
 
 		// $data = array('KASBON SPJ' =>$kasbonSPJ ,'KASBON BBM' =>$kasbonBBM, 'KASBON TOL' =>$kasbonTOL,'total'=>$kasbonSPJ+$kasbonBBM+$kasbonTOL,'jmlBiayaAdmin'=>$jmlBA, 'totalBiayaAdmin'=>$inputTotalBA );
@@ -805,10 +736,14 @@ class Implementasi extends CI_Controller {
 		foreach ($getSaldo->result() as $key) {
 			$saldo  = $key->SALDO;
 		}
-		$totalSaldo = ($saldo+$before) - $totalBiaya;
+		if ($totalBiaya != $before) {
+			$totalSaldo = ($saldo + $before)-$totalBiaya;
+			
 
-		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
-		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalBiaya, 'KASBON', $id,$keterangan);
+			$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
+			$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalBiaya, 'KASBON', $id,$keterangan);
+		}
+		
 	}
 	public function saveHistoryNG()
 	{
@@ -941,6 +876,264 @@ class Implementasi extends CI_Controller {
 		}
 		$response = array('data' =>true,'message'=>$message,'status'=>$status,'jml_kendaraan'=>$getData->JML_KENDARAAN,'jml_pic'=>$getData->JML_PIC );
 		echo json_encode($response);
+	}
+	public function pengajuanOtoritasBBM()
+	{
+		$idSPJ = $this->input->get("idSPJ");
+		$getNoSPJ = $this->db->query("SELECT NO_SPJ FROM SPJ_PENGAJUAN WHERE ID_SPJ = $idSPJ")->row();
+		$noSPJ = $getNoSPJ->NO_SPJ;
+		$getData = $this->db->query("SELECT ID FROM SPJ_PENGAJUAN_BBM WHERE NO_SPJ = '$noSPJ' AND STATUS = 'OPEN'");
+		if ($getData->num_rows()==0) {
+			$data = $this->M_Implementasi->savePengajuanOtoritasBBM($noSPJ);
+			if ($data == true) {
+				$response = array('data' =>$data,'status'=>'success','message'=>'Berhasil Mengajukan Izin Pengisian Ke Otoritas', 'sub_message'=>'Hubungi Otoritas Untuk Dibuka Akses Pengisian Uang BBM Manual','status'=>'success');
+			}else{
+				$response = array('data' =>false);
+			}
+		}else{
+			$response = array('data' =>true,'status'=>'info','message'=>'SPJ Ini Sudah Mengajukan Akses Pengisian BBM', 'sub_message'=>'Hubungi Otoritas Untuk Dibuka Akses Pengisian Uang BBM Manual');
+		}
+		
+		echo json_encode($response);
+	}
+	public function cekPengajuanBBM()
+	{
+		$idSPJ = $this->input->get("idSPJ");
+		$getNoSPJ = $this->db->query("SELECT NO_SPJ FROM SPJ_PENGAJUAN WHERE ID_SPJ = $idSPJ")->row();
+		$noSPJ = $getNoSPJ->NO_SPJ;
+		$getData = $this->db->query("SELECT ID FROM SPJ_PENGAJUAN_BBM WHERE NO_SPJ = '$noSPJ' AND STATUS = 'OPEN'");
+		$jml = round($getData->num_rows());
+		echo json_encode($jml);
+	}
+	public function pengajuanOtoritasBBM_v2()
+	{
+		$inputIdSPJ = $this->input->post("inputIdSPJ");
+		$inputPengajuanBBM = $this->input->post("inputPengajuanBBM");
+		$inputKeteranganBBM = $this->input->post("inputKeteranganBBM");
+		$getNoSPJ = $this->db->query("SELECT NO_SPJ FROM SPJ_PENGAJUAN WHERE ID_SPJ = $inputIdSPJ")->row();
+		$noSPJ = $getNoSPJ->NO_SPJ;
+		$data = $this->M_Implementasi->savePengajuanOtoritasBBM_v2($noSPJ, $inputPengajuanBBM, $inputKeteranganBBM);
+		echo json_encode($data);
+	}
+	public function akses_otoritas()
+	{
+		$data['side'] = 'akses_otoritas';
+		$data['page'] = 'Akses Otoritas';
+		$this->load->view("implementasi/akses_otoritas/index", $data);
+	}
+	public function getAksesOtoritas()
+	{
+		$filStatus = $this->input->get("filStatus");
+		$data['harga'] = $this->M_Implementasi->getHargaBBM('Pertalite')->row();
+		$data['data'] = $this->M_Implementasi->getDataAksesOtoritas($filStatus)->result();
+		$this->load->view("implementasi/akses_otoritas/tabel", $data);
+	}
+	public function saveAksesOtoritas()
+	{
+		$id = $this->input->post("id");
+		$status = $this->input->post("status");
+		$data = $this->M_Implementasi->saveAksesOtoritas($id, $status);
+		echo json_encode($data);
+	}
+	public function generate_kendaraan($value='')
+	{
+		$data['side'] = 'implementasi-generate_kendaraan';
+		$data['page'] = 'Generate Kendaraan Rental';
+		$data['rekanan'] = $this->M_Data_Master->getDataRekanan("")->result();
+		$data['noGenerate'] = $this->M_Implementasi->getNoGenerateKendaraanRental();
+		$this->load->view("implementasi/generate/kendaraan/index", $data);
+	}
+	public function getDataGenerateKendaraan()
+	{
+		$inputJenis = $this->input->get("inputJenis");
+		$inputRekanan = $this->input->get("inputRekanan");
+		$data['data'] = $this->M_Implementasi->getDataGenerateKendaraan($inputJenis,$inputRekanan)->result();
+		$this->load->view("implementasi/generate/kendaraan/tabel", $data);
+	}
+	public function saveGenerateKendaraan()
+	{
+		$inputJenis = $this->input->post("inputJenis");
+		$inputRekanan = $this->input->post("inputRekanan");
+		$getNamaRekanan = $this->db->query("SELECT NAMA FROM SPJ_REKANAN WHERE ID = $inputRekanan")->row();
+		$namaRekanan = $getNamaRekanan->NAMA;
+		$inputNoGenerate = $this->M_Implementasi->getNoGenerateKendaraanRental();
+		$inputSPJ = $this->input->post("inputSPJ");
+		$jmlNoSPJ = count($inputSPJ);
+		$jmlSPJ =0;
+		$sewaKendaraan = 0;
+		$potonganPPh = 0;
+		$total = 0;
+		for ($i=0; $i <$jmlNoSPJ ; $i++) { 
+			$jmlSPJ +=1;
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET NO_GENERATE_KENDARAAN = '$inputNoGenerate' WHERE NO_SPJ = '$inputSPJ[$i]'");
+		}
+
+		$sewaKendaraan = $jmlSPJ*250000;
+		$potonganPPh = $sewaKendaraan*0.25;
+		$totalBiayaRP = $sewaKendaraan - $potonganPPh;
+		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $jmlSPJ, $totalBiayaRP, $inputJenis, 0, 0,$inputRekanan);
+		if ($data == true) {
+			$data = $this->M_Implementasi->generateKendaraanRental($inputNoGenerate, $sewaKendaraan, $potonganPPh, $inputJenis, $namaRekanan);
+		}
+		echo json_encode($data);
+	}
+	public function revisiTotalUangPerPIC()
+	{
+		$inputNoSPJ= $this->input->post("inputNoSPJ"); 
+		$inputNIK= $this->input->post("inputNIK"); 
+		$inputUang= $this->input->post("inputUang"); 
+		$inputJenis= $this->input->post("inputJenis"); 
+		$inputJenisSPJ = $this->input->post("inputJenisSPJ");
+		$inputBeforeUang = $this->input->post("inputBeforeUang");
+		$save = $this->M_Implementasi->updateUangPIC($inputNoSPJ, $inputNIK, $inputUang, $inputJenis, $inputJenisSPJ);
+		if ($save == true) {
+			$kasbon = 'Kasbon SPJ '.$inputJenisSPJ;
+			$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($kasbon, 'SUB KAS');
+			$saldo = 0;
+			foreach ($getSaldo->result() as $key) {
+				$saldo  = $key->SALDO;
+			}
+			if ($inputUang==$inputBeforeUang) {
+				$totalSaldo = $saldo;
+			}else{
+				$totalSaldo = ($saldo + $inputBeforeUang)-$inputUang;
+			}
+			
+			$this->M_Cash_Flow->updateSaldo($kasbon, $totalSaldo, 'SUB KAS');
+		}
+		echo json_encode($save);
+
+	}
+	public function revisiKeberangkatan()
+	{
+		$inputNoSPJ= $this->input->post("inputNoSPJ"); 
+		$inputTglKeberangkatan= $this->input->post("inputTglKeberangkatan"); 
+		$inputJamKeberangkatan= $this->input->post("inputJamKeberangkatan"); 
+		$inputTglKepulangan= $this->input->post("inputTglKepulangan"); 
+		$inputJamKepulangan= $this->input->post("inputJamKepulangan"); 
+		$inputKmOut= $this->input->post("inputKmOut"); 
+		$inputKmIn= $this->input->post("inputKmIn"); 
+		$keberangkatan = date("Y-m-d", strtotime($inputTglKeberangkatan)).' '.date("H:i:s", strtotime($inputJamKeberangkatan));
+		$kepulangan = date("Y-m-d", strtotime($inputTglKepulangan)).' '.date("H:i:s", strtotime($inputJamKepulangan));
+		$data = $this->M_Implementasi->revisiKeberangkatan($inputNoSPJ, $keberangkatan, $kepulangan, $inputKmOut, $inputKmIn);
+		// $data = true;
+		if ($data == true) {
+			date_default_timezone_set('Asia/Jakarta');
+			$getData = $this->db->query("SELECT JENIS_ID, GROUP_ID FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$inputNoSPJ'")->row();
+			$inputGroupTujuan = $getData->GROUP_ID;
+			$inputJenisId = $getData->JENIS_ID;
+			$validasi = $this->M_Implementasi->getValidasiSPJ($inputNoSPJ)->row();
+			$jam_tambahan = $this->M_Data_Master->getJamTambahan()->result();
+			$where = "WHERE ID_JENIS = $inputJenisId";
+			$tambahan = $this->M_Data_Master->viewTambahanUangSaku($where)->result();
+			$uang_makan = $this->M_Data_Master->getUangMakan()->row();
+			$difHari = $validasi->DIF_HARI;
+			$difJam = $validasi->DIF_JAM;
+			if ($inputGroupTujuan == 4 || $inputGroupTujuan == 10) {
+					$uangSaku1 = 0;
+					$uangSaku2 = 0;
+					$uangMakan = 0;
+			}else{
+				foreach ($tambahan as $tm) {
+			      $biayaUangSaku1 = $tm->QTY1;
+			      $biayaUangSaku2 = $tm->QTY2;
+			    }
+			    if ($difHari==0) {
+			    	if ($difJam >= 18 && $difJam <22) {
+			    		$uangSaku1 = $biayaUangSaku1;
+			    		$uangSaku2 = 0;
+			    	}elseif($difJam>=22){
+			    		$uangSaku1 = $biayaUangSaku1;
+			    		$uangSaku2 = $biayaUangSaku2;
+			    	}else{
+			    		$uangSaku1 = 0;
+			    		$uangSaku2 = 0;
+			    	}
+			    }else{
+			    	if ($difJam>=14 && $difJam<18) {
+			    		$uangSaku1 = $biayaUangSaku1;
+			    		$uangSaku2 = 0;
+			    	}elseif ($difJam>=18) {
+			    		$uangSaku1 = $biayaUangSaku1;
+			    		$uangSaku2 = $biayaUangSaku2;
+			    	}else{
+			    		$uangSaku1 = 69;
+			    		$uangSaku2 = 68;
+			    	}
+			    }
+			    $jamKeberangkatan = date("H", strtotime($validasi->KEBERANGKATAN));
+		    	$jamPulang = date("H:i");
+
+				if ($inputJenisId == 1) {
+					
+					
+			    	if ($jamKeberangkatan<=11 && $jamPulang >= date("H:i",strtotime("19:00"))) {
+			    		$uangMakan = $uang_makan->BIAYA2;
+			    	}elseif ($difJam >= 13) {
+			    		$uangMakan = $uang_makan->BIAYA2;
+			    	}else{
+			    		$uangMakan = 0;
+			    	}
+				    
+				}elseif ($inputJenisId == 2) {
+					if ($difJam>=12 && $jamPulang>= date("H:i", strtotime("19:00")) ) {
+						$uangMakan = $uang_makan->BIAYA4;
+					} else {
+						$uangMakan = 0;
+					}
+					
+				}else{
+					$uangSaku1 = 0;
+					$uangSaku2 = 0;
+					$uangMakan = 0;
+				}
+			  		
+			}
+			$this->M_Implementasi->saveUangTambahan($inputNoSPJ, $uangSaku1, $uangSaku2, $uangMakan);
+		}
+		// $response = array('uangSaku1' =>$uangSaku1 ,'uangSaku2'=>$uangSaku2,'uangMakan'=>$uangMakan);
+		echo json_encode($data);
+	}
+	public function saveBiaya()
+	{
+		$inputNoSPJ = $this->input->post("inputNoSPJ"); 
+		$saku = $this->input->post("inputRealisasiUangSaku"); 
+		$makan = $this->input->post("inputRealisasiUangMakan"); 
+		$jalan = $this->input->post("inputRealisasiUangJalan"); 
+		$bbm = $this->input->post("inputRealisasiUangBBM")== '' ? 0 : $this->input->post("inputRealisasiUangBBM"); 
+		$tol = $this->input->post("inputRealisasiUangTol");
+		$inputId = $this->input->post("inputId");
+		$inputJenisSPJ = $this->input->post("inputJenisSPJ");
+		$inputMediaUangTOL = $this->input->post("inputMediaUangTOL");
+		$inputMediaUangBBM = $this->input->post("inputMediaUangBBM");
+		$inputJenisBBM = $this->input->post("inputJenisBBM");
+		$inputHargaBBM = $this->input->post("inputHargaBBM");
+		$inputBeforeBBM = $this->input->post("inputBeforeBBM") == '' ? 0 :$this->input->post("inputBeforeBBM");
+		$before = $this->input->post("inputBeforeTOL") == '' ? 0 : $this->input->post("inputBeforeTOL");
+		$inputGroupId = $this->input->post("inputGroupId");
+		$inputBeforeJalan = $this->input->post("inputBeforeJalan") == '' ? 0 : $this->input->post("inputBeforeJalan");
+		$data = $this->M_Implementasi->saveSPJ($inputNoSPJ, $saku, $makan, $jalan, $bbm, $tol);
+		if ($inputMediaUangTOL == 'Reimburse' && $data == true) {
+			$kasbon = "Kasbon TOL ".$inputJenisSPJ;
+			$this->updateSaldo($inputId, $kasbon, $tol,'REIMBURSE TOL', $before);
+		}
+
+		if ($inputMediaUangBBM == 'Reimburse' && $data == true) {
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET JENIS_BBM = '$inputJenisBBM', HARGA_BBM='$inputHargaBBM', VOUCHER = 'Y' WHERE NO_SPJ = '$inputNoSPJ'");
+			$kasbon= "Kasbon SPJ ".$inputJenisSPJ;
+			$this->updateSaldo($inputId,$kasbon,$bbm,'REIMBURSE BBM',$inputBeforeBBM);
+		}
+		if ($inputJenisSPJ == 'Non Delivery' && $inputGroupId =='4' || $inputGroupId == '10' && $inputJenisSPJ == 'Non Delivery') {
+			$kasbon = "Kasbon SPJ ".$inputJenisSPJ;
+			$this->updateSaldo($inputId, $kasbon, $jalan,'REIMBURSE UANG JALAN', $inputBeforeJalan);
+		}
+		echo json_encode($data);
+	}
+	public function closeImplementasi()
+	{
+		$inputNoSPJ = $this->input->post("inputNoSPJ");
+		$data = $this->M_Implementasi->closeImplementasi($inputNoSPJ);
+		echo json_encode($data);
 	}
 }
 ?>

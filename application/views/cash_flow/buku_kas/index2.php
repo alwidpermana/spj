@@ -35,7 +35,7 @@
         <div class="container-fluid">
           <div class="card">
             <div class="card-body">
-              <div class="row">
+              <!-- <div class="row">
                 <div class="col-md-2">
                   <div class="form-group">
                     <label>Tahun</label>
@@ -57,7 +57,7 @@
                     </select>
                   </div>
                 </div>
-              </div>
+              </div> -->
               <div class="row">
                 <div class="col-md-2">
                   <div class="form-group">

@@ -46,6 +46,7 @@
                   <a class="cek nav-link uangTambahan" id="vert-tabs-uangTambahan-tab" data-toggle="pill" href="#vert-tabs-uangTambahan" role="tab" aria-controls="vert-tabs-uangTambahan" aria-selected="false">Uang Tambahan</a>
                   <a class="cek nav-link kota" id="vert-tabs-kota-tab" data-toggle="pill" href="#vert-tabs-kota" role="tab" aria-controls="vert-tabs-kota" aria-selected="false">Kota</a>
                   <a class="cek nav-link limitSaldo" id="vert-tabs-limitSaldo-tab" data-toggle="pill" href="#vert-tabs-limitSaldo" role="tab" aria-controls="vert-tabs-limitSaldo" aria-selected="false">Limit Saldo</a>
+                  <a class="cek nav-link harga_bbm" id="vert-tabs-harga_bbm-tab" data-toggle="pill" href="#vert-tabs-harga_bbm" role="tab" aria-controls="vert-tabs-harga_bbm" aria-selected="false">Harga BBM</a>
                 </div>
               </div>
               <div class="col-8 col-sm-10">
@@ -172,6 +173,33 @@
                                   </td>
                                 </tr>
                               <?php endforeach ?>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane fade" id="vert-tabs-harga_bbm" role="tabpanel" aria-labelledby="vert-tabs-harga_bbm-tab">
+                    <div class="d-flex justify-content-end">
+                      <button type="button" class="btn bg-orange btn-kps btn-sm" id="btnBBM" data-toggle="modal" data-target="#modal-bbm">
+                        <i class="fas fa-plus"></i>
+                        Tambah
+                      </button> 
+                    </div>
+                    <br>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="table-responsive">
+                          <table class="table table-hover table-striped" width="100%">
+                            <thead class="text-center">
+                              <tr>
+                                <th>Jenis</th>
+                                <th>Harga</th>
+                                <th></th>
+                              </tr>
+                            </thead>
+                            <tbody id="getHargaBBM">
+                              
                             </tbody>
                           </table>
                         </div>
@@ -550,6 +578,39 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="modal-bbm" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="d-flex justify-content-end">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <input type="hidden" id="inputIdBBM">
+                <div class="form-group">
+                  <label>Jenis BBM</label>
+                  <input type="text" id="inputJenisBBM" class="form-control form-control-sm">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Harga BBM</label>
+                  <input type="number" id="inputHargaBBM" class="form-control form-control-sm" step="500">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn bg-orange btn-kps ladda-button saveHargaBBM" id="saveHargaBBM" data-style="expand-right">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
     <?php $this->load->view('_partial/footer');?>
@@ -573,6 +634,7 @@
     confJenisSPJUangSaku(jenis=1);
     confUangSakuRental();
     getJamTambahan();
+    getHargaBBM();
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     
@@ -1027,6 +1089,75 @@
       }
       
     })
+    $('#btnBBM').on('click', function(){
+      $('#inputIdBBM').val("");
+    })
+    var saveHargaBBM = $('#saveHargaBBM').ladda();
+      saveHargaBBM.click(function () {
+      // Start loading
+      saveHargaBBM.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var inputJenisBBM = $('#inputJenisBBM').val();
+        var inputHargaBBM = $('#inputHargaBBM').val();
+        var inputIdBBM = $('#inputIdBBM').val();
+        $.ajax({
+          type:'post',
+          data:{inputJenisBBM, inputHargaBBM, inputIdBBM},
+          dataType:'json',
+          cache:false,
+          async:true,
+          url:'saveHargaBBM',
+          beforeSend:function(data){
+            $('#saveHargaBBM').attr("disabled","disabled");
+          },
+          success:function(data){
+            berhasil();
+            getHargaBBM();
+            $('#modal-bbm').modal("hide")
+          },
+          complete:function(data){
+            $('#saveHargaBBM').removeAttr("disabled","disabled");
+            saveHargaBBM.ladda('stop');
+          },
+          error:function(data){
+            gagal();
+          }
+        })
+        
+        
+        return false;
+          
+      }, 1000)
+    });
+    $('#getHargaBBM').on('click','.editBBM', function(){
+      var id = $(this).attr("data");
+      var harga = $(this).attr("harga");
+      var jenis = $(this).attr("jenis");
+      $('#modal-bbm').modal("show");
+      $('#inputIdBBM').val(id);
+      $('#inputHargaBBM').val(harga);
+      $('#inputJenisBBM').val(jenis);
+    })
+    $('#getHargaBBM').on('click','.hapusBBM', function(){
+      var id = $(this).attr("data");
+      $.ajax({
+        type:'post',
+        data:{id},
+        dataType:'json',
+        cache:false,
+        async:true,
+        url:'hapusHargaBBM',
+        success:function(data){
+          Swal.fire("Berhasil Menghapus Data Harga BBM","","success")
+          getHargaBBM();
+        },
+        error:function(data){
+          Swal.fire("Gagal Menghapus Data Harga BBM!","Hubungi Staff IT","error");
+        }
+      })
+    })
 
   })
   function confUangSakuRental() {
@@ -1209,6 +1340,21 @@
       },
       error:function(data){
         
+      }
+    })
+  }
+  function getHargaBBM() {
+    $.ajax({
+      type:'get',
+      url:'getHargaBBM',
+      cache:false,
+      async:true,
+      dataType:'json',
+      success:function(data){
+        $('#getHargaBBM').html(data)
+      },
+      error:function(data){
+        Swal.fire("Gagal Mengambil Data Harga BBM!","","error");
       }
     })
   }

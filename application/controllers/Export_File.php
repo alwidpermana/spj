@@ -369,31 +369,27 @@ class Export_File extends CI_Controller {
 			$excel->setActiveSheetIndex(0)->setCellValue('O'.$numrow, $key->TYPE);
 			$excel->setActiveSheetIndex(0)->setCellValue('P'.$numrow, $key->NO_TNKB);
 			$excel->setActiveSheetIndex(0)->setCellValue('Q'.$numrow, $key->NAMA_GROUP);
-			$pic = $this->M_Monitoring->getPICPendampingByNoSPJ('','',$jenis, $search,'', $status);
-			$tujuan = $this->M_Monitoring->getTujuanByNoSPJ('','',$jenis, $search,'', $status);
+			$pic = $this->M_Monitoring->getPICPerSPJ($key->NO_SPJ);
+			$tujuan = $this->M_Monitoring->getLokasiPerNoSPJ($key->NO_SPJ);
 			$jmlPIC = $pic->num_rows();
 			$isiPIC = '';
 			$noPIC = 1;
 			foreach ($pic->result() as $pc) {
-				if ($pc->NO_PENGAJUAN == $key->NO_SPJ) {
-					$isiPIC .= $pc->PIC;
-					if ($noPIC>$jmlPIC) {
-						$isiPIC.="\n";
-					}
-					$noPIC++;
+				$isiPIC .= $pc->NIK.' - '.$pc->NAMA;
+				if ($noPIC>$jmlPIC) {
+					$isiPIC.="\n";
 				}
+				$noPIC++;
 			}
 			$jmlTujuan = $tujuan->num_rows();
 			$isiTujuan = '';
 			$noTujuan = 1;
 			foreach ($tujuan->result() as $tj) {
-				if ($tj->NO_SPJ == $key->NO_SPJ) {
-					$isiTujuan .= $tj->SERLOK_KOTA;
-					if ($jmlTujuan>$noTujuan) {
-						$isiTujuan.="\n";
-					}
-					$noTujuan++;
+				$isiTujuan .= $tj->SERLOK_KOTA;
+				if ($jmlTujuan>$noTujuan) {
+					$isiTujuan.="\n";
 				}
+				$noTujuan++;
 			}
 			$excel->setActiveSheetIndex(0)->setCellValue('R'.$numrow, $isiTujuan);
 			$excel->setActiveSheetIndex(0)->setCellValue('S'.$numrow, $key->PIC_DRIVER);
@@ -1555,20 +1551,21 @@ class Export_File extends CI_Controller {
 	    $excel->setActiveSheetIndex(0)->setCellValue('G2', "Merk");
 	    $excel->setActiveSheetIndex(0)->setCellValue('H2', "Type");
 	    $excel->setActiveSheetIndex(0)->setCellValue('I1', "Group Tujuan");
-	    $excel->setActiveSheetIndex(0)->mergeCells('I1:J1');
+	    $excel->setActiveSheetIndex(0)->mergeCells('I1:K1');
 	    $excel->setActiveSheetIndex(0)->setCellValue('I2', "Nama Group");
 	    $excel->setActiveSheetIndex(0)->setCellValue('J2', "Tujuan");
-	    $excel->setActiveSheetIndex(0)->setCellValue('K1', "PIC");
-	    $excel->setActiveSheetIndex(0)->mergeCells('K1:L1');
-	    $excel->setActiveSheetIndex(0)->setCellValue('K2', "Driver");
-	    $excel->setActiveSheetIndex(0)->setCellValue('L2', "Pendamping");
-	    $excel->setActiveSheetIndex(0)->setCellValue('M1', "Abnormal");
-	    $excel->setActiveSheetIndex(0)->mergeCells('M1:M2');
-	    $excel->setActiveSheetIndex(0)->setCellValue('N1', "Biaya Uang Jalan");
-	    $excel->setActiveSheetIndex(0)->mergeCells('N1:P1');
-	    $excel->setActiveSheetIndex(0)->setCellValue('N2', "Normal");
-	    $excel->setActiveSheetIndex(0)->setCellValue('O2', "Aktual");
-	    $excel->setActiveSheetIndex(0)->setCellValue('P2', "GAP");
+	    $excel->setActiveSheetIndex(0)->setCellValue('L2', "Customer");
+	    $excel->setActiveSheetIndex(0)->setCellValue('L1', "PIC");
+	    $excel->setActiveSheetIndex(0)->mergeCells('L1:M1');
+	    $excel->setActiveSheetIndex(0)->setCellValue('L2', "Driver");
+	    $excel->setActiveSheetIndex(0)->setCellValue('M2', "Pendamping");
+	    $excel->setActiveSheetIndex(0)->setCellValue('N1', "Abnormal");
+	    $excel->setActiveSheetIndex(0)->mergeCells('N1:N2');
+	    $excel->setActiveSheetIndex(0)->setCellValue('O1', "Biaya Uang Jalan");
+	    $excel->setActiveSheetIndex(0)->mergeCells('O1:Q1');
+	    $excel->setActiveSheetIndex(0)->setCellValue('O2', "Normal");
+	    $excel->setActiveSheetIndex(0)->setCellValue('P2', "Aktual");
+	    $excel->setActiveSheetIndex(0)->setCellValue('Q2', "GAP");
 
 	    $excel->getActiveSheet()->getStyle('A1')->applyFromArray($style_col); // Set width kolom A
 		$excel->getActiveSheet()->getStyle('B1')->applyFromArray($style_col);
@@ -1586,6 +1583,7 @@ class Export_File extends CI_Controller {
 		$excel->getActiveSheet()->getStyle('N1')->applyFromArray($style_col);
 		$excel->getActiveSheet()->getStyle('O1')->applyFromArray($style_col);
 		$excel->getActiveSheet()->getStyle('P1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('Q1')->applyFromArray($style_col);
 	    $excel->getActiveSheet()->getStyle('A2')->applyFromArray($style_col); // Set width kolom A
 		$excel->getActiveSheet()->getStyle('B2')->applyFromArray($style_col);
 		$excel->getActiveSheet()->getStyle('C2')->applyFromArray($style_col);
@@ -1602,6 +1600,7 @@ class Export_File extends CI_Controller {
 		$excel->getActiveSheet()->getStyle('N2')->applyFromArray($style_col);
 		$excel->getActiveSheet()->getStyle('O2')->applyFromArray($style_col);
 		$excel->getActiveSheet()->getStyle('P2')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('Q2')->applyFromArray($style_col);
 	    
 
 	    $excel->getActiveSheet()->getColumnDimension('A')->setWidth(5); // Set width kolom A
@@ -1614,12 +1613,14 @@ class Export_File extends CI_Controller {
 		$excel->getActiveSheet()->getColumnDimension('H')->setWidth(20);
 		$excel->getActiveSheet()->getColumnDimension('I')->setWidth(20);
 		$excel->getActiveSheet()->getColumnDimension('J')->setWidth(35);
-		$excel->getActiveSheet()->getColumnDimension('K')->setWidth(25);
+		$excel->getActiveSheet()->getColumnDimension('K')->setWidth(35);
+		
 		$excel->getActiveSheet()->getColumnDimension('L')->setWidth(25);
-		$excel->getActiveSheet()->getColumnDimension('M')->setWidth(10);
-		$excel->getActiveSheet()->getColumnDimension('N')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('M')->setWidth(25);
+		$excel->getActiveSheet()->getColumnDimension('N')->setWidth(10);
 		$excel->getActiveSheet()->getColumnDimension('O')->setWidth(20);
 		$excel->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+		$excel->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
 
 		$numrow = 3;
 		$nomor = 1;
@@ -1632,10 +1633,8 @@ class Export_File extends CI_Controller {
       // $excel->setActiveSheetIndex(1)->setCellValue('A'.$numrow1, $codeitemm.$lfcr.$partname);
       // $excel->getActiveSheet()->getStyle('A'.$numrow1)->applyFromArray($style_row)->getAlignment()->setWrapText(true);
 		foreach ($data as $key) {
-			$lokasi1 = str_replace('<li>', '', $key->LOKASI);
-			$lokasi2 = str_replace('</li>', $lfcr, $lokasi1);
-			$lokasi3 = str_replace('<ul>', '', $lokasi2);
-			$lokasi4= str_replace('</ul>', '', $lokasi3);
+			$lokasi = str_replace('<br>',', ',$key->LOKASI);
+			$customer = str_replace('<br>',', ',$key->CUSTOMER);
 			$excel->setActiveSheetIndex(0)->setCellValue('A'.$numrow, $nomor);
 			$excel->setActiveSheetIndex(0)->setCellValue('B'.$numrow, $key->TGL_SPJ);
 			$excel->setActiveSheetIndex(0)->setCellValue('C'.$numrow, $key->NO_SPJ);
@@ -1645,13 +1644,14 @@ class Export_File extends CI_Controller {
 			$excel->setActiveSheetIndex(0)->setCellValue('G'.$numrow, $key->MERK);
 			$excel->setActiveSheetIndex(0)->setCellValue('H'.$numrow, $key->TYPE);
 			$excel->setActiveSheetIndex(0)->setCellValue('I'.$numrow, $key->NAMA_GROUP);
-			$excel->setActiveSheetIndex(0)->setCellValue('J'.$numrow, '-'.$lokasi4);
-			$excel->setActiveSheetIndex(0)->setCellValue('K'.$numrow, $key->NIK_DRIVER.'-'.$key->NAMA_DRIVER);
-			$excel->setActiveSheetIndex(0)->setCellValue('L'.$numrow, $key->NIK_PENDAMPING.'-'.$key->NAMA_PENDAMPING);
-			$excel->setActiveSheetIndex(0)->setCellValue('M'.$numrow, $key->ABNORMAL == 'Y' ? 'YES':'NO');
+			$excel->setActiveSheetIndex(0)->setCellValue('J'.$numrow, $lokasi);
+			$excel->setActiveSheetIndex(0)->setCellValue('K'.$numrow, $customer);
+			$excel->setActiveSheetIndex(0)->setCellValue('L'.$numrow, $key->NIK_DRIVER.'-'.$key->NAMA_DRIVER);
+			$excel->setActiveSheetIndex(0)->setCellValue('M'.$numrow, $key->NIK_PENDAMPING.'-'.$key->NAMA_PENDAMPING);
+			$excel->setActiveSheetIndex(0)->setCellValue('N'.$numrow, $key->ABNORMAL == 'Y' ? 'YES':'NO');
 			$excel->setActiveSheetIndex(0)->setCellValue('O'.$numrow, $key->NORMAL_UANG_JALAN);
-			$excel->setActiveSheetIndex(0)->setCellValue('N'.$numrow, $key->AKTUAL_UANG_JALAN);
-			$excel->setActiveSheetIndex(0)->setCellValue('P'.$numrow, $key->GAP);
+			$excel->setActiveSheetIndex(0)->setCellValue('P'.$numrow, $key->AKTUAL_UANG_JALAN);
+			$excel->setActiveSheetIndex(0)->setCellValue('Q'.$numrow, $key->GAP);
 
 			$excel->getActiveSheet()->getStyle('A'.$numrow)->applyFromArray($style_row); // Set width kolom A
 			$excel->getActiveSheet()->getStyle('B'.$numrow)->applyFromArray($style_row);
@@ -1663,12 +1663,13 @@ class Export_File extends CI_Controller {
 			$excel->getActiveSheet()->getStyle('H'.$numrow)->applyFromArray($style_row);
 			$excel->getActiveSheet()->getStyle('I'.$numrow)->applyFromArray($style_row);
 			$excel->getActiveSheet()->getStyle('J'.$numrow)->applyFromArray($style_row)->getAlignment()->setWrapText(true);
-			$excel->getActiveSheet()->getStyle('K'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('K'.$numrow)->applyFromArray($style_row)->getAlignment()->setWrapText(true);
 			$excel->getActiveSheet()->getStyle('L'.$numrow)->applyFromArray($style_row);
 			$excel->getActiveSheet()->getStyle('M'.$numrow)->applyFromArray($style_row);
-			$excel->getActiveSheet()->getStyle('N'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('N'.$numrow)->applyFromArray($style_row);
 			$excel->getActiveSheet()->getStyle('O'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
 			$excel->getActiveSheet()->getStyle('P'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('Q'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
 
 			$numrow++;
             $nomor++;

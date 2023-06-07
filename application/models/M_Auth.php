@@ -15,7 +15,8 @@
 						SEKSI,
 						JENIS_KELAMIN,
 						KODE_DEPT,
-						SUB_DEPARTEMEN
+						SUB_DEPARTEMEN,
+						SubDepartemen2
 					FROM
 					(
 						SELECT
@@ -42,6 +43,7 @@
 							divisi AS DIVISI,
 							seksi AS SEKSI,
 							jKelamin AS JENIS_KELAMIN,
+							SubDepartemen2,
 							CASE 
 								WHEN Subdepartemen2 IS NULL THEN Subdepartemen1
 								WHEN Subdepartemen2 ='' THEN Subdepartemen1

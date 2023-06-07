@@ -134,7 +134,17 @@
             <label>TOL</label>
           </div>
           <div class="col-9">
-            : <?=number_format($master->RP_TOL)?>
+            <div class="row">
+              <div class="col-md-4">
+                : <?=number_format($master->RP_TOL)?>
+              </div>
+              <div class="col-md-4">
+                <label>Biaya Admin</label>
+              </div>
+              <div class="col-md-4">
+                : <?=number_format($master->TOTAL_BA)?>
+              </div>
+            </div>
           </div>
         </div>  
       </div>

@@ -13,7 +13,7 @@
 				<th colspan="6">Kendaraan</th>
 				<th colspan="2">Tujuan</th>
 				<th colspan="2">PIC</th>
-				<th colspan="6">Biaya Reguler</th>
+				<th colspan="7">Biaya Reguler</th>
 				<th colspan="4">Biaya Tambahan</th>
 				<th rowspan="2">Total Biaya</th>
 				<th rowspan="2">Adjst Biaya</th>
@@ -50,6 +50,7 @@
 				<th>Uang Jalan</th>
 				<th>BBM</th>
 				<th>TOL</th>
+				<th>Kendaraan</th>
 				<th>Jumlah</th>
 				<th>Uang Saku 1 - 3</th>
 				<th>Uang Saku 1 &ge; 4</th>
@@ -90,31 +91,52 @@
 	                    	<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/view_spj/<?=$key->ID_SPJ?>">Lihat Data</a>
 	                    	<?php if ($key->STATUS_SPJ != 'CANCEL'): ?>
 	                    		<!-- <a class="dropdown-item dropButton printSPJ printVoucher" href="javascript:;" data="<?=$key->ID_SPJ?>">Print</a> -->
-	                    		<button type="button" class="dropdown-item dropButton" onclick="printSPJ(<?=$key->ID_SPJ?>)">Print</button>
-	                    		<a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/export_spj/<?=$key->ID_SPJ?>" target="_blank">Export PDF</a>
+	                    		<button type="button" class="dropdown-item dropButton" onclick="printSPJ(<?=$key->ID_SPJ?>, '<?=$key->MEDIA_UANG_BBM?>')">Print</button>
+	                    		<!-- <a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/export_spj/<?=$key->ID_SPJ?>" target="_blank">Export PDF</a> -->
 	                    	<?php endif ?>
 	                    	<?php if ($key->STATUS_PERJALANAN == null && $this->session->userdata("LEVEL")<=4): ?>
 	                    		<?php if ($key->STATUS_SPJ == 'OPEN'): ?>
+	                    			<?php if ($key->JENIS_ID == '1'): ?>
+	                    				
+	                    				<a 
+		                    				class="dropdown-item dropButton btnCancel" 
+		                    				href="javascript:;" 
+		                    				data="<?=$key->ID_SPJ?>" 
+		                    				status = 'CANCEL'>
+		                    				Cancel SPJ
+		                    			</a>
+		                    			<a 
+		                    				class="dropdown-item dropButton" 
+		                    				href="<?=base_url()?>pengajuan/form_edit/<?=$key->ID_SPJ?>" 
+		                    				data="<?=$key->ID_SPJ?>">
+		                    				Edit SPJ
+		                    			</a>
+	                    			<?php else: ?>
+	                    				<?php if ($this->session->userdata("NIK") != $key->PIC_INPUT || $this->session->userdata("LEVEL")==0): ?>
+	                    					<!-- <button type="button" class="dropdown-item dropButton" onclick="printSPJ(<?=$key->ID_SPJ?>, '<?=$key->MEDIA_UANG_BBM?>')">Print</button> -->
+		                    				<a 
+			                    				class="dropdown-item dropButton btnCancel" 
+			                    				href="javascript:;" 
+			                    				data="<?=$key->ID_SPJ?>" 
+			                    				status = 'CANCEL'>
+			                    				Cancel SPJ
+			                    			</a>
+			                    			<a 
+			                    				class="dropdown-item dropButton" 
+			                    				href="<?=base_url()?>pengajuan/form_edit/<?=$key->ID_SPJ?>" 
+			                    				data="<?=$key->ID_SPJ?>">
+			                    				Edit SPJ
+			                    			</a>
+	                    				<?php endif ?>
+	                    			<?php endif ?>
+	                    			
 	                    			<a 
-	                    				class="dropdown-item dropButton btnCancel" 
-	                    				href="javascript:;" 
-	                    				data="<?=$key->ID_SPJ?>" 
-	                    				status = 'CANCEL'>
-	                    				Cancel SPJ
-	                    			</a>
-	                    			<a 
-	                    				class="dropdown-item dropButton" 
-	                    				href="<?=base_url()?>pengajuan/form_edit/<?=$key->ID_SPJ?>" 
-	                    				data="<?=$key->ID_SPJ?>">
-	                    				Edit SPJ
-	                    			</a>
-	                    			<!-- <a 
 	                    				class="dropdown-item dropButton btnEdit" 
 	                    				href="javascript:;" 
 	                    				data="<?=$key->ID_SPJ?>"
 	                    				noSPJ = "<?=$key->NO_SPJ?>">
-	                    				Edit SPJ
-	                    			</a> -->
+	                    				Edit SPJ 2
+	                    			</a>
 	                    			<!-- <a 
 	                    				class="dropdown-item dropButton" 
 	                    				href="javascript:;" 
@@ -122,15 +144,17 @@
 	                    				voucher="<?=$key->VOUCHER_BBM?>">
 	                    				Voucher NG
 	                    			</a> -->
-	                    			<a 
-	                    				class="dropdown-item dropButton reloadTujuan" 
-	                    				href="javascript:;" 
-	                    				noSPJ="<?=$key->NO_SPJ?>"
-	                    				noTNKB = "<?=$key->NO_TNKB?>"
-	                    				tglSPJ = "<?=$key->TGL_SPJ?>"
-	                    				groupId = "<?=$key->GROUP_ID?>">
-	                    				Reload Tujuan
-	                    			</a>			
+	                    			<?php if ($key->JENIS_ID == '1'): ?>
+	        							<a 
+		                    				class="dropdown-item dropButton reloadTujuan" 
+		                    				href="javascript:;" 
+		                    				noSPJ="<?=$key->NO_SPJ?>"
+		                    				noTNKB = "<?=$key->NO_TNKB?>"
+		                    				tglSPJ = "<?=$key->TGL_SPJ?>"
+		                    				groupId = "<?=$key->GROUP_ID?>">
+		                    				Reload Tujuan
+		                    			</a>
+	        						<?php endif ?>			
 	                			<?php else: ?>
 	                				<?php if ($this->session->userdata("LEVEL")<2): ?>
 	                					<a 
@@ -166,21 +190,19 @@
 					<td><?=$key->NAMA_GROUP?></td>
 					<td>
 						<ul style="padding-left: 10px">
-						<?php foreach ($tujuan as $lok): ?>
-							<?php if ($lok->NO_SPJ == $key->NO_SPJ): ?>
-								<li><?=$lok->SERLOK_KOTA?></li>
-							<?php endif ?>
-						<?php endforeach ?>
+							<?php
+								$lokasi = $this->M_Monitoring->getLokasiPerNoSPJ_v2($key->NO_SPJ);
+								echo $lokasi;
+							?>
 						</ul>
 					</td>
 					<td><?=$key->PIC_DRIVER?></td>
 					<td>
 						<ul style="padding-left: 10px">
-						<?php foreach ($pic as $pc): ?>
-							<?php if ($pc->NO_PENGAJUAN == $key->NO_SPJ): ?>
-								<li><?=$pc->PIC?></li>
-							<?php endif ?>
-						<?php endforeach ?>
+							<?php
+								$pic = $this->M_Monitoring->getPICPerSPJ_v2($key->NO_SPJ);
+								echo $pic;
+							?>
 						</ul>
 					</td>
 					<td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_SAKU, 0))?></td>
@@ -188,9 +210,10 @@
 					<td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_JALAN, 0))?></td>
 					<td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_BBM, 0))?></td>
 					<td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_TOL, 0))?></td>
+					<td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_KENDARAAN, 0))?></td>
 					<td>
 						<?php
-							$total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN + $key->TOTAL_UANG_BBM + $key->TOTAL_UANG_TOL;
+							$total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN + $key->TOTAL_UANG_BBM + $key->TOTAL_UANG_TOL+$key->TOTAL_UANG_KENDARAAN;
 							echo str_replace(',','.', number_format($total));
 						?>
 					</td>

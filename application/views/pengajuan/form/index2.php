@@ -422,6 +422,7 @@
                                       <option value="<?=$ken->Jenis?>"><?=$ken->Jenis?></option>
                                     <?php endforeach ?>
                                     <option value="Rental">Rental</option>
+                                    <option value="Gojek/Grab">Gojek/Grab</option>
                                   </select>
                                 </div>
                               </div>
@@ -475,7 +476,7 @@
                                   <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputJenisKendaraan">
                                       <option value="">-</option>
                                     <?php foreach ($jenis as $jen): ?>
-                                      <option value="<?=$jen->JENIS_KENDARAAN?>"><?=$jen->JENIS_KENDARAAN?></option>
+                                      <option value="<?=$jen->JENIS_KENDARAAN?>"><?=$jen->JENIS_KENDARAAN?><?=$jen->JENIS_KENDARAAN == 'Minibus'?'/Mobil':''?></option>
                                     <?php endforeach ?>
                                   </select>
                                 </div>
@@ -588,7 +589,7 @@
                         </div>
                         <div id="stepTujuan" class="content" role="tabpanel" aria-labelledby="stepTujuan-trigger">
                           <input type="hidden" id="inputGroupTujuan">
-                          <div class="row">
+                          <!-- <div class="row">
                             <div class="col-md-2">
                               <div class="row">
                                 <div class="col-md-12"> 
@@ -609,7 +610,7 @@
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </div> -->
                           <br>
                           <div class="row">
                             <div class="col-md-2">
@@ -839,6 +840,22 @@
                                         <option value="Kasbon">Kasbon</option>
                                         <option value="Voucher" disabled>Voucher</option>
                                         <option value="Reimburse" selected>Reimburse</option>
+                                        <option value="Tanpa TOL">Tanpa TOL</option>
+                                      </select>
+                                    </td>
+                                  </tr>
+                                  <tr class="biayaKendaraanRental">
+                                    <td>
+                                      Biaya Kendaraan
+                                      
+                                    </td>
+                                    <td><input type="number" class="form-control" id="inputBiayaKendaraan" value=""></td>
+                                    <td>
+                                      <!-- <input type="text" id="inputMediaUangSaku" class="form-control form-control-sm" value="Kasbon"> -->
+                                      <select class="select2 form-control select2-orange" id="inputMediaKendaraan" data-dropdown-css-class="select2-orange">
+                                        <option value="Kasbon" selected>Kasbon</option>
+                                        <option value="Voucher" disabled="disabled">Voucher</option>
+                                        <option value="Reimburse" disabled="disabled">Reimburse</option>
                                       </select>
                                     </td>
                                   </tr>
@@ -1035,8 +1052,20 @@
                 <div class="col-md-12">
                   <div class="form-group">
                     <label>Perusahaan</label>
-                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan">
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan" style="width: 100%">
                       
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row objekPilihKota d-none">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Kota/Kabupaten</label>
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPilihKota">
+                      <?php foreach ($kota as $kt): ?>
+                        <option value="<?=$kt->ID_KOTA?>"><?=$kt->KOTA?></option>
+                      <?php endforeach ?>
                     </select>
                   </div>
                 </div>
@@ -1082,8 +1111,9 @@
                             <option value="">Pilih Sebagai</option>
                             <option value="Sopir">Driver</option>
                             <option value="Pendamping">Pendamping</option>
-                            <option value="Office">Office</option>
+                            <option value="Office" <?=$this->session->userdata("marketing") == 'Marketing' ? 'selected':''?>>Office</option>
                             <option value="Manajemen">Manajemen</option>
+                            <option value="Subcont">Subcont</option>
                           </select>
                         </div>
                       </div>
@@ -1096,8 +1126,9 @@
                           <label>Subjek</label>
                           <select class="select2 form-control select2-orange pilihPIC" data-dropdown-css-class="select2-orange" id="inputSubjek">
                             <option value="">Pilih Subjek</option>
-                            <option value="Internal">Internal</option>
+                            <option value="Internal" <?=$this->session->userdata("marketing") == 'Marketing' ? 'selected':''?>>Internal</option>
                             <option value="Rental">Rental</option>
+                            <option value="Subcont">Subcont</option>
                           </select>
                         </div>
                       </div>
@@ -1109,13 +1140,16 @@
                   <div class="col-md-6">
                     <div class="row">
                       <div class="col-md-12">
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                           <label>PIC</label>
                           <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPIC">
                             <option value="">Pilih Jenis PIC dan Subjek Terlebih Dahulu!</option>
                           </select>
                           
-                        </div>
+                        </div> -->
+                        <button type="button" class="btn btn-kps bg-orange btn-block btn-sm" id="btnPilihPIC">
+                          Pilih PIC
+                        </button>
                       </div>
                     </div>
                     <div class="row">
@@ -1130,15 +1164,26 @@
                     </div>
                   </div>
                 </div>
+                <input type="hidden" id="inputPIC">
                 <input type="hidden" id="setNamaPIC">
                 <input type="hidden" id="setDivisiPIC">
+
                 <div class="row">
                   <div class="col-md-6">
+
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label>NIK</label>
+                          <input type="text" id="setNIK_PIC" class="form-control inputanPIC" readonly>
+                        </div>
+                      </div>
+                    </div>
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>Departemen</label>
-                          <input type="text" id="setDepartemenPIC" class="form-control" readonly>
+                          <input type="text" id="setDepartemenPIC" class="form-control inputanPIC" readonly>
                         </div>
                         <br>
                         &nbsp;
@@ -1149,7 +1194,7 @@
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>Sub Departemen</label>
-                          <input type="text" id="setSubDepartemenPIC" class="form-control" readonly>
+                          <input type="text" id="setSubDepartemenPIC" class="form-control inputanPIC" readonly>
                           <br>
                           &nbsp;
                         </div>
@@ -1159,12 +1204,20 @@
                       <div class="col-md-12">
                         <div class="form-group">
                           <label>Jabatan</label>
-                          <input type="text" id="setJabatanPIC" class="form-control" readonly>
+                          <input type="text" id="setJabatanPIC" class="form-control inputanPIC" readonly>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-6">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label>Nama</label>
+                          <input type="text" id="setNama_PIC" class="form-control inputanPIC" readonly>
+                        </div>
+                      </div>
+                    </div>
                     <div class="row">
                       <div class="col-md-12">
                         <div class="form-group">
@@ -1186,7 +1239,20 @@
                           <span id="keteranganUM"></span>
                         </div>
                       </div>
-                    </div>    
+                    </div>   
+                    <div class="row formSubcont d-none">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label>Subcont</label>
+                          <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputSubcont">
+                            <option value="" selected>PilihSubcont</option>
+                            <?php foreach ($subcont as $sc): ?>
+                              <option value="<?=$sc->CompanyName?>"><?=$sc->CompanyName?></option>
+                            <?php endforeach ?>
+                          </select>
+                        </div>
+                      </div>
+                    </div> 
                   </div>
                 </div>
               </div>
@@ -1279,6 +1345,29 @@
               <input type="hidden" id="inputOffset">
               <div class="col-md-12 d-flex justify-content-end">
                 <div id="paging"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal-pilihPIC" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-1"></div>
+              <div class="col-10">
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <span class="fa fa-search form-control-icon"></span>
+                  <input type="search" class="form-control form-control-search" id="searchListPIC" placeholder="Cari Berdasarkan NIK atau Nama">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div id="getListPIC"></div>
               </div>
             </div>
           </div>

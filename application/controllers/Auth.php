@@ -60,6 +60,7 @@ class Auth extends CI_Controller {
 					'KODE_DEPT' => $value->KODE_DEPT,
 					'SUB_DEPARTEMEN' => $value->SUB_DEPARTEMEN,
 					'status' => "login",
+					'marketing'=>$value->SubDepartemen2,
 					'DLV' => $value->OTORITAS_DLV,
 					'NDV' => $value->OTORITAS_NDV,
 					);

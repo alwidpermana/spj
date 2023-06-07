@@ -6,7 +6,7 @@
 			<th rowspan="2">No SPJ</th>
 			<th rowspan="2">Status SPJ</th>
 			<th colspan="4">Kendaraan</th>
-			<th colspan="2">Group Tujuan</th>
+			<th colspan="3">Group Tujuan</th>
 			<th colspan="2">PIC</th>
 			<th rowspan="2">Abnormal</th>
 			<th colspan="3">Biaya Uang Jalan</th>
@@ -17,7 +17,8 @@
 			<th>Merk</th>
 			<th>Type</th>
 			<th>Nama Group</th>
-			<th>Tujuan</th>
+			<th>Kota Tujuan</th>
+			<th>Customer</th>
 			<th>Driver</th>
 			<th>Pendamping</th>
 			<th>Normal</th>
@@ -47,6 +48,7 @@
 				<td><?=$key->TYPE?></td>
 				<td><?=$key->NAMA_GROUP?></td>
 				<td><?=$key->LOKASI?></td>
+				<td><?=str_replace(' ', '&nbsp;', $key->CUSTOMER)?></td>
 				<td><?=$key->NIK_DRIVER.'<br>'.$key->NAMA_DRIVER?></td>
 				<td><?=$key->NIK_PENDAMPING.'<br>'.$key->NAMA_PENDAMPING?></td>
 				<td class="text-center">
@@ -63,8 +65,8 @@
 	<tfoot>
 		<tr>
 			<th colspan="13" class="text-right">Total:</th>
-			<th><?=number_format($aktual)?></th>
 			<th><?=number_format($normal)?></th>
+			<th><?=number_format($aktual)?></th>
 			<th><?=number_format($gap)?></th>
 		</tr>
 	</tfoot>

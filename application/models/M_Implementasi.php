@@ -111,28 +111,39 @@ class M_Implementasi extends CI_Model {
 	public function getValidasiSPJ($noSPJ)
 	{
 		$sql = "SELECT
-					ID,
-					NO_SPJ,
-					KENDARAAN,
-					KETERANGAN_KENDARAAN,
-					KEBERANGKATAN,
-					KEPULANGAN,
-					KM_OUT,
-					KM_IN,
-					VERIFIKASI_BULAK_BALIK,
-					PIC_OUT,
-					PIC_IN,
-					REALISASI_UANG_SAKU,
-					REALISASI_UANG_MAKAN,
-					REALISASI_UANG_BBM,
-					REALISASI_UANG_JALAN,
-					REALISASI_UANG_TOL,
-					KENDARAAN_IN,
-					KETERANGAN_KENDARAAN_IN
+					*,
+					DATEDIFF( dd, KEBERANGKATAN, GETDATE() ) AS DIF_HARI,
+					DATEDIFF( hh, KEBERANGKATAN, GETDATE() ) AS DIF_JAM 
 				FROM
-					[dbo].[SPJ_VALIDASI]
-				WHERE
-					NO_SPJ = '$noSPJ'";
+				(
+					SELECT
+						ID,
+						NO_SPJ,
+						KENDARAAN,
+						KETERANGAN_KENDARAAN,
+						KEBERANGKATAN,
+						KEPULANGAN,
+						KM_OUT,
+						KM_IN,
+						VERIFIKASI_BULAK_BALIK,
+						PIC_OUT,
+						PIC_IN,
+						REALISASI_UANG_SAKU,
+						REALISASI_UANG_MAKAN,
+						REALISASI_UANG_BBM,
+						REALISASI_UANG_JALAN,
+						REALISASI_UANG_TOL,
+						KENDARAAN_IN,
+						KETERANGAN_KENDARAAN_IN,
+						CASE 
+							WHEN KEPULANGAN IS NULL THEN GETDATE()
+							ELSE KEPULANGAN
+						END AS WAKTU_PULANG
+					FROM
+						[dbo].[SPJ_VALIDASI] 
+					WHERE
+						NO_SPJ = '$noSPJ'
+				)Q1";
 		return $this->db->query($sql);
 	}
 	public function saveDataTemp($noSPJ)
@@ -540,11 +551,13 @@ class M_Implementasi extends CI_Model {
 						TOTAL_UANG_JALAN,
 						TOTAL_UANG_BBM,
 						TOTAL_UANG_TOL,
+						TOTAL_UANG_KENDARAAN,
 						MEDIA_UANG_SAKU,
 						MEDIA_UANG_MAKAN,
 						MEDIA_UANG_JALAN,
 						MEDIA_UANG_BBM,
 						MEDIA_UANG_TOL,
+						MEDIA_UANG_KENDARAAN,
 						ADJUSTMENT_MANAJEMEN,
 						VOUCHER_BBM,
 						PIC_CLOSE,
@@ -690,10 +703,10 @@ class M_Implementasi extends CI_Model {
 						NO_SPJ,
 						TGL_INPUT,
 						QR_CODE,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) + REIMBURSE_BBM + TOTAL_UANG_KENDARAAN AS TOTAL_SPJ,
 						TOTAL_UANG_TOL AS TOTAL_TOL,
 						TOTAL_UANG_BBM AS TOTAL_BBM,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM AS TOTAL_RP
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM+REIMBURSE_BBM + TOTAL_UANG_KENDARAAN AS TOTAL_RP
 					FROM
 					(
 						SELECT
@@ -705,7 +718,15 @@ class M_Implementasi extends CI_Model {
 							TOTAL_UANG_MAKAN,
 							TOTAL_UANG_JALAN,
 							TOTAL_UANG_TOL,
-							TOTAL_UANG_BBM,
+							TOTAL_UANG_KENDARAAN,
+							CASE 
+								WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
+								ELSE 0
+							END AS TOTAL_UANG_BBM,
+							CASE 
+								WHEN MEDIA_UANG_BBM = 'Voucher' THEN 0
+								ELSE TOTAL_UANG_BBM
+							END AS REIMBURSE_BBM,
 							JML_PIC AS JML_PIC_UM,
 							CASE 
 								WHEN UANG_SAKU1 IS NULL THEN 0
@@ -737,7 +758,12 @@ class M_Implementasi extends CI_Model {
 								NO_SPJ,
 								TOTAL_UANG_JALAN,
 								TOTAL_UANG_BBM,
-								TOTAL_UANG_TOL
+								TOTAL_UANG_TOL,
+								MEDIA_UANG_BBM,
+								CASE
+									WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
+									ELSE 0
+								END AS TOTAL_UANG_KENDARAAN
 							FROM
 								[dbo].[SPJ_PENGAJUAN]
 							WHERE
@@ -827,16 +853,23 @@ class M_Implementasi extends CI_Model {
 	{
 		$sql = "SELECT
 					COUNT(NO_SPJ) AS JUMLAH_SPJ,
-					SUM(TOTAL_SPJ) + SUM(TOTAL_UANG_TOL) + SUM(TOTAL_UANG_BBM) AS TOTAL_RP,
-					SUM(TOTAL_SPJ) AS TOTAL_SPJ,
+					SUM(TOTAL_SPJ) + SUM(TOTAL_UANG_TOL) + SUM(TOTAL_UANG_BBM) + SUM(REIMBURSE_BBM) AS TOTAL_RP,
+					SUM(TOTAL_SPJ)+SUM(REIMBURSE_BBM) AS TOTAL_SPJ,
 					SUM(TOTAL_UANG_TOL) AS TOTAL_TOL,
 					SUM(TOTAL_UANG_BBM) AS TOTAL_BBM
 				FROM
 				(
 					SELECT
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+TOTAL_UANG_KENDARAAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_SPJ,
 						TOTAL_UANG_TOL,
-						TOTAL_UANG_BBM,
+						CASE 
+							WHEN MEDIA_UANG_BBM = 'Voucher' THEN 0
+							ELSE TOTAL_UANG_BBM
+						END AS REIMBURSE_BBM,
+						CASE 
+							WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
+							ELSE 0
+						END AS TOTAL_UANG_BBM,
 						NO_SPJ
 					FROM
 					(
@@ -847,6 +880,8 @@ class M_Implementasi extends CI_Model {
 							TOTAL_UANG_MAKAN,
 							TOTAL_UANG_JALAN,
 							TOTAL_UANG_TOL,
+							TOTAL_UANG_KENDARAAN,
+							MEDIA_UANG_BBM,
 							TOTAL_UANG_BBM,
 							JML_PIC AS JML_PIC_UM,
 							CASE 
@@ -876,7 +911,12 @@ class M_Implementasi extends CI_Model {
 								NO_SPJ,
 								TOTAL_UANG_JALAN,
 								TOTAL_UANG_BBM,
-								TOTAL_UANG_TOL
+								TOTAL_UANG_TOL,
+								MEDIA_UANG_BBM,
+								CASE
+									WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
+									ELSE 0
+								END AS TOTAL_UANG_KENDARAAN
 							FROM
 								[dbo].[SPJ_PENGAJUAN]
 							WHERE
@@ -1006,13 +1046,42 @@ class M_Implementasi extends CI_Model {
         }
         return $noGenerate;
 	}
-	public function saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis, $jmlBA, $inputTotalBA)
+	public function getNoGenerateKendaraanRental()
+	{
+		$tahun = date('Y');
+        $bulan = date('m');
+		$gabung = "GNR/KR/".$tahun."/".$bulan."/";
+		$cekNoGenerate=$this->db->query("SELECT MAX
+										( RIGHT ( NO_GENERATE, 4 ) ) AS SET_URUTAN
+									FROM
+										SPJ_GENERATE
+									WHERE
+										NO_GENERATE LIKE '$gabung%' ");
+		foreach ($cekNoGenerate->result() as $data) {
+            if ($data->SET_URUTAN =="") {
+                $noGenerate = $gabung."0001";
+            }else{
+                $zero='';
+                $length= 4;
+                $index=$data->SET_URUTAN;
+
+                for ($i=0; $i <$length-strlen($index+1) ; $i++) { 
+                    $zero = $zero.'0';
+                }
+                $noGenerate = $gabung.$zero.($index+1);
+                
+            }
+            
+        }
+        return $noGenerate;
+	}
+	public function saveGenerateSPJ($inputNoGenerate, $inputJumlahSPJ, $inputTotalRP, $filJenis, $jmlBA, $inputTotalBA, $rekananId)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $tanggal2 = date("Y-m-d");
         $user = $this->session->userdata("NIK");
-		$sql = "INSERT INTO SPJ_GENERATE(NO_GENERATE, TGL_GENERATE, JML_SPJ, TOTAL_RP, PIC_INPUT, JENIS_SPJ, TGL_INPUT, JML_BA, TOTAL_BA) VALUES('$inputNoGenerate','$tanggal2',$inputJumlahSPJ, $inputTotalRP, '$user',$filJenis,'$tanggal',$jmlBA, $inputTotalBA)";
+		$sql = "INSERT INTO SPJ_GENERATE(NO_GENERATE, TGL_GENERATE, JML_SPJ, TOTAL_RP, PIC_INPUT, JENIS_SPJ, TGL_INPUT, JML_BA, TOTAL_BA, REKANAN_ID) VALUES('$inputNoGenerate','$tanggal2',$inputJumlahSPJ, $inputTotalRP, '$user',$filJenis,'$tanggal',$jmlBA, $inputTotalBA, $rekananId)";
 		return $this->db->query($sql);
 	}
 	public function getBiayaTotalPerNoSPJNEW($noSPJ)
@@ -1023,7 +1092,7 @@ class M_Implementasi extends CI_Model {
 				(
 					SELECT
 						NO_SPJ,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS KASBON_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+REIMBURSE_BBM+TOTAL_UANG_KENDARAAN AS KASBON_SPJ,
 						TOTAL_UANG_TOL AS KASBON_TOL,
 						TOTAL_UANG_BBM AS KASBON_BBM
 					FROM
@@ -1037,7 +1106,15 @@ class M_Implementasi extends CI_Model {
 							TOTAL_UANG_MAKAN,
 							TOTAL_UANG_JALAN,
 							TOTAL_UANG_TOL,
-							TOTAL_UANG_BBM,
+							TOTAL_UANG_KENDARAAN,
+							CASE 
+								WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
+								ELSE 0
+							END AS TOTAL_UANG_BBM,
+							CASE 
+								WHEN MEDIA_UANG_BBM = 'Voucher' THEN 0
+								ELSE TOTAL_UANG_BBM
+							END AS REIMBURSE_BBM,
 							JML_PIC AS JML_PIC_UM,
 							CASE 
 								WHEN UANG_SAKU1 IS NULL THEN 0
@@ -1069,7 +1146,12 @@ class M_Implementasi extends CI_Model {
 								NO_SPJ,
 								TOTAL_UANG_JALAN,
 								TOTAL_UANG_BBM,
-								TOTAL_UANG_TOL
+								TOTAL_UANG_TOL,
+								MEDIA_UANG_BBM,
+								CASE
+									WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
+									ELSE 0
+								END AS TOTAL_UANG_KENDARAAN
 							FROM
 								[dbo].[SPJ_PENGAJUAN]
 							WHERE
@@ -1638,6 +1720,313 @@ class M_Implementasi extends CI_Model {
 					WHERE
 						a.NO_SPJ = '$noSPJ'
 				)Q2 ON Q1.SATU = Q2.SATU";
+		return $this->db->query($sql);
+	}
+	public function savePengajuanOtoritasBBM($noSPJ)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "INSERT INTO SPJ_PENGAJUAN_BBM(NO_SPJ, TGL, PIC, STATUS)VALUES('$noSPJ','$tanggal','$user','OPEN')";
+        return $this->db->query($sql);
+	}
+	public function savePengajuanOtoritasBBM_v2($noSPJ, $bbm, $keterangan)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "INSERT INTO SPJ_PENGAJUAN_BBM(NO_SPJ, TGL, PIC, STATUS, BBM, KETERANGAN)VALUES('$noSPJ','$tanggal','$user','OPEN', $bbm, '$keterangan')";
+        return $this->db->query($sql);
+	}
+	public function getAksesManualBBM($noSPJ)
+	{
+		$sql = "SELECT TOP 1
+					STATUS,
+					BBM
+				FROM
+					[dbo].[SPJ_PENGAJUAN_BBM]
+				WHERE 
+					NO_SPJ = '$noSPJ'
+				ORDER BY ID DESC";
+		return $this->db->query($sql);
+	}
+	public function getDataAksesOtoritas($status)
+	{
+		$sql = "SELECT
+					Q1.ID,
+					Q1.TGL,
+					Q1.PIC,
+					Q1.NAMA_PIC,
+					Q1.STATUS,
+					Q1.BBM,
+					Q1.KETERANGAN,
+					Q2.*,
+					NIK_DRIVER,
+					NAMA_DRIVER,
+					KEBERANGKATAN,
+					KEPULANGAN,
+					DIFF_HOUR,
+					KM_OUT,
+					KM_IN,
+					SELISIH_KM,
+					NoTNKB,
+					BBMPerLiter
+				FROM
+				(
+					SELECT
+						a.ID,
+						a.NO_SPJ,
+						a.TGL,
+						a.PIC,
+						b.namapeg AS NAMA_PIC,
+						a.STATUS,
+						a.BBM,
+						a.KETERANGAN
+					FROM
+						[dbo].[SPJ_PENGAJUAN_BBM] a
+					LEFT JOIN
+						dbhrm.dbo.tbPegawai b ON
+					a.PIC = b.NIK
+					WHERE
+						a.STATUS LIKE '%$status%'
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						NO_SPJ,
+						TGL_SPJ,
+						NAMA_JENIS,
+						KENDARAAN,
+						MERK,
+						TYPE,
+						JENIS_KENDARAAN,
+						NO_TNKB,
+						NAMA_GROUP
+					FROM
+						SPJ_PENGAJUAN a
+					INNER JOIN 
+						SPJ_JENIS b ON
+					a.JENIS_ID = b.ID_JENIS
+					INNER JOIN SPJ_GROUP_TUJUAN c ON
+					a.GROUP_ID = c.ID_GROUP
+				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
+				LEFT JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						NIK AS NIK_DRIVER,
+						NAMA AS NAMA_DRIVER
+					FROM
+						SPJ_PENGAJUAN_PIC 
+					WHERE
+						JENIS_PIC = 'Sopir'
+				)Q3 ON Q2.NO_SPJ = Q3.NO_PENGAJUAN
+				LEFT JOIN
+				(
+					SELECT
+						NO_SPJ,
+						KEBERANGKATAN,
+						KEPULANGAN,
+						DATEDIFF(hh, KEBERANGKATAN, KEPULANGAN) AS DIFF_HOUR,
+						KM_OUT,
+						KM_IN,
+						KM_IN - KM_OUT AS SELISIH_KM
+					FROM
+						SPJ_VALIDASI
+				)Q4 ON Q2.NO_SPJ = Q4.NO_SPJ
+				LEFT JOIN
+				(
+					SELECT
+						NoTNKB,
+						ISNULL(BBMPerLiter, 0) AS BBMPerLiter
+					FROM
+						GA.dbo.GA_TKendaraan
+					UNION
+					SELECT
+						NoTNKB,
+						ISNULL(BBMPerLiter, 0) AS BBMPerLiter
+					FROM
+						SPJ_KENDARAAN_REKANAN
+				)Q5 ON Q2.NO_TNKB = Q5.NoTNKB
+				ORDER BY Q1.ID ASC";
+		return $this->db->query($sql);
+	}
+	public function getHargaBBM($jenis)
+	{
+		$sql = "SELECT HARGA FROM [dbo].[SPJ_BIAYA_BBM] WHERE JENIS = '$jenis'";
+		return $this->db->query($sql);
+	}
+	public function saveAksesOtoritas($id, $status)
+	{
+		$sql = "UPDATE SPJ_PENGAJUAN_BBM SET STATUS = '$status' WHERE ID=$id";
+		return $this->db->query($sql);
+	}
+	public function getDataGenerateKendaraan($jenis, $rekanan)
+	{
+		$sql = "SELECT
+					ID_SPJ,
+					TGL_INPUT,
+					NO_SPJ,
+					TGL_SPJ,
+					NO_TNKB,
+					REKANAN_ID
+				FROM
+					[dbo].[SPJ_PENGAJUAN]
+				WHERE
+					STATUS_PERJALANAN = 'IN' AND
+					JENIS_ID = $jenis AND
+					REKANAN_ID = $rekanan AND
+					NO_GENERATE_KENDARAAN IS NULL
+				ORDER BY NO_SPJ ASC";
+		return $this->db->query($sql);
+	}
+	public function generateKendaraanRental($inputNoGenerate, $sewaKendaraan, $potonganPPh, $inputJenis, $nama)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $jenisKasbon1 = 'Sewa Kendaraan Rental '.$nama;
+        $jenisKasbon2 = 'PPh Sewa Kendaraan Rental '.$nama;
+		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, PIC_APPROVE, TGL_APPROVE, STATUS_APPROVE, PIC_RECEIVE, TGL_RECEIVE, STATUS_RECEIVE, STATUS_PENGAJUAN_SALDO, JENIS_ID, COA)VALUES('$user','$tanggal','Generate','$sewaKendaraan','$jenisKasbon1','-','$inputNoGenerate','$user','$tanggal','APPROVED','$user','$tanggal','RECEIVED','CLOSE','$inputJenis','6-3106')");
+
+		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, PIC_APPROVE, TGL_APPROVE, STATUS_APPROVE, PIC_RECEIVE, TGL_RECEIVE, STATUS_RECEIVE, STATUS_PENGAJUAN_SALDO, JENIS_ID, COA)VALUES('$user','$tanggal','Generate','$potonganPPh','$jenisKasbon2','-','$inputNoGenerate','$user','$tanggal','APPROVED','$user','$tanggal','RECEIVED','CLOSE','$inputJenis','2-1301')");
+		
+		return $sql;
+	}
+	public function updateUangPIC($noSPJ, $nik, $uang, $jenis, $jenisSPJ)
+	{
+		if ($jenis == 'Uang Makan') {
+			$field = 'UANG_MAKAN';
+			$field2 = 'TOTAL_UANG_MAKAN';
+		}else{
+			$field = 'UANG_SAKU';
+			$field2 = 'TOTAL_UANG_SAKU';
+		}
+
+		$sql = $this->db->query("UPDATE SPJ_PENGAJUAN_PIC SET $field = $uang WHERE NIK = '$nik' AND NO_PENGAJUAN = '$noSPJ'");
+		if ($sql == true && $jenis == 'Uang Makan') {
+			$getSum = $this->db->query("SELECT
+											Q1.UANG_MAKAN + (Q1.JML_PIC*Q2.UANG_MAKAN) AS UANG_MAKAN,
+											ISNULL(Q1.UANG_MAKAN, 0) + ISNULL(UANG_SAKU, 0) + ISNULL(TOTAL_UANG_JALAN, 0) AS TOTAL_KAS,
+											Q3.ID_SPJ
+										FROM
+										(
+											SELECT
+												SUM(UANG_MAKAN) AS UANG_MAKAN,
+												SUM(UANG_SAKU) AS UANG_SAKU,
+												COUNT(NO_PENGAJUAN) AS JML_PIC,
+												NO_PENGAJUAN
+											FROM
+												[dbo].[SPJ_PENGAJUAN_PIC]
+											WHERE
+												NO_PENGAJUAN = '$noSPJ'
+											GROUP BY NO_PENGAJUAN
+										)Q1
+										LEFT JOIN
+										(
+											SELECT
+												NO_SPJ,
+												SUM(UANG_MAKAN) AS UANG_MAKAN
+											FROM
+												SPJ_BIAYA_TAMBAHAN
+											WHERE
+												NO_SPJ = '$noSPJ'
+											GROUP BY NO_SPJ
+										)Q2 ON Q1.NO_PENGAJUAN = Q2.NO_SPJ
+										LEFT JOIN
+										(
+											SELECT
+												ID_SPJ,
+												NO_SPJ,
+												TOTAL_UANG_JALAN
+											FROM
+												SPJ_PENGAJUAN
+										)Q3 ON Q1.NO_PENGAJUAN = Q3.NO_SPJ")->row();
+			$uangMakanSum = $getSum->UANG_MAKAN + $uang;
+			$uangKas = round($getSum->TOTAL_KAS);
+			$fkId = $getSum->ID_SPJ;
+			$kasbon = 'Kasbon SPJ '.$jenisSPJ;
+			$this->db->query("UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_MAKAN = $uangMakanSum WHERE NO_SPJ = '$noSPJ'");
+			$this->db->query("UPDATE SPJ_KAS_SUB SET CREDIT = '$uangKas' WHERE JENIS_FK = 'KASBON' AND JENIS_KASBON = '$kasbon' AND DETAIL_KASBON = 'TRANSAKSI AWAL' AND FK_ID = $fkId");
+		}
+		return $sql;
+
+	}
+	public function revisiKeberangkatan($noSPJ, $keberangkatan, $kepulangan, $kmOut, $kmIn)
+	{
+		$sql = "UPDATE SPJ_VALIDASI SET KEBERANGKATAN = '$keberangkatan', KEPULANGAN = '$kepulangan', KM_OUT = '$kmOut', KM_IN = '$kmIn' WHERE NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function saveSPJ($noSPJ, $saku, $makan, $jalan, $bbm, $tol)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "UPDATE SPJ_PENGAJUAN SET PIC_CLOSE= '$user', TGL_CLOSE = '$tanggal', TOTAL_UANG_SAKU=$saku, TOTAL_UANG_MAKAN=$makan, TOTAL_UANG_JALAN = $jalan, TOTAL_UANG_BBM = $bbm, TOTAL_UANG_TOL=$tol WHERE NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function closeImplementasi($noSPJ)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $cekVoucher = $this->db->query("SELECT ID_SPJ FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$noSPJ' AND  VOUCHER = 'Y'");
+        if ($cekVoucher->num_rows()>0) {
+        	$status = 'CLOSE';
+        } else {
+        	$status = 'OPEN';
+        }
+
+        $sql = "UPDATE SPJ_PENGAJUAN SET STATUS_SPJ = '$status', IMPLEMENTASI = 'Y' WHERE NO_SPJ = '$noSPJ'";
+        return $this->db->query($sql);
+	}
+	public function getSPJStep1($tahun, $bulan, $jenisSPJ, $group, $search)
+	{
+		$sql = "SELECT
+					ROW_NUMBER() over (partition by 'SAMA' order by TGL_INPUT DESC) AS NO_URUT,
+					*
+				FROM
+				(
+					SELECT
+						a.ID_SPJ,
+						a.TGL_INPUT,
+						a.NO_SPJ,
+						a.TGL_SPJ,
+						a.QR_CODE,
+						a.GROUP_ID,
+						a.STATUS_SPJ,
+						a.TOTAL_UANG_TOL,
+						b.NAMA_GROUP,
+						a.JENIS_ID
+					FROM
+						[dbo].[SPJ_PENGAJUAN] a
+					INNER JOIN
+						SPJ_GROUP_TUJUAN b ON
+					a.GROUP_ID = b.ID_GROUP
+					WHERE
+						STATUS_SPJ = 'OPEN' 
+						AND IMPLEMENTASI IS NULL 
+						AND STATUS_DATA = 'SAVED'
+						AND STATUS_PERJALANAN = 'IN'
+						AND JENIS_ID LIKE '$jenisSPJ%' 
+						AND NAMA_GROUP LIKE '$group%'
+						AND YEAR(TGL_SPJ) LIKE '$tahun%'
+						AND DATENAME(MONTH, TGL_SPJ) LIKE '$bulan%'
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						NIK+' - '+NAMA AS PIC_DRIVER
+					FROM
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						JENIS_PIC = 'Sopir'
+				)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+				WHERE
+					NO_SPJ LIKE '%$search%' OR
+					PIC_DRIVER LIKE '%$search%' OR
+					QR_CODE LIKE '%$search%'";
 		return $this->db->query($sql);
 	}
 	

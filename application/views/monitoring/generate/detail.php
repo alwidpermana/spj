@@ -76,7 +76,7 @@
                         <th colspan="6">Kendaraan</th>
                         <th colspan="2">Tujuan</th>
                         <th colspan="2">PIC</th>
-                        <th colspan="6">Biaya Reguler</th>
+                        <th colspan="7">Biaya Reguler</th>
                         <th colspan="4">Biaya Tambahan</th>
                         <th rowspan="2">Total Biaya</th>
                         <th rowspan="2">Adjst Biaya</th>
@@ -112,6 +112,7 @@
                         <th>Uang Jalan</th>
                         <th>BBM</th>
                         <th>TOL</th>
+                        <th>Kendaraan</th>
                         <th>Jumlah</th>
                         <th>Uang Saku 1 - 3</th>
                         <th>Uang Saku 1 &ge; 4</th>
@@ -220,9 +221,10 @@
                           <td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_JALAN, 0))?></td>
                           <td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_BBM, 0))?></td>
                           <td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_TOL, 0))?></td>
+                          <td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_KENDARAAN, 0))?></td>
                           <td>
                             <?php
-                              $total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN + $key->TOTAL_UANG_BBM + $key->TOTAL_UANG_TOL;
+                              $total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN + $key->TOTAL_UANG_BBM + $key->TOTAL_UANG_TOL+$key->TOTAL_UANG_KENDARAAN;
                               echo str_replace(',','.', number_format($total));
                             ?>
                           </td>

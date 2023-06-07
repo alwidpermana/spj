@@ -64,7 +64,7 @@
       scrollCollapse: true,
       paging:         false,
       'searching': false,
-      'ordering': false,
+      'ordering': true,
       order: [[0, 'asc']],
       info: false, 
       

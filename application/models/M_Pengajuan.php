@@ -5,7 +5,7 @@ class M_Pengajuan extends CI_Model {
 		$this->load->database();
 	}
 
-	public function getNoSPJ($jenis, $kode)
+	public function getNoSPJ($jenis, $kode, $tanggal)
 	{
 		if ($jenis == '1') {
 			$kodeJenis = 'DLV';
@@ -15,7 +15,7 @@ class M_Pengajuan extends CI_Model {
 			$kodeJenis = 'OTR';
 		}
 		$tahun = date('Y');
-        $bulan = date('m');
+        $bulan = date('m', strtotime($tanggal));
 		$gabung = "SPJ/".$kodeJenis."/".$tahun."/".$bulan."/";
 		$cekNoDoc=$this->db->query("SELECT MAX
 											( RIGHT ( NO_SPJ, 4 ) ) AS SETNODOC
@@ -118,6 +118,87 @@ class M_Pengajuan extends CI_Model {
 					Q1.NoTNKB LIKE '%$search%'";
 		return $this->db->query($sql);
 	}
+	public function getListKendaraanNonDelivery($search, $jenis, $kategori, $tgl)
+	{
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						NoTNKB,
+						Merk,
+						Type,
+						Jenis,
+						Kategori,
+						NoInventaris
+					FROM
+						GA.dbo.GA_Tkendaraan
+					WHERE
+						Jenis = '$jenis' AND
+						Kategori = '$kategori'
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						ID_SPJ,
+						NO_TNKB,
+						NO_SPJ,
+						STATUS_DATA
+					FROM
+						SPJ_PENGAJUAN
+					WHERE
+						TGL_SPJ = '$tgl' AND
+						STATUS_DATA !='TEMPORARY'
+				)Q2 ON Q1.NoTNKB = Q2.NO_TNKB
+				LEFT JOIN
+				(
+					SELECT
+						NIK AS NIK_DRIVER,
+						NAMA AS NAMA_DRIVER,
+						NO_PENGAJUAN
+					FROM
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						JENIS_PIC = 'Sopir'
+				)Q3 ON Q2.NO_SPJ = Q3.NO_PENGAJUAN
+				LEFT JOIN
+				(
+					SELECT
+						NO_TNBK,
+						NAMA_FILE
+					FROM
+						SPJ_GAMBAR_KENDARAAN
+					WHERE
+						STAR = 'Y'
+				)Q4 ON Q1.NoTNKB = Q4.NO_TNBK
+				WHERE
+					NoTNKB LIKE '%$search%' OR
+					Merk LIKE '%$search%' OR
+					Type LIKE '%$search%'
+				ORDER BY NoTNKB ASC";
+		return $this->db->query($sql);
+	}
+	public function getPendampingOnListKendaraan($noSPJ)
+	{
+		$sql = "SELECT
+					NIK,
+					NAMA 
+				FROM
+					SPJ_PENGAJUAN_PIC
+				WHERE
+					NO_PENGAJUAN = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function getListSubcont()
+	{
+		$sql = "SELECT
+					CompanyName
+				FROM
+					dbhrm.dbo.PC_TSupplier
+				WHERE TypeOfCompany = 'SUBCONT'
+				ORDER BY CompanyName ASC";
+		return $this->db->query($sql);
+	}
 	public function findGroupTujuan($nama)
 	{
 		$sql = $this->db->query("SELECT DISTINCT TOP 1
@@ -153,7 +234,7 @@ class M_Pengajuan extends CI_Model {
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
-        $getData = $this->db->query("SELECT ID_LOKASI FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$inputNoSPJ' AND SERLOK_ID = $serlokID AND DELIVERY_ID = $deliveryId");
+        $getData = $this->db->query("SELECT ID_LOKASI FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$inputNoSPJ' AND SERLOK_ID = $serlokID AND DELIVERY_ID = $deliveryId AND OBJEK = '$inputObjek'");
         if ($getData->num_rows()==0) {
         	$sql = "INSERT INTO SPJ_PENGAJUAN_LOKASI VALUES($serlokID, '$serlokAlamat','$serlokPerusahaan','$serlokKota','$inputNoSPJ','$inputGroupTujuan','$inputObjek','$tanggal','$user',null, $deliveryId)";	
         }else{
@@ -221,7 +302,7 @@ class M_Pengajuan extends CI_Model {
 					ID_LOKASI ASC";
 		return $this->db->query($sql);
 	}
-	public function getPIC($inputSubjek, $jabatan, $where, $noPengajuan, $where2, $whereJenis, $inputTglSPJ, $whereRekanan)
+	public function getPIC($inputSubjek, $jabatan, $where, $noPengajuan, $where2, $whereJenis, $whereRekanan, $search)
 	{
 		$sql = "SELECT
 				   Q1.*
@@ -229,7 +310,13 @@ class M_Pengajuan extends CI_Model {
 				(
 					SELECT
 						Q1.NIK,
-						Q2.namapeg
+						Q1.FOTO_WAJAH,
+						Q2.namapeg,
+						jabatan,
+						departemen,
+						Subdepartemen1,
+						Subdepartemen2,
+						NULL AS subkon
 					FROM
 					(
 						SELECT
@@ -249,7 +336,10 @@ class M_Pengajuan extends CI_Model {
 					SELECT
 						KdSopir AS nik,
 						NamaSopir AS namapeg,
-						status AS jabatan
+						status AS jabatan,
+						NULL AS departemen,
+						NULL AS Subdepartemen1,
+						NULL AS Subdepartemen2
 					FROM
 						TrTs_SopirLogistik 
 					WHERE
@@ -258,7 +348,10 @@ class M_Pengajuan extends CI_Model {
 					SELECT
 						KdSopir AS nik,
 						NamaSopir AS namapeg,
-						status AS jabatan
+						status AS jabatan,
+						NULL AS departemen,
+						NULL AS Subdepartemen1,
+						NULL AS Subdepartemen2
 					FROM
 						TrTs_SopirRental 
 					WHERE
@@ -267,14 +360,30 @@ class M_Pengajuan extends CI_Model {
 					SELECT
 						nik,
 						namapeg,
-						jabatan
+						jabatan,
+						departemen,
+						Subdepartemen1,
+						Subdepartemen2
 					FROM
 						dbhrm.dbo.tbPegawai 
 					WHERE
 						status_aktif = 'AKTIF' 
 					) Q2 on q1.NIK = q2.nik
 					$where2
-				)Q1";
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						NIK
+					FROM
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						NO_PENGAJUAN = '$noPengajuan'
+				)Q2 ON Q1.NIK = Q2.NIK
+				WHERE
+					Q2.NIK IS NULL AND
+					(Q1.NIK LIKE '%$search%' OR Q1.namapeg LIKE '%$search%')";
 		// LEFT JOIN
 		// (
 		// 	SELECT
@@ -288,6 +397,44 @@ class M_Pengajuan extends CI_Model {
 		// 		STATUS_DATA = 'SAVED' AND
 		// 		TGL_SPJ = '$inputTglSPJ'
 		// )Q3 ON Q1.NIK = Q3.NIK
+		return $this->db->query($sql);
+	}
+	public function getPICOffice($search)
+	{
+		$sql = "SELECT TOP 10
+					nik AS NIK,
+					namapeg,
+					departemen,
+					jabatan,
+					Subdepartemen1,
+					Subdepartemen2,
+					CASE 
+						WHEN jKelamin = 'P' THEN 'female1.png'
+						ELSE 'male3.png'
+					END AS FOTO_WAJAH,
+					NULL AS subkon
+				FROM
+					dbhrm.dbo.tbPegawai
+				WHERE	
+					nik LIKE '%$search%' OR
+					namapeg LIKE '%$search%'";
+		return $this->db->query($sql);
+	}
+	public function getPICSubcont($search)
+	{
+		$sql = "SELECT TOP 10
+					nik AS NIK,
+					namapeg,
+					subkon as departemen,
+					jabatan,
+					NULL as Subdepartemen1,
+					NULL as Subdepartemen2,
+					NULL AS FOTO_WAJAH,
+					subkon
+				FROM
+					svrsub.dbSupplier.dbo.tbPegawai_subkon
+				WHERE
+					namapeg LIKE '%$search%'";
 		return $this->db->query($sql);
 	}
 	public function saveOtomatisUangSPJ($id, $group, $biaya)
@@ -335,13 +482,13 @@ class M_Pengajuan extends CI_Model {
 					MAKAN_KE = 1";
 		return $this->db->query($sql);
 	}
-	public function savePIC($inputJenisPIC, $inputSubjek, $inputPIC, $inputUangSaku, $inputUangMakan, $inputSortir, $inputNoSPJ, $inputGroupTujuan, $inputDepartemen, $inputSubDepartemen, $inputJabatan, $inputNamaPIC)
+	public function savePIC($inputJenisPIC, $inputSubjek, $inputPIC, $inputUangSaku, $inputUangMakan, $inputSortir, $inputNoSPJ, $inputGroupTujuan, $inputDepartemen, $inputSubDepartemen, $inputJabatan, $inputNamaPIC, $inputSubcont)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
         $user = $this->session->userdata("NIK");
 
-        $sql = "INSERT INTO SPJ_PENGAJUAN_PIC VALUES('$tanggal','$user','$inputNoSPJ','$inputSubjek','$inputPIC','$inputUangSaku','$inputUangMakan','$inputSortir','$inputJenisPIC','$inputGroupTujuan', '$inputDepartemen','$inputSubDepartemen','$inputJabatan', '$inputNamaPIC')";
+        $sql = "INSERT INTO SPJ_PENGAJUAN_PIC VALUES('$tanggal','$user','$inputNoSPJ','$inputSubjek','$inputPIC','$inputUangSaku','$inputUangMakan','$inputSortir','$inputJenisPIC','$inputGroupTujuan', '$inputDepartemen','$inputSubDepartemen','$inputJabatan', '$inputNamaPIC','$inputSubcont')";
         return $this->db->query($sql);
 	}
 	public function getPengajuanPIC($group, $noPengajuan)
@@ -366,7 +513,8 @@ class M_Pengajuan extends CI_Model {
 							WHEN JENIS_PIC = 'Sopir' THEN 'Driver'
 							ELSE JENIS_PIC
 						END AS JENIS_PIC,
-					 GROUP_TUJUAN_ID
+					 GROUP_TUJUAN_ID,
+					 SUBCONT
 					FROM
 						SPJ_PENGAJUAN_PIC
 					WHERE
@@ -429,8 +577,8 @@ class M_Pengajuan extends CI_Model {
 						ELSE Q2.JML_PIC
 					END AS JML_PIC,
 					CASE 
-						WHEN Q2.NO_PENGAJUAN IS NULL THEN Q1.NO_PENGAJUAN
-						WHEN Q1.NO_PENGAJUAN IS NULL THEN Q2.NO_PENGAJUAN
+						WHEN Q1.NO_PENGAJUAN IS NOT NULL THEN Q1.NO_PENGAJUAN
+						WHEN Q2.NO_PENGAJUAN IS NOT NULL THEN Q2.NO_PENGAJUAN
 						ELSE '-'
 					END AS NO_PENGAJUAN
 				FROM
@@ -441,7 +589,8 @@ class M_Pengajuan extends CI_Model {
 					FROM
 						SPJ_PENGAJUAN_PIC 
 					WHERE
-						JENIS_PIC IN ( 'Sopir', 'Driver' ) 
+						JENIS_PIC IN ( 'Sopir', 'Driver' ) AND
+						JABATAN IN ( 'Sopir', 'Driver' ) 
 						AND GROUP_TUJUAN_ID = $group
 					GROUP BY
 						NO_PENGAJUAN
@@ -495,7 +644,7 @@ class M_Pengajuan extends CI_Model {
 					dbhrm.dbo.tbPegawai b
 				ON a.NIK = b.nik
 				WHERE
-					divisi = 'Marketing'
+					Subdepartemen2 = 'Marketing'
 				GROUP BY NO_PENGAJUAN
 			)Q5 ON Q1.NO_SPJ = Q5.NO_PENGAJUAN";
 		return $this->db->query($sql);
@@ -562,10 +711,19 @@ class M_Pengajuan extends CI_Model {
 				(
 					SELECT
 						COUNT(SERLOK_KOTA) AS JML_KOTA,
-						REPLACE(SERLOK_KOTA, 'KOTA ', '') AS SERLOK_KOTA,
+						SERLOK_KOTA,
 						NO_SPJ
 					FROM
-						SPJ_PENGAJUAN_LOKASI
+					(
+						SELECT
+							CASE 
+								WHEN SUBSTRING(SERLOK_KOTA, 1, 4) = 'Kota' THEN REPLACE(SERLOK_KOTA, 'KOTA ', '')
+								ELSE REPLACE(SERLOK_KOTA, 'Kabupaten ', '') 
+							END AS SERLOK_KOTA,
+							NO_SPJ
+						FROM
+							SPJ_PENGAJUAN_LOKASI
+					)Q1
 					GROUP BY NO_SPJ, SERLOK_KOTA
 				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
 				LEFT JOIN
@@ -581,7 +739,7 @@ class M_Pengajuan extends CI_Model {
 					LEFT JOIN
 						SPJ_KOTA b ON
 					a.ID_KOTA = b.ID_KOTA
-				)Q3 ON Q2.SERLOK_KOTA = Q3.NAMA_KOTA
+				)Q3 ON Q2.SERLOK_KOTA = Q3.NAMA_KOTA AND Q1.JENIS_ID = Q3.ID_JENIS_SPJ
 				ORDER BY JML_KOTA DESC";
 		return $this->db->query($sql);
 	}
@@ -646,6 +804,7 @@ class M_Pengajuan extends CI_Model {
         $inputGroupTujuan = $this->input->post("inputGroupTujuan");
         $inputTotalUangSaku = $this->input->post("inputTotalUangSaku");
         $inputTotalUangMakan = $this->input->post("inputTotalUangMakan");
+        $inputBiayaKendaraan = $this->input->post("inputBiayaKendaraan");
         
         $inputBBM = $this->input->post("inputBBM");
         $inputJenisSPJ = $this->input->post("inputJenisSPJ");
@@ -656,6 +815,7 @@ class M_Pengajuan extends CI_Model {
         $inputMediaUangJalan = $this->input->post("inputMediaUangJalan");
         $inputMediaBBM = $this->input->post("inputMediaBBM");
         $inputMediaTOL = $this->input->post("inputMediaTOL");
+        $inputMediaKendaraan = $this->input->post("inputMediaKendaraan");
         $inputTglBerangkat = $this->input->post("inputTglBerangkat");
         $inputJamBerangkat = $this->input->post("inputJamBerangkat");
         $inputTglPulang = $this->input->post("inputTglPulang");
@@ -692,10 +852,12 @@ class M_Pengajuan extends CI_Model {
        		
        		// $this->db->query()
        	}
+       	$statusData= $inputJenisSPJ == '1'?'SAVED':'DRAFT';
+       	$statusSPJ = $inputJenisSPJ == '1'?'OPEN':'DRAFT';
         $sql = $this->db->query("UPDATE SPJ_PENGAJUAN SET
         					TGL_INPUT = '$tanggal',
         					PIC_INPUT = '$user',
-        					STATUS_DATA = 'SAVED',
+        					STATUS_DATA = '$statusData',
         					TGL_SPJ = '$inputTglSPJ',
         					JENIS_KENDARAAN = '$inputJenisKendaraan',
         					NO_INVENTARIS = '$inputNoInventaris',
@@ -715,13 +877,20 @@ class M_Pengajuan extends CI_Model {
         					MEDIA_UANG_BBM = '$inputMediaBBM',
         					MEDIA_UANG_TOL = '$inputMediaTOL',
         					VOUCHER_BBM = '$inputNoVoucher',
-        					STATUS_SPJ = 'OPEN',
-        					ABNORMAL = '$inputAbnormal',
-        					TAMBAHAN_UANG_JALAN = '$inputTambahanUangJalan'
+        					STATUS_SPJ = '$statusSPJ',
+        					TAMBAHAN_UANG_JALAN = '$inputTambahanUangJalan',
+        					TOTAL_UANG_KENDARAAN = '$inputBiayaKendaraan',
+        					MEDIA_UANG_KENDARAAN = '$inputMediaKendaraan'
         		WHERE
         			NO_SPJ = '$inputNoSPJ'");
        	if ($inputMediaBBM == 'Tanpa BBM' || $inputMediaBBM == 'Kasbon') {
        		$this->db->query("UPDATE SPJ_PENGAJUAN SET VOUCHER = 'Y' WHERE NO_SPJ = '$inputNoSPJ'");
+       	}
+       	if ($inputJenisSPJ == '1') {
+       		$this->db->query("UPDATE SPJ_PENGAJUAN SET ABNORMAL = '$inputAbnormal' WHERE NO_SPJ = '$inputNoSPJ'");
+       	}
+       	if ($inputKendaraan == 'Gojek/Grab') {
+       		$this->db->query("UPDATE SPJ_PENGAJUAN SET MEDIA_UANG_BBM = 'Tanpa BBM', TOTAL_UANG_BBM = '0', MEDIA_UANG_TOL = 'Tanpa TOL', TOTAL_UANG_TOL = '0' WHERE NO_SPJ = '$inputNoSPJ'");
        	}
         // $biayaBBM = $inputIdVoucher == 0 ? $inputBBM : 0;
         // $kasbonSPJ = $inputTotalUangSaku + $inputTotalUangJalan + $inputTotalUangMakan + $biayaBBM;
@@ -788,17 +957,18 @@ class M_Pengajuan extends CI_Model {
 					FROM
 						SPJ_PENGAJUAN_PIC
 					WHERE
-						NO_PENGAJUAN= '$noSPJ'
-				)Q1
-				INNER JOIN
-				(
-					SELECT
-						*
-					FROM
-						SPJ_PEGAWAI_OTORITAS
-					WHERE
-						OTORITAS_DRIVER = 'Y'
-				)Q2 ON Q1.NIK = Q2.NIK";
+						NO_PENGAJUAN= '$noSPJ' AND
+						JENIS_PIC = 'Sopir'
+				)Q1";
+				// INNER JOIN
+				// (
+				// 	SELECT
+				// 		*
+				// 	FROM
+				// 		SPJ_PEGAWAI_OTORITAS
+				// 	WHERE
+				// 		OTORITAS_DRIVER = 'Y'
+				// )Q2 ON Q1.NIK = Q2.NIK
 		return $this->db->query($sql);
 	}
 	public function saveRencanaBerangkat($inputNoSPJ, $inputTglBerangkat, $inputJamBerangkat, $inputTglPulang, $inputJamPulang)
@@ -870,8 +1040,7 @@ class M_Pengajuan extends CI_Model {
 	public function getKendaraanWithAutoComplete($postData)
 	{
 		$cari = $postData['search'];
-		$sql = $this->db->query("SELECT DISTINCT TOP 10 
-					ID_SPJ,
+		$sql = $this->db->query("SELECT DISTINCT TOP 10
 					NO_TNKB,
 					MERK,
 					TYPE,
@@ -879,11 +1048,16 @@ class M_Pengajuan extends CI_Model {
 				FROM
 					SPJ_PENGAJUAN
 				WHERE
-					KENDARAAN = 'Rental' AND NO_TNKB LIKE '%$cari%'
-				ORDER BY ID_SPJ DESC");
-		foreach ($sql->result() as $key) {
-			$response[] = array("merk"=>$key->MERK,"label"=>$key->NO_TNKB,"type"=>$key->TYPE,'rekanan'=>$key->REKANAN_KENDARAAN);			
+					KENDARAAN = 'Pribadi' AND NO_TNKB LIKE '%$cari%'
+				ORDER BY NO_TNKB DESC");
+		if ($sql->num_rows()>0) {
+			foreach ($sql->result() as $key) {
+				$response[] = array("merk"=>$key->MERK,"label"=>$key->NO_TNKB,"type"=>$key->TYPE,'rekanan'=>$key->REKANAN_KENDARAAN);			
+			}
+		}else{
+			$response='';
 		}
+		
 		// if ($sql->num_rows()>0) {
 
 		// }else{
@@ -1338,5 +1512,147 @@ class M_Pengajuan extends CI_Model {
 		$save = $this->db->query("UPDATE SPJ_PENGAJUAN SET VOUCHER_BBM = '$noVoucher' WHERE NO_SPJ='$noSPJ'");
 		$this->db->query("UPDATE SPJ_PENGAJUAN SET MEDIA_UANG_BBM = 'Voucher' WHERE NO_SPJ = '$noSPJ'");
 		return $save;
+	}
+	public function getGroupForLainnya($id)
+	{
+		$sql = "SELECT
+					ID_GROUP,
+					TIPE_KOTA+' '+NAMA_KOTA AS KOTA
+				FROM
+					[dbo].[SPJ_GT_DETAIL] a
+				INNER JOIN
+					SPJ_KOTA b ON
+				a.ID_KOTA = b.ID_KOTA
+				WHERE
+					a.ID_KOTA = $id";
+		return $this->db->query($sql);
+	}
+	public function getPengajuanDraft($search, $jenis, $where)
+	{
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						a.TGL_SPJ,
+						a.TGL_INPUT,
+						a.ID_SPJ,
+						a.QR_CODE,
+						a.NO_SPJ,
+						a.STATUS_SPJ,
+						b.NAMA_GROUP,
+						a.VOUCHER_BBM,
+						a.TOTAL_UANG_JALAN,
+						a.TOTAL_UANG_BBM,
+						a.TOTAL_UANG_TOL,
+						a.TOTAL_UANG_KENDARAAN,
+						a.NO_GENERATE,
+						a.PIC_INPUT,
+						c.namapeg AS NAMA_INPUT,
+						c.jabatan AS JABATAN_INPUT,
+						c.departemen AS DEPARTEMEN_INPUT,
+						a.KENDARAAN,
+						a.JENIS_ID,
+						a.JENIS_KENDARAAN,
+						a.MERK,
+						a.TYPE,
+						a.NO_TNKB,
+						a.RENCANA_BERANGKAT,
+						a.RENCANA_PULANG,
+						MEDIA_UANG_SAKU,
+						MEDIA_UANG_MAKAN,
+						MEDIA_UANG_JALAN,
+						MEDIA_UANG_BBM,
+						MEDIA_UANG_TOL,
+						MEDIA_UANG_KENDARAAN
+					FROM
+						[dbo].[SPJ_PENGAJUAN] a
+					LEFT JOIN SPJ_GROUP_TUJUAN b ON
+					a.GROUP_ID = b.ID_GROUP
+					LEFT JOIN
+						dbhrm.dbo.tbPegawai c ON
+					a.PIC_INPUT = c.nik
+					WHERE
+						STATUS_DATA = 'DRAFT' AND
+						JENIS_ID LIKE '$jenis%'
+						$where
+				)Q1
+				INNER JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+						SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
+					FROM 
+						SPJ_PENGAJUAN_PIC
+					GROUP BY NO_PENGAJUAN	
+				)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+				LEFT JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						NIK AS NIK_DRIVER,
+						NAMA AS NAMA_DRIVER
+					FROM
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						JENIS_PIC = 'Sopir'
+				)Q3 ON Q1.NO_SPJ = Q3.NO_PENGAJUAN
+				WHERE 
+					NO_SPJ LIKE '%$search%' OR
+					NIK_DRIVER LIKE '%$search%' OR
+					NAMA_DRIVER LIKE '%$search%' OR
+					NAMA_INPUT LIKE '%$search%'
+				ORDER BY ID_SPJ DESC";
+		return $this->db->query($sql);
+	}
+	public function approveSPJDraft($noSPJ)
+	{
+		$sql = "UPDATE SPJ_PENGAJUAN SET STATUS_DATA = 'SAVED', STATUS_SPJ = 'OPEN' WHERE NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function getSupplier($cari)
+	{
+		$sql = "SELECT TOP 25
+					*
+				FROM
+				(
+					SELECT
+						NoSupplier AS id,
+						CompanyName AS COMPANY_NAME,
+						ISNULL(AddressOffice, '') AS ALAMAT_LENGKAP_PLANT 
+					FROM
+						dbhrm.dbo.PC_TSupplier 
+					WHERE
+						CompanyName IS NOT NULL 
+						AND CompanyName != '-' 
+				)Q1
+				WHERE 
+					COMPANY_NAME LIKE '%$cari%' OR 
+					ALAMAT_LENGKAP_PLANT LIKE '%$cari%' OR 
+					id LIKE '%$cari%'
+				ORDER BY
+					COMPANY_NAME ASC";
+		return $this->db->query($sql);
+	}
+	public function getKotaByGroup($where)
+	{
+		$sql = "SELECT
+					a.ID_KOTA,
+					b.TIPE_KOTA+' '+b.NAMA_KOTA AS KOTA,
+					a.ID_GROUP
+				FROM
+					[dbo].[SPJ_GT_DETAIL] a
+				INNER JOIN
+					SPJ_KOTA b
+				ON a.ID_KOTA = b.ID_KOTA
+				$where
+				ORDER BY NAMA_KOTA ASC";
+		return $this->db->query($sql);
+	}
+	public function saveAutoBiayaKendaraan($noSPJ, $biaya)
+	{
+		$sql = "UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_KENDARAAN = $biaya WHERE NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
 	}
 }

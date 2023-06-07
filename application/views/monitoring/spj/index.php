@@ -427,12 +427,14 @@
     
   })
   
-  function printSPJ(id) {
+  function printSPJ(id, media) {
     var url2 = url+"/monitoring/print_spj/"+id;
     window.open(url2,'_blank');
+    if (media == 'Voucher') {
+      var url1 = url+"/monitoring/print_voucher/"+id;
+      window.open(url1,'_blank');  
+    }
     
-    var url1 = url+"/monitoring/print_voucher/"+id;
-    window.open(url1,'_blank');
     
     console.log(url2)
     console.log(url1)

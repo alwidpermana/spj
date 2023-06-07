@@ -469,16 +469,20 @@
 		}
 		public function getKota2($cari)
 		{
-			$sql = "SELECT TOP 25
-						TIPE_KOTA+' '+NAMA_KOTA AS KOTA,
-						TIPE_KOTA+' '+NAMA_KOTA+' Provinsi '+PROVINSI AS VAL
+			$sql = "SELECT 
+						a.ID_KOTA,
+						a.NAMA_KOTA AS KOTA,
+						a.TIPE_KOTA + ' ' + a.NAMA_KOTA AS VAL 
 					FROM
-						SPJ_KOTA
+						SPJ_KOTA a
+					INNER JOIN
+						SPJ_GT_DETAIL b ON
+					a.ID_KOTA= b.ID_KOTA
 					WHERE
-						TIPE_KOTA LIKE '%$cari%' OR
-						NAMA_KOTA LIKE '%$cari%' OR
-						PROVINSI LIKE '%$cari%'
-					ORDER BY NAMA_KOTA ASC";
+						a.TIPE_KOTA LIKE '%$cari%' 
+						OR a.NAMA_KOTA LIKE '%$cari%'	
+					ORDER BY
+						NAMA_KOTA ASC";
 			return $this->db->query($sql);
 		}
 		public function getKotaKabDis()
@@ -864,6 +868,7 @@
 							a.ID_JENIS_SPJ = 1
 					)Q$id ON MASTER.Status = Q$id.JENIS_PIC AND MASTER.KENDARAAN_MASTER = Q$id.JENIS_KENDARAAN";
 			}
+			$sql.=" ORDER BY Status DESC";
 			return $this->db->query($sql);
 		
 		}
@@ -875,6 +880,18 @@
 					FROM
 					(
 						SELECT
+							CASE 
+								WHEN jabatan = 'Driver' THEN 1
+								WHEN jabatan = 'Manager' THEN 2
+								WHEN jabatan = 'Kepala Bagian' THEN 3
+								WHEN jabatan = 'Kepala Seksi' THEN 4
+								WHEN jabatan = 'Kepala Regu' THEN 5
+								WHEN jabatan = 'Staff' THEN 6
+								WHEN jabatan = 'Inspector' THEN 7
+								WHEN jabatan = 'Administrasi' THEN 8
+								WHEN jabatan = 'Operator' THEN 9
+								ELSE 0
+							END AS no_urut,
 							jabatan,
 							'Internal' AS TIPE_MASTER
 						FROM
@@ -883,6 +900,7 @@
 							jabatan IN ( 'Manager', 'Kepala Bagian', 'Kepala Bagian', 'Kepala Seksi', 'Kepala Regu', 'Staff', 'Administrasi', 'Operator', 'Driver' ) 
 						UNION ALL
 						SELECT
+							1 AS no_urut,
 							jabatan,
 							'Rental' AS TIPE_MASTER
 						FROM
@@ -924,8 +942,10 @@
 							WHERE
 								a.ID_GROUP = $id AND
 								a.ID_JENIS_SPJ = 2	
-						)Q$id ON Q.jabatan = Q$id.JENIS_PIC AND Q.TIPE_MASTER = Q$id.TIPE";	
+						)Q$id ON Q.jabatan = Q$id.JENIS_PIC AND Q.TIPE_MASTER = Q$id.TIPE
+						";	
 			}
+			$sql .=" ORDER BY no_urut asc";
 		return $this->db->query($sql);
 		}
 		public function getKategoriKendaraan()
@@ -1626,6 +1646,39 @@
 		public function editDataRental($field, $isi, $nik)
 		{
 			$sql = "UPDATE TrTS_SopirRental SET $field = '$isi' WHERE KdSopir = '$nik'";
+			return $this->db->query($sql);
+		}
+		public function saveJenisSPJ($nik)
+		{
+
+			$getData = $this->db->query("SELECT NIK FROM SPJ_PEGAWAI_OTORITAS WHERE NIK = '$nik'");
+			if ($getData->num_rows() == 0) {
+				date_default_timezone_set('Asia/Jakarta');
+	            $tanggal = date('Y-m-d H:i:s');
+	            $user = $this->session->userdata("NIK");
+				$this->db->query("INSERT INTO SPJ_PEGAWAI_OTORITAS(NIK, TGL_INPUT, PIC_INPUT, JENIS_DATA, OTORITAS_ADJUSMENT, SPJ_NDV, SPJ_DLV)VALUES('$nik','$tanggal','$user','internal','N','Y','N')");
+			}
+		}
+		public function getHargaBBM()
+		{
+			$sql = "SELECT
+						* 
+					FROM
+						[dbo].[SPJ_BIAYA_BBM]";
+			return $this->db->query($sql);
+		}
+		public function saveHargaBBM($id, $jenis, $harga)
+		{
+			if ($id == '') {
+				$sql = "INSERT INTO SPJ_BIAYA_BBM(JENIS, HARGA)VALUES('$jenis',$harga)";
+			}else{
+				$sql = "UPDATE SPJ_BIAYA_BBM SET JENIS ='$jenis', HARGA = $harga WHERE ID = $id";
+			}
+			return $this->db->query($sql);
+		}
+		public function hapusHargaBBM($id)
+		{
+			$sql = "DELETE FROM SPJ_BIAYA_BBM WHERE ID = $id";
 			return $this->db->query($sql);
 		}
 	}

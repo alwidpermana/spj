@@ -100,6 +100,7 @@ class Data_Master extends CI_Controller {
 		if ($jenis == 'internal') {
 			$data['data'] = $this->M_Data_Master->getKaryawan($filDepartemen='', $filJabatan='', $filSearch='', $nik, $top = 1)->result();
 			$data['side'] = 'data_master-karyawan_internal';
+			$saveJenisSPJ = $this->M_Data_Master->saveJenisSPJ($nik);
 		}elseif ($jenis == 'logistik') {
 			$data['data'] = $this->M_Data_Master->getSupirLogistik('Aktif',$filStatus='', $filSearch='', $nik, $top = 1, $table = 'TrTs_SopirLogistik')->result();
 			$data['side'] = 'data_master-karyawan_logistik';
@@ -850,6 +851,37 @@ class Data_Master extends CI_Controller {
 		$isi = $this->input->post("isi");
 		$nik = $this->input->post("nik");
 		$data = $this->M_Data_Master->editDataRental($field, $isi, $nik);
+		echo json_encode($data);
+	}
+	public function getHargaBBM()
+	{
+		$data = $this->M_Data_Master->getHargaBBM();
+		if ($data->num_rows()==0) {
+			$html = "";
+		}else{
+			$html="";
+			foreach ($data->result() as $key) {
+				$html.="<tr class='text-center'>
+							<td><a href='javascript:;' class='editBBM text-dark' jenis=".$key->JENIS." harga=".round($key->HARGA)." data=".$key->ID.">".$key->JENIS."</a></td>
+							<td><a href='javascript:;' class='editBBM text-dark' jenis=".$key->JENIS." harga=".round($key->HARGA)." data=".$key->ID.">".number_format($key->HARGA)."</a></td>
+							<td><a href='javascript:;' class='btn text-orange hapusBBM' data='".$key->ID."'><i class='fas fa-trash-alt'></i></a></td>
+						</tr>";
+			}
+		}
+		echo json_encode($html);
+	}
+	public function saveHargaBBM()
+	{
+		$inputJenisBBM = $this->input->post("inputJenisBBM");
+		$inputHargaBBM = $this->input->post("inputHargaBBM");
+		$inputIdBBM = $this->input->post("inputIdBBM");
+		$data = $this->M_Data_Master->saveHargaBBM($inputIdBBM, $inputJenisBBM, $inputHargaBBM);
+		echo json_encode($data);
+	}
+	public function hapusHargaBBM()
+	{
+		$id = $this->input->post("id");
+		$data = $this->M_Data_Master->hapusHargaBBM($id);
 		echo json_encode($data);
 	}
 

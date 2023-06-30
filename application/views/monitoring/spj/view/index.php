@@ -651,7 +651,7 @@
                                     </td>
                                     <td><?=$rl->MEDIA_UANG_BBM?><?=$key->VOUCHER_BBM != ''?'<br>'.$key->VOUCHER_BBM:''?></td>
                                     <?php 
-                                    $valUangBBM = $key->MEDIA_UANG_BBM == 'Kasbon' ? 0 : round($key->TOTAL_UANG_BBM);
+                                    $valUangBBM = round($key->TOTAL_UANG_BBM);
                                     $valUangTOL = $key->MEDIA_UANG_TOL == 'Kasbon' ? 0 : round($key->TOTAL_UANG_TOL);
                                     
                                     if ($rl->ADJUSTMENT_MANAJEMEN == 'Y'): ?>
@@ -709,6 +709,17 @@
                                     </tr>
                                   <?php endif ?>
                                 <?php endforeach ?>
+                                <tr>
+                                  <td>Uang Lainnya</td>
+                                  <td>0</td>
+                                  <td>Reimburse</td>
+                                  <td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_LAINNYA, 0))?></td>
+                                  <td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_LAINNYA, 0))?></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td><?=$key->KETERANGAN_LAINNYA?></td>
+                                </tr>
                               </tbody>
                               <tfoot>
                                 <?php
@@ -721,14 +732,14 @@
                                   <th></th>
                                   <th>Rp. 
                                     <?php
-                                      $totalRealisasi = $realisasiUangSaku + $realisasiUangMakan + $realisasiUangJalan + $valUangBBM + $realisasiTOL;
+                                      $totalRealisasi = $realisasiUangSaku + $realisasiUangMakan + $realisasiUangJalan + $valUangBBM + $realisasiTOL+$key->TOTAL_UANG_LAINNYA;
                                       echo str_replace(',', '.', number_format($totalRealisasi));
                                     ?>
                                       
                                   </th>
                                   <th>Rp. 
                                     <?php
-                                      $totalKB = ($realisasiUangSaku - $kasbonUangSaku) + ($realisasiUangMakan - $kasbonUangMakan) + ($realisasiUangJalan - $kasbonUangJalan)+($valUangBBM-$kasbonBBM)+($realisasiTOL-$kasbonTOL) + $key->TOTAL_UANG_KENDARAAN;
+                                      $totalKB = ($realisasiUangSaku - $kasbonUangSaku) + ($realisasiUangMakan - $kasbonUangMakan) + ($realisasiUangJalan - $kasbonUangJalan)+($valUangBBM-$kasbonBBM)+($realisasiTOL-$kasbonTOL) + $key->TOTAL_UANG_KENDARAAN +$key->TOTAL_UANG_LAINNYA;
                                       echo str_replace(',', '.', number_format($totalKB));
                                     ?>
                                   </th>

@@ -248,15 +248,17 @@ class Pengajuan extends CI_Controller {
 			$deliveryId = 0;
 			$serlokAlamat = $this->input->post("inputAlamat");
 			$serlokPerusahaan = $this->input->post("inputNamaTempat");
-			$serlokKota = $this->input->post("inputKotaKabupaten");
-			$getGroup = $this->M_Pengajuan->getGroupForLainnya($serlokKota);
-			if ($getGroup->num_rows()>0) {
-				$dataGroup = $getGroup->row();
-				$inputGroupTujuan = $dataGroup->ID_GROUP;
-				$serlokKota = $dataGroup->KOTA;
-			}else{
-				$inputGroupTujuan = 0;
-			}
+			$inputKotaKabupaten = $this->input->post("inputKotaKabupaten");
+			$getKota = $this->db->query("SELECT TIPE_KOTA, NAMA_KOTA FROM SPJ_KOTA WHERE ID_KOTA = $inputKotaKabupaten")->row();
+			$serlokKota = strtoupper($getKota->TIPE_KOTA.' '.$getKota->NAMA_KOTA);
+			// $getGroup = $this->M_Pengajuan->getGroupForLainnya($serlokKota);
+			// if ($getGroup->num_rows()>0) {
+			// 	$dataGroup = $getGroup->row();
+			// 	$inputGroupTujuan = $dataGroup->ID_GROUP;
+			// 	$serlokKota = $dataGroup->KOTA;
+			// }else{
+			// 	$inputGroupTujuan = 0;
+			// }
 		}else if($objek == 'Rekanan'){
 			$serlokID = $getJmlLokasi+1;
 			$deliveryId = 0;
@@ -362,7 +364,10 @@ class Pengajuan extends CI_Controller {
 										END AS JENIS_PIC,
 										b.TGL_SPJ,
 										c.Subdepartemen2,
-										SORTIR
+										SORTIR,
+										a.NIK,
+										b.KENDARAAN,
+										b.TGL_SPJ
 									FROM
 										SPJ_PENGAJUAN_PIC a
 									INNER JOIN
@@ -375,25 +380,60 @@ class Pengajuan extends CI_Controller {
 										a.NO_PENGAJUAN= '$inputNoSPJ'");
 		$save = true;
 		foreach ($getPIC->result() as $key) {
-			$objek = date('l', strtotime($key->TGL_SPJ)) == 'Saturday' ? 'Rental':$key->OBJEK;
-			$pic = $key->JENIS_PIC;
-			$id = $key->ID_PIC;
-			$subDepartemen = $key->Subdepartemen2;
-			if ($subDepartemen == 'Marketing') {
+			$cekPIC = $this->M_Pengajuan->cekPICUangSaku($key->TGL_SPJ, $key->NIK);
+			if ($cekPIC->num_rows()>0) {
 				$biayaUangSaku = 0;
-			}elseif($key->SORTIR == 'Y'){
-				$biayaUangSaku = 30000;
+				$biayaMakan = 0;
 			}else{
-				$uang= $this->M_Pengajuan->hitungUangSaku($inputJenisSPJ, $objek, $pic, $inputGroupTujuan, $inputJenisKendaraan);
-				$biaya = 0;
-				foreach ($uang->result() as $key) {
-					$biaya = $key->BIAYA;
-				}	
-				$biayaUangSaku = $biaya == null || $biaya == '' ? 0 : $biaya;
+				$objek = date('l', strtotime($key->TGL_SPJ)) == 'Saturday' ? 'Rental':$key->OBJEK;
+				$pic = $key->JENIS_PIC;
+				$id = $key->ID_PIC;
+				$nik = $key->NIK;
+				$subDepartemen = $key->Subdepartemen2;
+				if ($subDepartemen == 'Marketing') {
+					$biayaUangSaku = 0;
+				}elseif($key->SORTIR == 'Y'){
+					$biayaUangSaku = 30000;
+				}else{
+					if ($key->KENDARAAN == 'Rental' && $key->OBJEK == 'Rental' && $pic == 'Sopir' && $inputJenisSPJ == '1') {
+						$biayaUangSaku = 0;
+					}else{
+						$uang= $this->M_Pengajuan->hitungUangSaku($inputJenisSPJ, $objek, $pic, $inputGroupTujuan, $inputJenisKendaraan);
+						$biaya = 0;
+						foreach ($uang->result() as $key) {
+							$biaya = $key->BIAYA;
+						}	
+						$biayaUangSaku = $biaya == null || $biaya == '' ? 0 : $biaya;	
+					}
+					
+				}
+				
+				
+				if ($nik == '00004' || $nik == '00003' || $nik == '01519' || $nik == '00917' || $nik == '01223') {
+					$biayaMakan = 0;
+				}elseif ($inputGroupTujuan == '10' && $inputJenisSPJ == '1') {
+		        	$biayaMakan = 20000;
+		        }elseif($inputGroupTujuan == '10' && $inputJenisSPJ == '2'){
+		        	$biayaMakan = 10000;
+		        }elseif($inputGroupTujuan == '4' && $inputJenisSPJ == '2'){
+		        	$biayaMakan = 20000;
+		        }elseif($inputGroupTujuan == '11'){
+		        	$biayaMakan = 0;
+		        }else{
+		        	$jenisTujuan = $inputGroupTujuan == '4' || $inputGroupTujuan == '10' || $inputGroupTujuan == '11' ? 'Lokal':'Luar Kota';
+		        	$makan = $this->M_Pengajuan->hitungUangMakan($inputJenisSPJ, $jenisTujuan);
+		        	if ($makan->num_rows()>0) {
+						foreach ($makan->result() as $key) {
+							$biayaMakan= $key->BIAYA;			
+						}
+					} else {
+						$biayaMakan = 0;
+					}
+		        }
+				
+				$save = $this->M_Pengajuan->saveOtomatisUangSPJ($id, $inputGroupTujuan, $biayaUangSaku, $biayaMakan);
 			}
 			
-			
-			$save = $this->M_Pengajuan->saveOtomatisUangSPJ($id, $inputGroupTujuan, $biayaUangSaku);
 
 			
 		}
@@ -501,7 +541,7 @@ class Pengajuan extends CI_Controller {
 			}
 
 			$whereRekanan='';
-			if ($inputKendaraan == 'Rental' && $inputJenisPIC == 'Sopir' && $inputJenisSPJ == '1') {
+			if ($inputKendaraan == 'Rental' && $inputJenisPIC == 'Sopir' && $inputJenisSPJ == '1' && $inputSubjek == 'Rental') {
 				$whereRekanan = " AND REKANAN = '$inputRekanan'";
 			}
 			$data['jenis'] = $inputJenisSPJ;
@@ -554,7 +594,7 @@ class Pengajuan extends CI_Controller {
         	if ($dataMarketing == 1) {
 	        	$hasil = array('BIAYA' => 0,'KET'=>'Marketing Tidak Mendapatkan Uang Saku','tc'=>'danger');
 	        }else{
-	        	if ($inputKendaraan == 'Rental' && $inputJenisPIC == 'Sopir' && $anjing == '1') {
+	        	if ($inputKendaraan == 'Rental' && $inputJenisPIC == 'Sopir' && $anjing == '1' && $inputSubjek == 'Rental') {
 		        	$hasil = array('BIAYA' =>0 ,'KET'=>'Menggunakan Kendaraan Rental','tc'=>'warning');
 		        }else{
 		        	$cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $nik);

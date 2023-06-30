@@ -1005,6 +1005,19 @@
                   </div>
                 </div>
               </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Group Tujuan</label>
+                    <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputGroupPerusahaan3">
+                      <option value="">Pilih Group</option>
+                      <?php foreach ($group as $gr): ?>
+                        <option value="<?=$gr->ID_GROUP?>"><?=$gr->NAMA_GROUP?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="objekRekanan d-none">
               <div class="row">

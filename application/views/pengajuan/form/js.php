@@ -401,6 +401,31 @@
         cache: true
       }
     });
+    $('#inputKotaKabupaten').on('change', function(){
+      var id = $(this).val();
+      $.ajax({
+        type:'get',
+        data:{id},
+        dataType:'json',
+        url:url+'/pengajuan/findGroupTujuanByIdKota',
+        cache:false,
+        async:true,
+        success:function(data){
+          $("select#inputGroupPerusahaan3 option[value='"+data+"']").prop("selected","selected");
+          $("select#inputGroupPerusahaan3").trigger("change")
+          document.querySelectorAll("#inputGroupPerusahaan3 option").forEach(opt => {
+            if (opt.value == data || opt.value == '11') {
+                opt.disabled = false;
+            }else{
+              opt.disabled = true;
+            }
+          });
+        },
+        error:function(data){
+          Swal.fire("Gagal Mengambil Data","Hubungi Staff IT","error")
+        }
+      })
+    });
     $("#inputPerusahaan").select2({
       ajax: { 
         url: url+'/pengajuan/getCustomerSerlok',
@@ -479,6 +504,7 @@
         if (objek == 'Lainnya') {
           var inputPerusahaan = '-'
           var inputGroupTujuan = '0'
+          var inputGroupTujuan = $('#inputGroupPerusahaan3').val();
         }else if(objek == 'Rekanan'){
           var inputPerusahaan = $('#inputPerusahaan2').val()
           var inputGroupTujuan = $('#inputGroupPerusahaan2').val()  
@@ -1596,6 +1622,9 @@
           $('#showUangSaku').val(formatRupiah(Number('0').toFixed(0), 'Rp. '));
         }
       }      
+    }else if(inputGroupTujuan == 11){
+      $('#inputUangSaku').val("0");  
+      $('#showUangSaku').val(formatRupiah(Number('0').toFixed(0), 'Rp. '));
     }else{
         $.ajax({
           type: 'get',
@@ -1647,23 +1676,30 @@
     var inputTglSPJ = $('#inputTglSPJ').val();
     var inputJenisPIC = $('#inputJenisPIC').val();
     var inputSubjek = $('#inputSubjek').val();
-    $.ajax({
-      type: 'get',
-      dataType:'json',
-      data:{inputJenisSPJ, inputGroupTujuan, inputPIC, inputTglSPJ, inputJenisPIC, inputSubjek},
-      url: url+'/pengajuan/hitungUangMakan',
-      cache: false,
-      async: true,
-      success: function(data){
-        $('#inputUangMakan').val(data.BIAYA);
-        $('#showUangMakan').val(formatRupiah(Number(data.BIAYA).toFixed(0), 'Rp. '));
-        $('#keteranganUM').html(data.KET);
-      },
-      error: function(data){
-        $('#inputUangMakan').val("0");
-        $('#showUangMakan').val(formatRupiah(Number("0").toFixed(0), 'Rp. '));
-      }
-    });
+    if (inputGroupTujuan == '11') {
+      $('#inputUangMakan').val(0);
+      $('#showUangMakan').val(formatRupiah(Number(0).toFixed(0), 'Rp. '));
+      $('#keteranganUM').html("Group Tujuan Lokal Lembur Tidak Mendapatkan Uang Makan");
+    } else {
+      $.ajax({
+        type: 'get',
+        dataType:'json',
+        data:{inputJenisSPJ, inputGroupTujuan, inputPIC, inputTglSPJ, inputJenisPIC, inputSubjek},
+        url: url+'/pengajuan/hitungUangMakan',
+        cache: false,
+        async: true,
+        success: function(data){
+          $('#inputUangMakan').val(data.BIAYA);
+          $('#showUangMakan').val(formatRupiah(Number(data.BIAYA).toFixed(0), 'Rp. '));
+          $('#keteranganUM').html(data.KET);
+        },
+        error: function(data){
+          $('#inputUangMakan').val("0");
+          $('#showUangMakan').val(formatRupiah(Number("0").toFixed(0), 'Rp. '));
+        }
+      });  
+    }
+    
   }
 
   function pengaturanSortir() {
@@ -1689,7 +1725,16 @@
     var inputSubjek = 'Internal';
     var inputPIC = '<?=$this->session->userdata("NIK")?>';
     var inputUangSaku = 0;
-    var inputUangMakan = 30000;
+    if (inputGroupTujuan == 4) {
+      var inputUangMakan = 20000;  
+    }else if(inputGroupTujuan == 10){
+      var inputUangMakan = 10000;
+    }else if(inputGroupTujuan == 11){
+      var inputUangMakan = 0;
+    }else{
+      var inputUangMakan = 30000;
+    }
+    
     var inputJenisSPJ = '2';
     var inputNoSPJ = $('#inputNoSPJ').val();
     var inputDepartemen = '<?=$this->session->userdata("DEPARTEMEN")?>'
@@ -2232,7 +2277,7 @@
           $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
           console.log("a")
         }
-        else if (inputGroupTujuan == '4' || inputGroupTujuan == '10') {
+        else if (inputGroupTujuan == '4' || inputGroupTujuan == '10' || inputGroupTujuan == '11') {
           settingManualJalan()
           console.log("b")
         }else if(data.abnormal == true && inputJenisSPJ == '1') {
@@ -2531,6 +2576,12 @@
         $('#manualUangJalan').addClass("d-none");
         $('.tambahUangJalanAbnormal').removeClass("d-none")
         $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
+      }else if(inputAbnormal.checked == false && inputGroupTujuan == '11'){
+        $('#tampilTotalUangJalan').addClass("d-none");
+        $('.lokalUangJalan').removeClass("d-none");
+        $('#manualUangJalan').addClass("d-none");
+        $('.tambahUangJalanAbnormal').removeClass("d-none")
+        $('#inputTambahanUangJalan').val(biayaTambahanUangJalan);
       }else{
         $('#tampilTotalUangJalan').removeClass("d-none");
         $('.lokalUangJalan').addClass("d-none");
@@ -2670,7 +2721,7 @@
       $("select#inputGroupPerusahaan2 option[value='10']").prop("selected","selected");
       $("select#inputGroupPerusahaan2").trigger("change")
       document.querySelectorAll("#inputGroupPerusahaan2 option").forEach(opt => {
-        if (opt.value == '10') {
+        if (opt.value == '10' || opt.value=='11') {
             opt.disabled = false;
         }else{
           opt.disabled = true;
@@ -2691,7 +2742,7 @@
       $("select#inputMediaBBM option[value='Reimburse']").prop("selected","selected");
       $("select#inputMediaBBM").trigger("change")
       document.querySelectorAll("#inputMediaBBM option").forEach(opt => {
-        if (opt.value == 'Kasbon' || opt.value=='Tanpa BBM') {
+        if (opt.value == 'Kasbon') {
             opt.disabled = true;
         }else{
           opt.disabled = false;

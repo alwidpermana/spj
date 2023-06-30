@@ -59,6 +59,8 @@ class M_Monitoring extends CI_Model {
 							TOTAL_UANG_BBM,
 							TOTAL_UANG_TOL,
 							TOTAL_UANG_KENDARAAN,
+							TOTAL_UANG_LAINNYA,
+							KETERANGAN_LAINNYA,
 							STATUS_SPJ,
 							RENCANA_BERANGKAT,
 							RENCANA_PULANG,
@@ -347,7 +349,9 @@ class M_Monitoring extends CI_Model {
 						TOTAL_UANG_BBM,
 						TOTAL_UANG_TOL,
 						STATUS_SPJ,
-						ADJUSTMENT_MANAJEMEN
+						ADJUSTMENT_MANAJEMEN,
+						TOTAL_UANG_LAINNYA,
+						KETERANGAN_LAINNYA,
 					FROM
 						SPJ_PENGAJUAN a
 					LEFT JOIN
@@ -3000,9 +3004,14 @@ class M_Monitoring extends CI_Model {
 		$sql = "DELETE FROM SPJ_TARGET_CR WHERE ID = $id";
 		return $this->db->query($sql);
 	}
-	public function grapikCRDelivery($tahun)
+	public function grapikCRDelivery($tahun, $awal, $akhir, $bulan)
 	{
-		$sql = "Execute SPJ_grapikCostReductionDelivery '$tahun'";
+		$sql = "Execute SPJ_grapikCostReductionDelivery '$tahun','$awal','$akhir', '$bulan'";
+		return $this->db->query($sql);
+	}
+	public function grapikCRDeliveryExport($tahun, $awal, $akhir, $bulan)
+	{
+		$sql = "Execute SPJ_grapikCostReductionDeliveryExport '$tahun','$awal','$akhir', '$bulan'";
 		return $this->db->query($sql);
 	}
 	public function getMonitoringKeberangakatan($jenis, $awal, $akhir, $search, $jamMulai, $jamAkhir, $interval)

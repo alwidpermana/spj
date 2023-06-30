@@ -64,7 +64,7 @@
 	</tbody>
 	<tfoot>
 		<tr>
-			<th colspan="13" class="text-right">Total:</th>
+			<th colspan="14" class="text-right">Total:</th>
 			<th><?=number_format($normal)?></th>
 			<th><?=number_format($aktual)?></th>
 			<th><?=number_format($gap)?></th>

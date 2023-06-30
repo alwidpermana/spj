@@ -311,7 +311,10 @@ class Cash_Flow extends CI_Controller {
 	public function getAllSaldo()
 	{
 		$data['induk'] = $this->M_Cash_Flow->getAllSaldo('KAS INDUK')->result();
-		$data['sub'] = $this->M_Cash_Flow->getAllSaldo('SUB KAS')->result();
+		// $data['sub'] = $this->M_Cash_Flow->getAllSaldo('SUB KAS')->result();
+		
+		$data['sub'] = $this->M_Cash_Flow->getSaldoSubKasNew()->result();
+
 		$this->load->view("cash_flow/my_cash_flow/saldo", $data);
 	}
 	public function approvePengajuan()

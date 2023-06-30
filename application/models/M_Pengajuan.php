@@ -148,7 +148,8 @@ class M_Pengajuan extends CI_Model {
 						SPJ_PENGAJUAN
 					WHERE
 						TGL_SPJ = '$tgl' AND
-						STATUS_DATA !='TEMPORARY'
+						STATUS_DATA !='TEMPORARY' AND
+						STATUS_SPJ != 'CANCEL'
 				)Q2 ON Q1.NoTNKB = Q2.NO_TNKB
 				LEFT JOIN
 				(
@@ -437,9 +438,9 @@ class M_Pengajuan extends CI_Model {
 					namapeg LIKE '%$search%'";
 		return $this->db->query($sql);
 	}
-	public function saveOtomatisUangSPJ($id, $group, $biaya)
+	public function saveOtomatisUangSPJ($id, $group, $biaya, $makan)
 	{
-		$sql = "UPDATE SPJ_PENGAJUAN_PIC SET GROUP_TUJUAN_ID = $group, UANG_SAKU = $biaya WHERE ID_PIC = $id";
+		$sql = "UPDATE SPJ_PENGAJUAN_PIC SET GROUP_TUJUAN_ID = $group, UANG_SAKU = $biaya, UANG_MAKAN = $makan WHERE ID_PIC = $id";
 		return $this->db->query($sql);
 	}
 	public function hitungUangSaku($anjing, $inputSubjek, $inputPIC, $inputGroupTujuan, $inputJenisKendaraan)
@@ -1574,7 +1575,8 @@ class M_Pengajuan extends CI_Model {
 					a.PIC_INPUT = c.nik
 					WHERE
 						STATUS_DATA = 'DRAFT' AND
-						JENIS_ID LIKE '$jenis%'
+						JENIS_ID LIKE '$jenis%' AND
+						STATUS_SPJ != 'CANCEL'
 						$where
 				)Q1
 				INNER JOIN

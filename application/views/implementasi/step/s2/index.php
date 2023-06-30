@@ -208,6 +208,7 @@
                             <div class="row">
                               <div class="col-md-12">
                                 :&nbsp;<label><?=$key->KENDARAAN?></label>
+                                <input type="hidden" id="inputKendaraan" value="<?=$key->KENDARAAN?>">
                               </div>
                             </div>
                           </div>
@@ -447,7 +448,14 @@
                                   <td><?=$pc->SORTIR == 'Y'?'Sortir':'Reguler'?></td>
                                   <td>Rp.<?=str_replace(',', '.', number_format($pc->UANG_SAKU, 0))?></td>
                                   <td>
-                                    <a href="javascript:;" class="text-kps btnEditUangMakanKasbon" nik="<?=$pc->NIK?>" uang="<?=round($pc->UANG_MAKAN)?>" nama="<?=$pc->NAMA?>" jenis="Uang Makan">Rp.<?=str_replace(',', '.', number_format($pc->UANG_MAKAN, 0))?></a>
+                                    <?php 
+                                    $userLogin = $this->session->userdata("NIK");
+                                    if ($userLogin == '00003' || $userLogin == '00004' || $userLogin == '04035' || $userLogin =='05100' || $userLogin == '04022'): ?>
+                                      <a href="javascript:;" class="text-kps btnEditUangMakanKasbon" nik="<?=$pc->NIK?>" uang="<?=round($pc->UANG_MAKAN)?>" nama="<?=$pc->NAMA?>" jenis="Uang Makan">Rp.<?=str_replace(',', '.', number_format($pc->UANG_MAKAN, 0))?></a>
+                                    <?php else: ?>
+                                      Rp.<?=str_replace(',', '.', number_format($pc->UANG_MAKAN, 0))?>
+                                    <?php endif ?>
+                                    
                                   </td>
                                   <td>Rp.<?=str_replace(',', '.', number_format($pc->UANG_SAKU1, 0))?></td>
                                   <td>Rp.<?=str_replace(',', '.', number_format($pc->UANG_SAKU2, 0))?></td>
@@ -658,8 +666,8 @@
                                   </td>
                                   <td><?=$rl->MEDIA_UANG_BBM?><?=$key->VOUCHER_BBM != ''?'<br>'.$key->VOUCHER_BBM:''?></td>
                                   <?php 
-                                  $valUangBBM = $key->MEDIA_UANG_BBM == 'Kasbon' ? 0 : round($key->TOTAL_UANG_BBM);
-                                  $valUangTOL = $key->MEDIA_UANG_TOL == 'Kasbon' ? 0 : round($key->TOTAL_UANG_TOL);
+                                  $valUangBBM = round($key->TOTAL_UANG_BBM);
+                                  $valUangTOL = round($key->TOTAL_UANG_TOL);
                                   
                                   if ($rl->ADJUSTMENT_MANAJEMEN == 'Y'): ?>
                                     <td>
@@ -740,6 +748,12 @@
                                             <input type="number" id="inputRealisasiUangBBM" class="form-control form-control-sm" style="width: 120px" awal="<?=$key->STATUS_SPJ == 'CLOSE' ?0: $key->TOTAL_UANG_BBM?>" readonly value="<?=$status_bbm == 'APPROVED'?$bbm_pengajuan:$valUangBBM?>">
                                           </center>  
                                         </div>
+
+                                      <?php elseif($key->MEDIA_UANG_BBM == 'Kasbon'):?>
+                                        <center>
+                                          <?=number_format($key->TOTAL_UANG_BBM)?>
+                                          <input type="hidden" id="inputRealisasiUangBBM" class="form-control form-control-sm" style="width: 120px" awal="<?=$key->STATUS_SPJ == 'CLOSE' ?0: $key->TOTAL_UANG_BBM?>" <?=$key->MEDIA_UANG_BBM == 'Reimburse'?'':'readonly'?> value="<?=$valUangBBM?>">
+                                        </center>  
                                       <?php else: ?>
                                         <center>
                                           <input type="number" id="inputRealisasiUangBBM" class="form-control form-control-sm" style="width: 120px" awal="<?=$key->STATUS_SPJ == 'CLOSE' ?0: $key->TOTAL_UANG_BBM?>" <?=$key->MEDIA_UANG_BBM == 'Reimburse'?'':'readonly'?> value="<?=$valUangBBM?>">
@@ -797,7 +811,15 @@
                                     <td>Uang Kendaraan</td>
                                     <td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_KENDARAAN, 0))?></td>
                                     <td><?=$key->MEDIA_UANG_KENDARAAN?></td>
-                                    <td><?=str_replace(',', '.', number_format($key->TOTAL_UANG_KENDARAAN, 0))?></td>
+                                    <td>
+                                      <center>
+                                        <?php if ($key->KENDARAAN == 'Gojek/Grab'): ?>
+                                           <input type="number" id="inputRealisasiUangKendaraan" class="form-control form-control-sm" style="width: 120px" value="<?=round($rl->TOTAL_UANG_KENDARAAN)?>" awal="<?=$key->STATUS_SPJ == 'CLOSE'?0:$key->TOTAL_UANG_KENDARAAN?>">
+                                        <?php else: ?>
+                                          <?=str_replace(',', '.', number_format($key->TOTAL_UANG_KENDARAAN, 0))?>
+                                        <?php endif ?>
+                                      </center>
+                                    </td>
                                     <td>0</td>
                                     <td><?=date("Y-m-d", strtotime($key->TGL_SPJ))?></td>
                                     <td><?=$key->namapeg?></td>
@@ -806,13 +828,34 @@
                                   </tr>
                                 <?php endif ?>
                               <?php endforeach ?>
+                              <?php if ($key->JENIS_ID == 2): ?>
+                                <tr>
+                                  <td>Biaya Lainnya</td>
+                                  <td>0</td>
+                                  <td>Reimburse</td>
+                                  <td>
+                                    <center>
+                                      <input type="hidden" id="inputbeforeLainnya" value="<?=round($key->TOTAL_UANG_LAINNYA)?>">
+                                      <input type="number" id="inputRealisasiBiayaLainnya" class="form-control form-control-sm" style="width: 120px" value="<?=round($key->TOTAL_UANG_LAINNYA)?>">
+                                    </center>
+                                  </td>
+                                  <td>
+                                    <span id="kbLainnya"><?=number_format($key->TOTAL_UANG_LAINNYA)?></span>
+                                      <input type="hidden" id="inputKbLainnya" class="form-control form-control-sm" style="width: 120px" readonly>
+                                  </td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td><textarea class="form-control" id="inputKeteranganLainnya" rows="3"><?=$key->KETERANGAN_LAINNYA?></textarea></td>
+                                </tr> 
+                              <?php endif ?>
                             </tbody>
                             <tfoot>
                               <tr>
                                 <th>TOTAL:</th>
-                                <th>Rp. <?=str_replace(',', '.', number_format($key->TOTAL_UANG_SAKU+$key->TOTAL_UANG_MAKAN+$kasbonJalan+$kasbonBBM+$kasbonTOL, 0))?></th>
+                                <th>Rp. <?=str_replace(',', '.', number_format($key->TOTAL_UANG_SAKU+$key->TOTAL_UANG_MAKAN+$kasbonJalan+$kasbonBBM+$kasbonTOL+$key->TOTAL_UANG_KENDARAAN, 0))?></th>
                                 <th></th>
-                                <th><span id="totalRealisasi">Rp. <?=str_replace(',', '.', number_format($realisasiUangSaku+$realisasiUangMakan+$realisasiUangJalan+$valUangBBM+$valUangTOL, 0))?></span></th>
+                                <th><span id="totalRealisasi">Rp. <?=str_replace(',', '.', number_format($realisasiUangSaku+$realisasiUangMakan+$realisasiUangJalan+$valUangBBM+$valUangTOL+$key->TOTAL_UANG_KENDARAAN+$key->TOTAL_UANG_LAINNYA, 0))?></span></th>
                                 <th><span id="totalKB"></span></th>
                                 <th colspan="4"></th>
                               </tr>
@@ -1083,6 +1126,10 @@
       hitungKBUangJalan();
       totalBiaya();
     });
+    $('#inputRealisasiBiayaLainnya').on('keyup', function(){
+      hitungKBLainnya();
+      totalBiaya();
+    })
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     
@@ -1310,7 +1357,7 @@
           },
           success:function(data){
             Swal.fire("Berhasil Merevisi Keberangkatan","","success")
-            // location.reload();
+            location.reload();
           },
           complete:function(data){
             saveKeberangkatan.ladda('stop');
@@ -1363,6 +1410,14 @@
     $('#kbTOL').html(formatRupiah(Number(kb).toFixed(0), ''));
     console.log(kb)
   }
+  function hitungKBLainnya() {
+    var tambahan = $('#inputRealisasiBiayaLainnya').val();
+    var awal = 0;
+    var kb = parseInt(tambahan) - parseInt(awal)
+    $('#inputKbLainnya').val(kb);
+    $('#kbLainnya').html(formatRupiah(Number(kb).toFixed(0), ''));
+    console.log(kb)
+  }
   function hitungKBUangJalan() {
     var tambahan = $('#inputRealisasiUangJalan').val();
     var awal = $('#inputAwalUangJalan').val();
@@ -1380,17 +1435,15 @@
     var inputKbBBM = $('#inputKbBBM').val() == 'NaN' || $('#inputKbBBM').val() == ''? 0 : $('#inputKbBBM').val();
     var inputKbTOL = $('#inputKbTOL').val() == 'NaN' || $('#inputKbTOL').val() == ''? 0 : $('#inputKbTOL').val();
     var inputKbJalan = $('#inputKbJalan').val() == 'NaN' || $('#inputKbJalan').val() == ''? 0 : $('#inputKbJalan').val();
-    var totalRealisasi = parseInt(totalUangTambahan) + parseInt(tambahanBBM) + parseInt(tambahanTOL) + parseInt(tambahanJalan)
-    console.log(totalUangTambahan)
-    var totalKB = parseInt(totalKBTambahan) + parseInt(inputKbBBM) + parseInt(inputKbTOL) + parseInt(inputKbJalan);
+    var kendaraan = $('#inputRealisasiUangKendaraan').val() == '' ? 0 :$('#inputRealisasiUangKendaraan').val();
+    var lainnya = $('#inputRealisasiBiayaLainnya').val()==''? 0 : $('#inputRealisasiBiayaLainnya').val();
+    var inputKbLainnya = $('#inputKbLainnya').val() == '' ? 0 : $('#inputKbLainnya').val();
+    var totalRealisasi = parseInt(totalUangTambahan) + parseInt(tambahanBBM) + parseInt(tambahanTOL) + parseInt(tambahanJalan) + parseInt(kendaraan) + parseInt(lainnya)
+    console.log(inputKbLainnya);
+    var totalKB = parseInt(totalKBTambahan) + parseInt(inputKbBBM) + parseInt(inputKbTOL) + parseInt(inputKbJalan) + parseInt(inputKbLainnya)
     $('#totalRealisasi').html(formatRupiah(Number(totalRealisasi).toFixed(0), 'Rp. '))
     $('#totalKB').html(formatRupiah(Number(totalKB).toFixed(0), 'Rp. '))
-    console.log(totalUangTambahan)
-    console.log(totalKBTambahan)
-    console.log(tambahanBBM)
-    console.log(tambahanTOL)
-    console.log(inputKbBBM)
-    console.log(inputKbTOL)
+    console.log(inputKbLainnya)
     console.log(totalRealisasi)
     console.log(totalKB)
   }
@@ -1441,6 +1494,11 @@
     var inputBeforeBBM = $('#inputBeforeBBM').val();  
     var inputGroupId = $('#inputGroupId').val();
     var inputBeforeJalan = $('#inputBeforeJalan').val();
+    var inputRealisasiUangKendaraan = $('#inputRealisasiUangKendaraan').val();
+    var inputKendaraan = $('#inputKendaraan').val();
+    var inputRealisasiBiayaLainnya = $('#inputRealisasiBiayaLainnya').val();
+    var inputKeteranganLainnya = $('#inputKeteranganLainnya').val();
+    var inputbeforeLainnya = $('#inputbeforeLainnya').val();
     if(inputRealisasiUangBBM == '' && inputMediaUangBBM == 'Reimburse'){
       Swal.fire({
         position: 'top-end',
@@ -1470,7 +1528,7 @@
     }else{
       $.ajax({
         type:'post',
-        data:{inputNoSPJ, inputRealisasiUangSaku, inputRealisasiUangMakan, inputRealisasiUangJalan, inputRealisasiUangBBM, inputRealisasiUangTol, inputJenisSPJ, inputId, inputMediaUangTOL, inputBeforeTOL, inputJenisBBM, inputHargaBBM, inputMediaUangBBM, inputBeforeBBM, inputGroupId, inputBeforeJalan},
+        data:{inputNoSPJ, inputRealisasiUangSaku, inputRealisasiUangMakan, inputRealisasiUangJalan, inputRealisasiUangBBM, inputRealisasiUangTol, inputJenisSPJ, inputId, inputMediaUangTOL, inputBeforeTOL, inputJenisBBM, inputHargaBBM, inputMediaUangBBM, inputBeforeBBM, inputGroupId, inputBeforeJalan, inputRealisasiUangKendaraan, inputKendaraan, inputRealisasiBiayaLainnya, inputKeteranganLainnya, inputbeforeLainnya},
         url:url+'/implementasi/saveBiaya',
         cache: false,
         async: true,

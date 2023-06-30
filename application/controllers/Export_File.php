@@ -1679,7 +1679,7 @@ class Export_File extends CI_Controller {
 	    // Set orientasi kertas jadi LANDSCAPE
 	    $excel->getActiveSheet()->getPageSetup()->setOrientation(PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
 	    // Set judul file excel nya
-	    $excel->getActiveSheet(0)->setTitle("SPJ");
+	    $excel->getActiveSheet(0)->setTitle("Cost Reduction");
 	    $excel->setActiveSheetIndex(0);
 	    // Proses file excel
 
@@ -1690,6 +1690,119 @@ class Export_File extends CI_Controller {
 	    $write = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
 	    $write->save('php://output');	
 
+	}
+	public function exportGrapikCostReduction()
+	{
+		$awal = date("Y-m-d", strtotime($this->input->get("awal")));
+		$akhir = date("Y-m-d", strtotime($this->input->get("akhir")));
+		$tahun = $this->input->get("tahun");
+		$bulan = date("n", strtotime($awal));
+		$data = $this->M_Monitoring->grapikCRDelivery($tahun, $awal, $akhir, $bulan)->result();
+
+		include APPPATH.'third_party/PHPExcel.php';
+     	$excel = new PHPExcel();
+     	$excel->getProperties()->setCreator('SPJ By Alwi')
+                 ->setLastModifiedBy('SPJ By Alwi')
+                 ->setTitle("SPJ Cost Reduction Delivery")
+                 ->setSubject("spj Cost Reduction Delivery")
+                 ->setDescription("export Data SPJ Cost Reduction Delivery")
+                 ->setKeywords("spj Cost Reduction Delivery");
+        $style_col = array(
+	      'font' => array('bold' => true), // Set font nya jadi bold
+	      'alignment' => array(
+	        'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, // Set text jadi ditengah secara horizontal (center)
+	        'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+	      ),
+	      'borders' => array(
+	        'top' => array('style'  => PHPExcel_Style_Border::BORDER_THIN), // Set border top dengan garis tipis
+	        'right' => array('style'  => PHPExcel_Style_Border::BORDER_THIN),  // Set border right dengan garis tipis
+	        'bottom' => array('style'  => PHPExcel_Style_Border::BORDER_THIN), // Set border bottom dengan garis tipis
+	        'left' => array('style'  => PHPExcel_Style_Border::BORDER_THIN) // Set border left dengan garis tipis
+	      ),'fill' => array(
+	            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+	            'color' => array('rgb' => 'e5e5e5')
+	        )
+	    );
+	    $style_row = array(
+	      'alignment' => array(
+	        'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+	      ),
+	      'borders' => array(
+	        'top' => array('style'  => PHPExcel_Style_Border::BORDER_THIN), // Set border top dengan garis tipis
+	        'right' => array('style'  => PHPExcel_Style_Border::BORDER_THIN),  // Set border right dengan garis tipis
+	        'bottom' => array('style'  => PHPExcel_Style_Border::BORDER_THIN), // Set border bottom dengan garis tipis
+	        'left' => array('style'  => PHPExcel_Style_Border::BORDER_THIN) // Set border left dengan garis tipis
+	      )
+	    );
+
+	    $excel->setActiveSheetIndex(0)->setCellValue('A1', "Bulan");
+	    $excel->setActiveSheetIndex(0)->setCellValue('B1', "Jumlah Target");
+	    $excel->setActiveSheetIndex(0)->setCellValue('C1', "Jumlah SPJ");
+	    $excel->setActiveSheetIndex(0)->setCellValue('D1', "Normal");
+	    $excel->setActiveSheetIndex(0)->setCellValue('E1', "Aktual");
+	    $excel->setActiveSheetIndex(0)->setCellValue('F1', "GAP(Normal-Aktual)");
+	    $excel->setActiveSheetIndex(0)->setCellValue('G1', "Status");
+
+	    $excel->getActiveSheet()->getStyle('A1')->applyFromArray($style_col); // Set width kolom A
+		$excel->getActiveSheet()->getStyle('B1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('C1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('D1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('E1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('F1')->applyFromArray($style_col);
+		$excel->getActiveSheet()->getStyle('G1')->applyFromArray($style_col);
+
+		$excel->getActiveSheet()->getColumnDimension('A')->setWidth(20); // Set width kolom A
+		$excel->getActiveSheet()->getColumnDimension('B')->setWidth(15);
+		$excel->getActiveSheet()->getColumnDimension('C')->setWidth(15);
+		$excel->getActiveSheet()->getColumnDimension('D')->setWidth(15);
+		$excel->getActiveSheet()->getColumnDimension('E')->setWidth(15);
+		$excel->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+		$excel->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+		$numrow = 2;
+		foreach ($data as $key) {
+			if ($key->GAP == null) {
+				$statusCR = '';
+			}elseif ($key->JUMLAH_TARGET>$key->GAP ) {
+				$statusCR = 'Tidak Tercapai';
+			}elseif($key->GAP>=$key->JUMLAH_TARGET){
+				$statusCR = 'Tercapai';
+			}else{
+				$statusCR = '';
+			}
+			$excel->setActiveSheetIndex(0)->setCellValue('A'.$numrow, $key->NAMA_BULAN);
+			$excel->setActiveSheetIndex(0)->setCellValue('B'.$numrow, $key->JUMLAH_TARGET);
+			$excel->setActiveSheetIndex(0)->setCellValue('C'.$numrow, $key->JML_SPJ);
+			$excel->setActiveSheetIndex(0)->setCellValue('D'.$numrow, $key->NORMAL);
+			$excel->setActiveSheetIndex(0)->setCellValue('E'.$numrow, $key->AKTUAL);
+			$excel->setActiveSheetIndex(0)->setCellValue('F'.$numrow, $key->GAP);
+			$excel->setActiveSheetIndex(0)->setCellValue('G'.$numrow, $statusCR);
+
+			$excel->getActiveSheet()->getStyle('A'.$numrow)->applyFromArray($style_row);
+			$excel->getActiveSheet()->getStyle('B'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('C'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('D'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('E'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('F'.$numrow)->applyFromArray($style_row)->getNumberFormat()->setFormatCode("#,##0");
+			$excel->getActiveSheet()->getStyle('G'.$numrow)->applyFromArray($style_row);
+			
+			$numrow++;
+		}
+
+		// Set height semua kolom menjadi auto (mengikuti height isi dari kolommnya, jadi otomatis)
+	    $excel->getActiveSheet()->getDefaultRowDimension()->setRowHeight(-1);
+	    // Set orientasi kertas jadi LANDSCAPE
+	    $excel->getActiveSheet()->getPageSetup()->setOrientation(PHPExcel_Worksheet_PageSetup::ORIENTATION_PORTRAIT);
+	    // Set judul file excel nya
+	    $excel->getActiveSheet(0)->setTitle("Grapik Cost Reduction");
+	    $excel->setActiveSheetIndex(0);
+	    // Proses file excel
+
+
+	    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+	    header('Content-Disposition: attachment; filename=Grapik-Cost_Reduction_Delivery-SPJ.xlsx'); // Set nama file excel nya
+	    header('Cache-Control: max-age=0');
+	    $write = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+	    $write->save('php://output');	
 	}
 
 }

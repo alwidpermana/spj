@@ -106,6 +106,15 @@
                     </select>
                   </div>
                 </div>
+                <div class="col-md-8 col-sm-4"></div>
+                <div class="col-md-2 col-sm-4">
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <a href="javascript:;" class="btn btn-success btn-sm btn-block" id="btnExportGrapik">
+                      <i class="fas fa-file-excel"></i> &nbsp; Export Data Grapik
+                    </a>
+                  </div>
+                </div>
               </div>
               <div class="row">
                 <div class="col-md-12">
@@ -228,6 +237,7 @@
     $('.ladda-button').ladda('bind', {timeout: 1000});
     $('.filter').on('change', function(){
       getTabel()
+      
     })
     $('#search').submit(function(e){
       e.preventDefault();
@@ -352,8 +362,6 @@
     $('#filTahunGrapik').on('change', function(){
       getGrapik();  
     })
-    getGrapik(); 
-
     $('#btnExport').on('click', function(){
       var filPeriode = $('#filPeriode').val();
       var filSearch = $('#filSearch').val();
@@ -361,6 +369,16 @@
       var periodeAwal = periode[0]
       var periodeAkhir = periode[1]
       window.location.href=url+'/export_file/cost_reduction_delivery?awal='+periodeAwal+'&akhir='+periodeAkhir;
+      
+    })
+    $('#btnExportGrapik').on('click', function(){
+      var filPeriode = $('#filPeriode').val();
+      var filSearch = $('#filSearch').val();
+      var filTahunGrapik = $('#filTahunGrapik').val();
+      var periode = filPeriode.split(' - ');
+      var periodeAwal = periode[0]
+      var periodeAkhir = periode[1]
+      window.location.href=url+'/export_file/exportGrapikCostReduction?awal='+periodeAwal+'&akhir='+periodeAkhir+'&tahun='+filTahunGrapik;
     })
   })
   
@@ -381,6 +399,7 @@
       },
       success:function(data){
         $('#getTabel').html(data);
+        getGrapik();
       },
       complete:function(data){
         $('.preloader').fadeOut('slow');
@@ -407,13 +426,17 @@
   }
   function getGrapik() {
     var filTahunGrapik = $('#filTahunGrapik').val();
-    const bulan = [];
-    const aktual = [];
-    const normal = [];
-    const target = [];
+    var bulan = [];
+    var aktual = [];
+    var normal = [];
+    var target = [];
+    var filPeriode = $('#filPeriode').val();
+    var periode = filPeriode.split(' - ');
+    var periodeAwal = periode[0]
+    var periodeAkhir = periode[1]
     $.ajax({
       type:'get',
-      data:{filTahunGrapik},
+      data:{filTahunGrapik, periodeAwal, periodeAkhir},
       dataType:'json',
       url:'grapikCRDelivery',
       cache:true,
@@ -461,6 +484,9 @@
     })
   }
   function setGrafik(bulan, aktual, normal, target) {
+    console.log(bulan)
+    console.log(aktual)
+    console.log(normal)
     var areaChartData = {
                     
     labels  : bulan,

@@ -951,7 +951,10 @@ class Monitoring extends CI_Controller {
 	public function grapikCRDelivery()
 	{
 		$tahun = $this->input->get("filTahunGrapik");
-		$data = $this->M_Monitoring->grapikCRDelivery($tahun)->result();
+		$periodeAwal = date("Y-m-d", strtotime($this->input->get("periodeAwal")));
+		$periodeAkhir = date("Y-m-d", strtotime($this->input->get("periodeAkhir")));
+		$bulan = date("n", strtotime($this->input->get("periodeAwal")));
+		$data = $this->M_Monitoring->grapikCRDelivery($tahun, $periodeAwal, $periodeAkhir, $bulan)->result();
 		echo json_encode($data);
 	}
 	public function keberangkatan()

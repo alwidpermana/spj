@@ -112,8 +112,8 @@ class M_Implementasi extends CI_Model {
 	{
 		$sql = "SELECT
 					*,
-					DATEDIFF( dd, KEBERANGKATAN, GETDATE() ) AS DIF_HARI,
-					DATEDIFF( hh, KEBERANGKATAN, GETDATE() ) AS DIF_JAM 
+					DATEDIFF( dd, KEBERANGKATAN, WAKTU_PULANG ) AS DIF_HARI,
+					DATEDIFF( hh, KEBERANGKATAN, WAKTU_PULANG ) AS DIF_JAM 
 				FROM
 				(
 					SELECT
@@ -703,10 +703,10 @@ class M_Implementasi extends CI_Model {
 						NO_SPJ,
 						TGL_INPUT,
 						QR_CODE,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) + REIMBURSE_BBM + TOTAL_UANG_KENDARAAN AS TOTAL_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) + REIMBURSE_BBM + TOTAL_UANG_KENDARAAN + TOTAL_UANG_LAINNYA AS TOTAL_SPJ,
 						TOTAL_UANG_TOL AS TOTAL_TOL,
 						TOTAL_UANG_BBM AS TOTAL_BBM,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM+REIMBURSE_BBM + TOTAL_UANG_KENDARAAN AS TOTAL_RP
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM+REIMBURSE_BBM + TOTAL_UANG_KENDARAAN + TOTAL_UANG_LAINNYA AS TOTAL_RP
 					FROM
 					(
 						SELECT
@@ -718,6 +718,7 @@ class M_Implementasi extends CI_Model {
 							TOTAL_UANG_MAKAN,
 							TOTAL_UANG_JALAN,
 							TOTAL_UANG_TOL,
+							TOTAL_UANG_LAINNYA,
 							TOTAL_UANG_KENDARAAN,
 							CASE 
 								WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
@@ -760,6 +761,7 @@ class M_Implementasi extends CI_Model {
 								TOTAL_UANG_BBM,
 								TOTAL_UANG_TOL,
 								MEDIA_UANG_BBM,
+								ISNULL(TOTAL_UANG_LAINNYA, 0) AS TOTAL_UANG_LAINNYA,
 								CASE
 									WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
 									ELSE 0
@@ -1092,7 +1094,7 @@ class M_Implementasi extends CI_Model {
 				(
 					SELECT
 						NO_SPJ,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+REIMBURSE_BBM+TOTAL_UANG_KENDARAAN AS KASBON_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+REIMBURSE_BBM+TOTAL_UANG_KENDARAAN+TOTAL_UANG_LAINNYA AS KASBON_SPJ,
 						TOTAL_UANG_TOL AS KASBON_TOL,
 						TOTAL_UANG_BBM AS KASBON_BBM
 					FROM
@@ -1106,6 +1108,7 @@ class M_Implementasi extends CI_Model {
 							TOTAL_UANG_MAKAN,
 							TOTAL_UANG_JALAN,
 							TOTAL_UANG_TOL,
+							TOTAL_UANG_LAINNYA,
 							TOTAL_UANG_KENDARAAN,
 							CASE 
 								WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
@@ -1148,6 +1151,7 @@ class M_Implementasi extends CI_Model {
 								TOTAL_UANG_BBM,
 								TOTAL_UANG_TOL,
 								MEDIA_UANG_BBM,
+								ISNULL(TOTAL_UANG_LAINNYA, 0) AS TOTAL_UANG_LAINNYA,
 								CASE
 									WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
 									ELSE 0
@@ -2028,6 +2032,79 @@ class M_Implementasi extends CI_Model {
 					PIC_DRIVER LIKE '%$search%' OR
 					QR_CODE LIKE '%$search%'";
 		return $this->db->query($sql);
+	}
+	public function saveLogImplementasi($noSPJ, $aktivitas, $nominal)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "INSERT INTO SPJ_LOG_IMPLEMENTASI(PIC_INPUT, TGL_INPUT, NO_SPJ, AKTIVITAS, NOMINAL)VALUES('$user','$tanggal','$noSPJ','$aktivitas','$nominal')";
+        return $this->db->query($sql);
+	}
+	public function saveLogImplementasiKeberangkatan($noSPJ, $berangkat, $pulang,$kmOut, $kmIn)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "INSERT INTO SPJ_LOG_IMPLEMENTASI(PIC_INPUT, TGL_INPUT, NO_SPJ, AKTIVITAS, KEBERANGKATAN, KEPULANGAN, KM_OUT, KM_IN)VALUES('$user','$tanggal','$noSPJ','Revisi Keberangkatan','$berangkat','$pulang',$kmOut, $kmIn)";
+        return $this->db->query($sql);
+	}
+	public function saveBiayaKendaraan($noSPJ, $biaya)
+	{
+		$sql = "UPDATE SPJ_PENGAJUAN SET TOTAL_UANG_KENDARAAN = $biaya WHERE NO_SPJ = '$noSPJ'";
+		return $this->db->query($sql);
+	}
+	public function getTotalKasbon($noSPJ)
+	{
+		$sql = $this->db->query("SELECT
+									TOTAL_UANG_BBM + TOTAL_UANG_TOL + TOTAL_UANG_KENDARAAN + UANG_SAKU +UANG_MAKAN AS KASBON,
+									CREDIT
+								FROM
+								(
+									SELECT
+										ID_SPJ,
+										NO_SPJ,
+										CASE 
+											WHEN MEDIA_UANG_BBM = 'Kasbon' THEN TOTAL_UANG_BBM
+											ELSE 0
+										END AS TOTAL_UANG_BBM,
+										CASE 
+											WHEN MEDIA_UANG_TOL = 'Kasbon' THEN TOTAL_UANG_TOL
+											ELSE 0
+										END AS TOTAL_UANG_TOL,
+										CASE 
+											WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
+											ELSE 0
+										END AS TOTAL_UANG_KENDARAAN
+									FROM
+										SPJ_PENGAJUAN
+									WHERE
+										NO_SPJ = '$noSPJ'
+								)Q1
+								INNER JOIN
+								(
+									SELECT
+										NO_PENGAJUAN,
+										SUM(UANG_SAKU) AS UANG_SAKU,
+										SUM(UANG_MAKAN) AS UANG_MAKAN
+									FROM
+										SPJ_PENGAJUAN_PIC
+									GROUP BY
+										NO_PENGAJUAN
+								)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+								LEFT JOIN
+								(
+									SELECT
+										FK_ID,
+										CREDIT
+									FROM
+										SPJ_KAS_SUB
+									WHERE
+										JENIS_FK = 'KASBON' AND
+										JENIS_KASBON ='Kasbon SPJ Non Delivery' AND
+										DETAIL_KASBON = 'TRANSAKSI AWAL'
+								)Q3 ON Q1.ID_SPJ = Q3.FK_ID");
+		return $sql;
 	}
 	
 }

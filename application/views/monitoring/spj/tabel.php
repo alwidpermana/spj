@@ -94,6 +94,13 @@
 	                    		<button type="button" class="dropdown-item dropButton" onclick="printSPJ(<?=$key->ID_SPJ?>, '<?=$key->MEDIA_UANG_BBM?>')">Print</button>
 	                    		<!-- <a class="dropdown-item dropButton" href="<?=base_url()?>monitoring/export_spj/<?=$key->ID_SPJ?>" target="_blank">Export PDF</a> -->
 	                    	<?php endif ?>
+	                    	<a 
+		                    				class="dropdown-item dropButton btnCancel" 
+		                    				href="javascript:;" 
+		                    				data="<?=$key->ID_SPJ?>" 
+		                    				status = 'CANCEL'>
+		                    				Cancel SPJ
+		                    			</a> 	
 	                    	<?php if ($key->STATUS_PERJALANAN == null && $this->session->userdata("LEVEL")<=4): ?>
 	                    		<?php if ($key->STATUS_SPJ == 'OPEN'): ?>
 	                    			<?php if ($key->JENIS_ID == '1'): ?>
@@ -112,7 +119,7 @@
 		                    				Edit SPJ
 		                    			</a>
 	                    			<?php else: ?>
-	                    				<?php if ($this->session->userdata("NIK") != $key->PIC_INPUT || $this->session->userdata("LEVEL")==0): ?>
+	                    				<?php if ($this->session->userdata("NIK") == $key->PIC_INPUT || $this->session->userdata("LEVEL")==0): ?>
 	                    					<!-- <button type="button" class="dropdown-item dropButton" onclick="printSPJ(<?=$key->ID_SPJ?>, '<?=$key->MEDIA_UANG_BBM?>')">Print</button> -->
 		                    				<a 
 			                    				class="dropdown-item dropButton btnCancel" 
@@ -130,13 +137,13 @@
 	                    				<?php endif ?>
 	                    			<?php endif ?>
 	                    			
-	                    			<a 
+	                    			<!-- <a 
 	                    				class="dropdown-item dropButton btnEdit" 
 	                    				href="javascript:;" 
 	                    				data="<?=$key->ID_SPJ?>"
 	                    				noSPJ = "<?=$key->NO_SPJ?>">
 	                    				Edit SPJ 2
-	                    			</a>
+	                    			</a> -->
 	                    			<!-- <a 
 	                    				class="dropdown-item dropButton" 
 	                    				href="javascript:;" 

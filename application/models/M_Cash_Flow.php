@@ -77,6 +77,15 @@ class M_Cash_Flow extends CI_Model {
 				ORDER BY ID ASC";
 		return $this->db->query($sql);
 	}
+	public function getSaldoSubKasNew()
+	{
+		date_default_timezone_set('Asia/Jakarta');
+		$tahun = date("Y");
+		$bulan = date("n");
+		$namaBulan = date("F");
+		$sql = "Execute SPJ_infoSaldo $tahun, $bulan, '$namaBulan',''";
+		return $this->db->query($sql);
+	}
 	public function getSaldoPerJenis($jenis, $kas)
 	{
 		$sql = "SELECT

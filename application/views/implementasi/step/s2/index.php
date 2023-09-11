@@ -664,7 +664,18 @@
                                     <input type="hidden" id="inputKasbonBBM" value="<?=$kasbonBBM?>">
                                     <input type="hidden" id="inputKasbonTOL" value="<?=$kasbonTOL?>">    
                                   </td>
-                                  <td><?=$rl->MEDIA_UANG_BBM?><?=$key->VOUCHER_BBM != ''?'<br>'.$key->VOUCHER_BBM:''?></td>
+                                  <td>
+                                    <?php if ($key->JENIS_ID = '2'): ?>
+                                      <select class="select2 form-control" id="inputMediaBBM">
+                                        <option value="Reimburse" <?=$rl->MEDIA_UANG_BBM == 'Reimburse' ? 'selected':''?>>Reimburse</option>
+                                        <option value="Tanpa BBM" <?=$rl->MEDIA_UANG_BBM == 'Tanpa BBM' ? 'selected':''?>>Tanpa BBM</option>
+                                      </select>
+                                    <?php else: ?>
+                                      <?=$rl->MEDIA_UANG_BBM?><?=$key->VOUCHER_BBM != ''?'<br>'.$key->VOUCHER_BBM:''?>  
+                                    <?php endif ?>
+                                    
+                                      
+                                  </td>
                                   <?php 
                                   $valUangBBM = round($key->TOTAL_UANG_BBM);
                                   $valUangTOL = round($key->TOTAL_UANG_TOL);
@@ -1357,7 +1368,7 @@
           },
           success:function(data){
             Swal.fire("Berhasil Merevisi Keberangkatan","","success")
-            location.reload();
+            // location.reload();
           },
           complete:function(data){
             saveKeberangkatan.ladda('stop');

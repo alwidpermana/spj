@@ -67,8 +67,7 @@
               <th colspan="4">Receive</th>
               <th rowspan="2">Status Pengajuan</th>
             </tr>
-            <tr>
-              
+            <tr> 
               <th>Tanggal</th>
               <th>Transaksi</th>
               <th>Jenis SPJ</th>
@@ -85,7 +84,6 @@
               <th>PIC</th>
               <th>Delay</th>
               <th>Status</th>
-              
             </tr>
           </thead>
           <tbody class="tbody-fixed">

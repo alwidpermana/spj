@@ -378,12 +378,16 @@ class Pengajuan extends CI_Controller {
 									a.NIK = c.nik
 									WHERE
 										a.NO_PENGAJUAN= '$inputNoSPJ'");
+		$cekEwindo = $this->db->query("SELECT NO_SPJ AS JML_EWINDO FROM SPJ_PENGAJUAN_LOKASI WHERE DELIVERY_ID IN (497, 68) AND NO_SPJ  = '$inputNoSPJ'")->num_rows();
 		$save = true;
 		foreach ($getPIC->result() as $key) {
 			$cekPIC = $this->M_Pengajuan->cekPICUangSaku($key->TGL_SPJ, $key->NIK);
 			if ($cekPIC->num_rows()>0) {
 				$biayaUangSaku = 0;
 				$biayaMakan = 0;
+			}elseif($cekEwindo >0){
+				$biayaUangSaku = 0;
+				$biayaUangMakan=10000;
 			}else{
 				$objek = date('l', strtotime($key->TGL_SPJ)) == 'Saturday' ? 'Rental':$key->OBJEK;
 				$pic = $key->JENIS_PIC;
@@ -564,7 +568,7 @@ class Pengajuan extends CI_Controller {
 		// 	$inputSubjek = $this->input->get("inputSubjek");
 		// }
 		$inputSubjek =  $hari == 'Saturday' || $hari == 'Sunday' ? 'Rental' : $this->input->get("inputSubjek"); 
-		 
+		$statusWeekend = $hari == 'Saturday' || $hari == 'Sunday' ? 'Weekend' : 'Weekday'; 
 		$inputPIC = $this->input->get("jabatanPIC"); 
 		$inputGroupTujuan = $this->input->get("inputGroupTujuan"); 
 		$inputJenisKendaraan = $this->input->get("inputJenisKendaraan");
@@ -589,6 +593,8 @@ class Pengajuan extends CI_Controller {
         	$hasil = array('BIAYA' => 0,'KET'=>'Subcont Tidak Mendapatkan Uang Saku','tc'=>'danger');
         }elseif ($nik == '00004' || $nik == '00003' || $nik == '01519' || $nik == '00917' || $nik == '01223') {
         	$hasil = array('BIAYA' => 0,'KET'=>'Manajemen Tidak Mendapatkan Uang Saku','tc'=>'danger');
+        }elseif ($nik == 'S-331') {
+        	$hasil = array('BIAYA' => 0,'KET'=>'Tidak Mendapatkan Uang Saku','tc'=>'danger');
         }
         else{
         	if ($dataMarketing == 1) {
@@ -596,7 +602,24 @@ class Pengajuan extends CI_Controller {
 	        }else{
 	        	if ($inputKendaraan == 'Rental' && $inputJenisPIC == 'Sopir' && $anjing == '1' && $inputSubjek == 'Rental') {
 		        	$hasil = array('BIAYA' =>0 ,'KET'=>'Menggunakan Kendaraan Rental','tc'=>'warning');
-		        }else{
+		        }elseif ($statusWeekend == 'Weekend' && $inputJenisPIC == 'Sopir' && $inputKendaraan != 'Rental' && $inputSubjek == 'Internal' && $anjing == '1' && $inputGroupTujuan == 4) {
+		        	switch ($inputJenisKendaraan) {
+		        		case 'Engkel & Double':
+		        			$biayaWeekend = 125000;
+		        			break;
+		        		case 'Wing Box':
+		        			$biayaWeekend = 130000;
+		        			break;
+		        		case 'Minibus':
+		        			$biayaWeekend = 120000;
+		        			break;
+		        		default:
+		        			$biayaWeekend = 0;
+		        			break;
+		        	}
+		        	$hasil = array('BIAYA' =>$biayaWeekend ,'KET'=>'Biaya Weekend Lokal Untuk PIC Internal','tc'=>'warning');
+		        }
+		        else{
 		        	$cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $nik);
 		        
 			        if ($cekPIC->num_rows()>0) {
@@ -647,6 +670,7 @@ class Pengajuan extends CI_Controller {
         $inputJamPulang = $this->input->get("inputJamPulang");
         $inputJenisPIC = $this->input->get("inputJenisPIC");
         $inputSubjek = $this->input->get("inputSubjek");
+        $inputNoSPJ = $this->input->get("inputNoSPJ");
         $rencanaBerangkat = $inputTglBerangkat.' '.$inputJamBerangkat;
         $rencanaPulang = $inputTglPulang.' '.$inputJamPulang;
         $waktu_awal  = strtotime($rencanaBerangkat);
@@ -656,8 +680,12 @@ class Pengajuan extends CI_Controller {
         $jam2 = 0;
         $totalJam = 0;
 		$cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $inputPIC);
-        
-        if ($inputGroupTujuan == '10' && $inputJenisSPJ == '1') {
+        $cekEwindo = $this->db->query("SELECT NO_SPJ AS JML_EWINDO FROM SPJ_PENGAJUAN_LOKASI WHERE DELIVERY_ID IN (497, 68) AND NO_SPJ  = '$inputNoSPJ'")->num_rows();
+
+
+        if ($cekEwindo>0 && $inputJenisSPJ == '2') {
+        	$hasil = array('BIAYA' => '10000', 'KET'=>'Tersedia');
+        }elseif ($inputGroupTujuan == '10' && $inputJenisSPJ == '1') {
         	$hasil = array('BIAYA' => '20000', 'KET'=>'Tersedia');
         }elseif($inputGroupTujuan == '10' && $inputJenisSPJ == '2'){
         	$hasil = array('BIAYA' => '10000', 'KET'=>'Tersedia');
@@ -732,7 +760,11 @@ class Pengajuan extends CI_Controller {
 		$inputPIC= $this->input->post("inputPIC");
 		$inputUangSaku= $this->input->post("inputUangSaku");
 		$inputUangMakan= $this->input->post("inputUangMakan");
-		$inputSortir= $this->input->post("inputSortir");
+		if ($inputJenisPIC == 'Subcont' || $inputSubjek == 'Subcont') {
+			$inputSortir = 'Y';
+		}else{
+			$inputSortir= $this->input->post("inputSortir");
+		}
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$inputGroupTujuan = $this->input->post("inputGroupTujuan");
 		$inputDepartemen = $this->input->post("inputDepartemen");

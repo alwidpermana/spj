@@ -223,12 +223,14 @@
   function getCheckData() {
     var noSPJ = [];
     var jml = 0;
+    var inputRekanan = $('#inputRekanan').val();
     $.each($('[name="inputCheckSPJ"]:checked'), function(){
       noSPJ.push($(this).val());
       jml +=1;
     })
+    var ppn = inputRekanan == '1' ? 0.02 : 0.025; 
     var sewaKendaraan = jml * 250000;
-    var potonganPPh = sewaKendaraan*0.25;
+    var potonganPPh = sewaKendaraan*ppn;
     var total = sewaKendaraan - potonganPPh;
     $('#viewJumlahSPJ').html(jml)
     $('#viewSewaKendaraan').html(formatRupiah(Number(sewaKendaraan).toFixed(0), 'Rp. '))

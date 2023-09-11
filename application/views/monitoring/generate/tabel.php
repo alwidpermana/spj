@@ -45,6 +45,7 @@
 	                    	<?php if ($key->STATUS_RECEIVE == null): ?>
 	                    		<a href="<?=base_url()?>monitoring/print_generate/<?=$key->ID?>" class="dropdown-item dropButton">Print</a>	
 	                    	<?php endif ?>
+	                    	<a href="<?=base_url()?>monitoring/print_generate/<?=$key->ID?>" class="dropdown-item dropButton">Print</a>	
 	                    </div>
 				</td>
 			</tr>

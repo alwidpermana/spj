@@ -200,6 +200,14 @@
                 </div>
               </div>
             </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Biaya Sewa</label>
+                  <input type="number" id="inputBiayaSewa" class="form-control form-control-sm" step="0.01">
+                </div>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -340,14 +348,19 @@
         var inputBahanBakar = $('#inputBahanBakar').val();
         var inputLiter = $('#inputLiter').val();
         var inputTahun = $('#inputTahun').val();
+        var inputBiayaSewa = $('#inputBiayaSewa').val();
         if (inputNoTNKB == '' || inputMerk == '' || inputType == '') {
           Swal.fire("Lengkapi Datanya Terlebih Dahulu","No TNKB, Merk, dan Type Kendaraan Tidak Boleh Kosong","warning")
           saveKendaraan.ladda('stop');
+        }else if(inputBiayaSewa == ''){
+          Swal.fire("Lengkapi Datanya Terlebih Dahulu","Biaya Sewa Tidak Boleh Kosong","warning")
+        }else if(inputLiter == ''){
+          Swal.fire("Lengkapi Datanya Terlebih Dahulu","Biaya BBM/Liter Tidak Boleh Kosong","warning")
         }else{
           $.ajax({
             type:'post',
             dataType:'json',
-            data:{inputRekananId, inputIdKendaraan, inputNoTNKB, inputMerk, inputType, inputJenis, inputWarna, inputBahanBakar, inputLiter, inputTahun},
+            data:{inputRekananId, inputIdKendaraan, inputNoTNKB, inputMerk, inputType, inputJenis, inputWarna, inputBahanBakar, inputLiter, inputTahun, inputBiayaSewa},
             url:url+'/data_master/saveKendaraanRental',
             cache:false,
             async:true,
@@ -384,6 +397,7 @@
       var bbm = $(this).attr("bbm");
       var liter = $(this).attr("liter");
       var tahun = $(this).attr("tahun");
+      var sewa = $(this).attr("sewa");
       $('#inputIdKendaraan').val(id);
       $('#inputMerk').val(merk)
       $('#inputType').val(type)
@@ -391,6 +405,7 @@
       $('#inputWarna').val(warna)
       $('#inputLiter').val(liter);
       $('#inputTahun').val(tahun);
+      $('#inputBiayaSewa').val(sewa)
       $("select#inputJenis option[value='" + jenis + "']").prop("selected","selected");
       $("select#inputJenis").trigger("change");
       $("select#inputBahanBakar option[value='" + bbm + "']").prop("selected","selected");

@@ -1328,7 +1328,8 @@
 						BahanBakar,
 						Kategori,
 						BBMPerLiter,
-						Tahun
+						Tahun,
+						BiayaSewa
 					FROM
 						[dbo].[SPJ_KENDARAAN_REKANAN]
 					WHERE
@@ -1337,17 +1338,17 @@
 						ID DESC";
 			return $this->db->query($sql);
 		}
-		public function tambahKendaraanRental($rekananId, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter, $tahun)
+		public function tambahKendaraanRental($rekananId, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter, $tahun, $sewa)
 		{
 			date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d H:i:s');
             $user = $this->session->userdata("NIK");
-			$sql = "INSERT INTO SPJ_KENDARAAN_REKANAN(NoTNKB, Merk, Type, Warna, BahanBakar, Kategori, BBMPerLiter, REKANAN_ID, PIC_INPUT, TGL_INPUT, Tahun)VALUES('$noTNKB','$merk','$type','$warna', '$bbm','$jenis','$liter','$rekananId','$user','$tanggal','$tahun')";
+			$sql = "INSERT INTO SPJ_KENDARAAN_REKANAN(NoTNKB, Merk, Type, Warna, BahanBakar, Kategori, BBMPerLiter, REKANAN_ID, PIC_INPUT, TGL_INPUT, Tahun, BiayaSewa)VALUES('$noTNKB','$merk','$type','$warna', '$bbm','$jenis','$liter','$rekananId','$user','$tanggal','$tahun','$sewa')";
 			return $this->db->query($sql);
 		}
-		public function updateKendaraanRental($id, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter, $tahun)
+		public function updateKendaraanRental($id, $noTNKB, $merk, $type, $jenis, $warna, $bbm, $liter, $tahun, $sewa)
 		{
-			$sql = "UPDATE SPJ_KENDARAAN_REKANAN SET NoTNKB = '$noTNKB', Merk = '$merk', Type='$type', Kategori = '$jenis', warna='$warna', BahanBakar = '$bbm', BBMPerLiter = '$liter', Tahun='$tahun' WHERE ID = $id";
+			$sql = "UPDATE SPJ_KENDARAAN_REKANAN SET NoTNKB = '$noTNKB', Merk = '$merk', Type='$type', Kategori = '$jenis', warna='$warna', BahanBakar = '$bbm', BBMPerLiter = '$liter', Tahun='$tahun', BiayaSewa = '$sewa' WHERE ID = $id";
 			return $this->db->query($sql);
 		}
 		public function hapusKendaraanRental($id)

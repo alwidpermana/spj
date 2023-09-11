@@ -49,17 +49,24 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12 text-center">
-                      <img src="<?=base_url()?>assets/image/avatar/<?=$key->FOTO?>" class="img-circle elevation-2" alt="User Image" width="150px" height="150px">
+                      <?php 
+                      $username = $this->session->userdata("username");
+                      if ($this->session->userdata("photo") == ''): ?>
+                          
+                      <?php else: ?>
+                        <img src="http://192.168.0.213:8080/FOTO/<?=$this->session->userdata("photo")?>" class="img-circle elevation-2" alt="User Image" width="150px" height="150px">    
+                      <?php endif ?>
+                      <!-- <img src="<?=base_url()?>assets/image/avatar/<?=$key->FOTO?>" class="img-circle elevation-2" alt="User Image" width="150px" height="150px"> -->
                     </div>
                   </div>
-                  <br>
+                  <!-- <br>
                   <div class="row">
                     <div class="col-md-12 text-center">
                       <button type="button" class="btn bg-orange btn-kps btn-sm" id="btnEditFoto">
                         Edit Avatar
                       </button>
                     </div>
-                  </div>
+                  </div> -->
                 </div>
               </div>
             </div>

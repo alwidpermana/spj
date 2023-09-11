@@ -6,7 +6,14 @@
           <div class="col-md-12">
             <center>
               <div class="image">
-                <img src="<?=base_url()?>assets/image/avatar/<?=$this->session->userdata("AVATAR")?>" class="img-circle elevation-2" alt="User Image">
+                <!-- <img src="<?=base_url()?>assets/image/avatar/<?=$this->session->userdata("AVATAR")?>" class="img-circle elevation-2 photo_user" alt="User Image"> -->
+                <?php 
+                $username = $this->session->userdata("username");
+                if ($this->session->userdata("photo") == ''): ?>
+                    
+                <?php else: ?>
+                  <img src="http://192.168.0.213:8080/FOTO/<?=$this->session->userdata("photo")?>" class="img-circle elevation-2 photo_user" alt="User Image">    
+                <?php endif ?>
               </div>
             </center>
           </div>

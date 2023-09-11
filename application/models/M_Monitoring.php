@@ -297,16 +297,22 @@ class M_Monitoring extends CI_Model {
 					LEFT JOIN
 					(
 						SELECT
-							NoTNKB,
-							BBMPerLiter
+							*
 						FROM
-							[dbo].[SPJ_KENDARAAN_REKANAN]
-						UNION
-						SELECT
-							NoTNKB,
-							BBMPerLiter
-						FROM
-							GA.[dbo].[GA_TKendaraan]
+						(
+							SELECT
+								NoTNKB,
+								BBMPerLiter
+							FROM
+								[dbo].[SPJ_KENDARAAN_REKANAN]
+							UNION
+							SELECT
+								NoTNKB,
+								BBMPerLiter
+							FROM
+								GA.[dbo].[GA_TKendaraan]
+						)Q1
+						WHERE NoTNKB != '-'
 					)Q13 ON Q1.NO_TNKB = Q13.NoTNKB
 					WHERE 
 						NO_SPJ LIKE '%$search%' OR
@@ -2668,23 +2674,105 @@ class M_Monitoring extends CI_Model {
 				)Q4 ON Q1.NO_GENERATE = Q4.DETAIL_TRANSAKSI";
 		return $this->db->query($sql);
 	}
-	public function dataSPJByGenerate($noGenerate, $where)
+	public function dataSPJByGenerate($noGenerate)
 	{
 		$sql = "SELECT
-					ROW_NUMBER() over (partition by 'SAMA' order by TGL_SPJ asc) AS NOMOR,
 					*
 				FROM
 				(
 					SELECT
-						ROW_NUMBER() over (partition by NO_GENERATE order by TGL_SPJ asc) AS NO_URUT,
+						NOMOR,
 						TGL_SPJ,
-						NO_SPJ
+						Q1.NO_SPJ,
+						ISNULL(KASBON_BBM, 0) + ISNULL(TOTAL_UANG_JALAN, 0) + ISNULL(TOTAL_UANG_LAINNYA, 0) + ISNULL(TOTAL_UANG_KENDARAAN, 0) + ISNULL(BT_US1, 0) + ISNULL(BT_US2, 0) + ISNULL(BT_UM, 0) + KASBON_UANG_SAKU + KASBON_UANG_MAKAN AS BIAYA_SPJ,
+						 ISNULL(TOTAL_VOUCHER_BBM, 0) AS TOTAL_VOUCHER_BBM,
+						 ISNULL(TOTAL_UANG_TOL, 0) AS TOTAL_UANG_TOL
 					FROM
-						SPJ_PENGAJUAN
-					WHERE
-						NO_GENERATE = '$noGenerate'
+					(
+						SELECT
+							ROW_NUMBER() over (partition by 'SAMA' order by TGL_SPJ asc) AS NOMOR,
+							NO_SPJ,
+							TGL_SPJ,
+							CASE 
+								WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
+								ELSE 0
+							END AS TOTAL_VOUCHER_BBM,
+							CASE 
+								WHEN MEDIA_UANG_BBM = 'Voucher' THEN 0
+								ELSE TOTAL_UANG_BBM
+							END AS KASBON_BBM,
+							TOTAL_UANG_TOL,
+							TOTAL_UANG_JALAN,
+							TOTAL_UANG_LAINNYA,
+							TOTAL_UANG_KENDARAAN
+						FROM
+							SPJ_PENGAJUAN
+						WHERE
+							NO_GENERATE = '$noGenerate'
+					)Q1
+					INNER JOIN
+					(
+						SELECT
+							NO_PENGAJUAN,
+							CASE 
+								WHEN KEPUTUSAN_US1 = 'OK' THEN UANG_SAKU1 * JML_PIC_SAKU
+								ELSE 0
+							END AS BT_US1, 
+							CASE 
+								WHEN KEPUTUSAN_US2 = 'OK' THEN UANG_SAKU2 * JML_PIC_SAKU
+								ELSE 0
+							END AS BT_US2,
+							CASE 
+								WHEN KEPUTUSAN_MAKAN = 'OK' THEN UANG_MAKAN * JML_PIC_MAKAN
+								ELSE 0
+							END AS BT_UM,
+							KASBON_UANG_SAKU,
+							KASBON_UANG_MAKAN
+						FROM
+						(
+							SELECT
+								NO_PENGAJUAN,
+								SUM(JML_PIC) AS JML_PIC_SAKU,
+								COUNT(NIK) AS JML_PIC_MAKAN,
+								SUM(UANG_SAKU) AS KASBON_UANG_SAKU,
+								SUM(UANG_MAKAN) AS KASBON_UANG_MAKAN
+							FROM
+							(
+								SELECT
+									NIK,
+									NO_PENGAJUAN,
+									CASE 
+										WHEN Kendaraan = 'Rental' AND JENIS_PIC = 'Sopir' THEN 0
+										ELSE 1
+									END AS JML_PIC,
+									UANG_SAKU,
+									UANG_MAKAN
+								FROM
+									SPJ_PENGAJUAN_PIC a
+								INNER JOIN
+									SPJ_PENGAJUAN b
+								ON a.NO_PENGAJUAN = b.NO_SPJ
+							)Q1
+							GROUP BY NO_PENGAJUAN
+						)Q1
+						LEFT JOIN
+						(
+							SELECT
+								NO_SPJ AS NO_BT,
+								UANG_SAKU1,
+								UANG_SAKU2,
+								UANG_MAKAN,
+								STATUS_US1,
+								STATUS_US2,
+								STATUS_MAKAN,
+								KEPUTUSAN_US1,
+								KEPUTUSAN_US2,
+								KEPUTUSAN_MAKAN
+							FROM
+								SPJ_BIAYA_TAMBAHAN
+						)Q2 ON Q1.NO_PENGAJUAN = Q2.NO_BT
+					)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
 				)Q1
-				$where
 				ORDER BY TGL_SPJ ASC";
 		return $this->db->query($sql);
 	}
@@ -3127,6 +3215,103 @@ class M_Monitoring extends CI_Model {
 				a.ID_KOTA = b.ID_KOTA
 				WHERE
 					ID_JENIS_SPJ = $id";
+		return $this->db->query($sql);
+	}
+	public function getMonitoringSortir($search)
+	{
+		$sql = "SELECT
+					ROW_NUMBER() over (partition by 'SAMA' order by TGL_SPJ, ID_SPJ DESC) AS NO_URUT,
+					Q1.*,
+					JML_SORTIR,
+					TOTAL_UANG_SAKU,
+					TOTAL_UANG_MAKAN,
+					JML_PIC,
+					ISNULL(UANG_SAKU1, 0) AS UANG_SAKU1,
+					ISNULL(UANG_SAKU2, 0) AS UANG_SAKU2,
+					ISNULL(UANG_MAKAN, 0) AS UANG_MAKAN
+				FROM
+				(
+					SELECT
+						a.ID_SPJ,
+						a.NO_SPJ,
+						a.TGL_SPJ,
+						CASE 
+							WHEN STATUS_SPJ = 'CLOSE' AND NO_GENERATE IS NULL THEN 'Waiting For Generate'
+							ELSE STATUS_SPJ
+						END AS STATUS_SPJ,
+						b.NAMA_GROUP,
+						a.VOUCHER_BBM,
+						a.NO_GENERATE,
+						TOTAL_UANG_BBM,
+						TOTAL_UANG_TOL,
+						TOTAL_UANG_JALAN,
+						TOTAL_UANG_KENDARAAN,
+						ISNULL(TOTAL_UANG_LAINNYA, 0) AS TOTAL_UANG_LAINNYA,
+						MEDIA_UANG_BBM,
+						MEDIA_UANG_TOL,
+						MEDIA_UANG_JALAN,
+						MEDIA_UANG_KENDARAAN,
+						MEDIA_UANG_SAKU,
+						MEDIA_UANG_MAKAN
+					FROM
+						SPJ_PENGAJUAN a
+					INNER JOIN
+						SPJ_GROUP_TUJUAN b ON
+					a.GROUP_ID = b.ID_GROUP
+					WHERE
+						JENIS_ID = 2 AND
+						STATUS_DATA  = 'SAVED'
+				)q1
+				INNER JOIN
+				(
+					SELECT
+						COUNT(NO_PENGAJUAN) AS JML_SORTIR,
+						NO_PENGAJUAN
+					FROM
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						SORTIR = 'Y'
+					GROUP BY NO_PENGAJUAN 
+				)q2 ON q1.NO_SPJ = q2.NO_PENGAJUAN
+				INNER JOIN
+				(
+					SELECT
+						SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+						SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN,
+						COUNT(NO_PENGAJUAN) AS JML_PIC,
+						NO_PENGAJUAN
+					FROM
+						SPJ_PENGAJUAN_PIC
+					GROUP BY NO_PENGAJUAN
+				)q3 ON q1.NO_SPJ = q3.NO_PENGAJUAN
+				LEFT JOIN
+				(
+					SELECT
+						UANG_SAKU1,
+						UANG_SAKU2,
+						UANG_MAKAN,
+						NO_SPJ
+					FROM
+						SPJ_BIAYA_TAMBAHAN
+				)q4 ON q1.NO_SPJ = q4.NO_SPJ
+				LEFT JOIN
+				(
+					SELECT
+						NO_SPJ
+					FROM
+						SPJ_PENGAJUAN a
+					INNER JOIN
+						SPJ_PENGAJUAN_PIC b ON
+					a.NO_SPJ = b.NO_PENGAJUAN
+					WHERE
+						KENDARAAN = 'Rental' AND
+						OBJEK = 'Rental' AND
+						JENIS_PIC = 'Sopir'
+				)q5 ON q1.NO_SPJ =q5.NO_SPJ
+				WHERE
+					q1.NO_SPJ LIKE '%%' OR
+					q1.NO_GENERATE LIKE '%%'
+				ORDER BY TGL_SPJ, ID_SPJ DESC";
 		return $this->db->query($sql);
 	}
 }

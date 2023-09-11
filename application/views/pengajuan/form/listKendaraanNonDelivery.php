@@ -26,8 +26,7 @@
 				<div class="card <?=$key->NO_SPJ == null ? '' : 'bg-kps'?>" class="kartuEuy">
 				  
 				  <label>
-				  	<?php if ($key->NO_SPJ == null): ?>
-				  		<input 
+				  	<input 
 					    	type="radio" 
 					    	name="pilihKendaraan" 
 					    	class="pilihKendaraan" 
@@ -37,12 +36,14 @@
 					    	inv = '<?=$key->NoInventaris?>'>
 					    <img 
 					    	src="<?=base_url()?>assets/image/<?=$key->NAMA_FILE == null || $key->NAMA_FILE == 'N'?'car.png':'/foto-kendaraan/'.$key->NAMA_FILE?>" 
-					    	class="card-img-top">	
+					    	class="card-img-top">
+				  	<!-- <?php if ($key->NO_SPJ == null): ?>
+				  			
 				  	<?php else: ?>
 				  		<img 
 					    	src="<?=base_url()?>assets/image/<?=$key->NAMA_FILE == null || $key->NAMA_FILE == 'N'?'car.png':'/foto-kendaraan/'.$key->NAMA_FILE?>" 
 					    	class="card-img-top">
-				  	<?php endif ?>
+				  	<?php endif ?> -->
 				    
 				  </label>
 				  

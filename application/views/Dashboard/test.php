@@ -37,7 +37,7 @@
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                The body of the card
+                The body of the card <?=date("l", strtotime("2023-07-23"))?>
               </div>
               <!-- /.card-body -->
             </div>

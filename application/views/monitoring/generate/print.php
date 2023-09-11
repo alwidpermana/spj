@@ -151,49 +151,47 @@
     </div>
     <hr>
     <div class="row">
-      <div class="col-6">
-        <?php if (count($ganjil)>0): ?>
-          <table class="tableTest" border="1" width="100%">
-            <thead class="text-center">
+      <div class="col-12">
+        <table class="tableTest" border="1" width="100%">
+          <thead class="text-center">
+            <tr>
+              <th>No</th>
+              <th>Tanggal SPJ</th>
+              <th>No SPJ</th>
+              <th>Biaya SPJ</th>
+              <th>Biaya TOL</th>
+              <th>Biaya Voucher BBM</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            <?php 
+            $spj = 0;
+            $bbm = 0;
+            $tol = 0;
+            foreach ($data as $key): 
+              $spj+= $key->BIAYA_SPJ;
+              $bbm += $key->TOTAL_VOUCHER_BBM;
+              $tol += $key->TOTAL_UANG_TOL;
+            ?>
               <tr>
-                <th>No</th>
-                <th>Tanggal SPJ</th>
-                <th>No SPJ</th>
+                <td><?=$key->NOMOR?></td>
+                <td><?=date("d F Y", strtotime($key->TGL_SPJ))?></td>
+                <td><?=$key->NO_SPJ?></td>
+                <td>Rp. <?=number_format($key->BIAYA_SPJ)?></td>
+                <td>Rp. <?=number_format($key->TOTAL_UANG_TOL)?></td>
+                <td>Rp. <?=number_format($key->TOTAL_VOUCHER_BBM)?></td>
               </tr>
-            </thead>
-            <tbody class="text-center">
-              <?php foreach ($ganjil as $gj): ?>
-                <tr>
-                  <td><?=$gj->NO_URUT?></td>
-                  <td><?=date("d F Y", strtotime($gj->TGL_SPJ))?></td>
-                  <td><?=$gj->NO_SPJ?></td>
-                </tr>
-              <?php endforeach ?>
-            </tbody>
-          </table>    
-        <?php endif ?>
-      </div>
-      <div class="col-6">
-        <?php if (count($genap)>0): ?>
-          <table class="tableTest" border="1" width="100%">
-            <thead class="text-center">
-              <tr>
-                <th>No</th>
-                <th>Tanggal SPJ</th>
-                <th>No SPJ</th>
-              </tr>
-            </thead>
-            <tbody class="text-center">
-              <?php foreach ($genap as $gp): ?>
-                <tr>
-                  <td><?=$gp->NO_URUT?></td>
-                  <td><?=date("d F Y", strtotime($gp->TGL_SPJ))?></td>
-                  <td><?=$gp->NO_SPJ?></td>
-                </tr>
-              <?php endforeach ?>
-            </tbody>
-          </table>    
-        <?php endif ?>
+            <?php endforeach ?>
+          </tbody>
+          <tfoot>
+            <tr class="text-center">
+              <th class="text-right" colspan="3">Total:</th>
+              <th><?=number_format($spj)?></th>
+              <th><?=number_format($tol)?></th>
+              <th><?=number_format($bbm)?></th>
+            </tr>
+          </tfoot>
+        </table>    
       </div>
     </div>
     

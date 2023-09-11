@@ -144,7 +144,7 @@
     getTabelRekanan();
     $('#btnTambahRekanan').on('click', function(){
       $('#modal-rekanan').modal("show")
-      $('#inputIdRekanan').val();
+      $('#inputIdRekanan').val("");
       setKodeRekanan();
     });
     var saveRekanan = $('.saveRekanan').ladda();

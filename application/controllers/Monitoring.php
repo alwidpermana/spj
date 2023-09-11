@@ -655,10 +655,7 @@ class Monitoring extends CI_Controller {
 		$master = $this->M_Monitoring->getDataPrintSPJ($id)->row();
 		$data['master'] = $master;
 		$noGenerate = $master->NO_GENERATE;
-		$ganjil = " WHERE NO_URUT %2 <> 0";
-		$genap = " WHERE NO_URUT %2 = 0 ";
-		$data['ganjil'] = $this->M_Monitoring->dataSPJByGenerate($noGenerate, $ganjil)->result();
-		$data['genap'] = $this->M_Monitoring->dataSPJByGenerate($noGenerate, $genap)->result();
+		$data['data'] = $this->M_Monitoring->dataSPJByGenerate($noGenerate)->result();
 		$this->load->view("monitoring/generate/print", $data);
 	}
 	public function getTempBBM_SPJ()
@@ -1016,6 +1013,18 @@ class Monitoring extends CI_Controller {
 		$data['tambahan'] = $this->M_Data_Master->viewTambahanUangSaku(" WHERE JENIS_ID = $filJenisSPJ")->result();
 		$data['jenis'] = $filJenisSPJ;
 		$this->load->view("monitoring/konfigurasi/biaya_tambahan", $data);
+	}
+	public function sortir()
+	{
+		$data['side'] = 'monitoring-retail';
+		$data['page'] = 'Monitoring Retail';
+		$this->load->view("monitoring/retail/index", $data);
+	}
+	public function getMonitoringSortir()
+	{
+		$filSearch = $this->input->get("filSearch");
+		$data['data'] = $this->M_Monitoring->getMonitoringSortir($filSearch)->result();
+		$this->load->view("monitoring/retail/tabel", $data);
 	}
 
 

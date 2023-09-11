@@ -1676,15 +1676,16 @@
     var inputTglSPJ = $('#inputTglSPJ').val();
     var inputJenisPIC = $('#inputJenisPIC').val();
     var inputSubjek = $('#inputSubjek').val();
+    var inputNoSPJ = $('#inputNoSPJ').val();
     if (inputGroupTujuan == '11') {
-      $('#inputUangMakan').val(0);
-      $('#showUangMakan').val(formatRupiah(Number(0).toFixed(0), 'Rp. '));
-      $('#keteranganUM').html("Group Tujuan Lokal Lembur Tidak Mendapatkan Uang Makan");
+      $('#inputUangMakan').val(10000);
+      $('#showUangMakan').val(formatRupiah(Number(10000).toFixed(0), 'Rp. '));
+      $('#keteranganUM').html("");
     } else {
       $.ajax({
         type: 'get',
         dataType:'json',
-        data:{inputJenisSPJ, inputGroupTujuan, inputPIC, inputTglSPJ, inputJenisPIC, inputSubjek},
+        data:{inputJenisSPJ, inputGroupTujuan, inputPIC, inputTglSPJ, inputJenisPIC, inputSubjek, inputNoSPJ},
         url: url+'/pengajuan/hitungUangMakan',
         cache: false,
         async: true,

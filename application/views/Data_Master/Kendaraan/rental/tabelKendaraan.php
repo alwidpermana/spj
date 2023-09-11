@@ -8,6 +8,7 @@
 			<th>Warna</th>
 			<th>Bahan Bakar</th>
 			<th>KM/Liter</th>
+			<th>Biaya Sewa</th>
 			<th>Tahun</th>
 			<th></th>
 		</tr>
@@ -21,7 +22,8 @@
 				<td><?=$key->Kategori?></td>
 				<td><?=$key->Warna?></td>
 				<td><?=$key->BahanBakar?></td>
-				<td><?=number_format($key->BBMPerLiter, 2)?></td>
+				<td><?=$key->BBMPerLiter?></td>
+				<td>Rp. <?=number_format($key->BiayaSewa)?></td>
 				<td><?=$key->Tahun?></td>
 				<td>
 					<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
@@ -39,6 +41,7 @@
                     		liter="<?=$key->BBMPerLiter?>" 
                     		noTNKB ="<?=$key->NoTNKB?>"
                     		tahun = "<?=$key->Tahun?>"
+                    		sewa="<?=$key->BiayaSewa?>"
                     		href="javascript:;">
                     		Edit
                     	</a>

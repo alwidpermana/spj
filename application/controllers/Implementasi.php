@@ -60,14 +60,17 @@ class Implementasi extends CI_Controller {
 		$scan = $this->input->get("scan");
 		$data = $this->db->query("SELECT ID_SPJ, STATUS_PERJALANAN, NO_SPJ, STATUS_SPJ FROM SPJ_PENGAJUAN WHERE QR_CODE = '$scan'")->row();
 		date_default_timezone_set('Asia/Jakarta');
-    $jam = date('G');
-    if ($jam >= 7 && $jam <= 17) {
-    	$kerja = true;
-    } else {
-    	$kerja= false;
-    }
+	    $jam = date('G');
+	    $weekend = date("l");
+	    if ($weekend =='Saturday' || $weekend == 'Sunday') {
+	    	$kerja = false;
+	    }elseif ($jam >= 7 && $jam <= 17) {
+	    	$kerja = true;
+	    } else {
+	    	$kerja= false;
+	    }
 
-    $response = array('kerja' =>$kerja, 'ID_SPJ'=>$data->ID_SPJ, 'STATUS_PERJALANAN'=>$data->STATUS_PERJALANAN, 'NO_SPJ'=>$data->NO_SPJ, 'STATUS_SPJ'=>$data->STATUS_SPJ);
+    $response = array('kerja' =>$kerja, 'ID_SPJ'=>$data->ID_SPJ, 'STATUS_PERJALANAN'=>$data->STATUS_PERJALANAN, 'NO_SPJ'=>$data->NO_SPJ, 'STATUS_SPJ'=>$data->STATUS_SPJ,'weekend'=>$weekend);
 		echo json_encode($response);
 	}
 	public function getSPJ()
@@ -128,7 +131,8 @@ class Implementasi extends CI_Controller {
 		$inputKMIn = $this->input->post("inputKMIn");
 
 		$getHistory=$this->M_Implementasi->getHistoryInOutLokal($inputNoSPJ);
-		$km = $getHistory->num_rows()==0?$inputKMOut:$inputKMIn;
+		// $km = $getHistory->num_rows()==0?$inputKMOut:$inputKMIn;
+		$km = $inputKMOut;
 		if ($getHistory->num_rows()==0) {
 			$data = $this->M_Implementasi->saveValidasiOut($inputNoSPJ, $inputVerifikasiKendaraan, $inputKeteranganKendaraan, $inputKMOut);
 		}
@@ -153,7 +157,7 @@ class Implementasi extends CI_Controller {
 		$data = $this->M_Implementasi->deleteDataTemp($inputNoSPJ);
 		$data = $this->M_Implementasi->saveValidasiIn($inputNoSPJ, $inputVerifikasiKendaraan, $inputKeteranganKendaraan, $inputKMIn);
 		$data = $this->M_Implementasi->saveKMKendaraan($inputNoTNKB, $inputKMIn);
-		if ($inputGroupTujuan == '4') {
+		if ($inputGroupTujuan == '4' || $inputGroupTujuan == '10' || $inputGroupTujuan == '11') {
 			$this->M_Implementasi->saveHistoryInOut($inputNoSPJ, 'IN',$inputKMIn);
 		}
 		// $data = true;
@@ -974,13 +978,14 @@ class Implementasi extends CI_Controller {
 		$sewaKendaraan = 0;
 		$potonganPPh = 0;
 		$total = 0;
+		$pphPercent = $inputRekanan == 1 ? 0.02 : 0.025;
 		for ($i=0; $i <$jmlNoSPJ ; $i++) { 
 			$jmlSPJ +=1;
 			$this->db->query("UPDATE SPJ_PENGAJUAN SET NO_GENERATE_KENDARAAN = '$inputNoGenerate' WHERE NO_SPJ = '$inputSPJ[$i]'");
 		}
 
 		$sewaKendaraan = $jmlSPJ*250000;
-		$potonganPPh = $sewaKendaraan*0.25;
+		$potonganPPh = $sewaKendaraan*$pphPercent;
 		$totalBiayaRP = $sewaKendaraan - $potonganPPh;
 		$data = $this->M_Implementasi->saveGenerateSPJ($inputNoGenerate, $jmlSPJ, $totalBiayaRP, $inputJenis, 0, 0,$inputRekanan);
 		if ($data == true) {
@@ -1072,8 +1077,8 @@ class Implementasi extends CI_Controller {
 			    		$uangSaku1 = $biayaUangSaku1;
 			    		$uangSaku2 = $biayaUangSaku2;
 			    	}else{
-			    		$uangSaku1 = 69;
-			    		$uangSaku2 = 68;
+			    		$uangSaku1 = 0;
+			    		$uangSaku2 = 0;
 			    	}
 			    }
 			    

@@ -10,7 +10,15 @@
     <!-- Sidebar user (optional) -->
     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
       <div class="image">
-        <a href="javascript:;" class="d-block btnUser"><img src="<?=base_url()?>assets/image/avatar/<?=$this->session->userdata("AVATAR")?>" class="img-circle elevation-2" alt="User Image"></a>
+        <a href="javascript:;" class="d-block btnUser">
+          <?php 
+          $username = $this->session->userdata("username");
+          if ($this->session->userdata("photo") == ''): ?>
+              
+          <?php else: ?>
+            <img src="http://192.168.0.213:8080/FOTO/<?=$this->session->userdata("photo")?>" class="img-circle elevation-2 photo_user" alt="User Image">    
+          <?php endif ?>
+        </a>
       </div>
       <div class="info">
         <a href="javascript:;" class="d-block btnUser"><?=$this->session->userdata("NAMA")?></a>
@@ -407,6 +415,7 @@
                   </li>
                 </ul>
               </li>
+
               <?php 
               $nik = $this->session->userdata("NIK");
               $level = $this->session->userdata("LEVEL");
@@ -419,11 +428,17 @@
                 </li>  
               <?php endif ?>
               <li class="nav-item list-menu-open">
-                  <a href="<?=base_url()?>monitoring/keberangkatan" class="nav-link ">
-                    <i class="fas fa-clock nav-icon <?=substr($side, 11) == 'keberangkatan'?'text-dark':''?>" style="font-size: 11px;"></i>
-                    <p>Keberangkatan</p>
-                  </a>
-                </li>
+                <a href="<?=base_url()?>monitoring/keberangkatan" class="nav-link ">
+                  <i class="fas fa-clock nav-icon <?=substr($side, 11) == 'keberangkatan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Keberangkatan</p>
+                </a>
+              </li>
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>monitoring/sortir" class="nav-link ">
+                  <i class="fas fa-file nav-icon <?=substr($side, 11) == 'sortir'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Sortir</p>
+                </a>
+              </li>
             </ul>
           </li>
           <?php if ($this->session->userdata("LEVEL")<=2 || $this->session->userdata("LEVEL")==5): ?>

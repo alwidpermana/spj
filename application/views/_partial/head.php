@@ -17,6 +17,10 @@
       /*.navbar-kps{
   background-color: rgb(241, 250, 238);
 }*/
+.photo_user{
+    height: 35px !important;
+    width: 35px !important;
+}
 .template-paging .active{
   background-color: rgb(204, 88, 3) !important;  
   color: white !important;

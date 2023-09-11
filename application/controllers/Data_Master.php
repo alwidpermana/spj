@@ -708,10 +708,11 @@ class Data_Master extends CI_Controller {
 		$inputBahanBakar= $this->input->post("inputBahanBakar");
 		$inputLiter= $this->input->post("inputLiter");
 		$inputTahun = $this->input->post("inputTahun");
+		$inputBiayaSewa = $this->input->post("inputBiayaSewa");
 		if ($inputIdKendaraan == '') {
-			$data = $this->M_Data_Master->tambahKendaraanRental($inputRekananId, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter, $inputTahun);
+			$data = $this->M_Data_Master->tambahKendaraanRental($inputRekananId, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter, $inputTahun, $inputBiayaSewa);
 		}else{
-			$data = $this->M_Data_Master->updateKendaraanRental($inputIdKendaraan, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter, $inputTahun);
+			$data = $this->M_Data_Master->updateKendaraanRental($inputIdKendaraan, $inputNoTNKB, $inputMerk, $inputType, $inputJenis, $inputWarna, $inputBahanBakar, $inputLiter, $inputTahun, $inputBiayaSewa);
 		}
 		echo json_encode($data);
 	}

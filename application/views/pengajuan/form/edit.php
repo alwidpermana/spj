@@ -730,7 +730,8 @@
                                             <option value="0">Rp. 0</option>
                                             <option value="10000" <?=round($key->TOTAL_UANG_TOL) == '10000' ? 'selected':''?>>Rp. 10,000</option>
                                             <option value="25000" <?=round($key->TOTAL_UANG_TOL) == '25000' ? 'selected':''?>>Rp. 25,000</option>
-                                            <option value="36000" <?=round($key->TOTAL_UANG_TOL) == '36000' ? 'selected':''?>>Rp. 36,000</option>
+                                            <option value="27000" <?=round($key->TOTAL_UANG_TOL) == '27000' ? 'selected':''?>>Rp. 27,000</option>
+                                            <option value="4000" <?=round($key->TOTAL_UANG_TOL) == '4000' ? 'selected':''?>>Rp. 4,000</option>
                                           </select>
                                       </div>
                                       <div class="tambahUangJalanAbnormal">
@@ -1023,9 +1024,11 @@
               <div class="row">
                 <div class="col-md-12">
                   <div class="form-group">
-                    <label>Tujuan Rekanan</label>
+                    <label>Tujuan Rekanan/Cabang</label>
                     <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan2">
                       <option value="Solokan Jeruk">Solokan Jeruk</option>
+                      <option value="Dwipapuri">Dwipapuri</option>
+                      <option value="Pandawa 5">Pandawa 5</option>
                     </select>
                   </div>
                 </div>

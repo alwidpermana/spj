@@ -815,7 +815,7 @@ foreach ($data as $key): ?>
 <div class="row">
   <input type="hidden" id="inputGroupTujuan" value="<?=$key->GROUP_ID?>">
   <div class="col-md-8 offset-md-2">
-    <?php if ($key->GROUP_ID == '4'): ?>
+    <?php if ($key->GROUP_ID == '4' || $key->GROUP_ID == '10'|| $key->GROUP_ID == '11'): ?>
       <?php if ($key->STATUS_SPJ == 'OPEN'): ?>
         <?php if ($key->STATUS_PERJALANAN == null || $key->STATUS_PERJALANAN == 'IN'): ?>
           <?php if ($key->LOKAL_SELESAI == null && $key->TGL_SPJ >= date("Y-m-d")): ?>
@@ -1113,7 +1113,7 @@ foreach ($data as $key): ?>
     var inputKeteranganKendaraan = $('#inputKeteranganKendaraan').val();
     var inputKMOut = $('#inputKMOut').val();
     var inputGroupTujuan = $('#inputGroupTujuan').val();
-    var urlTujuan = inputGroupTujuan == '4'?'saveValidasiOutLokal' :'saveValidasiOut';
+    var urlTujuan = inputGroupTujuan == '4' || inputGroupTujuan == '10' || inputGroupTujuan == '11'?'saveValidasiOutLokal' :'saveValidasiOut';
     var inputKMIn = $('#inputKMIn').val();
     var inputNoTNKB = $('#inputNoTNKB').val();
     if (inputVerifikasiKendaraan == '') {
@@ -1187,7 +1187,7 @@ foreach ($data as $key): ?>
       async: true,
       success: function(data){
         berhasil();
-        if (inputGroupTujuan == '4') {
+        if (inputGroupTujuan == '4' || inputGroupTujuan == '10' || inputGroupTujuan == '11') {
           $('#modal-bulak_balik').modal("show");
         }else{
           location.reload();  

@@ -16,7 +16,8 @@
 						JENIS_KELAMIN,
 						KODE_DEPT,
 						SUB_DEPARTEMEN,
-						SubDepartemen2
+						SubDepartemen2,
+						PHOTO
 					FROM
 					(
 						SELECT
@@ -49,7 +50,8 @@
 								WHEN Subdepartemen2 ='' THEN Subdepartemen1
 								WHEN Subdepartemen2 ='-' THEN Subdepartemen1
 								ELSE Subdepartemen1+', '+Subdepartemen2
-							END AS SUB_DEPARTEMEN
+							END AS SUB_DEPARTEMEN,
+							PHOTO
 						FROM
 						dbhrm.dbo.tbPegawai
 					)Q2 ON Q1.NIK = Q2.nik

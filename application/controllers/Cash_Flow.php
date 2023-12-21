@@ -337,7 +337,7 @@ class Cash_Flow extends CI_Controller {
 	{
 		$id = $this->input->post("id");
 		$jumlah = $this->input->post("jumlah");
-		$kasbon = $this->input->post("kasbon") == 'Kasbon BBM ' ? 'Kasbon Voucher BBM' : $this->input->post("kasbon");
+		$kasbon = $this->input->post("kasbon") == 'Kasbon Voucher BBM' || $this->input->post("kasbon") == 'Kasbon Voucher BBM Katustiwa' ? $this->input->post("kasbon") : $this->input->post("kasbon");
 		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($kasbon, 'SUB KAS');
 		$saldo = 0;
 		foreach ($getSaldo->result() as $key) {
@@ -384,12 +384,10 @@ class Cash_Flow extends CI_Controller {
 		$jenisKasbon = $this->input->post("jenisKasbon");
 		$jenisSPJ = $this->input->post("jenisSPJ");
 		$jumlah = $this->input->post("jumlah");
-		if ($jenisKasbon == 'Kasbon BBM') {
-			$kasbon = 'Kasbon Voucher BBM';
-		}elseif ($jenisKasbon == 'Biaya Admin TOL') {
+		if ($jenisKasbon == 'Biaya Admin TOL') {
 			$kasbon = 'Kasbon TOL '.$jenisSPJ;
 		}else{
-			$kasbon = $jenisKasbon.' '.$jenisSPJ;
+			$kasbon = $jenisKasbon == 'Kasbon Voucher BBM Rest Area' || $jenisKasbon == 'Kasbon Voucher BBM Katulistiwa' ? $jenisKasbon:$jenisKasbon.' '.$jenisSPJ;
 		}
 		// $kasbon = $jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':$jenisKasbon.' '.$jenisSPJ;
 
@@ -422,6 +420,78 @@ class Cash_Flow extends CI_Controller {
 			$this->M_Cash_Flow->adjustmentUbahRekapSaldo($jenis, $kas, $rp);
 		}
 		echo json_encode($data);
+	}
+	public function mutasi()
+	{
+		$data['side'] = 'cash_flow-mutasi';
+		$data['page'] = 'Mutasi Sub Kas';
+		$this->load->view("cash_flow/mutasi/index", $data);
+	}
+	public function dataMutasi()
+	{
+		$data['data'] = $this->M_Cash_Flow->getDataMutasi()->result();
+		$this->load->view("cash_flow/mutasi/tabel", $data);
+	}
+	public function saveMutasi()
+	{
+		$inputId = $this->input->post("inputID");
+		$inputDari = $this->input->post("inputDari");
+		$inputKe = $this->input->post("inputKe");
+		$inputRP = round($this->input->post("inputRP"));
+
+		if ($inputDari == $inputKe) {
+			$data = true;
+			$status = 'warning';
+			$message = 'Mutasi Tidak bisa dilakukan dengan sub kas yang sama';
+			$sub_message="pilih sumber atau tujuan";
+		}elseif ($inputRP<=0) {
+			$data = true;
+			$status = 'warning';
+			$message = 'Isi Jumlah Mutasi lebih dari 0';
+			$sub_message="";
+		}else{
+			if ($inputId == '') {
+				$noMutasi = $this->M_Cash_Flow->getNoMutasi();
+				$data = $this->M_Cash_Flow->saveMutasi($inputDari, $inputKe, $inputRP, $noMutasi);
+			}else{
+				$data = $this->M_Cash_Flow->updateMutasi($inputDari, $inputKe, $inputRP, $inputId);
+			}
+
+			if ($data == true) {
+				$status = 'success';
+				$message="Berhasil melakukan Mutasi";
+				$sub_message = '';
+			}
+		}
+		$response = array('data' =>$data ,'status'=>$status,'message'=>$message,'sub_message'=>$sub_message);
+		echo json_encode($response);
+	}
+	public function approveMutasi()
+	{
+		$id = $this->input->post("id");
+		$getMutasi = $this->db->query("SELECT * FROM SPJ_PENGAJUAN_MUTASI_SALDO WHERE ID = $id")->row();
+		$dari = $getMutasi->DARI;
+		$ke = $getMutasi->KE;
+		$rp = $getMutasi->RP;
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenisSubKas($dari)->row();
+		if ($rp>$getSaldo->SALDO) {
+			$data = true;
+			$status = 'warning';
+			$message = 'Saldo '.$dari.' tidak mencukupi untuk melakukan mutasi';
+			$sub_message = "perkecil nominal mutasinya";
+		}else{
+			$data = $this->M_Cash_Flow->approveMutasi($id);
+			if ($data == true) {
+				$this->M_Cash_Flow->saveSubKas($dari,'CREDIT', $rp, 'MUTASI', $id,'SUMBER');
+				$this->M_Cash_Flow->saveSubKas($ke,'DEBIT', $rp, 'MUTASI', $id,'TUJUAN');				
+				$message= 'Berhasil Approved Mutasi';
+				$sub_message = '';
+				$status = 'success';
+			}
+
+		}
+		$response = array('data' =>$data ,'status'=>$status,'message'=>$message,'sub_message'=>$sub_message);		
+		echo json_encode($response);
 	}
 	
 }

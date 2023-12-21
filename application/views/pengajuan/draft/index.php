@@ -86,7 +86,8 @@
     var total = $(this).attr("total");
     var kendaraan = $(this).attr("kendaraan");
     var jenisId = $(this).attr("jenisId");
-    
+    var bbm = $(this).attr("bbm")
+    var mediaBBM = $(this).attr("mediaBBM");
     Swal.fire({
         title: 'Apakah Anda Yakin Approve SPJ Ini?',
         text: "Pastikan Biaya Kasbon dan Data lainnya Sudah Sesuai",
@@ -113,7 +114,7 @@
               }else if(data.JML_PIC <= 0){
                 Swal.fire("Data PIC Masih Kosong!","Mohon Untuk Menambahkan Data PIC","warning")
               }else{
-                cekAdaDriver(inputNoSPJ, id, total, kendaraan, jenisId);
+                cekAdaDriver(inputNoSPJ, id, total, kendaraan, jenisId, bbm, mediaBBM);
               }
             },
             error: function(data){
@@ -166,7 +167,7 @@
     })
   }
 
-  function cekAdaDriver(inputNoSPJ, id, total, kendaraan, jenisId) {
+  function cekAdaDriver(inputNoSPJ, id, total, kendaraan, jenisId, bbm, mediaBBM) {
     console.log(inputNoSPJ)
     $.ajax({
       type:'get',
@@ -182,7 +183,7 @@
             
         // }
         if (parseInt(data)>0) {
-          cekSaldo(inputNoSPJ, id, total, kendaraan, jenisId);
+          cekSaldo(inputNoSPJ, id, total, kendaraan, jenisId, bbm, mediaBBM);
         } else {
           Swal.fire("Tidak Terdapat Driver Pada SPJ Ini!","PIC yang di daftarkan Tidak ada yang memiliki otoritas Driver!","warning")
         }
@@ -193,7 +194,7 @@
       }
     })
   }
-  function cekSaldo(inputNoSPJ, id, total, kendaraan, inputJenisSPJ) {
+  function cekSaldo(inputNoSPJ, id, total, kendaraan, inputJenisSPJ, bbm, mediaBBM) {
     
 
     var kasbonSPJ =total;
@@ -211,12 +212,12 @@
         console.log(kasbonSPJ)
         console.log(data.saldoSPJ)
         if (inputJenisSPJ == '3') {
-          approveSPJ(inputNoSPJ, id, total, kendaraan, inputJenisSPJ)
+          approveSPJ(inputNoSPJ, id, total, kendaraan, inputJenisSPJ, bbm, mediaBBM)
         }else{
           if (parseInt(kasbonSPJ) >= parseInt(data.saldoSPJ)) {
             Swal.fire("Kasbon SPJ Melebihi Jumlah Saldo Sub Kas!","Hubungi PIC Terkait","warning")
           }else{
-            approveSPJ(inputNoSPJ, id, total, kendaraan, inputJenisSPJ);
+            approveSPJ(inputNoSPJ, id, total, kendaraan, inputJenisSPJ, bbm, mediaBBM);
           }  
         }
         
@@ -226,10 +227,10 @@
       }
     })
   }
-  function approveSPJ(inputNoSPJ, id, total, kendaraan, inputJenisSPJ) {
+  function approveSPJ(inputNoSPJ, id, total, kendaraan, inputJenisSPJ, bbm, mediaBBM) {
     $.ajax({
       type:'post',
-      data:{inputNoSPJ, id, total},
+      data:{inputNoSPJ, id, total, bbm, mediaBBM},
       dataType:'json',
       url:'approveSPJDraft',
       cache:false,

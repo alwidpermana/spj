@@ -56,7 +56,7 @@ class M_Pengajuan extends CI_Model {
         $this->db->query("DELETE FROM SPJ_PENGAJUAN_LOKASI WHERE NO_SPJ = '$noSPJ'");
         return $this->db->query($sql);
 	}
-	public function saveTemporaryPengajuan($jenis, $no, $namaFile, $inputTglSPJ, $inputJenisOther)
+	public function saveTemporaryPengajuan($jenis, $no, $namaFile, $inputTglSPJ, $inputJenisOther, $inputTempatKeberangkatan)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
@@ -69,7 +69,7 @@ class M_Pengajuan extends CI_Model {
 		if(file_exists($link)){
 			unlink($link);
 		}
-		$sql = "INSERT INTO SPJ_PENGAJUAN(TGL_INPUT, PIC_INPUT, STATUS_DATA, JENIS_ID, NO_SPJ, QR_CODE, TGL_SPJ, TUJUAN_OTHER)VALUES('$tanggal','$user','TEMPORARY','$jenis','$no','$namaFile','$inputTglSPJ','$jenisOther')";
+		$sql = "INSERT INTO SPJ_PENGAJUAN(TGL_INPUT, PIC_INPUT, STATUS_DATA, JENIS_ID, NO_SPJ, QR_CODE, TGL_SPJ, TUJUAN_OTHER, TEMPAT_KEBERANGKATAN)VALUES('$tanggal','$user','TEMPORARY','$jenis','$no','$namaFile','$inputTglSPJ','$jenisOther','$inputTempatKeberangkatan')";
 		return $this->db->query($sql);
 	}
 
@@ -806,7 +806,7 @@ class M_Pengajuan extends CI_Model {
         $inputTotalUangSaku = $this->input->post("inputTotalUangSaku");
         $inputTotalUangMakan = $this->input->post("inputTotalUangMakan");
         $inputBiayaKendaraan = $this->input->post("inputBiayaKendaraan");
-        
+        $inputKeteranganTujuan = $this->input->post("inputKeteranganTujuan");
         $inputBBM = $this->input->post("inputBBM");
         $inputJenisSPJ = $this->input->post("inputJenisSPJ");
         
@@ -821,9 +821,11 @@ class M_Pengajuan extends CI_Model {
         $inputJamBerangkat = $this->input->post("inputJamBerangkat");
         $inputTglPulang = $this->input->post("inputTglPulang");
         $inputJamPulang = $this->input->post("inputJamPulang");
+        $inputTempatKeberangkatan = $this->input->post("inputTempatKeberangkatan");
         $inputNoVoucher = $inputMediaBBM == 'Voucher'?$this->input->post("inputNoVoucher"):'';
         $rencanaBerangkat = $inputTglBerangkat.' '.$inputJamBerangkat;
         $rencanaPulang = $inputTglPulang.' '.$inputJamPulang;
+        $inputTempatSPBU = $this->input->post("inputTempatSPBU");
         $inputTambahanUangJalan = $this->input->post("inputTambahanUangJalan") == '' ? 0 :  $this->input->post("inputTambahanUangJalan");
         date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
@@ -881,7 +883,10 @@ class M_Pengajuan extends CI_Model {
         					STATUS_SPJ = '$statusSPJ',
         					TAMBAHAN_UANG_JALAN = '$inputTambahanUangJalan',
         					TOTAL_UANG_KENDARAAN = '$inputBiayaKendaraan',
-        					MEDIA_UANG_KENDARAAN = '$inputMediaKendaraan'
+        					MEDIA_UANG_KENDARAAN = '$inputMediaKendaraan',
+        					TEMPAT_KEBERANGKATAN = '$inputTempatKeberangkatan',
+        					KETERANGAN_TUJUAN = '$inputKeteranganTujuan',
+        					TEMPAT_SPBU = '$inputTempatSPBU'
         		WHERE
         			NO_SPJ = '$inputNoSPJ'");
        	if ($inputMediaBBM == 'Tanpa BBM' || $inputMediaBBM == 'Kasbon') {
@@ -1070,7 +1075,9 @@ class M_Pengajuan extends CI_Model {
 	{
 		$sql = "SELECT
 					ID_SPJ,
-					NAMA_JENIS 
+					NAMA_JENIS,
+					TOTAL_UANG_BBM,
+					MEDIA_UANG_BBM
 				FROM
 					SPJ_PENGAJUAN a
 				INNER JOIN SPJ_JENIS b 
@@ -1476,13 +1483,13 @@ class M_Pengajuan extends CI_Model {
 		$sql = "SELECT TGL_SPJ, JENIS_ID, JENIS_KENDARAAN FROM SPJ_PENGAJUAN WHERE NO_SPJ='$noSPJ'";
 		return $this->db->query($sql);
 	}
-	public function getNoVoucherAuto_V1()
+	public function getNoVoucherAuto_V1($tempat)
 	{
 		$bulan = date("m");
 		$tahun = date("y");
 		$getRomawi = $this->db->query("SELECT ROMAWI FROM SPJ_ROMAWI WHERE KODE = '$bulan'")->row();
 		$bulanRomawi = $getRomawi->ROMAWI;
-		$gabung = "KPSVC-".$bulanRomawi.''.$tahun."-";
+		$gabung = $tempat == 'Rest Area'?"KPSVC-".$bulanRomawi.''.$tahun."-":"KPSVC1-".$bulanRomawi.''.$tahun."-";
 		$cekNoDoc=$this->db->query("SELECT MAX
 											( RIGHT ( VOUCHER_BBM, 4 ) ) AS SETNODOC
 										FROM

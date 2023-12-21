@@ -324,8 +324,8 @@
             </tr>
           </table>
         </div>
-        <div class="col-md-3"></div>
-        <div class="col-sm-3">
+        <div class="col-3"></div>
+        <div class="col-3">
           <table class="tableTest text-center" width="100%" border="1" style="font-size: 16px !important;">
             <tr>
               <th colspan="2">Validasi & Cap Security</th>

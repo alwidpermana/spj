@@ -818,7 +818,7 @@ foreach ($data as $key): ?>
     <?php if ($key->GROUP_ID == '4' || $key->GROUP_ID == '10'|| $key->GROUP_ID == '11'): ?>
       <?php if ($key->STATUS_SPJ == 'OPEN'): ?>
         <?php if ($key->STATUS_PERJALANAN == null || $key->STATUS_PERJALANAN == 'IN'): ?>
-          <?php if ($key->LOKAL_SELESAI == null && $key->TGL_SPJ >= date("Y-m-d")): ?>
+          <?php if ($key->LOKAL_SELESAI == null): ?>
             <button type="button" class="btn bg-orange btn-kps btn-block saveCheckOut ladda-button" data-style="zoom-in" id="btnCheckOut">
               Check Out
             </button>    

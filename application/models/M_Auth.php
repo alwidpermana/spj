@@ -26,7 +26,8 @@
 							STATUS,
 							AVATAR,
 							OTORITAS_DLV,
-							OTORITAS_NDV
+							OTORITAS_NDV,
+							ISNULL(DWIPAPURI,'N' ) AS DWIPAPURI
 						FROM
 							SPJ_USER
 						WHERE

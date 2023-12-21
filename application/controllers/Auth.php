@@ -63,7 +63,8 @@ class Auth extends CI_Controller {
 					'marketing'=>$value->SubDepartemen2,
 					'DLV' => $value->OTORITAS_DLV,
 					'NDV' => $value->OTORITAS_NDV,
-					'photo'=>$value->PHOTO
+					'photo'=>$value->PHOTO,
+					'DWIPAPURI'=>$value->DWIPAPURI,
 					);
 	 
 				$this->session->set_userdata($data_session);

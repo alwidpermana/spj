@@ -266,7 +266,8 @@ class M_Implementasi extends CI_Model {
 								SPJ_PENGAJUAN b
 							ON a.NO_PENGAJUAN = b.NO_SPJ
 							WHERE
-								NO_PENGAJUAN = '$noSPJ'
+								NO_PENGAJUAN = '$noSPJ' AND 
+								NIK NOT IN ('00003','00004','01519','00917','01223')
 						)Q1
 					)Q1
 					LEFT JOIN
@@ -524,8 +525,8 @@ class M_Implementasi extends CI_Model {
 					JML_PIC,
 					TOTAL_UANG_SAKU + (UANG_SAKU1*JML_PIC_US) + (UANG_SAKU2*JML_PIC_US) AS REALISASI_UANG_SAKU,
 					CASE 
-						WHEN ADJUSTMENT_MANAJEMEN = 'Y' THEN (UANG_MAKAN*JML_PIC) + UM_DIAJUKAN
-						ELSE TOTAL_UANG_MAKAN + (UANG_MAKAN*JML_PIC)
+						WHEN ADJUSTMENT_MANAJEMEN = 'Y' THEN (UANG_MAKAN*JML_PIC_UM) + UM_DIAJUKAN
+						ELSE TOTAL_UANG_MAKAN + (UANG_MAKAN*JML_PIC_UM)
 					END AS REALISASI_UANG_MAKAN,
 					CASE 
 						WHEN ADJUSTMENT_MANAJEMEN = 'Y' THEN UJ_DIAJUKAN
@@ -643,6 +644,8 @@ class M_Implementasi extends CI_Model {
 						SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
 					FROM
 						SPJ_PENGAJUAN_PIC
+					WHERE
+						NIK NOT IN ('00003','00004','01519','00917','01223')
 					GROUP BY NO_PENGAJUAN
 				)Q6 ON Q1.NO_SPJ = Q6.NO_PENGAJUAN
 				LEFT JOIN
@@ -654,6 +657,17 @@ class M_Implementasi extends CI_Model {
 					FROM
 						SPJ_VOUCHER_BBM
 				)Q7 ON Q1.VOUCHER_BBM = Q7.NO_VOUCHER
+				INNER JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						COUNT(NIK) AS JML_PIC_UM
+					FROM 
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						NIK NOT IN ('00003','00004','01519','00917','01223')
+					GROUP BY NO_PENGAJUAN	
+				)Q9 ON Q1.NO_SPJ = Q9.NO_PENGAJUAN
 				LEFT JOIN
 				(
 					SELECT
@@ -703,10 +717,12 @@ class M_Implementasi extends CI_Model {
 						NO_SPJ,
 						TGL_INPUT,
 						QR_CODE,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) + REIMBURSE_BBM + TOTAL_UANG_KENDARAAN + TOTAL_UANG_LAINNYA AS TOTAL_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) + TOTAL_UANG_KENDARAAN + TOTAL_UANG_LAINNYA AS TOTAL_SPJ,
 						TOTAL_UANG_TOL AS TOTAL_TOL,
 						TOTAL_UANG_BBM AS TOTAL_BBM,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM+REIMBURSE_BBM + TOTAL_UANG_KENDARAAN + TOTAL_UANG_LAINNYA AS TOTAL_RP
+						REIMBURSE_BBM,
+						TOTAL_UANG_BBM_KATULISTIWA AS TOTAL_BBM_KATULISTIWA,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_TOL+TOTAL_UANG_BBM+TOTAL_UANG_BBM_KATULISTIWA+REIMBURSE_BBM + TOTAL_UANG_KENDARAAN + TOTAL_UANG_LAINNYA AS TOTAL_RP
 					FROM
 					(
 						SELECT
@@ -721,12 +737,16 @@ class M_Implementasi extends CI_Model {
 							TOTAL_UANG_LAINNYA,
 							TOTAL_UANG_KENDARAAN,
 							CASE 
-								WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
+								WHEN MEDIA_UANG_BBM = 'Voucher' AND TEMPAT_SPBU = 'Rest Area' THEN TOTAL_UANG_BBM
 								ELSE 0
 							END AS TOTAL_UANG_BBM,
 							CASE 
-								WHEN MEDIA_UANG_BBM = 'Voucher' THEN 0
-								ELSE TOTAL_UANG_BBM
+								WHEN MEDIA_UANG_BBM = 'Voucher' AND TEMPAT_SPBU = 'Katulistiwa' THEN TOTAL_UANG_BBM
+								ELSE 0
+							END AS TOTAL_UANG_BBM_KATULISTIWA,
+							CASE 
+								WHEN MEDIA_UANG_BBM IN ('Kasbon','Reimburse') THEN TOTAL_UANG_BBM
+								ELSE 0
 							END AS REIMBURSE_BBM,
 							JML_PIC AS JML_PIC_UM,
 							CASE 
@@ -765,7 +785,8 @@ class M_Implementasi extends CI_Model {
 								CASE
 									WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
 									ELSE 0
-								END AS TOTAL_UANG_KENDARAAN
+								END AS TOTAL_UANG_KENDARAAN,
+								TEMPAT_SPBU
 							FROM
 								[dbo].[SPJ_PENGAJUAN]
 							WHERE
@@ -856,22 +877,28 @@ class M_Implementasi extends CI_Model {
 		$sql = "SELECT
 					COUNT(NO_SPJ) AS JUMLAH_SPJ,
 					SUM(TOTAL_SPJ) + SUM(TOTAL_UANG_TOL) + SUM(TOTAL_UANG_BBM) + SUM(REIMBURSE_BBM) AS TOTAL_RP,
-					SUM(TOTAL_SPJ)+SUM(REIMBURSE_BBM) AS TOTAL_SPJ,
+					SUM(TOTAL_SPJ) AS TOTAL_SPJ,
 					SUM(TOTAL_UANG_TOL) AS TOTAL_TOL,
-					SUM(TOTAL_UANG_BBM) AS TOTAL_BBM
+					SUM(TOTAL_UANG_BBM) AS TOTAL_BBM,
+					SUM(TOTAL_UANG_BBM_KATULISTIWA) AS TOTAL_BBM_KATULISTIWA,
+					SUM(REIMBURSE_BBM) AS REIMBURSE_BBM
 				FROM
 				(
 					SELECT
 						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+TOTAL_UANG_KENDARAAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM) AS TOTAL_SPJ,
 						TOTAL_UANG_TOL,
 						CASE 
-							WHEN MEDIA_UANG_BBM = 'Voucher' THEN 0
-							ELSE TOTAL_UANG_BBM
+							WHEN MEDIA_UANG_BBM IN ('Kasbon','Reimburse') THEN TOTAL_UANG_BBM
+							ELSE 0
 						END AS REIMBURSE_BBM,
 						CASE 
-							WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
+							WHEN MEDIA_UANG_BBM = 'Voucher' AND TEMPAT_SPBU = 'Rest Area' THEN TOTAL_UANG_BBM
 							ELSE 0
 						END AS TOTAL_UANG_BBM,
+						CASE 
+							WHEN MEDIA_UANG_BBM = 'Voucher' AND TEMPAT_SPBU = 'Katulistiwa' THEN TOTAL_UANG_BBM
+							ELSE 0
+						END AS TOTAL_UANG_BBM_KATULISTIWA,
 						NO_SPJ
 					FROM
 					(
@@ -885,7 +912,7 @@ class M_Implementasi extends CI_Model {
 							TOTAL_UANG_KENDARAAN,
 							MEDIA_UANG_BBM,
 							TOTAL_UANG_BBM,
-							JML_PIC AS JML_PIC_UM,
+							JML_PIC_UM,
 							CASE 
 								WHEN UANG_SAKU1 IS NULL THEN 0
 								ELSE UANG_SAKU1
@@ -905,7 +932,8 @@ class M_Implementasi extends CI_Model {
 							CASE 
 								WHEN Q6.NO_SPJ IS NULL THEN 'N'
 								ELSE 'Y'
-							END AS JML_PIC_RENTAL
+							END AS JML_PIC_RENTAL,
+							TEMPAT_SPBU
 						FROM
 						(
 							SELECT
@@ -918,7 +946,8 @@ class M_Implementasi extends CI_Model {
 								CASE
 									WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
 									ELSE 0
-								END AS TOTAL_UANG_KENDARAAN
+								END AS TOTAL_UANG_KENDARAAN,
+								TEMPAT_SPBU
 							FROM
 								[dbo].[SPJ_PENGAJUAN]
 							WHERE
@@ -983,6 +1012,17 @@ class M_Implementasi extends CI_Model {
 								OBJEK = 'Rental' AND
 								JENIS_PIC = 'Sopir'
 						)Q6 ON Q1.NO_SPJ =Q6.NO_SPJ
+						INNER JOIN
+						(
+							SELECT
+								NO_PENGAJUAN,
+								COUNT(NIK) AS JML_PIC_UM
+							FROM 
+								SPJ_PENGAJUAN_PIC
+							WHERE
+								NIK NOT IN ('00003','00004','01519','00917','01223')
+							GROUP BY NO_PENGAJUAN	
+						)Q7 ON Q1.NO_SPJ = Q7.NO_PENGAJUAN
 					)Q1
 				)Q1";
 		return $this->db->query($sql);
@@ -1094,9 +1134,12 @@ class M_Implementasi extends CI_Model {
 				(
 					SELECT
 						NO_SPJ,
-						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+REIMBURSE_BBM+TOTAL_UANG_KENDARAAN+TOTAL_UANG_LAINNYA AS KASBON_SPJ,
+						TOTAL_UANG_SAKU+TOTAL_UANG_MAKAN+TOTAL_UANG_JALAN+((TAMBAHAN_UANG_SAKU1+TAMBAHAN_UANG_SAKU2)*JML_PIC_US)+(TAMBAHAN_UANG_MAKAN*JML_PIC_UM)+TOTAL_UANG_KENDARAAN+TOTAL_UANG_LAINNYA AS KASBON_SPJ,
 						TOTAL_UANG_TOL AS KASBON_TOL,
-						TOTAL_UANG_BBM AS KASBON_BBM
+						TOTAL_UANG_BBM AS KASBON_BBM,
+						TOTAL_UANG_BBM_KATULISTIWA AS KASBON_BBM_KATULISTIWA,
+						REIMBURSE_BBM
+
 					FROM
 					(
 						SELECT
@@ -1111,14 +1154,18 @@ class M_Implementasi extends CI_Model {
 							TOTAL_UANG_LAINNYA,
 							TOTAL_UANG_KENDARAAN,
 							CASE 
-								WHEN MEDIA_UANG_BBM = 'Voucher' THEN TOTAL_UANG_BBM
+								WHEN MEDIA_UANG_BBM = 'Voucher' AND TEMPAT_SPBU = 'Rest Area' THEN TOTAL_UANG_BBM
 								ELSE 0
 							END AS TOTAL_UANG_BBM,
 							CASE 
-								WHEN MEDIA_UANG_BBM = 'Voucher' THEN 0
-								ELSE TOTAL_UANG_BBM
+								WHEN MEDIA_UANG_BBM = 'Voucher' AND TEMPAT_SPBU = 'Katulistiwa' THEN TOTAL_UANG_BBM
+								ELSE 0
+							END AS TOTAL_UANG_BBM_KATULISTIWA,
+							CASE 
+								WHEN MEDIA_UANG_BBM IN ('Kasbon','Reimburse') THEN TOTAL_UANG_BBM
+								ELSE 0
 							END AS REIMBURSE_BBM,
-							JML_PIC AS JML_PIC_UM,
+							JML_PIC_UM,
 							CASE 
 								WHEN UANG_SAKU1 IS NULL THEN 0
 								ELSE UANG_SAKU1
@@ -1138,7 +1185,8 @@ class M_Implementasi extends CI_Model {
 							CASE 
 								WHEN Q6.NO_SPJ IS NULL THEN 'N'
 								ELSE 'Y'
-							END AS JML_PIC_RENTAL
+							END AS JML_PIC_RENTAL,
+							TEMPAT_SPBU
 						FROM
 						(
 							SELECT
@@ -1155,7 +1203,8 @@ class M_Implementasi extends CI_Model {
 								CASE
 									WHEN KENDARAAN = 'Gojek/Grab' THEN TOTAL_UANG_KENDARAAN
 									ELSE 0
-								END AS TOTAL_UANG_KENDARAAN
+								END AS TOTAL_UANG_KENDARAAN,
+								TEMPAT_SPBU
 							FROM
 								[dbo].[SPJ_PENGAJUAN]
 							WHERE
@@ -1220,6 +1269,17 @@ class M_Implementasi extends CI_Model {
 								OBJEK = 'Rental' AND
 								JENIS_PIC = 'Sopir'
 						)Q6 ON Q1.NO_SPJ =Q6.NO_SPJ
+						INNER JOIN
+						(
+							SELECT
+								NO_PENGAJUAN,
+								COUNT(NIK) AS JML_PIC_UM
+							FROM 
+								SPJ_PENGAJUAN_PIC
+							WHERE
+								NIK NOT IN ('00003','00004','01519','00917','01223')
+							GROUP BY NO_PENGAJUAN	
+						)Q7 ON Q1.NO_SPJ = Q7.NO_PENGAJUAN
 					)Q1
 				)Q1";
 		return $this->db->query($sql);
@@ -1316,7 +1376,7 @@ class M_Implementasi extends CI_Model {
 				)Q1";
 		return $this->db->query($sql);
 	}
-	public function generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $jenisID, $jmlBA, $inputTotalBA)
+	public function generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $jenisID, $jmlBA, $inputTotalBA, $voucherRA, $voucherKA)
 	{
 		date_default_timezone_set('Asia/Jakarta');
         $tanggal = date('Y-m-d H:i:s');
@@ -1327,8 +1387,22 @@ class M_Implementasi extends CI_Model {
         	$coa = "6-3106";
         }
 		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonSPJ, 'Kasbon SPJ','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','$coa')");
-		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonBBM, 'Kasbon BBM','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
-		$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonTOL, 'Kasbon TOL','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
+		if ($kasbonBBM > 0) {
+			$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonBBM, 'Kasbon BBM','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
+		}
+
+		if ($kasbonTOL>0) {
+			$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$kasbonTOL, 'Kasbon TOL','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
+		}
+		
+		if ($voucherRA>0) {
+			$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$voucherRA, 'Kasbon Voucher BBM Rest Area','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
+		}
+		
+		if ($voucherKA>0) {
+			$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$voucherKA, 'Kasbon Voucher BBM Katulistiwa','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','6-3003')");
+		}
+		
 		if ($jmlBA>0) {
 			$sql = $this->db->query("INSERT INTO SPJ_PENGAJUAN_SALDO(PIC_PENGAJU, TGL_PENGAJU, TRANSAKSI, JUMLAH, JENIS_KASBON, TYPE, DETAIL_TRANSAKSI, JENIS_ID, STATUS_PENGAJUAN_SALDO, COA)VALUES('$user','$tanggal','Generate',$inputTotalBA, 'Biaya Admin TOL','Kas Induk','$inputNoGenerate',$jenisID,'OPEN','9-1101')");
 		}
@@ -1614,43 +1688,53 @@ class M_Implementasi extends CI_Model {
 				INNER JOIN
 				(
 					SELECT
-						a.TGL_INPUT,
-						NO_SPJ,
-						ID_SPJ,
-						NAMA_JENIS,
-						TGL_SPJ,
-						QR_CODE,
-						NAMA_GROUP,
-						d.NIK AS NIK_DRIVER,
-						d.NAMA AS NAMA_DRIVER,
-						a.PIC_INPUT,
-						e.namapeg AS NAMA_INPUT,
-						e.departemen AS DEPARTEMEN_INPUT,
-						e.jabatan AS JABATAN_INPUT,
-						TOTAL_UANG_JALAN,
-						TOTAL_UANG_BBM,
-						STATUS_SPJ
+						*
 					FROM
-						SPJ_PENGAJUAN a
-					INNER JOIN
-						SPJ_JENIS b ON
-					a.JENIS_ID = b.ID_JENIS
-					INNER JOIN
-						SPJ_GROUP_TUJUAN c ON
-					a.GROUP_ID = c.ID_GROUP
-					INNER JOIN
-						SPJ_PENGAJUAN_PIC d
-					ON a.NO_SPJ = d.NO_PENGAJUAN
-					LEFT JOIN
-						dbhrm.dbo.tbPegawai e ON
-					a.PIC_INPUT = e.nik
-					WHERE
-						JENIS_PIC = 'Sopir' AND
-						YEAR(TGL_SPJ) LIKE '$tahun%' AND
-						DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
-						JENIS_ID LIKE '$jenis%' AND
-						GROUP_ID LIKE '$group%' AND
-						STATUS_SPJ LIKE '%'
+					(
+						SELECT
+							a.TGL_INPUT,
+							NO_SPJ,
+							ID_SPJ,
+							NAMA_JENIS,
+							TGL_SPJ,
+							QR_CODE,
+							NAMA_GROUP,
+							a.PIC_INPUT,
+							e.namapeg AS NAMA_INPUT,
+							e.departemen AS DEPARTEMEN_INPUT,
+							e.jabatan AS JABATAN_INPUT,
+							TOTAL_UANG_JALAN,
+							TOTAL_UANG_BBM,
+							STATUS_SPJ
+						FROM
+							SPJ_PENGAJUAN a
+						INNER JOIN
+							SPJ_JENIS b ON
+						a.JENIS_ID = b.ID_JENIS
+						INNER JOIN
+							SPJ_GROUP_TUJUAN c ON
+						a.GROUP_ID = c.ID_GROUP
+						LEFT JOIN
+							dbhrm.dbo.tbPegawai e ON
+						a.PIC_INPUT = e.nik
+						WHERE
+							YEAR(TGL_SPJ) LIKE '$tahun%' AND
+							DATENAME(MONTH,TGL_SPJ) LIKE '$bulan%' AND
+							JENIS_ID LIKE '$jenis%' AND
+							GROUP_ID LIKE '$group%' AND
+							STATUS_SPJ LIKE '%'
+					)Q1
+					LEFT JOIN 
+					(
+						SELECT
+							NO_PENGAJUAN,
+							NIK AS NIK_DRIVER,
+							NAMA AS NAMA_DRIVER
+						FROM
+							SPJ_PENGAJUAN_PIC
+						WHERE
+							JENIS_PIC = 'Sopir'
+					)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
 				)Q2 ON Q1.NO_SPJ = Q2.NO_SPJ
 				LEFT JOIN
 				(
@@ -1911,7 +1995,7 @@ class M_Implementasi extends CI_Model {
 		if ($sql == true && $jenis == 'Uang Makan') {
 			$getSum = $this->db->query("SELECT
 											Q1.UANG_MAKAN + (Q1.JML_PIC*Q2.UANG_MAKAN) AS UANG_MAKAN,
-											ISNULL(Q1.UANG_MAKAN, 0) + ISNULL(UANG_SAKU, 0) + ISNULL(TOTAL_UANG_JALAN, 0) AS TOTAL_KAS,
+											ISNULL(Q1.UANG_MAKAN, 0) + ISNULL(UANG_SAKU, 0) + ISNULL(TOTAL_UANG_JALAN, 0) + ISNULL(TOTAL_UANG_BBM, 0) AS TOTAL_KAS,
 											Q3.ID_SPJ
 										FROM
 										(
@@ -1945,7 +2029,17 @@ class M_Implementasi extends CI_Model {
 												TOTAL_UANG_JALAN
 											FROM
 												SPJ_PENGAJUAN
-										)Q3 ON Q1.NO_PENGAJUAN = Q3.NO_SPJ")->row();
+										)Q3 ON Q1.NO_PENGAJUAN = Q3.NO_SPJ
+										LEFT JOIN 
+										(
+											SELECT
+												TOTAL_UANG_BBM,
+												NO_SPJ
+											FROM
+												SPJ_PENGAJUAN
+											WHERE
+												MEDIA_UANG_BBM = 'Kasbon'
+										)Q4 ON Q1.NO_PENGAJUAN = Q4.NO_SPJ")->row();
 			$uangMakanSum = $getSum->UANG_MAKAN + $uang;
 			$uangKas = round($getSum->TOTAL_KAS);
 			$fkId = $getSum->ID_SPJ;

@@ -60,7 +60,7 @@
                 <input type="hidden" id="inputSPJRP" value="">
               </div>
               <div class="row">
-                <div class="col-md-2"><label>BBM Rp.</label></div>
+                <div class="col-md-2"><label>BBM (Kasbon/Reimburse) Rp.</label></div>
                 <div class="col-md-4">: <span id="showBBMRP"></span></div>
                 <input type="hidden" id="inputBBMRP" value="">
               </div>
@@ -68,6 +68,16 @@
                 <div class="col-md-2"><label>TOL Rp.</label></div>
                 <div class="col-md-4">: <span id="showTOLRP"></span></div>
                 <input type="hidden" id="inputTOLRP" value="">
+              </div>
+              <div class="row">
+                <div class="col-md-2"><label>Voucher Rest Area Rp.</label></div>
+                <div class="col-md-4">: <span id="showVoucherRA"></span></div>
+                <input type="hidden" id="inputVoucherRA" value="">
+              </div>
+              <div class="row">
+                <div class="col-md-2"><label>Voucher Katulistiwa Rp.</label></div>
+                <div class="col-md-4">: <span id="showVoucherKA"></span></div>
+                <input type="hidden" id="inputVoucherKA" value="">
               </div>
               <div class="row">
                 <div class="col-md-2"><label>Jumlah Biaya Admin</label></div>
@@ -147,12 +157,16 @@
       var totalSPJ = 0;
       var totalBBM = 0;
       var totalTOL = 0;
+      var totalReimburse = 0;
+      var totalKatulistiwa = 0
       $.each($('[name="inputCheckSPJ"]:checked'), function(){
         totalRP +=parseInt($(this).attr("rp"))
         noSPJ.push($(this).val());
         totalSPJ +=parseInt($(this).attr("spj"))
         totalBBM +=parseInt($(this).attr("bbm"))
         totalTOL +=parseInt($(this).attr("tol"))
+        totalReimburse +=parseInt($(this).attr("reimburse"))
+        totalKatulistiwa +=parseInt($(this).attr("katulistiwa"))
       })
       $('#inputJumlahSPJ').val(noSPJ.length);
       $('#inputTotalRP').val(totalRP);
@@ -160,10 +174,14 @@
       $('#showTotalRP').html(formatRupiah(Number(totalRP).toFixed(0), 'Rp. '));
       $('#inputSPJRP').val(totalSPJ);
       $('#showSPJRP').html(formatRupiah(Number(totalSPJ).toFixed(0), 'Rp. '))
-      $('#inputBBMRP').val(totalBBM);
-      $('#showBBMRP').html(formatRupiah(Number(totalBBM).toFixed(0), 'Rp. '))
+      $('#inputBBMRP').val(totalReimburse);
+      $('#showBBMRP').html(formatRupiah(Number(totalReimburse).toFixed(0), 'Rp. '))
       $('#inputTOLRP').val(totalTOL);
       $('#showTOLRP').html(formatRupiah(Number(totalTOL).toFixed(0), 'Rp. '))
+      $('#inputVoucherRA').val(totalBBM);
+      $('#showVoucherRA').html(formatRupiah(Number(totalBBM).toFixed(0), 'Rp. '))
+      $('#inputVoucherKA').val(totalKatulistiwa);
+      $('#showVoucherKA').html(formatRupiah(Number(totalKatulistiwa).toFixed(0), 'Rp. '))
       console.log(noSPJ);
 
       var totalBA =0;
@@ -186,12 +204,16 @@
       var totalSPJ = 0;
       var totalBBM = 0;
       var totalTOL = 0;
+      var totalReimburse = 0;
+      var totalKatulistiwa = 0
       $.each($('[name="inputCheckSPJ"]:checked'), function(){
         totalRP +=parseInt($(this).attr("rp"))
         noSPJ.push($(this).val());
         totalSPJ +=parseInt($(this).attr("spj"))
         totalBBM +=parseInt($(this).attr("bbm"))
         totalTOL +=parseInt($(this).attr("tol"))
+        totalReimburse +=parseInt($(this).attr("reimburse"))
+        totalKatulistiwa +=parseInt($(this).attr("katulistiwa"))
       })
       $('#inputJumlahSPJ').val(noSPJ.length);
       $('#inputTotalRP').val(totalRP);
@@ -199,10 +221,14 @@
       $('#showTotalRP').html(formatRupiah(Number(totalRP).toFixed(0), 'Rp. '));
       $('#inputSPJRP').val(totalSPJ);
       $('#showSPJRP').html(formatRupiah(Number(totalSPJ).toFixed(0), 'Rp. '))
-      $('#inputBBMRP').val(totalBBM);
-      $('#showBBMRP').html(formatRupiah(Number(totalBBM).toFixed(0), 'Rp. '))
+      $('#inputBBMRP').val(totalReimburse);
+      $('#showBBMRP').html(formatRupiah(Number(totalReimburse).toFixed(0), 'Rp. '))
       $('#inputTOLRP').val(totalTOL);
       $('#showTOLRP').html(formatRupiah(Number(totalTOL).toFixed(0), 'Rp. '))
+      $('#inputVoucherRA').val(totalBBM);
+      $('#showVoucherRA').html(formatRupiah(Number(totalBBM).toFixed(0), 'Rp. '))
+      $('#inputVoucherKA').val(totalKatulistiwa);
+      $('#showVoucherKA').html(formatRupiah(Number(totalKatulistiwa).toFixed(0), 'Rp. '))
       console.log(totalRP)
       console.log(totalSPJ)
       console.log(totalBBM)
@@ -319,7 +345,9 @@
         $('#inputJumlahSPJ').val(data.jumlahSPJ);
         $('#inputNoGenerate').val(data.noGenerate);
         $('#inputTotalRP').val(data.totalRP);
-        $('#inputBBMRP').val(data.totalBBM);
+        $('#inputBBMRP').val(data.totalReimburse);
+        $('#inputVoucherRA').val(data.totalBBM);
+        $('#inputVoucherKA').val(data.totalKatulistiwa);
         $('#inputSPJRP').val(data.totalSPJ);
         $('#inputTOLRP').val(data.totalTOL);
         $('#inputTotalBiayaAdmin').val(data.totalBA)
@@ -328,9 +356,11 @@
         $('#showNoGenerate').html(data.noGenerate);
         $('#showJumlahBiayaAdmin').html(data.jumlahBA);
         $('#showTotalRP').html(formatRupiah(Number(data.totalRP).toFixed(0), 'Rp. '));
-        $('#showBBMRP').html(formatRupiah(Number(data.totalBBM).toFixed(0), 'Rp. '));
+        $('#showBBMRP').html(formatRupiah(Number(data.totalReimburse).toFixed(0), 'Rp. '));
         $('#showSPJRP').html(formatRupiah(Number(data.totalSPJ).toFixed(0), 'Rp. '));
         $('#showTOLRP').html(formatRupiah(Number(data.totalTOL).toFixed(0), 'Rp. '));
+        $('#showVoucherKA').html(formatRupiah(Number(data.totalKatulistiwa).toFixed(0), 'Rp. '));
+        $('#showVoucherRA').html(formatRupiah(Number(data.totalBBM).toFixed(0), 'Rp. '));
         $('#showTotalBiayaAdmin').html(formatRupiah(Number(data.totalBA).toFixed(0), 'Rp. '));
         
       },

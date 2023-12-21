@@ -256,6 +256,28 @@
                       </div>
                     </div>
                   </div>
+                  <br>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="row">
+                        <div class="col-md-12">
+                          <label class="labJudul">Tempat Keberangkatan</label>    
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="row">
+                        <div class="col-md-12">
+                          <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputTempatKeberangkatan">
+                            <option value="Plant 1 KPS Cipacing" <?=$key->TEMPAT_KEBERANGKATAN == 'Plant 1 KPS Cipacing' ? 'selected':''?>>Plant 1 KPS Cipacing</option>
+                            <option value="Plant 2 Dwipapuri" <?=$key->TEMPAT_KEBERANGKATAN == 'Plant 2 Dwipapuri' ? 'selected':''?>>Plant 2 Dwipapuri</option>
+                            <option value="Plant 3 Solokan Jeruk" <?=$key->TEMPAT_KEBERANGKATAN == 'Plant 3 Solokan Jeruk' ? 'selected':''?>>Plant 3 Solokan Jeruk</option>
+                            <option value="Plant 4 Majalengka" <?=$key->TEMPAT_KEBERANGKATAN == 'Plant 4 Majalengka' ? 'selected':''?>>Plant 4 Majalengka</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <div id="getQrCode"></div>
@@ -622,6 +644,17 @@
                                   </button>
                                 </div>
                               </div>
+                              <?php if ($key->JENIS_ID == 2): ?>
+                                <div class="row mt-5">
+                                  <div class="col-md-12">
+                                    <div class="form-group">
+                                      <label>Keterangan Tujuan</label>
+                                      <textarea class="form-control" id="inputKeteranganTujuan" rows="3"><?=$key->KETERANGAN_TUJUAN?></textarea>
+                                    </div>
+                                  </div>
+                                </div>  
+                              <?php endif ?>
+                              
                             </div>
                             <div class="col-md-2"></div>
                             <div class="col-md-2">
@@ -784,6 +817,12 @@
                                       </div> -->
                                       <div id="voucherBBM">
                                         <input type="text" id="inputNoVoucher" class="form-control form-control-sm" value="<?=$key->VOUCHER_BBM?>" readonly>
+                                       <br>
+                                        <label>Tempat SPBU</label>
+                                        <select class="select2 form-control select2-orange" id="inputTempatSPBU">
+                                          <option value="Rest Area" <?=$key->TEMPAT_SPBU == 'Rest Area'?'selected':''?>>Rest Area</option>
+                                          <option value="Katulistiwa" <?=$key->TEMPAT_SPBU == 'Katulistiwa'?'selected':''?>>Katulistiwa</option>
+                                        </select>
                                         <br>
                                         <!-- <button type="button" class="btn btn-kps bg-orange btn-sm" id="pilihNoVoucher">Pilih No Voucher</button> -->
                                         <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="btnGenerateVoucher">
@@ -799,6 +838,7 @@
                                       </div>
                                     </td>
                                     <td>
+                                      
                                       <!-- <input type="text" id="inputMediaBBM" class="form-control form-control-sm" value="Reimburse"> -->
                                       <select class="select2 form-control select2-orange" id="inputMediaBBM" data-dropdown-css-class="select2-orange">
                                         <option value="Voucher" <?=$key->MEDIA_UANG_BBM == 'Voucher'?'selected':''?>>Voucher</option>
@@ -1026,8 +1066,10 @@
                   <div class="form-group">
                     <label>Tujuan Rekanan/Cabang</label>
                     <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan2">
-                      <option value="Solokan Jeruk">Solokan Jeruk</option>
-                      <option value="Dwipapuri">Dwipapuri</option>
+                      <option value="Plant 1 Cipacing">Plant 1 Cipacing</option>
+                      <option value="Plant 2 Dwipapuri" selected>Plant 2 Dwipapuri</option>
+                      <option value="Plant 3 Solokan Jeruk">Plant 3 Solokan Jeruk</option>
+                      <option value="Plant 4 Majalengka">Plant 4 Majalengka</option>
                       <option value="Pandawa 5">Pandawa 5</option>
                     </select>
                   </div>

@@ -119,6 +119,8 @@
                     <option value="Kasbon SPJ">Kasbon SPJ</option>
                     <option value="Kasbon TOL">Kasbon TOL</option>
                     <option value="Kasbon BBM">Kasbon BBM</option>
+                    <option value="Kasbon Voucher BBM">Kasbon Voucher BBM Rest Area</option>
+                    <option value="Kasbon Voucher BBM Katulistiwa">Kasbon Voucher BBM Katulistiwa</option>
                   </select>
                 </div>
               </div>
@@ -223,11 +225,34 @@
         var inputJenisSPJ = $('#inputJenisSPJ').val();
         var inputBiaya = parseInt($('#inputBiaya').val());
         if (inputBiaya>0) {
-          cekSaldo(inputJenisKasbon, inputJenisSPJ, inputBiaya);
+          var inputJenisData = $('#inputJenisData').val();
+          var inputID = $('#inputID').val();
+          $.ajax({
+            type:'post',
+            data:{inputJenisKasbon, inputJenisSPJ, inputBiaya, inputJenisData, inputID},
+            url:'savePengajuanSaldo',
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function(data){
+              berhasil()
+              $('#modal-pengajuan').modal("hide")
+              getPengajuan()
+            },
+            complete:function(data){
+              savePengajuan.ladda('stop');
+            },
+            error: function(data){
+              gagal()
+            }
+          })
+          // cekSaldo(inputJenisKasbon, inputJenisSPJ, inputBiaya);
+          // savePengajuan(inputJenisKasbon, inputJenisSPJ, inputBiaya)
         }else{
           Swal.fire("Masukan Jumlah Biaya Lebih dari 0!","","warning");
+          savePengajuan.ladda('stop');
         }
-        savePengajuan.ladda('stop');
+        
         return false;
           
       }, 1000)
@@ -282,7 +307,7 @@
       var jumlah = $(this).attr("jumlah");
       var jenisSPJ = $(this).attr("jenisSPJ");
       var jenisKasbon = $(this).attr("jenisKasbon");
-      var kasbon = jenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':jenisKasbon+' '+jenisSPJ;
+      var kasbon = jenisKasbon == 'Kasbon Voucher BBM' || jenisKasbon == 'Kasbon Voucher BBM Katulistiwa'?jenisKasbon:jenisKasbon+' '+jenisSPJ;
       $('#id').val(id)
       $('#status').val(status)
       $('#kasbon').val(kasbon)
@@ -381,7 +406,7 @@
   }
   function cekSaldo(inputJenisKasbon, inputJenisSPJ, inputBiaya) {
     var jenisSPJ = inputJenisSPJ == '1' ? 'Delivery' : 'Non Delivery';
-    var jenis = inputJenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':inputJenisKasbon+' '+jenisSPJ;
+    var jenis = inputJenisKasbon == 'Kasbon Voucher BBM' || inputJenisKasbon == 'Kasbon Voucher BBM Katulistiwa'?inputJenisKasbon:inputJenisKasbon+' '+jenisSPJ;
     $.ajax({
       type:'get',
       dataType:'json',
@@ -431,18 +456,18 @@
     var departemen = '<?=$this->session->userdata("DEPARTEMEN")?>';
 
 
-    if (parseInt(level)==2 && departemen == 'PPIC' && inputJenisKasbon != 'Kasbon BBM') {
+    if (parseInt(level)==2 && departemen == 'PPIC' && inputJenisKasbon != 'Kasbon Voucher BBM' && inputJenisKasbon != 'Kasbon Voucher BBM Katulistiwa') {
       opsi1 = true;
       opsi2 = false;
       opsi3 = false;
       $("select#inputJenisSPJ option[value='1']").prop("selected","selected");
       $("select#inputJenisSPJ").trigger("change")  
     }else{
-      if (inputJenisKasbon == 'Kasbon BBM') {
+      if (inputJenisKasbon == 'Kasbon Voucher BBM' || inputJenisKasbon == 'Kasbon Voucher BBM Katulistiwa') {
         opsi1 = true;
         opsi2 = true;
         opsi3 = false;
-        $("select#inputJenisSPJ option[value='']").prop("selected","selected");
+        $("select#inputJenisSPJ option[value='0']").prop("selected","selected");
         $("select#inputJenisSPJ").trigger("change")  
       }else{
         opsi1 = false;

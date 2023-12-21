@@ -37,7 +37,9 @@
 	            rp="<?=$key->TOTAL_RP?>"
 	            spj = "<?=$key->TOTAL_SPJ?>"
 	            bbm = "<?=$key->TOTAL_BBM?>"
-	            tol = "<?=$key->TOTAL_TOL?>">
+	            tol = "<?=$key->TOTAL_TOL?>"
+	            reimburse="<?=$key->REIMBURSE_BBM?>"
+	            katulistiwa="<?=$key->TOTAL_BBM_KATULISTIWA?>">
 	          <label for="<?=$key->NO_SPJ?>">
 	            
 	          </label>

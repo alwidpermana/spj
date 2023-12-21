@@ -365,7 +365,7 @@
   }
 
   function cekSaldo(inputJenisKasbon, inputJenisSPJ, inputBiaya, id, status, password) {
-    var jenis = inputJenisKasbon == 'Kasbon BBM'?'Kasbon Voucher BBM':inputJenisKasbon+' '+inputJenisSPJ;
+    var jenis = inputJenisKasbon == 'Kasbon Voucher BBM' || inputJenisKasbon == 'Kasbon Voucher BBM Katulistiwa'?inputJenisKasbon:inputJenisKasbon+' '+inputJenisSPJ;
     $.ajax({
       type:'get',
       dataType:'json',

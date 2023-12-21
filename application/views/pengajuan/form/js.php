@@ -44,6 +44,8 @@
       
       if (inputGroupTujuan == '') {
         Swal.fire("Pilih Terlebih dahulu Lokasi Tujuan","","warning")
+      }else if(inputJenisSPJ == '2' && $('#inputKeteranganTujuan').val() == ''){
+        Swal.fire("Isi Keterangan Tujuan Terlebih Dahulu!","","warning")
       }else{
         cekPengajuanPIC();
         if (inputJenisSPJ == '1') {
@@ -132,6 +134,7 @@
         var inputTglSPJ = $('#inputTglSPJ').val();
         var inputSaldoHidden = $('#inputSaldoHidden').val();
         var inputJenisOther = $('#inputJenisOther').val();
+        var inputTempatKeberangkatan = $('#inputTempatKeberangkatan').val();
         if (inputJenisSPJ == '1') {
           jenisSPJ = 'Delivery';
         }else if (inputJenisSPJ == '2'){
@@ -172,7 +175,7 @@
             $.ajax({
               type:'post',
               dataType: 'json',
-              data:{inputJenisSPJ, inputNoSPJ, inputTglSPJ, inputJenisOther},
+              data:{inputJenisSPJ, inputNoSPJ, inputTglSPJ, inputJenisOther, inputTempatKeberangkatan},
               url: url+'/pengajuan/saveTemporaryPengajuan',
               cache: false,
               async: true,
@@ -196,6 +199,10 @@
                 if (jenisData != 'form_temporary') {
                   $('#inputTglBerangkat').val(inputTglSPJ);
                   $('#inputTglPulang').val(inputTglSPJ);  
+                }
+
+                if (inputJenisSPJ ==2) {
+                  $('.formKeteranganTujuan').removeClass("d-none")
                 }
                 
 
@@ -827,7 +834,7 @@
               savePIC.ladda('stop');
             },
             error: function(data){
-
+              Swal.fire("Gagal Menyimpan Data","","error")
             }
           });
           
@@ -1180,10 +1187,11 @@
     })
     $('#btnGenerateVoucher').on('click', function(){
       var inputNoSPJ = $('#inputNoSPJ').val();
+      var inputTempatSPBU = $('#inputTempatSPBU').val();
       $.ajax({
         type:'get',
         dataType:'json',
-        data:{inputNoSPJ},
+        data:{inputNoSPJ, inputTempatSPBU},
         url:url+'/pengajuan/generateVoucherBBM',
         cache:false,
         async:true,
@@ -1939,6 +1947,9 @@
     var inputAbnormal = abnormal.checked == true ? 'Y' : 'N';
     var inputBiayaKendaraan = $('#inputBiayaKendaraan').val();
     var inputMediaKendaraan = $('#inputMediaKendaraan').val();
+    var inputKeteranganTujuan = $('#inputKeteranganTujuan').val();
+    var inputTempatKeberangkatan = $('#inputTempatKeberangkatan').val();
+    var inputTempatSPBU = $('#inputTempatSPBU').val();
     console.log(parseInt(inputTambahanUangJalan))
     if (inputNoTNKB == '') {
       Swal.fire("Lengkapi Datanya Terlebih Dahulu!","No TNKB Kendaraan Masing Kosong!", "warning")
@@ -1991,7 +2002,10 @@
             status,
             inputTambahanUangJalan,
             inputBiayaKendaraan,
-            inputMediaKendaraan
+            inputMediaKendaraan,
+            inputTempatKeberangkatan,
+            inputKeteranganTujuan,
+            inputTempatSPBU
           },
         dataType: 'json',
         url:url+'/pengajuan/saveSPJ',
@@ -2337,7 +2351,13 @@
     }else{
       $('#voucherBBM').addClass("d-none");
       $('#manualBBM').removeClass("d-none");
-      $('#inputNoVoucher').val("");
+      var anjing = '<?=$this->uri->segment("2")?>';
+      if (anjing == 'form_edit') {
+        
+      }else{
+        $('#inputNoVoucher').val("");  
+      }
+      
       if (inputMediaBBM == 'Kasbon') {
         console.log(inputJenisKendaraan)
         if (inputJenisKendaraan == 'Sepeda Motor') {
@@ -2761,6 +2781,9 @@
       });
       console.log("YESSS SUREE")
     } else {
+      var inputMediaBBM = $('#inputMediaBBM').val();
+      $("select#inputMediaBBM option[value='"+inputMediaBBM+"']").prop("selected","selected");
+      $("select#inputMediaBBM").trigger("change")
       document.querySelectorAll("#inputMediaBBM option").forEach(opt => {
         opt.disabled = false;
       });

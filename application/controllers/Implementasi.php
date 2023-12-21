@@ -209,18 +209,31 @@ class Implementasi extends CI_Controller {
 		    	}
 		    }
 		    $jamKeberangkatan = date("H", strtotime($validasi->KEBERANGKATAN));
-	    	$jamPulang = date("H:i");
+	    	$jamPulang = date("H");
 
 			if ($inputJenisId == 1) {
 				
 				if ($difHari ==0) {
-					if ($jamKeberangkatan<=11 && $jamPulang >= date("H:i",strtotime("19:00"))) {
-			    		$uangMakan = $uang_makan->BIAYA2;
-			    	}elseif ($difJam >= 13) {
-			    		$uangMakan = $uang_makan->BIAYA2;
-			    	}else{
-			    		$uangMakan = 0;
-			    	}
+					if ($jamKeberangkatan<=11) {
+						if ($jamPulang >=19) {
+							$uangMakan = $uang_makan->BIAYA2;
+						}else{
+							$uangMakan = 0;
+						}
+					}else{
+						if ($difJam>=13) {
+							$uangMakan = $uang_makan->BIAYA2;
+						}else{
+							$uangMakan = 0;
+						}
+					}
+					// if ($jamKeberangkatan<=11 && $jamPulang >= 19) {
+			    	// 	$uangMakan = $uang_makan->BIAYA2;
+			    	// }elseif ($difJam >= 13) {
+			    	// 	$uangMakan = $uang_makan->BIAYA2;
+			    	// }else{
+			    	// 	$uangMakan = 0;
+			    	// }
 				} else {
 					$uangMakan = $uang_makan->BIAYA2;
 				}
@@ -641,7 +654,7 @@ class Implementasi extends CI_Controller {
 
 		if ($inputMediaUangBBM == 'Reimburse' && $data == true) {
 			$this->db->query("UPDATE SPJ_PENGAJUAN SET JENIS_BBM = '$inputJenisBBM', HARGA_BBM='$inputHargaBBM', VOUCHER = 'Y', STATUS_SPJ = 'CLOSE' WHERE NO_SPJ = '$inputNoSPJ'");
-			$kasbon= "Kasbon SPJ ".$inputJenisSPJ;
+			$kasbon= "Kasbon BBM ".$inputJenisSPJ;
 			$this->updateSaldo($inputId,$kasbon,$bbm,'REIMBURSE BBM',$inputBeforeBBM);
 		}
 		if ($inputJenisSPJ == 'Non Delivery' && $inputGroupId =='4' || $inputGroupId == '10' && $inputJenisSPJ == 'Non Delivery') {
@@ -670,12 +683,16 @@ class Implementasi extends CI_Controller {
 		$totalSPJ = 0;
 		$totalBBM = 0;
 		$totalTOL = 0;
+		$totalReimburse =0;
+		$totalKatulistiwa = 0;
 		foreach ($total as $key) {
 			$jumlahSPJ = $key->JUMLAH_SPJ;
 			$totalRP = $key->TOTAL_RP;
 			$totalSPJ = $key->TOTAL_SPJ;
 			$totalBBM = $key->TOTAL_BBM;
 			$totalTOL = $key->TOTAL_TOL;
+			$totalReimburse = $key->REIMBURSE_BBM;
+			$totalKatulistiwa = $key->TOTAL_BBM_KATULISTIWA;
 		}
 		$jumlahBA = 0;
 		$totalBA = 0;
@@ -683,7 +700,7 @@ class Implementasi extends CI_Controller {
 			$jumlahBA = $ba->JML_BIAYA_ADMIN;
 			$totalBA = $ba->TOTAL_BIAYA_ADMIN;
 		}
-		$hasil = array('noGenerate' =>$noGenerate ,'jumlahSPJ'=>round($jumlahSPJ), 'totalRP'=> round($totalRP),'jumlahBA'=>round($jumlahBA), 'totalBA'=>round($totalBA),'totalSPJ'=>round($totalSPJ), 'totalBBM'=>round($totalBBM), 'totalTOL'=>round($totalTOL));
+		$hasil = array('noGenerate' =>$noGenerate ,'jumlahSPJ'=>round($jumlahSPJ), 'totalRP'=> round($totalRP),'jumlahBA'=>round($jumlahBA), 'totalBA'=>round($totalBA),'totalSPJ'=>round($totalSPJ), 'totalBBM'=>round($totalBBM), 'totalTOL'=>round($totalTOL),'totalBBMKatulistiwa'=>round($totalKatulistiwa),'totalReimburse'=>round($totalReimburse));
 		echo json_encode($hasil);
 	}
 	public function getTabelGenerate()
@@ -708,12 +725,16 @@ class Implementasi extends CI_Controller {
 		$kasbonSPJ = 0;
 		$kasbonBBM = 0;
 		$kasbonTOL = 0;
+		$kasbonVoucherRA = 0;
+		$kasbonVoucherKA = 0;
 		for ($i=0; $i <$jmlNoSPJ ; $i++) { 
 			$getBiaya = $this->M_Implementasi->getBiayaTotalPerNoSPJNEW($noSPJ[$i]);
 			foreach ($getBiaya->result() as $key) {
 				$kasbonSPJ += $key->KASBON_SPJ;
-				$kasbonBBM += $key->KASBON_BBM;
+				$kasbonBBM += $key->REIMBURSE_BBM;
 				$kasbonTOL += $key->KASBON_TOL;
+				$kasbonVoucherRA += $key->KASBON_BBM;
+				$kasbonVoucherKA += $key->KASBON_BBM_KATULISTIWA;
 			}
 			$this->db->query("UPDATE SPJ_PENGAJUAN SET NO_GENERATE = '$inputNoGenerate' WHERE NO_SPJ = '$noSPJ[$i]'");
 		}
@@ -728,7 +749,7 @@ class Implementasi extends CI_Controller {
 		// $data = array('KASBON SPJ' =>$kasbonSPJ ,'KASBON BBM' =>$kasbonBBM, 'KASBON TOL' =>$kasbonTOL,'total'=>$kasbonSPJ+$kasbonBBM+$kasbonTOL,'jmlBiayaAdmin'=>$jmlBA, 'totalBiayaAdmin'=>$inputTotalBA );
 
 
-		$data = $this->M_Implementasi->generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $filJenis, $jmlBA, $inputTotalBA);
+		$data = $this->M_Implementasi->generatePengajuanKas($inputNoGenerate, $kasbonSPJ, $kasbonBBM, $kasbonTOL, $filJenis, $jmlBA, $inputTotalBA, $kasbonVoucherRA, $kasbonVoucherKA);
 		
 		echo json_encode($data);
 	}
@@ -1085,14 +1106,26 @@ class Implementasi extends CI_Controller {
 
 				if ($inputJenisId == 1) {
 					
-					
-			    	if ($jamKeberangkatan<=11 && $jamPulang >= date("H:i",strtotime("19:00"))) {
-			    		$uangMakan = $uang_makan->BIAYA2;
-			    	}elseif ($difJam >= 13) {
-			    		$uangMakan = $uang_makan->BIAYA2;
-			    	}else{
-			    		$uangMakan = 0;
-			    	}
+					if ($jamKeberangkatan<=11) {
+						if ($jamPulang >=19) {
+							$uangMakan = $uang_makan->BIAYA2;
+						}else{
+							$uangMakan = 0;
+						}
+					}else{
+						if ($difJam>=13) {
+							$uangMakan = $uang_makan->BIAYA2;
+						}else{
+							$uangMakan = 0;
+						}
+					}
+			    	// if ($jamKeberangkatan<=11 && $jamPulang >= date("H:i",strtotime("19:00"))) {
+			    	// 	$uangMakan = $uang_makan->BIAYA2;
+			    	// }elseif ($difJam >= 13) {
+			    	// 	$uangMakan = $uang_makan->BIAYA2;
+			    	// }else{
+			    	// 	$uangMakan = 0;
+			    	// }
 				    
 				}elseif ($inputJenisId == 2) {
 					if ($difJam>=12 && $jamPulang>= date("H:i", strtotime("19:00")) ) {
@@ -1149,7 +1182,7 @@ class Implementasi extends CI_Controller {
 
 		if ($inputMediaUangBBM == 'Reimburse' && $data == true) {
 			$this->db->query("UPDATE SPJ_PENGAJUAN SET JENIS_BBM = '$inputJenisBBM', HARGA_BBM='$inputHargaBBM', VOUCHER = 'Y' WHERE NO_SPJ = '$inputNoSPJ'");
-			$kasbon= "Kasbon SPJ ".$inputJenisSPJ;
+			$kasbon= "Kasbon BBM ".$inputJenisSPJ;
 			$this->updateSaldo($inputId,$kasbon,$bbm,'REIMBURSE BBM',$inputBeforeBBM);
 			$this->M_Implementasi->saveLogImplementasi($inputNoSPJ, 'Reimburse Uang BBM',$bbm);
 		}
@@ -1200,6 +1233,49 @@ class Implementasi extends CI_Controller {
 			$this->M_Implementasi->saveLogImplementasi($inputNoSPJ,'CLOSE IMPLEMENTASI',0);
 		}
 		echo json_encode($data);
+	}
+	public function saveGantiMediaBBM()
+	{
+		$inputMediaBBM = $this->input->post("inputMediaBBM");
+		$id = $this->input->post("id");
+		$data = $this->db->query("SELECT MEDIA_UANG_BBM, TOTAL_UANG_BBM FROM SPJ_PENGAJUAN WHERE ID_SPJ = $id")->row();
+		$mediaBefore = $data->MEDIA_UANG_BBM;
+		$totalBefore = $data->TOTAL_UANG_BBM;
+		if ($inputMediaBBM == $mediaBefore) {
+			$data = true;
+			$message = 'Media Tidak Berubah';
+			$sub_message = 'Pilih Media Lain';
+			$status = 'warning';
+		}else{
+			if ($mediaBefore == 'Kasbon' && $totalBefore >0 && $inputMediaBBM != 'Kasbon') {
+				$getSaldoKasbon = $this->db->query("SELECT CREDIT FROM SPJ_KAS_SUB WHERE FK_ID = $id AND DETAIL_KASBON = 'TRANSAKSI AWAL' AND JENIS_FK = 'KASBON'");
+				if ($getSaldoKasbon->num_rows()>0) {
+					$dataSaldoKasbon = $getSaldoKasbon->row();
+					$credit = $dataSaldoKasbon->CREDIT;
+					$totalKasbon = $credit-$totalBefore;
+					$this->db->query("UPDATE SPJ_KAS_SUB SET CREDIT = $totalKasbon WHERE FK_ID = $id AND DETAIL_KASBON = 'TRANSAKSI AWAL' AND JENIS_FK = 'KASBON'");
+				}
+			}
+
+			if ($mediaBefore == 'Implementasi' && $totalBefore>0) {
+				$data = true;
+				$message = 'Media BBM Saat ini adalah implementasi dan sudah diisi bbmnya';
+				$sub_message = 'Media BBM Tidak Bisa Diubah!';
+				$status = 'warning';
+			}else{
+				$data = $this->db->query("UPDATE SPJ_PENGAJUAN SET MEDIA_UANG_BBM = '$inputMediaBBM', TOTAL_UANG_BBM = 0, VOUCHER = 'Y' WHERE ID_SPJ = $id");
+				if ($data == true) {
+					$message = 'Berhasil Menyimpan Media BBM';
+					$sub_message = '';
+					$status = 'success';
+				}	
+			}	
+		}
+		
+
+		$response = array('data' =>$data ,'message'=>$message, 'sub_message'=>$sub_message,'status'=>$status);
+		
+		echo json_encode($response);
 	}
 }
 ?>

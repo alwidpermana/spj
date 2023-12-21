@@ -32,7 +32,7 @@
 		<td>BON PERMINTAAN<td>
 	</tr>
 	<tr>
-		<td>BOM SPBU 33-40201</td>
+		<td>BOM SPBU <?=$data->TEMPAT_SPBU == 'Katulistiwa'?'34-45310':'33-40201'?></td>
 	</tr>
 </table>
 <br>

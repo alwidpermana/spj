@@ -139,7 +139,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-orange btn-kps ladda-button saveDebit" data-style="expand-right" id="saveDebit">Save</button>
+              <!-- <button type="submit" class="btn btn-orange btn-kps ladda-button saveDebit" data-style="expand-right" id="saveDebit">Save</button> -->
           </div>
         </div>
       </div>

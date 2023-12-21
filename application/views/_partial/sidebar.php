@@ -220,6 +220,12 @@
                 </li>
               <?php endif ?>
               <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>cash_flow/mutasi" class="nav-link ">
+                  <i class="fas fa-hand-holding-usd nav-icon <?=substr($side, 10) == 'mutasi'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Mutasi Sub Kas</p>
+                </a>
+              </li>
+              <li class="nav-item list-menu-open">
                 <a href="<?=base_url()?>cash_flow/pengajuan" class="nav-link ">
                   <i class="fas fa-hand-holding-usd nav-icon <?=substr($side, 10) == 'pengajuan'?'text-dark':''?>" style="font-size: 11px;"></i>
                   <p>Pengajuan Sub Kas</p>
@@ -439,9 +445,27 @@
                   <p>Sortir</p>
                 </a>
               </li>
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>monitoring/monthly_marketing" class="nav-link ">
+                  <i class="fas fa-file nav-icon <?=substr($side, 11) == 'monthly_marketing'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Monthly Marketing</p>
+                </a>
+              </li>
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>monitoring/detail_tujuan_marketing" class="nav-link ">
+                  <i class="fas fa-file nav-icon <?=substr($side, 11) == 'detail_tujuan_marketing'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Monthly Tujuan Marketing</p>
+                </a>
+              </li>
+              <li class="nav-item list-menu-open">
+                <a href="<?=base_url()?>monitoring/monitoring_waktu_perjalanan" class="nav-link ">
+                  <i class="fas fa-clock nav-icon <?=substr($side, 11) == 'waktu_perjalanan'?'text-dark':''?>" style="font-size: 11px;"></i>
+                  <p>Waktu Perjalanan</p>
+                </a>
+              </li>
             </ul>
           </li>
-          <?php if ($this->session->userdata("LEVEL")<=2 || $this->session->userdata("LEVEL")==5): ?>
+          <?php if ($this->session->userdata("LEVEL")<=2 || $this->session->userdata("LEVEL")==5 || $this->session->userdata("DWIPAPURI") == 'Y'): ?>
             <li class="nav-item">
               <a href="<?=base_url()?>security" class="nav-link <?=$side == 'implementasi-security'?'active':''?>">
                 <i class="fas fa-user-shield nav-icon"></i>

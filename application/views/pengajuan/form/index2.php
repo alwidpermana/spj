@@ -249,6 +249,27 @@
                         </div>
                       </div>
                     </div>
+                  </div><br>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="row">
+                        <div class="col-md-12">
+                          <label class="labJudul">Tempat Keberangkatan</label>    
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="row">
+                        <div class="col-md-12">
+                          <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputTempatKeberangkatan">
+                            <option value="Plant 1 KPS Cipacing">Plant 1 KPS Cipacing</option>
+                            <option value="Plant 2 Dwipapuri">Plant 2 Dwipapuri</option>
+                            <option value="Plant 3 Solokan Jeruk">Plant 3 Solokan Jeruk</option>
+                            <option value="Plant 4 Majalengka">Plant 4 Majalengka</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <br>
                   <div class="row">
@@ -633,6 +654,14 @@
                                   </button>
                                 </div>
                               </div>
+                              <div class="row mt-5 d-none formKeteranganTujuan">
+                                <div class="col-md-12">
+                                  <div class="form-group">
+                                    <label>Keterangan Tujuan</label>
+                                    <textarea class="form-control" id="inputKeteranganTujuan" rows="3"></textarea>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                             <div class="col-md-2"></div>
                             <div class="col-md-2">
@@ -798,6 +827,12 @@
 
                                       <div id="voucherBBM">
                                         <input type="text" id="inputNoVoucher" class="form-control form-control-sm" readonly>
+                                        <br>
+                                        <label>Tempat SPBU</label>
+                                        <select class="select2 form-control select2-orange" id="inputTempatSPBU">
+                                          <option value="Rest Area">Rest Area</option>
+                                          <option value="Katulistiwa">Katulistiwa</option>
+                                        </select>
                                         <br>
                                         <!-- <button type="button" class="btn btn-kps bg-orange btn-sm" id="pilihNoVoucher">Pilih No Voucher</button> -->
                                         <button type="button" class="btn bg-orange btn-kps btn-sm btn-block" id="btnGenerateVoucher">
@@ -1042,8 +1077,10 @@
                   <div class="form-group">
                     <label>Tujuan Rekanan/Cabang</label>
                     <select class="select2 form-control select2-orange" data-dropdown-css-class="select2-orange" id="inputPerusahaan2">
-                      <option value="Solokan Jeruk">Solokan Jeruk</option>
-                      <option value="Dwipapuri">Dwipapuri</option>
+                      <option value="Plant 1 Cipacing">Plant 1 Cipacing</option>
+                      <option value="Plant 2 Dwipapuri" selected>Plant 2 Dwipapuri</option>
+                      <option value="Plant 3 Solokan Jeruk">Plant 3 Solokan Jeruk</option>
+                      <option value="Plant 4 Majalengka">Plant 4 Majalengka</option>
                       <option value="Pandawa 5">Pandawa 5</option>
                     </select>
                   </div>

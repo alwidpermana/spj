@@ -58,7 +58,7 @@
 			$level = $this->session->userdata("LEVEL");
 			$departemen = $this->session->userdata("DEPARTEMEN");
 			foreach ($data as $key): 
-			$total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN + $key->TOTAL_UANG_BBM + $key->TOTAL_UANG_TOL+$key->TOTAL_UANG_KENDARAAN;?>
+			$total = $key->TOTAL_UANG_SAKU + $key->TOTAL_UANG_MAKAN + $key->TOTAL_UANG_JALAN + $key->TOTAL_UANG_TOL+$key->TOTAL_UANG_KENDARAAN;?>
 				<tr>
 					<td>
 						<button type="button" class="btn bg-orange dropdown-toggle dropdown-icon btn-kps btn-sm" data-toggle="dropdown">
@@ -83,6 +83,8 @@
 		            				noSPJ="<?=$key->NO_SPJ?>"
 		            				total = "<?=$total?>"
 		            				data="<?=$key->ID_SPJ?>"
+		            				bbm = "<?=$key->TOTAL_UANG_BBM?>"
+		            				mediaBBM = "<?=$key->MEDIA_UANG_BBM?>"
 		            				kendaraan = "<?=$key->KENDARAAN?>"
 		            				jenisId = "<?=$key->JENIS_ID?>">
 		            				Approve SPJ

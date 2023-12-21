@@ -73,8 +73,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-$db['default']['hostname'] = 'Driver={SQL Server};Server=192.168.0.212;Database=New_GL; Uid=spjweb_new;Pwd=it@kps0k;';
-$db['default']['username'] = 'spjweb_new';
+$db['default']['hostname'] = 'Driver={SQL Server};Server=IT-ALWI;Database=New_GL; Uid=sa;Pwd=it@kps0k;';
+$db['default']['username'] = 'sa';
 $db['default']['password'] = 'it@kps0k';
 $db['default']['database'] = 'New_GL';
 $db['default']['dbdriver'] = 'odbc';

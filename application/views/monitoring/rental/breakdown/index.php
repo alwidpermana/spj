@@ -76,7 +76,19 @@
                 </div>
               </div>
             </div>
-          </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+              <div class="row d-none" id="viewPrint">
+                <div class="col-md-12 text-right">
+                  <div class="align-self-center">
+                    <a href="javascript:;" class="btn btn-app btn-kps bg-orange btnPrint" >
+                      <i class="fas fa-print"></i>
+                    </a>  
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> 
           <div class="row">
             <div class="col-md-12">
               <div class="card">
@@ -142,6 +154,17 @@
     $('.filter').on('change', function(){
       getTabel()
     })
+    $('.btnPrint').on('click', function(){
+        var filRekanan = $('#filRekanan').val();
+        var filPeriode = $('#filPeriode').val();
+        var periode = filPeriode.split(' - ');
+        var filTglMulai = periode[0].replace('/','-')
+        var filTglSelesai = periode[1].replace('/','-')
+        console.log();   
+        var url1 = url+'/monitoring/print_breakdown_pemakaian?rekanan='+filRekanan+'&mulai='+filTglMulai.replace('/','-')+'&selesai='+filTglSelesai.replace('/','-');
+          window.open(url1,'_blank');
+        // window.location.href=url+'/monitoring/print_breakdown_pemakaian?rekanan='+filRekanan+'&mulai='+filTglMulai+'&selesai='+$filTglSelesai;
+    })
 
   })
 
@@ -163,6 +186,7 @@
         },
         success:function(data){
           $('#getTabel').html(data);
+          $('#viewPrint').removeClass("d-none")
         },
         complete:function(data){
           $('.preloader-no-bg').fadeOut("slow");

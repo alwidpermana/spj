@@ -80,7 +80,10 @@ class M_Monitoring extends CI_Model {
 							REKANAN_ID,
 							TAMBAHAN_UANG_JALAN,
 							VOUCHER,
-							IMPLEMENTASI
+							IMPLEMENTASI,
+							TEMPAT_KEBERANGKATAN,
+							KETERANGAN_TUJUAN,
+							TEMPAT_SPBU
 						FROM
 							SPJ_PENGAJUAN
 						WHERE
@@ -358,6 +361,7 @@ class M_Monitoring extends CI_Model {
 						ADJUSTMENT_MANAJEMEN,
 						TOTAL_UANG_LAINNYA,
 						KETERANGAN_LAINNYA,
+						TEMPAT_SPBU
 					FROM
 						SPJ_PENGAJUAN a
 					LEFT JOIN
@@ -797,7 +801,10 @@ class M_Monitoring extends CI_Model {
 						WHEN KENDARAAN = 'Rental' AND JENIS_PIC = 'Driver' THEN 0
 						ELSE UANG_SAKU2
 					END AS UANG_SAKU2,
-					UANG_MAKAN_TAMBAHAN,
+					CASE
+						WHEN Q1.NIK IN ('00003','00004','01519','00917','01223') THEN 0 
+						ELSE UANG_MAKAN_TAMBAHAN
+					END AS UANG_MAKAN_TAMBAHAN,
 					STATUS_US1,
 					STATUS_US2,
 					STATUS_MAKAN,
@@ -1937,6 +1944,8 @@ class M_Monitoring extends CI_Model {
 								NO_PENGAJUAN
 							FROM
 								SPJ_PENGAJUAN_PIC
+							WHERE
+								NIK NOT IN ('00003','00004','01519','00917','01223')
 							GROUP BY
 								NO_PENGAJUAN
 						)Q2 ON Q1.NO_BT = Q2.NO_PENGAJUAN
@@ -2791,7 +2800,8 @@ class M_Monitoring extends CI_Model {
 						a.VOUCHER,
 						b.RP,
 						c.KODE_ROMAWI,
-						c.TAHUN 
+						c.TAHUN,
+						TEMPAT_SPBU
 					FROM
 						SPJ_PENGAJUAN a
 						LEFT JOIN SPJ_TEMP_BBM b ON a.NO_SPJ  = b.NO_SPJ 
@@ -2926,7 +2936,7 @@ class M_Monitoring extends CI_Model {
 							TOTAL_UANG_TOL,
 							TOTAL_UANG_BBM,
 							TOTAL_UANG_KENDARAAN,
-							JML_PIC AS JML_PIC_UM,
+							 JML_PIC_UM,
 							CASE 
 								WHEN UANG_SAKU1 IS NULL THEN 0
 								ELSE UANG_SAKU1
@@ -3030,10 +3040,22 @@ class M_Monitoring extends CI_Model {
 								OBJEK = 'Rental' AND
 								JENIS_PIC = 'Sopir'
 						)Q6 ON Q1.NO_SPJ =Q6.NO_SPJ
+						INNER JOIN 
+						(
+							SELECT
+								NO_PENGAJUAN,
+								COUNT(NIK) AS JML_PIC_UM
+							FROM 
+								SPJ_PENGAJUAN_PIC
+							WHERE
+								NIK NOT IN ('00003','00004','01519','00917','01223')
+							GROUP BY NO_PENGAJUAN	
+						)Q7 ON Q1.NO_SPJ = Q7.NO_PENGAJUAN
 						WHERE
 							STATUS_SPJ LIKE '%$status%' 
 							$periode
 							
+						
 					)Q1
 					WHERE
 						NO_SPJ LIKE '%$search%' OR
@@ -3312,6 +3334,189 @@ class M_Monitoring extends CI_Model {
 					q1.NO_SPJ LIKE '%%' OR
 					q1.NO_GENERATE LIKE '%%'
 				ORDER BY TGL_SPJ, ID_SPJ DESC";
+		return $this->db->query($sql);
+	}
+	public function getMonthlyMarketing($tahun)
+	{
+		$sql = "Execute SPJ_monitoringSPJMarketing '$tahun'";
+		return $this->db->query($sql);
+	}
+
+	public function getMonitoringJam($jenis, $group, $bulan, $tahun, $search, $where, $whereJam)
+	{
+		// $whereBulan = $bulan == '' ? '' : " AND MONTH(TGL_SPJ)  = '$bulan'";
+		$sql = "SELECT
+					*
+				FROM
+				(
+					SELECT
+						*
+					FROM
+					(
+						SELECT
+							ROW_NUMBER() over (partition by 'SAMA' order by ID_SPJ ASC) AS NO_URUT,
+							*
+						FROM
+						(
+							SELECT
+								ID_SPJ,
+								a.TGL_INPUT,
+								JENIS_ID,
+								a.NO_SPJ,
+								TGL_SPJ,
+								QR_CODE,
+								a.PIC_INPUT,
+								JENIS_KENDARAAN,
+								NO_INVENTARIS,
+								NO_TNKB,
+								MERK,
+								TYPE,
+								GROUP_ID,
+								TOTAL_UANG_JALAN,
+								TOTAL_UANG_BBM,
+								TOTAL_UANG_TOL,
+								TOTAL_UANG_KENDARAAN,
+								TOTAL_UANG_LAINNYA,
+								KETERANGAN_LAINNYA,
+								STATUS_SPJ,
+								RENCANA_BERANGKAT,
+								RENCANA_PULANG,
+								a.KENDARAAN,
+								MEDIA_UANG_SAKU,
+								MEDIA_UANG_MAKAN,
+								MEDIA_UANG_JALAN,
+								MEDIA_UANG_BBM,
+								MEDIA_UANG_TOL,
+								MEDIA_UANG_KENDARAAN,
+								STATUS_PERJALANAN,
+								VOUCHER_BBM,
+								NO_GENERATE,
+								ABNORMAL,
+								LOKAL_SELESAI,
+								REKANAN_KENDARAAN,
+								REKANAN_ID,
+								TAMBAHAN_UANG_JALAN,
+								VOUCHER,
+								IMPLEMENTASI,
+								KEBERANGKATAN,
+								KEPULANGAN,
+								CAST(DATEDIFF(mi, KEBERANGKATAN, KEPULANGAN) AS FLOAT)/60 AS GAP_BERANGKAT,
+								NAMA_GROUP,
+								NAMA_JENIS,
+								KM_OUT,
+								KM_IN
+							FROM
+								SPJ_PENGAJUAN a 
+							INNER JOIN
+								SPJ_VALIDASI b ON 
+							a.NO_SPJ = b.NO_SPJ
+							INNER JOIN
+								SPJ_GROUP_TUJUAN c ON 
+							a.GROUP_ID = c.ID_GROUP
+							INNER JOIN
+								SPJ_JENIS d ON 
+							a.JENIS_ID = d.ID_JENIS
+							WHERE
+								STATUS_DATA = 'SAVED' AND 
+								STATUS_PERJALANAN = 'IN' AND
+								JENIS_ID LIKE '%$jenis%' AND 
+								YEAR(TGL_SPJ) = '$tahun' AND 
+								DATENAME(MONTH,TGL_SPJ) LIKE '%$bulan%' AND
+								(a.NO_SPJ LIKE '%$search%' OR a.QR_CODE LIKE '%$search%') $group
+						)Q1
+						$whereJam
+					)Q1
+					$where
+				)Q1
+				LEFT JOIN
+				(
+					SELECT
+						NO_PENGAJUAN,
+						NIK+ ' - ' +NAMA AS PIC_DRIVER,
+						UANG_SAKU,
+						UANG_MAKAN,
+						SORTIR,
+						OBJEK,
+						NIK AS NIK_DRIVER,
+						NAMA AS NAMA_DRIVER,
+						JABATAN AS JABATAN_DRIVER,
+						DEPARTEMEN AS DEPARTEMEN_DRIVER,
+						SUB_DEPARTEMEN AS SUB_DEPARTEMEN_DRIVER
+					FROM
+						SPJ_PENGAJUAN_PIC
+					WHERE
+						JENIS_PIC ='Sopir'
+				)Q2 ON Q1.NO_SPJ = Q2.NO_PENGAJUAN
+				LEFT JOIN
+				(
+					SELECT
+						NO_BT,
+						UANG_SAKU1 * JML_PIC_SAKU AS US1,
+						UANG_SAKU2 * JML_PIC_SAKU AS US2,
+						UANG_MAKAN * JML_PIC_MAKAN AS UM,
+						STATUS_US1,
+						STATUS_US2,
+						STATUS_MAKAN,
+						KEPUTUSAN_US1,
+						KEPUTUSAN_US2,
+						KEPUTUSAN_MAKAN
+					FROM
+					(
+						SELECT
+							NO_SPJ AS NO_BT,
+							UANG_SAKU1,
+							UANG_SAKU2,
+							UANG_MAKAN,
+							STATUS_US1,
+							STATUS_US2,
+							STATUS_MAKAN,
+							KEPUTUSAN_US1,
+							KEPUTUSAN_US2,
+							KEPUTUSAN_MAKAN
+						FROM
+							SPJ_BIAYA_TAMBAHAN
+					)Q1
+					INNER JOIN
+					(
+						SELECT
+							NO_PENGAJUAN,
+							SUM(JML_PIC) AS JML_PIC_SAKU,
+							COUNT(NIK) AS JML_PIC_MAKAN
+						FROM
+						(
+							SELECT
+								NIK,
+								NO_PENGAJUAN,
+								CASE 
+									WHEN Kendaraan = 'Rental' AND JENIS_PIC = 'Sopir' THEN 0
+									ELSE 1
+								END AS JML_PIC
+							FROM
+								SPJ_PENGAJUAN_PIC a
+							INNER JOIN
+								SPJ_PENGAJUAN b
+							ON a.NO_PENGAJUAN = b.NO_SPJ
+						)Q1
+						GROUP BY NO_PENGAJUAN
+					)Q2 ON Q1.NO_BT = Q2.NO_PENGAJUAN
+				)Q3 ON Q1.NO_SPJ = Q3.NO_BT
+				LEFT JOIN
+				(
+					SELECT
+						NO_PENGAJUAN AS NO_TOTAL,
+						SUM(UANG_SAKU) AS TOTAL_UANG_SAKU,
+						SUM(UANG_MAKAN) AS TOTAL_UANG_MAKAN
+					FROM
+						SPJ_PENGAJUAN_PIC
+					GROUP BY
+						NO_PENGAJUAN		
+				)Q4 ON Q1.NO_SPJ = Q4.NO_TOTAL
+				ORDER BY NO_URUT ASC";
+		return $this->db->query($sql);
+	}
+	public function getMonitoringTujuanMarketingMonthly($tahun)
+	{
+		$sql = "Execute SPJ_monthlySPJMarketing '$tahun'";
 		return $this->db->query($sql);
 	}
 }

@@ -467,6 +467,19 @@ class Monitoring extends CI_Controller {
 		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
 		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $inputBiaya, 'KASBON', $inputId,'VOUCHER');
 	}
+	public function updateSaldoVoucher($inputId, $inputBiaya, $inputBiayaAwal, $tempat)
+	{
+		$this->load->model('M_Cash_Flow');
+		$jenis = $tempat == 'Rest Area'?'Kasbon Voucher BBM':'Kasbon Voucher BBM Katulistiwa';
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($jenis, 'SUB KAS');
+		$saldo = 0;
+		foreach ($getSaldo->result() as $key) {
+			$saldo  = $key->SALDO;
+		}
+		$totalSaldo = ($saldo+$inputBiayaAwal) - $inputBiaya;
+		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
+		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $inputBiaya, 'KASBON', $inputId,'VOUCHER');
+	}
 
 	public function getBiayaAdmin()
 	{
@@ -641,6 +654,18 @@ class Monitoring extends CI_Controller {
 		$data['data'] = $this->M_Monitoring->getBreakdownKendaraanRental($filRekanan, $tglMulai, $tglSelesai, $filSearch)->result();
 		$this->load->view("monitoring/rental/breakdown/tabel", $data); 
 	}
+	public function print_breakdown_pemakaian()
+	{
+		$rekanan = $this->input->get("rekanan");
+		$getRekanan = $this->db->query("SELECT NAMA FROM SPJ_REKANAN WHERE ID = $rekanan")->row();
+		$data['rekanan']= $getRekanan->NAMA;
+		$mulai = $this->input->get("mulai");
+		$selesai = $this->input->get("selesai");
+		$data['mulai'] = $mulai;
+		$data['selesai'] = $selesai;
+		$data['data'] = $this->M_Monitoring->getBreakdownKendaraanRental($rekanan, $mulai, $selesai, '')->result();
+		$this->load->view("monitoring/rental/breakdown/print", $data); 
+	}
 	public function getGroupTujuan()
 	{
 		$inputNoSPJ = $this->input->get("inputNoSPJ");
@@ -743,6 +768,7 @@ class Monitoring extends CI_Controller {
 				$inputNoVoucher = $key->VOUCHER_BBM;
 				$inputId = $key->ID_SPJ;
 				$inputBiayaAwal = round($key->TOTAL_UANG_BBM);
+				$tempatSPBU = $key->TEMPAT_SPBU;
 				// $row['noSPJ'] = $key->NO_SPJ;
 				// $row['biaya'] = $key->RP == null ? $key->TOTAL_UANG_BBM : $key->RP;
 				// $row['novoucher'] = $key->VOUCHER_BBM;
@@ -754,7 +780,7 @@ class Monitoring extends CI_Controller {
 				$data = $this->M_Monitoring->saveNominalVoucherBBM($inputNoSPJ, $inputBiaya);
 				$this->M_Monitoring->saveVoucherBBM($inputNoVoucher, $inputBiaya);
 				if ($inputBiaya > 0) {
-					$this->updateSaldo($inputId, $inputBiaya, $inputBiayaAwal);
+					$this->updateSaldoVoucher($inputId, $inputBiaya, $inputBiayaAwal, $tempatSPBU);
 				}
 				
 			}
@@ -1026,6 +1052,118 @@ class Monitoring extends CI_Controller {
 		$data['data'] = $this->M_Monitoring->getMonitoringSortir($filSearch)->result();
 		$this->load->view("monitoring/retail/tabel", $data);
 	}
+	public function monthly_marketing()
+	{
+		$data['side'] = 'monitoring-monthly_marketing';
+		$data['page'] = 'Monthly Marketing';
+		$this->load->view("monitoring/marketing/index", $data);
+	}
+	public function getDataMarketing()
+	{
+		$filTahun = $this->input->get("filTahun");
+		$data['data'] = $this->M_Monitoring->getMonthlyMarketing($filTahun)->result();
+		$this->load->view("monitoring/marketing/tabel", $data);
+	}
+	public function monitoring_waktu_perjalanan()
+	{
+		$data['side']= 'monitoring-waktu_perjalanan';
+		$data['page'] = 'Monitoring Waktu Perjalanan';
+		$this->load->view("monitoring/waktu_perjalanan/index", $data);
+	}
+	public function getDataMonitoringWaktuPerjalanan()
+	{
+		$filJenis = $this->input->get("filJenis");
+		$filGroup = $this->input->get("filGroup");
+		$filBulan = $this->input->get("filBulan");
+		$filSearch = $this->input->get("filSearch");
+		$filTahun = $this->input->get("filTahun");
+		$filStatus = $this->input->get("filStatus");
+		$limit= $this->input->get("limit");
+		if ($filGroup == '') {
+			$group = '';
+		}else{
+			if ($filGroup == 4) {
+				$group = " AND GROUP_ID IN (4,10,11)";
+			}else{
+				$group = " AND GROUP_ID = $filGroup";
+			}
+		}
+		$offset =$this->input->get("offset")==''?0:$this->input->get("offset")+1;
+		$where = " WHERE NO_URUT >= $offset AND NO_URUT < $offset + $limit";
+		switch ($filStatus) {
+			case '1':
+				$whereJam = " WHERE GAP_BERANGKAT >= 0 AND GAP_BERANGKAT <=1";
+				break;
+			case '2':
+				$whereJam = " WHERE GAP_BERANGKAT > 1 AND GAP_BERANGKAT <=2";
+				break;
+			case '3':
+				$whereJam = " WHERE GAP_BERANGKAT > 2 AND GAP_BERANGKAT <=3";
+				break;
+			case '4':
+				$whereJam = " WHERE GAP_BERANGKAT > 3";
+				break;
+			default:
+			$whereJam = '';
+			break;
+		}
+		$data['data'] = $this->M_Monitoring->getMonitoringJam($filJenis, $group, $filBulan, $filTahun, $filSearch, $where, $whereJam)->result();
+		$this->load->view("monitoring/waktu_perjalanan/tabel", $data);
+	}
+	public function getPagingMonitoringWaktuPerjalanan()
+	{
+		$filJenis = $this->input->get("filJenis");
+		$filGroup = $this->input->get("filGroup");
+		$filBulan = $this->input->get("filBulan");
+		$filTahun = $this->input->get("filTahun");
+		$filSearch = $this->input->get("filSearch");
+		$filStatus = $this->input->get("filStatus");
+		$limit= $this->input->get("limit");
+		$offset =$this->input->get("offset");
+		$data['limit'] = $limit;
+		$data['offset'] = $offset;
+		if ($filGroup == '') {
+			$group = '';
+		}else{
+			if ($filGroup == 4) {
+				$group = " AND GROUP_ID IN (4,10,11)";
+			}else{
+				$group = " AND GROUP_ID = $filGroup";
+			}
+		}
+		switch ($filStatus) {
+			case '1':
+				$whereJam = " WHERE GAP_BERANGKAT >= 0 AND GAP_BERANGKAT <=1";
+				break;
+			case '2':
+				$whereJam = " WHERE GAP_BERANGKAT > 1 AND GAP_BERANGKAT <=2";
+				break;
+			case '3':
+				$whereJam = " WHERE GAP_BERANGKAT > 2 AND GAP_BERANGKAT <=3";
+				break;
+			case '4':
+				$whereJam = " WHERE GAP_BERANGKAT > 3";
+				break;
+			default:
+			$whereJam = '';
+			break;
+		}
+		$data['data'] = $this->M_Monitoring->getMonitoringJam($filJenis, $group, $filBulan, $filTahun, $filSearch, '', $whereJam)->num_rows();
+		$this->load->view("_partial/paging", $data);
+	}
+	public function detail_tujuan_marketing()
+	{
+		$data['side'] = 'monitoring-detail_tujuan_marketing';
+		$data['page'] = 'Monthly Tujuan Marketing';
+		$this->load->view("monitoring/detail_tujuan_marketing/index", $data);
+	}
+	public function getDetailTujuanMarketing()
+	{
+		$filTahun = $this->input->get("filTahun");
+		$data['data'] = $this->M_Monitoring->getMonitoringTujuanMarketingMonthly($filTahun)->result();
+		$this->load->view("monitoring/detail_tujuan_marketing/tabel", $data);
+	}
+
 
 
 }

@@ -97,6 +97,14 @@ class M_Cash_Flow extends CI_Model {
 					JENIS_KAS = '$kas'";
 		return $this->db->query($sql);
 	}
+	public function getSaldoPerJenisSubKas($jenis)
+	{
+		$tahun = date("Y");
+		$bulan = date("n");
+		$namaBulan = date("F");
+		$sql = "Execute SPJ_lastSaldo '$jenis',$tahun,$bulan,'$namaBulan'";
+		return $this->db->query($sql);
+	}
 	public function updateSaldo($jenis, $biaya, $kas)
 	{
 		$sql = "UPDATE SPJ_SALDO SET JUMLAH = $biaya WHERE JENIS_SALDO = '$jenis' AND JENIS_KAS = '$kas'";
@@ -234,7 +242,7 @@ class M_Cash_Flow extends CI_Model {
 					NAMA_JENIS,
 					DETAIL_TRANSAKSI,
 					CASE 
-						WHEN JENIS_KASBON = 'Kasbon BBM' THEN JENIS_KASBON
+						WHEN JENIS_KASBON LIKE '%Kasbon Voucher%' THEN JENIS_KASBON
 						ELSE JENIS_KASBON+' '+NAMA_JENIS
 					END VAL_KASBON,
 					PIC_PENGAJU,
@@ -501,5 +509,77 @@ class M_Cash_Flow extends CI_Model {
 		$tanggal = date("Y-m-d");
 		$sql = "UPDATE SPJ_REKAP_SALDO SET $field = $rp WHERE TGL_REKAP = '$tanggal'";
 		return $this->db->query($sql);
+	}
+	public function getDataMutasi()
+	{
+		$sql = "SELECT
+					a.*,
+					b.namapeg as nama_mutasi,
+					c.namapeg as nama_approve
+				FROM
+					[dbo].[SPJ_PENGAJUAN_MUTASI_SALDO] a 
+				LEFT JOIN
+					dbhrm.dbo.tbPegawai b ON 
+				a.PIC_MUTASI = b.nik
+				LEFT JOIN
+					dbhrm.dbo.tbPegawai c ON 
+				a.PIC_APPROVE = c.nik
+				ORDER BY ID DESC";
+		return $this->db->query($sql);
+	}
+	public function getNoMutasi()
+	{
+		$tahun = date('Y');
+		$gabung = "MTS/".$tahun."/";
+		$cekNoDoc=$this->db->query("SELECT MAX
+											( RIGHT ( NO_MUTASI, 3 ) ) AS SETNODOC
+										FROM
+											SPJ_PENGAJUAN_MUTASI_SALDO
+										WHERE
+											NO_MUTASI LIKE '$gabung%'");
+		foreach ($cekNoDoc->result() as $data) {
+            if ($data->SETNODOC =="") {
+                $URUTZERO = $gabung."001";
+
+                $hasil= $URUTZERO;
+            }else{
+                $zero='';
+                $length= 3;
+                $index=$data->SETNODOC;
+
+                for ($i=0; $i <$length-strlen($index+1) ; $i++) { 
+                    $zero = $zero.'0';
+                }
+                $URUTDOCNO = $gabung.$zero.($index+1);
+                
+                $hasil=$URUTDOCNO;  
+            }
+            
+        }
+        return $hasil;
+	}
+	public function saveMutasi($dari, $ke, $rp, $no)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+		$sql = "INSERT INTO SPJ_PENGAJUAN_MUTASI_SALDO(DARI, KE, RP, TGL_MUTASI, PIC_MUTASI, NO_MUTASI)VALUES('$dari','$ke','$rp','$tanggal','$user','$no')";
+		return $this->db->query($sql);
+	}
+	public function updateMutasi($dari, $ke, $rp, $id)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "UPDATE SPJ_PENGAJUAN_MUTASI_SALDO SET DARI = '$dari', KE = '$ke', RP = '$rp', TGL_MUTASI='$tanggal',PIC_MUTASI = '$user' WHERE ID = $id";
+        return $this->db->query($sql);
+	}
+	public function approveMutasi($id)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+        $tanggal = date('Y-m-d H:i:s');
+        $user = $this->session->userdata("NIK");
+        $sql = "UPDATE SPJ_PENGAJUAN_MUTASI_SALDO SET TGL_APPROVE='$tanggal',PIC_APPROVE = '$user' WHERE ID = $id";
+        return $this->db->query($sql);
 	}
 }

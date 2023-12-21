@@ -165,7 +165,10 @@
                       <option value="Kasbon SPJ Non Delivery">Kasbon SPJ Non Delivery</option>
                       <option value="Kasbon TOL Delivery">Kasbon TOL Delivery</option>
                       <option value="Kasbon TOL Non Delivery">Kasbon TOL Non Delivery</option>
-                      <option value="Kasbon Voucher BBM">Kasbon Voucher BBM</option>
+                      <option value="Kasbon Voucher BBM">Kasbon Voucher BBM Rest Area</option>
+                      <option value="Kasbon Voucher BBM Katulistiwa">Kasbon Voucher BBM Katulistiwa</option>
+                      <option value="Kasbon BBM Delivery">Kasbon BBM Delivery</option>
+                      <option value="Kasbon BBM Non Delivery">Kasbon BBM Non Delivery</option>
                     </select>
                   </div>
                   <input type="hidden" id="inputTujuanAwal">

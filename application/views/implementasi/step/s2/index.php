@@ -666,10 +666,10 @@
                                   </td>
                                   <td>
                                     <?php if ($key->JENIS_ID = '2'): ?>
-                                      <select class="select2 form-control" id="inputMediaBBM">
-                                        <option value="Reimburse" <?=$rl->MEDIA_UANG_BBM == 'Reimburse' ? 'selected':''?>>Reimburse</option>
-                                        <option value="Tanpa BBM" <?=$rl->MEDIA_UANG_BBM == 'Tanpa BBM' ? 'selected':''?>>Tanpa BBM</option>
-                                      </select>
+                                      <?=$key->MEDIA_UANG_BBM?><br>
+                                      <a href="javascript:;" class="btn text-kps" id="gantiMediaBBM">
+                                        Ganti Media BBM
+                                      </a>
                                     <?php else: ?>
                                       <?=$rl->MEDIA_UANG_BBM?><?=$key->VOUCHER_BBM != ''?'<br>'.$key->VOUCHER_BBM:''?>  
                                     <?php endif ?>
@@ -1103,6 +1103,34 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="modal-gantiMediaBBM" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="d-flex justify-content-end">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Ganti Media BBM</label>
+                  <select class="select2 form-control" id="inputMediaBBM">
+                    <option value="Reimburse" <?=$key->MEDIA_UANG_BBM == 'Reimburse' ? 'selected':''?>>Reimburse</option>
+                    <option value="Tanpa BBM" <?=$key->MEDIA_UANG_BBM == 'Tanpa BBM' ? 'selected':''?>>Tanpa BBM</option>
+                    <option value="Kasbon" <?=$key->MEDIA_UANG_BBM == 'Kasbon' ? 'selected':''?> <?=$key->MEDIA_UANG_BBM == 'Kasbon' ? '':'disabled'?>>Kasbon</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn bg-orange btn-kps ladda-button saveGantiMediaBBM" id="saveGantiMediaBBM" data-style="expand-right">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <?php $this->load->view('_partial/footer');?>
 </div>
 <?php $this->load->view("_partial/js");?>
@@ -1141,10 +1169,51 @@
       hitungKBLainnya();
       totalBiaya();
     })
+    $('#gantiMediaBBM').on('click', function(){
+      $('#modal-gantiMediaBBM').modal("show")
+    })
     // $('.ph-item').fadeOut('slow');
     // $('.test').fadeIn('slow').removeClass('d-none');
     
     // make_skeleton().fadeOut();
+    var saveGantiMediaBBM = $('.saveGantiMediaBBM').ladda();
+      saveGantiMediaBBM.click(function () {
+      // Start loading
+      saveGantiMediaBBM.ladda('start');
+      // Timeout example
+      // Do something in backend and then stop ladda
+      setTimeout(function () {
+        var inputMediaBBM = $('#inputMediaBBM').val();
+        var id = '<?=$this->uri->segment("3")?>';
+        $.ajax({
+          type:'post',
+          dataType:'json',
+          cache:false,
+          async:true,
+          url:url+'/implementasi/saveGantiMediaBBM',
+          data:{inputMediaBBM, id},
+          beforeSend:function(data){
+            $('.saveGantiMediaBBM').attr("disabled",true);
+          },
+          success:function(data){
+            if (data.status == 'success') {
+              location.reload();
+            }
+            Swal.fire(data.message,data.sub_message,data.status);
+          },
+          complete:function(data){
+            $('.saveGantiMediaBBM').attr("disabled",false);
+            saveGantiMediaBBM.ladda('stop');
+          },
+          error:function(data){
+            Swal.fire("Proses Mengganti Media BBM Error","Hubungi Staff IT","error")
+          }
+        })
+        
+        
+        return false;  
+      }, 1000)
+    });
     var saveClose = $('.saveClose').ladda();
       saveClose.click(function () {
       // Start loading

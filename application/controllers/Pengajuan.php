@@ -74,13 +74,15 @@ class Pengajuan extends CI_Controller {
 	public function generateVoucherBBM()
 	{
 		$inputNoSPJ = $this->input->get("inputNoSPJ");
-		$getVoucherSPJ = $this->db->query("SELECT VOUCHER_BBM FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$inputNoSPJ' AND VOUCHER_BBM IS NOT NULL AND VOUCHER_BBM != ''");
+		$inputTempatSPBU = $this->input->get("inputTempatSPBU");
+		$getVoucherSPJ = $this->db->query("SELECT VOUCHER_BBM FROM SPJ_PENGAJUAN WHERE NO_SPJ = '$inputNoSPJ' AND VOUCHER_BBM IS NOT NULL AND VOUCHER_BBM != '' AND TEMPAT_SPBU = '$inputTempatSPBU'");
 		if ($getVoucherSPJ->num_rows()>0) {
 			$data = $getVoucherSPJ->row();
 			$noVoucher = $data->VOUCHER_BBM;
 			$response = array('data' =>true,'no'=>$noVoucher);
 		}else{
-			$noVoucher = $this->M_Pengajuan->getNoVoucherAuto_V1();	
+
+			$noVoucher = $this->M_Pengajuan->getNoVoucherAuto_V1($inputTempatSPBU);	
 			$data = $this->M_Pengajuan->generateVoucherBBM($noVoucher, $inputNoSPJ);
 			$response = array('data' =>$data,'no'=>$noVoucher);
 		}
@@ -107,8 +109,9 @@ class Pengajuan extends CI_Controller {
 		$inputNoSPJ = $this->input->post("inputNoSPJ");
 		$inputTglSPJ = $this->input->post("inputTglSPJ");
 		$inputJenisOther = $this->input->post("inputJenisOther");
+		$inputTempatKeberangkatan = $this->input->post("inputTempatKeberangkatan");
 		$namaFile = str_replace('/', '', $inputNoSPJ);
-		$data = $this->M_Pengajuan->saveTemporaryPengajuan($inputJenisSPJ, $inputNoSPJ, $namaFile, $inputTglSPJ, $inputJenisOther);
+		$data = $this->M_Pengajuan->saveTemporaryPengajuan($inputJenisSPJ, $inputNoSPJ, $namaFile, $inputTglSPJ, $inputJenisOther, $inputTempatKeberangkatan);
 		$config['cacheable']    = true; //boolean, the default is true
         $config['cachedir']     = './assets/image/'; //string, the default is application/cache/
         $config['errorlog']     = './assets/image/'; //string, the default is application/logs/
@@ -589,6 +592,7 @@ class Pengajuan extends CI_Controller {
         $totalJam = 0;
         $getSub = $this->db->query("SELECT Subdepartemen2 FROM dbhrm.dbo.tbPegawai WHERE nik = '$nik' AND Subdepartemen2 ='Marketing'");
         $dataMarketing = $getSub->num_rows()>0?1:0;
+        $tujuanLokal = $inputGroupTujuan == 4 ||$inputGroupTujuan == 10 || $inputGroupTujuan == 11 ? 'Lokal':'-';
         if ($inputJenisPIC == 'Subcont' || $inputSubjek == 'Subcont') {
         	$hasil = array('BIAYA' => 0,'KET'=>'Subcont Tidak Mendapatkan Uang Saku','tc'=>'danger');
         }elseif ($nik == '00004' || $nik == '00003' || $nik == '01519' || $nik == '00917' || $nik == '01223') {
@@ -602,7 +606,7 @@ class Pengajuan extends CI_Controller {
 	        }else{
 	        	if ($inputKendaraan == 'Rental' && $inputJenisPIC == 'Sopir' && $anjing == '1' && $inputSubjek == 'Rental') {
 		        	$hasil = array('BIAYA' =>0 ,'KET'=>'Menggunakan Kendaraan Rental','tc'=>'warning');
-		        }elseif ($statusWeekend == 'Weekend' && $inputJenisPIC == 'Sopir' && $inputKendaraan != 'Rental' && $inputSubjek == 'Internal' && $anjing == '1' && $inputGroupTujuan == 4) {
+		        }elseif ($statusWeekend == 'Weekend' && $inputJenisPIC == 'Sopir' && $inputSubjek == 'Internal' && $anjing == '1' && $tujuanLokal == 'Lokal') {
 		        	switch ($inputJenisKendaraan) {
 		        		case 'Engkel & Double':
 		        			$biayaWeekend = 125000;
@@ -681,9 +685,11 @@ class Pengajuan extends CI_Controller {
         $totalJam = 0;
 		$cekPIC = $this->M_Pengajuan->cekPICUangSaku($inputTglSPJ, $inputPIC);
         $cekEwindo = $this->db->query("SELECT NO_SPJ AS JML_EWINDO FROM SPJ_PENGAJUAN_LOKASI WHERE DELIVERY_ID IN (497, 68) AND NO_SPJ  = '$inputNoSPJ'")->num_rows();
-
+        $cekRekanan = $this->db->query("SELECT NO_SPJ FROM SPJ_PENGAJUAN_LOKASI WHERE SERLOK_COMPANY = 'Plant 2 Dwipapuri' AND OBJEK = 'Rekanan' AND NO_SPJ = '$inputNoSPJ'")->num_rows();
 
         if ($cekEwindo>0 && $inputJenisSPJ == '2') {
+        	$hasil = array('BIAYA' => '10000', 'KET'=>'Tersedia');
+        }if ($cekRekanan>0 && $inputJenisSPJ == '2') {
         	$hasil = array('BIAYA' => '10000', 'KET'=>'Tersedia');
         }elseif ($inputGroupTujuan == '10' && $inputJenisSPJ == '1') {
         	$hasil = array('BIAYA' => '20000', 'KET'=>'Tersedia');
@@ -930,16 +936,17 @@ class Pengajuan extends CI_Controller {
         $inputTotalUangJalan = $this->input->post("inputTotalUangJalan") == '' ?0:$this->input->post("inputTotalUangJalan");
         $inputBiayaKendaraan = $this->input->post("inputKendaraan") == 'Gojek/Grab' ?$this->input->post("inputBiayaKendaraan"):0;
         $inputTambahanUangJalan = $this->input->post("inputTambahanUangJalan");
+        $inputTempatKeberangkatan = $this->input->post("inputTempatKeberangkatan");
         $inputBBM = $this->input->post("inputBBM");
         $inputTOL = $this->input->post("inputTOL");
         $inputMediaBBM = $this->input->post("inputMediaBBM");
         $inputMediaTOL = $this->input->post("inputMediaTOL");
-        $bbmSPJ = $inputMediaBBM == 'Kasbon' ? $inputBBM : 0;
         $tolSPJ = $inputMediaTOL == 'Kasbon' ? $inputTOL : 0;
         $inputAbnormal = $this->input->post("inputAbnormal");
         $totalUangJalan = $inputGroupTujuan == '4'|| $inputAbnormal == 'Y' ? $inputTotalUangJalan + $inputTambahanUangJalan : $inputTotalUangJalan;
-        $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $totalUangJalan + $bbmSPJ + $tolSPJ+$inputBiayaKendaraan;
+        $totalSPJ = $inputTotalUangSaku + $inputTotalUangMakan + $totalUangJalan + $tolSPJ;
         $status = $this->input->post("status");
+        $inputTempatSPBU = $this->input->post("inputTempatSPBU");
         $inputJenisSPJ = $this->input->post("inputJenisSPJ");
         if ($data == true && $totalSPJ > 0 && $inputJenisSPJ == '1') {
         	$this->updateSaldo($inputNoSPJ, $totalSPJ, $oldKasbon, $status);
@@ -1056,12 +1063,16 @@ class Pengajuan extends CI_Controller {
 		$getSPJ = $this->M_Pengajuan->getIDByNoSPJ($inputNoSPJ)->result();
 		$id = 0;
 		$jenisSPJ = '';
+		$mediaBBM = '';
+		$totalBBM = 0;
 		foreach ($getSPJ as $key) {
 			$id = $key->ID_SPJ;
 			$jenisSPJ = $key->NAMA_JENIS;
+			$mediaBBM = $key->MEDIA_UANG_BBM;
+			$totalBBM = $key->TOTAL_UANG_BBM;
 		}
 		$jenis = 'Kasbon SPJ '.$jenisSPJ;
-		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenis($jenis, 'SUB KAS');
+		$getSaldo = $this->M_Cash_Flow->getSaldoPerJenisSubKas($jenis);
 		$saldo = 0;
 		foreach ($getSaldo->result() as $key) {
 			$saldo  = $key->SALDO;
@@ -1077,7 +1088,21 @@ class Pengajuan extends CI_Controller {
 				$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $totalSPJ, 'KASBON', $id,'TRANSAKSI AWAL');
 			}
 		}
-		
+
+		if ($mediaBBM == 'Kasbon') {
+			$jenisBBM = 'Kasbon BBM '.$jenisSPJ;
+			$getSaldoBBM = $this->M_Cash_Flow->getSaldoPerJenisSubKas($jenisBBM);
+			$saldoBBM = 0;
+			foreach ($getSaldoBBM as $keyBBM) {
+				$saldoBBM = $keyBBM->SALDO;
+			}
+			if ($status == 'NEW') {
+				$totalSaldoBBM = $saldoBBM - $totalBBM;
+				$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldoBBM, 'SUB KAS');
+			}
+			$this->M_Cash_Flow->saveSubKas($jenisBBM,'CREDIT', $totalBBM, 'KASBON', $id,'KASBON BBM');
+
+		}
 		
 	}
 	public function getSaldoPerJenis()
@@ -1505,14 +1530,16 @@ class Pengajuan extends CI_Controller {
 		$noSPJ = $this->input->post("inputNoSPJ");
 		$total = $this->input->post("total");
 		$id = $this->input->post("id");
+		$bbm = $this->input->post("bbm");
+		$mediaBBM = $this->input->post("mediaBBM");
 		$data = $this->M_Pengajuan->approveSPJDraft($noSPJ);
 		if ($data == true) {
 			$this->M_Monitoring->saveSPJLog('New',$noSPJ,"Approve SPJ Draft Non Delivery");
-			$this->updateKasDraftNonDelivery($id, $total);
+			$this->updateKasDraftNonDelivery($id, $total, $bbm, $mediaBBM);
 		}
 		echo json_encode($data);
 	}
-	public function updateKasDraftNonDelivery($id, $total)
+	public function updateKasDraftNonDelivery($id, $total, $bbm, $mediaBBM)
 	{
 		$getSaldo = $this->db->query("SELECT JUMLAH FROM SPJ_SALDO WHERE JENIS_SALDO = 'Kasbon SPJ Non Delivery' AND JENIS_KAS = 'SUB KAS'")->row();
 		$saldo = $getSaldo->JUMLAH;
@@ -1520,6 +1547,17 @@ class Pengajuan extends CI_Controller {
 		$totalSaldo = $saldo - $total;
 		$this->M_Cash_Flow->updateSaldo($jenis, $totalSaldo, 'SUB KAS');
 		$this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $total, 'KASBON', $id,'TRANSAKSI AWAL');
+		if ($mediaBBM == 'Kasbon') {
+			$jenisBBM = 'Kasbon BBM Non Delivery';
+			$getSaldoBBM = $this->M_Cash_Flow->getSaldoPerJenisSubKas($jenisBBM)->row();
+			$saldoBBM = $getSaldoBBM->SALDO;
+			$totalSaldoBBM = $saldoBBM - $bbm;
+			$this->M_Cash_Flow->updateSaldo($jenisBBM, $totalSaldoBBM, 'SUB KAS');
+			$this->M_Cash_Flow->saveSubKas($jenisBBM,'CREDIT', $bbm, 'KASBON', $id,'KASBON BBM');
+			// $this->M_Cash_Flow->updateSaldo('Kasbon BBM Non Delivery', $totalSaldo, 'SUB KAS');
+			// $this->M_Cash_Flow->saveSubKas($jenis,'CREDIT', $total, 'KASBON', $id,'TRANSAKSI AWAL');
+			
+		}
 	}
 	public function findGroupTujuanByIdKota()
 	{
